@@ -8,14 +8,12 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Base class for type-pair binding converters.</summary>
+/// <summary>
+/// Base class for a converter between one type pair; it supplies <see cref="FromType"/>, <see cref="ToType"/> and
+/// an object-based <see cref="TryConvertTyped(object?, object?, out object?)"/> over the typed <c>TryConvert</c>.
+/// </summary>
 /// <typeparam name="TFrom">The source type to convert from.</typeparam>
 /// <typeparam name="TTo">The target type to convert to.</typeparam>
-/// <remarks>
-/// This base class supplies the "type-only" metadata (<see cref="FromType"/>/<see cref="ToType"/>) and the
-/// object-based shim (<see cref="TryConvertTyped(object?, object?, out object?)"/>), allowing the dispatch
-/// layer to avoid reflection.
-/// </remarks>
 [DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} converter")]
 public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<TFrom, TTo>
 {
@@ -25,31 +23,22 @@ public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<T
     /// <inheritdoc/>
     public Type ToType => typeof(TTo);
 
-    /// <summary>Returns the affinity score for this converter.</summary>
+    /// <summary>Returns this converter's priority among the converters registered for the same type pair.</summary>
     /// <returns>
-    /// A positive integer indicating converter priority. Higher values win when multiple converters match.
-    /// Return 0 if the converter cannot handle the type pair.
+    /// A positive value when the converter applies; zero or less excludes it. The highest value wins and the
+    /// earliest registered converter wins a tie. The built-in converters return 2, and
+    /// <see cref="EqualityTypeConverter"/> returns 1, so a larger value outranks them.
     /// </returns>
-    /// <remarks>
-    /// <para><strong>Affinity Guidelines:</strong></para>
-    /// <list type="bullet">
-    /// <item><description><strong>0</strong> - Cannot convert (no conversion possible)</description></item>
-    /// <item><description><strong>1</strong> - Last resort converters (e.g., EqualityTypeConverter)</description></item>
-    /// <item><description><strong>2</strong> - Standard ReactiveUI core converters (string, numeric, datetime)</description></item>
-    /// <item><description><strong>8</strong> - Platform-specific standard converters (NSDate, WinForms controls)</description></item>
-    /// <item><description><strong>100+</strong> - Third-party override range (use to override ReactiveUI defaults)</description></item>
-    /// </list>
-    /// <para>
-    /// When multiple converters match the same type pair, the converter with the highest affinity is selected.
-    /// Third-party converters should return 100 or higher to override ReactiveUI defaults.
-    /// </para>
-    /// </remarks>
     public abstract int GetAffinityForObjects();
 
     /// <inheritdoc/>
     public abstract bool TryConvert(TFrom? from, object? conversionHint, [MaybeNullWhen(true)] out TTo? result);
 
-    /// <inheritdoc/>
+    /// <summary>Converts a boxed value by casting it to <typeparamref name="TFrom"/> and calling <c>TryConvert</c>.</summary>
+    /// <param name="from">The source value. A null is passed on as <c>default</c> when <typeparamref name="TFrom"/> can hold null, and fails when it cannot.</param>
+    /// <param name="conversionHint">Implementation-defined hint, passed to <c>TryConvert</c> unchanged.</param>
+    /// <param name="result">The converted value, or null when the conversion fails or produces a null.</param>
+    /// <returns><see langword="false"/> when <paramref name="from"/> is not a <typeparamref name="TFrom"/> or <c>TryConvert</c> fails; otherwise <see langword="true"/>.</returns>
     public bool TryConvertTyped(object? from, object? conversionHint, out object? result)
     {
         // Allow null inputs for converters whose source type can represent null, and

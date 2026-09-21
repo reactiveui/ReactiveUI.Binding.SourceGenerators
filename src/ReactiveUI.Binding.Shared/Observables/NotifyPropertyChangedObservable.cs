@@ -11,13 +11,13 @@ namespace ReactiveUI.Binding.Reactive.Observables;
 namespace ReactiveUI.Binding.Observables;
 #endif
 
-/// <summary>
-/// Single fused observable for <see cref="INotifyPropertyChanged"/> / <see cref="INotifyPropertyChanging"/>
-/// property observation. Each subscription attaches one handler that filters by property name and emits a
-/// single prebuilt <see cref="IObservedChange{TSender, TValue}"/> directly — replacing a
-/// <c>FromEvent + Where + Select</c> operator chain with one allocation-light class. Before-change versus
-/// after-change is selected per instance, so a single type serves the whole purpose.
-/// </summary>
+/// <summary>Emits an observed change each time the sender raises a notification for one property.</summary>
+/// <remarks>
+/// It observes <see cref="INotifyPropertyChanging"/> when before-change is requested and the sender implements it,
+/// and <see cref="INotifyPropertyChanged"/> otherwise. A notification with a null or empty property name matches
+/// every property. Nothing is emitted on subscribe, and the emitted change carries no value: the sender and
+/// expression identify the property to read. The sequence never completes.
+/// </remarks>
 [DebuggerDisplay("Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChange<object, object?>>
@@ -28,7 +28,7 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
     /// <summary>The expression surfaced on the emitted observed change.</summary>
     private readonly Expression _expression;
 
-    /// <summary>The observed property name (with the <c>[]</c> suffix already applied for indexers).</summary>
+    /// <summary>The property name to match, ending in <c>[]</c> for an indexer.</summary>
     private readonly string _observedPropertyName;
 
     /// <summary>Whether to observe before-change (<see cref="INotifyPropertyChanging"/>) notifications.</summary>
@@ -37,8 +37,9 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
     /// <summary>Initializes a new instance of the <see cref="NotifyPropertyChangedObservable"/> class.</summary>
     /// <param name="sender">The source object raising the notifications.</param>
     /// <param name="expression">The expression surfaced on the emitted observed change.</param>
-    /// <param name="expectedName">The observed property name (with the <c>[]</c> suffix already applied for indexers).</param>
+    /// <param name="expectedName">The property name to match, ending in <c>[]</c> for an indexer.</param>
     /// <param name="beforeChanged">Whether to observe before-change notifications.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/>, <paramref name="expression"/> or <paramref name="expectedName"/> is <see langword="null"/>.</exception>
     public NotifyPropertyChangedObservable(object sender, Expression expression, string expectedName, bool beforeChanged)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
@@ -51,6 +52,7 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<IObservedChange<object, object?>> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

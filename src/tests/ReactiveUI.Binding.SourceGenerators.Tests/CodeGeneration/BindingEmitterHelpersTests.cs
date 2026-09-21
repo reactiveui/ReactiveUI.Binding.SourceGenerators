@@ -114,7 +114,7 @@ public class BindingEmitterHelpersTests
         var group = Group(false, IntTypeName, IntTypeName);
         var sb = new StringBuilder();
 
-        api.AppendExtraParameters(sb, group);
+        api.AppendExtraParameters(sb, group, false);
 
         await Assert.That(sb.ToString()).IsEmpty();
         await Assert.That(api.FormatExtraArguments(group)).IsEmpty();

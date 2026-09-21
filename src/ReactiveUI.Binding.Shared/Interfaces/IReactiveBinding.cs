@@ -14,13 +14,13 @@ namespace ReactiveUI.Binding;
 public interface IReactiveBinding<out TView, out TValue> : IDisposable
     where TView : IViewFor
 {
-    /// <summary>Gets the expression representing the view model property that is bound.</summary>
+    /// <summary>Gets the expression representing the view model property that is bound, or null when the binding carries none.</summary>
     Expression? ViewModelExpression { get; }
 
     /// <summary>Gets the view that is bound.</summary>
     TView View { get; }
 
-    /// <summary>Gets the expression representing the view property that is bound.</summary>
+    /// <summary>Gets the expression representing the view property that is bound, or null when the binding carries none.</summary>
     Expression? ViewExpression { get; }
 
     /// <summary>Gets an observable that signals when the binding value changes.</summary>

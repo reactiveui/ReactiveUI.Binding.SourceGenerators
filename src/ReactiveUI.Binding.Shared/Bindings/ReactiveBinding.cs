@@ -38,13 +38,13 @@ public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TVa
         _subscription = subscription;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Gets the view model expression, which is always null because a generated binding carries no expression.</summary>
     public Expression? ViewModelExpression => null;
 
     /// <inheritdoc/>
     public TView View { get; }
 
-    /// <inheritdoc/>
+    /// <summary>Gets the view expression, which is always null because a generated binding carries no expression.</summary>
     public Expression? ViewExpression => null;
 
     /// <inheritdoc/>
@@ -53,7 +53,7 @@ public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TVa
     /// <inheritdoc/>
     public BindingDirection Direction { get; }
 
-    /// <inheritdoc/>
+    /// <summary>Disposes the underlying subscription on the first call; later calls do nothing.</summary>
     public void Dispose()
     {
         if (!TrySetDisposed())

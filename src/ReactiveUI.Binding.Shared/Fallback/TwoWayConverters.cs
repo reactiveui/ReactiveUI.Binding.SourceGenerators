@@ -11,11 +11,6 @@ namespace ReactiveUI.Binding.Fallback;
 #endif
 
 /// <summary>Builds a <see cref="TwoWayConverterPair{TSourceProp,TTargetProp}"/> without naming its type arguments.</summary>
-/// <remarks>
-/// Generated code has to compile as C# 7.3, where a constructor cannot infer its type arguments. A static
-/// factory can, so the emitted call names neither property type and cannot disagree with the overload's
-/// nullable annotations.
-/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class TwoWayConverters
 {

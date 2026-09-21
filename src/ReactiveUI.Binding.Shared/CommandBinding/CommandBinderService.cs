@@ -21,7 +21,7 @@ public static class CommandBinderService
     /// <summary>Gets the highest-affinity <see cref="ICreatesCommandBinding"/> registered for the specified control type.</summary>
     /// <typeparam name="T">The type of the control.</typeparam>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
-    /// <returns>The best binder, or <see langword="null"/> if no registered binder supports the control type.</returns>
+    /// <returns>The best binder; the first registered wins a tie. Null when every registered binder returns an affinity of zero or less.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
     public static ICreatesCommandBinding? GetBinder<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents

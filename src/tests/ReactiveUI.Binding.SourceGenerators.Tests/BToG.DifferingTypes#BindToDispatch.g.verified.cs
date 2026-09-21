@@ -15,14 +15,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable BindTo(
             this global::System.IObservable<int> source,
-            global::SharedScenarios.BindTo.DifferingTypes.MyView target,
+            global::SharedScenarios.BindTo.DifferingTypes.MyView? target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.DifferingTypes.MyView, string?>> property,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property")] string propertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyExpression = propertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal) ? propertyExpression.Substring(7) : propertyExpression;
-
             if (propertyExpression == "x => x.Caption")
             {
                 return __BindTo_7FFFF0EE063CE32A(source, target);

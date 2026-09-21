@@ -12,9 +12,8 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 #endif
 
 /// <summary>
-/// Extension methods for property change observation using expression chains.
-/// This is a runtime fallback bridge class — the source generator produces optimized
-/// code that bypasses this entirely at compile time.
+/// Extension methods that observe a property, by name or through an expression chain, using the
+/// <see cref="ICreatesObservableForProperty"/> registrations from the service locator. Generated code does not call them.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode(
@@ -50,10 +49,10 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// <param name="item">The source object to observe properties of.</param>
     extension<TSender>(TSender? item)
     {
-        /// <summary>ObservableForProperty by name, observing after-change, emitting the initial value, with distinct filtering.</summary>
+        /// <summary>Observes a property by name after it changes, emitting its current value first and dropping consecutive equal values.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="propertyName">The property name to observe.</param>
-        /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+        /// <returns>An observable of the changes for the property.</returns>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode(
             "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
@@ -62,11 +61,11 @@ public static class ReactiveNotifyPropertyChangedMixins
             string propertyName) =>
             ObservableForProperty<TSender, TValue>(item, propertyName, false, true, true);
 
-        /// <summary>ObservableForProperty by name, observing after-change with distinct filtering and a configurable initial value.</summary>
+        /// <summary>Observes a property by name after it changes, dropping consecutive equal values and optionally skipping the current value emitted on subscription.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="propertyName">The property name to observe.</param>
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
-        /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+        /// <returns>An observable of the changes for the property.</returns>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode(
             "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
@@ -76,17 +75,13 @@ public static class ReactiveNotifyPropertyChangedMixins
             bool skipInitial) =>
             ObservableForProperty<TSender, TValue>(item, propertyName, false, skipInitial, true);
 
-        /// <summary>
-        /// ObservableForProperty returns an Observable representing the
-        /// property change notifications for a specific property on an object.
-        /// This overload avoids expression tree analysis by using a property name string.
-        /// </summary>
+        /// <summary>Observes a property by name through the highest-affinity <see cref="ICreatesObservableForProperty"/> registered for the source's runtime type.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="propertyName">The property name to observe.</param>
         /// <param name="beforeChange">If true, the Observable will notify immediately before a property is going to change.</param>
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
         /// <param name="isDistinct">If set to true, values are filtered with DistinctUntilChanged.</param>
-        /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+        /// <returns>An observable of the changes for the property; each value is read by reflection from the public instance property, or is the default when that is missing or null.</returns>
         /// <exception cref="ArgumentNullException">The source object or <paramref name="propertyName"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">
         /// No registered <see cref="ICreatesObservableForProperty"/> bids a positive affinity for
@@ -151,21 +146,21 @@ public static class ReactiveNotifyPropertyChangedMixins
                 isDistinct);
         }
 
-        /// <summary>ObservableForProperty by expression, observing after-change, emitting the initial value, with distinct filtering.</summary>
+        /// <summary>Observes the property an expression points at after it changes, emitting its current value first and dropping consecutive equal values.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="property">An Expression representing the property.</param>
-        /// <returns>An Observable representing the property change notifications for the given property.</returns>
+        /// <returns>An observable of the changes for the property.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             Expression<Func<TSender, TValue>> property) =>
             ObservableForProperty(item, property, false, true, true);
 
-        /// <summary>ObservableForProperty by expression, observing after-change with distinct filtering and a configurable initial value.</summary>
+        /// <summary>Observes the property an expression points at after it changes, dropping consecutive equal values and optionally skipping the current value emitted on subscription.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="property">An Expression representing the property.</param>
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
-        /// <returns>An Observable representing the property change notifications for the given property.</returns>
+        /// <returns>An observable of the changes for the property.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
@@ -173,17 +168,14 @@ public static class ReactiveNotifyPropertyChangedMixins
             bool skipInitial) =>
             ObservableForProperty(item, property, false, skipInitial, true);
 
-        /// <summary>
-        /// ObservableForProperty returns an Observable representing the
-        /// property change notifications for a specific property on an object.
-        /// This method uses expression trees to identify the property.
-        /// </summary>
+        /// <summary>Observes the property, or the member chain, an expression points at.</summary>
         /// <typeparam name="TValue">The value type.</typeparam>
         /// <param name="property">An Expression representing the property.</param>
         /// <param name="beforeChange">If true, the Observable will notify immediately before a property is going to change.</param>
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
         /// <param name="isDistinct">If set to true, values are filtered with DistinctUntilChanged.</param>
-        /// <returns>An Observable representing the property change notifications for the given property.</returns>
+        /// <returns>An observable of the changes for the last link of the chain.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="property"/> is <see langword="null"/>.</exception>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             Expression<Func<TSender, TValue>> property,
@@ -201,7 +193,7 @@ public static class ReactiveNotifyPropertyChangedMixins
                 isDistinct);
         }
 
-        /// <summary>Subscribes to an expression chain, observing after-change, emitting the initial value, with distinct filtering.</summary>
+        /// <summary>Observes an expression's member chain after each link changes, emitting the end value first and dropping consecutive equal values.</summary>
         /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
         /// <param name="expression">An expression which will point towards the property.</param>
         /// <returns>An observable which notifies about observed changes.</returns>
@@ -212,7 +204,7 @@ public static class ReactiveNotifyPropertyChangedMixins
             Expression? expression) =>
             SubscribeToExpressionChain<TSender, TValue>(item, expression, false, true, true);
 
-        /// <summary>Subscribes to an expression chain, observing after-change with distinct filtering and a configurable initial value.</summary>
+        /// <summary>Observes an expression's member chain after each link changes, dropping consecutive equal values and optionally skipping the end value emitted on subscription.</summary>
         /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
         /// <param name="expression">An expression which will point towards the property.</param>
         /// <param name="skipInitial">If we don't want to get a notification about the default value of the property.</param>
@@ -226,8 +218,8 @@ public static class ReactiveNotifyPropertyChangedMixins
             SubscribeToExpressionChain<TSender, TValue>(item, expression, false, skipInitial, true);
 
         /// <summary>
-        /// Creates an observable which will subscribe to each property and sub-property
-        /// specified in the Expression, providing updates to the last value in the chain.
+        /// Observes each property in an expression's member chain, re-subscribing deeper links when an
+        /// intermediate value changes, and reports the value at the end of the chain.
         /// </summary>
         /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
         /// <param name="expression">An expression which will point towards the property.</param>
@@ -246,8 +238,8 @@ public static class ReactiveNotifyPropertyChangedMixins
             CreateExpressionChain<TSender, TValue>(item, expression, beforeChange, skipInitial, isDistinct, false);
 
         /// <summary>
-        /// Creates an observable which will subscribe to each property and sub-property
-        /// specified in the Expression, providing updates to the last value in the chain.
+        /// Observes each property in an expression's member chain, re-subscribing deeper links when an
+        /// intermediate value changes, and reports the value at the end of the chain.
         /// </summary>
         /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
         /// <param name="expression">An expression which will point towards the property.</param>

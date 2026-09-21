@@ -28,7 +28,7 @@ public static partial class ReactiveUIBindingExtensions
         "No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.";
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a one-way binding from a source property to a target property.</summary>
+    /// <summary>Binds a source property to a target property one way, writing the current value and each later change on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -40,7 +40,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
@@ -57,7 +57,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSource : class
         where TTarget : class
 #else
-    /// <summary>Creates a one-way binding from a source property to a target property.</summary>
+    /// <summary>Binds a source property to a target property one way, writing the current value and each later change on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -67,7 +67,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -84,7 +84,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a one-way binding from a source property to a target property with a conversion function.</summary>
+    /// <summary>Binds a source property to a target property one way through a conversion function, writing on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -98,7 +98,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
@@ -116,7 +116,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSource : class
         where TTarget : class
 #else
-    /// <summary>Creates a one-way binding from a source property to a target property with a conversion function.</summary>
+    /// <summary>Binds a source property to a target property one way through a conversion function, writing on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -128,7 +128,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the source property value to the target property type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -146,7 +146,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a two-way binding between a source property and a target property.</summary>
+    /// <summary>Binds a source and a target property to each other, seeding the target from the source and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -158,7 +158,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
@@ -175,7 +175,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSource : class
         where TTarget : class
 #else
-    /// <summary>Creates a two-way binding between a source property and a target property.</summary>
+    /// <summary>Binds a source and a target property to each other, seeding the target from the source and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -185,7 +185,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -202,7 +202,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a two-way binding between a source property and a target property with conversion functions.</summary>
+    /// <summary>Binds a source and a target property to each other through conversion functions, seeding the target and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -217,7 +217,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
@@ -236,7 +236,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSource : class
         where TTarget : class
 #else
-    /// <summary>Creates a two-way binding between a source property and a target property with conversion functions.</summary>
+    /// <summary>Binds a source and a target property to each other through conversion functions, seeding the target and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -249,7 +249,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="targetToSourceConv">A function that converts the target property value back to the source property type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, disconnects the binding; a binding hook that vetoes the binding leaves nothing bound.</returns>
     /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
@@ -269,7 +269,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a one-way binding from a view model property to a view property.</summary>
+    /// <summary>Binds a view model property to a view property one way, writing the current value and each later change on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -282,7 +282,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
@@ -299,7 +299,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>Creates a one-way binding from a view model property to a view property.</summary>
+    /// <summary>Binds a view model property to a view property one way, writing the current value and each later change on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -310,7 +310,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -327,7 +327,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector.</summary>
+    /// <summary>Binds a view model property to a view property one way through a selector, writing on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TProp">The type of the view model property.</typeparam>
@@ -341,7 +341,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
@@ -359,7 +359,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector.</summary>
+    /// <summary>Binds a view model property to a view property one way through a selector, writing on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TProp">The type of the view model property.</typeparam>
@@ -371,7 +371,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the view model property value to the view property type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
@@ -389,7 +389,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a two-way binding between a view model property and a view property.</summary>
+    /// <summary>Binds a view model property and a view property to each other, seeding the view and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -402,7 +402,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
@@ -419,7 +419,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>Creates a two-way binding between a view model property and a view property.</summary>
+    /// <summary>Binds a view model property and a view property to each other, seeding the view and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -430,7 +430,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -447,7 +447,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions.</summary>
+    /// <summary>Binds a view model property and a view property to each other through conversion functions, seeding the view and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -462,7 +462,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
@@ -481,7 +481,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions.</summary>
+    /// <summary>Binds a view model property and a view property to each other through conversion functions, seeding the view and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -494,7 +494,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding, or null when a binding hook vetoes it.</returns>
     /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(

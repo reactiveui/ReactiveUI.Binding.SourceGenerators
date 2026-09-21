@@ -10,16 +10,23 @@ namespace ReactiveUI.Binding.Reactive.ObservableForProperty;
 namespace ReactiveUI.Binding.ObservableForProperty;
 #endif
 
-/// <summary>
-/// Final fallback implementation for observation when no observable mechanism is available.
-/// Emits exactly one value (the current value at subscription time) and then never emits again.
-/// </summary>
+/// <summary>Observes a property on a type that offers no change notification, at the lowest affinity.</summary>
+/// <remarks>
+/// The notification sequence emits one observed change on subscribe, which carries the sender and expression but no
+/// value, then never emits or completes. Unless warnings are suppressed, the first observation of each type and
+/// property writes a debug message.
+/// </remarks>
 public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 {
     /// <summary>Tracks which (type, property) pairs have already emitted a POCO warning to avoid duplicate messages.</summary>
     private static readonly ConcurrentDictionary<ObservedPropertyKey, byte> HasWarned = new();
 
-    /// <inheritdoc/>
+    /// <summary>Returns the fallback affinity for every type and property.</summary>
+    /// <param name="type">The type being observed.</param>
+    /// <param name="propertyName">The property name being observed.</param>
+    /// <param name="beforeChanged">Whether before-change notifications are requested; not consulted.</param>
+    /// <returns>The lowest positive affinity, so any other registered mechanism outranks it.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="propertyName"/> is <see langword="null"/>.</exception>
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         ArgumentExceptionHelper.ThrowIfNull(type);
@@ -28,7 +35,14 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
         return BindingAffinity.Fallback;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Returns a sequence that emits one observed change on subscribe and then stays silent.</summary>
+    /// <param name="sender">The object to observe.</param>
+    /// <param name="expression">The expression identifying the property.</param>
+    /// <param name="propertyName">The property name.</param>
+    /// <param name="beforeChanged">Whether before-change notifications are requested; not consulted.</param>
+    /// <param name="suppressWarnings"><see langword="true"/> to skip the debug message written the first time a type and property are observed.</param>
+    /// <returns>An observable that emits once and never completes.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/>, <paramref name="expression"/> or <paramref name="propertyName"/> is <see langword="null"/>.</exception>
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,
         Expression expression,

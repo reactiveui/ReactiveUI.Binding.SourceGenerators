@@ -11,16 +11,22 @@ namespace ReactiveUI.Binding.Reactive.Maui;
 namespace ReactiveUI.Binding.Maui;
 #endif
 
-/// <summary>Writes to a MAUI object through the dispatcher it carries.</summary>
+/// <summary>Routes writes to a MAUI <c>BindableObject</c> through the dispatcher it carries.</summary>
 public sealed class DispatcherViewThreadInvoker : IViewThreadInvoker
 {
     /// <inheritdoc/>
     public bool Claims(object target) => target is BindableObject;
 
-    /// <inheritdoc/>
+    /// <summary>Returns whether the calling thread may write to the target; also true when the target has no dispatcher.</summary>
+    /// <param name="target">A <c>BindableObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <returns><see langword="false"/> only when the target's dispatcher requires a dispatch from the calling thread.</returns>
     public bool CheckAccess(object target) => FindDispatcher((BindableObject)target) is not { IsDispatchRequired: true };
 
-    /// <inheritdoc/>
+    /// <summary>Queues <paramref name="callback"/> on the target's dispatcher, or runs it inline when the target has no dispatcher.</summary>
+    /// <param name="target">A <c>BindableObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <param name="callback">The callback to run.</param>
+    /// <param name="state">The value passed to <paramref name="callback"/>.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="callback"/> is null.</exception>
     public void Post(object target, Action<object?> callback, object? state)
     {
         ArgumentExceptionHelper.ThrowIfNull(callback);

@@ -10,10 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts a nullable <see cref="short"/> to <see cref="short"/>.</summary>
-/// <remarks>
-/// When the nullable value is null, the conversion fails and returns false.
-/// </remarks>
+/// <summary>Converts a nullable <see cref="short"/> to a <see cref="short"/>; a null value fails the conversion.</summary>
 [DebuggerDisplay("short? -> short (affinity {Affinity})")]
 public sealed class NullableShortToShortTypeConverter : IBindingTypeConverter<short?, short>
 {

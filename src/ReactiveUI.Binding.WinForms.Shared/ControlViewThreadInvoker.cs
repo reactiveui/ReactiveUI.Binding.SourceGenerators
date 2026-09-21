@@ -10,18 +10,24 @@ namespace ReactiveUI.Binding.Reactive.WinForms;
 namespace ReactiveUI.Binding.WinForms;
 #endif
 
-/// <summary>Writes to a WinForms control on the thread that created its handle.</summary>
+/// <summary>Routes writes to a WinForms <c>Control</c> onto the thread that created its handle.</summary>
 public sealed class ControlViewThreadInvoker : IViewThreadInvoker
 {
     /// <inheritdoc/>
     public bool Claims(object target) => target is Control;
 
-    /// <inheritdoc/>
+    /// <summary>Returns whether the calling thread may write to the control; also true while the control has no handle.</summary>
+    /// <param name="target">A <c>Control</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <returns><see langword="true"/> when <c>InvokeRequired</c> is false.</returns>
     public bool CheckAccess(object target) =>
         // InvokeRequired is false until the control or a parent has a handle, so those writes run inline.
         !((Control)target).InvokeRequired;
 
-    /// <inheritdoc/>
+    /// <summary>Queues <paramref name="callback"/> with <c>BeginInvoke</c>, or runs it inline when no invoke is required.</summary>
+    /// <param name="target">A <c>Control</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <param name="callback">The callback to run.</param>
+    /// <param name="state">The value passed to <paramref name="callback"/>.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="callback"/> is null.</exception>
     public void Post(object target, Action<object?> callback, object? state)
     {
         ArgumentExceptionHelper.ThrowIfNull(callback);

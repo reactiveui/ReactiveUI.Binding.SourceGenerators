@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="float"/> using <see cref="float.TryParse(string?, out float)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to a <see cref="float"/> with <see cref="float.TryParse(string?, out float)"/> under the current culture; a null or unparseable string fails.</summary>
 public sealed class StringToSingleTypeConverter : BindingTypeConverter<string, float>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

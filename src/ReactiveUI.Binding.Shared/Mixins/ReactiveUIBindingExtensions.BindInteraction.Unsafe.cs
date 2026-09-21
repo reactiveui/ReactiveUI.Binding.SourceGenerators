@@ -19,16 +19,16 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Binds a task-based handler to an interaction exposed by the view model.</summary>
+    /// <summary>Registers a task-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
     /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
     /// <param name="view">The view that provides the handler.</param>
-    /// <param name="viewModel">The view model that exposes the interaction.</param>
+    /// <param name="viewModel">The view model that exposes the interaction; null registers nothing.</param>
     /// <param name="propertyName">An expression that selects the interaction property on the view model.</param>
     /// <param name="handler">A task-based handler for the interaction.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, unregisters the handler and stops observing the property.</returns>
     /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindInteractionUnsafe<TViewModel, TView, TInput, TOutput>(
@@ -48,17 +48,17 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Binds an observable-based handler to an interaction exposed by the view model.</summary>
+    /// <summary>Registers an observable-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
     /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
     /// <typeparam name="TDontCare">The signal type of the observable handler.</typeparam>
     /// <param name="view">The view that provides the handler.</param>
-    /// <param name="viewModel">The view model that exposes the interaction.</param>
+    /// <param name="viewModel">The view model that exposes the interaction; null registers nothing.</param>
     /// <param name="propertyName">An expression that selects the interaction property on the view model.</param>
     /// <param name="handler">An observable-based handler for the interaction.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <returns>A disposable that, when disposed, unregisters the handler and stops observing the property.</returns>
     /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindInteractionUnsafe<TViewModel, TView, TInput, TOutput, TDontCare>(

@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Reactive.WinForms;
 namespace ReactiveUI.Binding.WinForms;
 #endif
 
-/// <summary>WinForms-specific module that registers event-based property observation with the dependency resolver.</summary>
+/// <summary>Registers the WinForms event-based property observer and view thread invoker with the dependency resolver.</summary>
 /// <remarks>
 /// WinForms command binding (event+Enabled) is handled at compile time by the source generator.
 /// </remarks>

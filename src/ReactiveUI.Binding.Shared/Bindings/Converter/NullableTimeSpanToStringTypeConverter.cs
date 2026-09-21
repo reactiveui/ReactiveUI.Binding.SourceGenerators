@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="TimeSpan"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a nullable <see cref="TimeSpan"/> to a <see cref="string"/> in the culture-invariant constant format (<c>c</c>). A null value succeeds with a null string.</summary>
 public sealed class NullableTimeSpanToStringTypeConverter : BindingTypeConverter<TimeSpan?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

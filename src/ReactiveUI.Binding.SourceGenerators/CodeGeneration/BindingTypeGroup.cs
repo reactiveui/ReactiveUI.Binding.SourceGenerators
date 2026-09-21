@@ -17,7 +17,8 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// <remarks>
 /// <c>BindOneWay</c>, <c>BindTwoWay</c>, <c>OneWayBind</c> and <c>Bind</c> differ in argument order, parameter
 /// names and direction, but they all group their call sites by the same signature: the two types, the two
-/// property types, and whether a conversion and a scheduler are present. One record serves all four.
+/// property types, and whether a conversion, a converter object and a scheduler are present. One record serves
+/// all four.
 /// </remarks>
 internal sealed record BindingTypeGroup(
     string SourceTypeFullName,
@@ -26,4 +27,12 @@ internal sealed record BindingTypeGroup(
     string TargetPropertyTypeFullName,
     bool HasConversion,
     bool HasScheduler,
-    BindingInvocationInfo[] Invocations);
+    BindingInvocationInfo[] Invocations)
+{
+    /// <summary>Gets a value indicating whether the call sites pass a converter object in place of a delegate.</summary>
+    /// <remarks>
+    /// That overload has its own parameter list - the converter or converters, an optional hint and an optional
+    /// scheduler - and no expression parameters, so its call sites can only be told apart by file and line.
+    /// </remarks>
+    internal bool HasConverterOverride { get; init; }
+}

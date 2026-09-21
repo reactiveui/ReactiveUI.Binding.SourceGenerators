@@ -18,13 +18,12 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Observes a property change on the specified object and emits the value after it changes.</summary>
+    /// <summary>Observes a property by reflection, emitting its current value on subscription and its new value after each change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <param name="objectToMonitor">The object instance to observe for property changes.</param>
     /// <param name="property1">An expression that selects the first property to observe.</param>
     /// <returns>An observable sequence that emits the property value when it changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<T1> WhenChangedUnsafe<TObj, T1>(
         this TObj objectToMonitor,
@@ -37,7 +36,9 @@ public static partial class ReactiveUIBindingExtensions
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
     }
 
-    /// <summary>Observes changes on 2 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 2 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -45,7 +46,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property1">An expression that selects the first property to observe.</param>
     /// <param name="property2">An expression that selects the second property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<PropertyValues<T1, T2>> WhenChangedUnsafe<TObj, T1, T2>(
         this TObj objectToMonitor,
@@ -60,7 +60,9 @@ public static partial class ReactiveUIBindingExtensions
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2);
     }
 
-    /// <summary>Observes changes on 3 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 3 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -70,7 +72,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression that selects the second property to observe.</param>
     /// <param name="property3">An expression that selects the third property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<PropertyValues<T1, T2, T3>> WhenChangedUnsafe<TObj, T1, T2, T3>(
@@ -88,7 +89,9 @@ public static partial class ReactiveUIBindingExtensions
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2, property3);
     }
 
-    /// <summary>Observes changes on 4 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 4 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -100,7 +103,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression that selects the third property to observe.</param>
     /// <param name="property4">An expression that selects the fourth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -131,7 +133,9 @@ public static partial class ReactiveUIBindingExtensions
             static (v1, v2, v3, v4) => new PropertyValues<T1, T2, T3, T4>(v1, v2, v3, v4));
     }
 
-    /// <summary>Observes changes on 5 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 5 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -145,7 +149,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression that selects the fourth property to observe.</param>
     /// <param name="property5">An expression that selects the fifth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -180,7 +183,9 @@ public static partial class ReactiveUIBindingExtensions
             static (v1, v2, v3, v4, v5) => new PropertyValues<T1, T2, T3, T4, T5>(v1, v2, v3, v4, v5));
     }
 
-    /// <summary>Observes changes on 6 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 6 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -196,7 +201,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression that selects the fifth property to observe.</param>
     /// <param name="property6">An expression that selects the sixth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -228,7 +232,9 @@ public static partial class ReactiveUIBindingExtensions
             static (v1, v2, v3, v4, v5, v6) => new PropertyValues<T1, T2, T3, T4, T5, T6>(v1, v2, v3, v4, v5, v6));
     }
 
-    /// <summary>Observes changes on 7 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 7 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -246,7 +252,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression that selects the sixth property to observe.</param>
     /// <param name="property7">An expression that selects the seventh property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -281,7 +286,9 @@ public static partial class ReactiveUIBindingExtensions
             static (v1, v2, v3, v4, v5, v6, v7) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7>(v1, v2, v3, v4, v5, v6, v7));
     }
 
-    /// <summary>Observes changes on 8 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 8 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -301,7 +308,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression that selects the seventh property to observe.</param>
     /// <param name="property8">An expression that selects the eighth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -339,7 +345,9 @@ public static partial class ReactiveUIBindingExtensions
             static (v1, v2, v3, v4, v5, v6, v7, v8) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>(v1, v2, v3, v4, v5, v6, v7, v8));
     }
 
-    /// <summary>Observes changes on 9 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 9 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -361,7 +369,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression that selects the eighth property to observe.</param>
     /// <param name="property9">An expression that selects the ninth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -403,7 +410,9 @@ public static partial class ReactiveUIBindingExtensions
                 new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>(v1, v2, v3, v4, v5, v6, v7, v8, v9));
     }
 
-    /// <summary>Observes changes on 10 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 10 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -427,7 +436,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression that selects the ninth property to observe.</param>
     /// <param name="property10">An expression that selects the tenth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -472,7 +480,9 @@ public static partial class ReactiveUIBindingExtensions
                 new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
     }
 
-    /// <summary>Observes changes on 11 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 11 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -498,7 +508,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression that selects the tenth property to observe.</param>
     /// <param name="property11">An expression that selects the eleventh property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -558,7 +567,9 @@ public static partial class ReactiveUIBindingExtensions
                 new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
     }
 
-    /// <summary>Observes changes on 12 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 12 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -586,7 +597,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression that selects the eleventh property to observe.</param>
     /// <param name="property12">An expression that selects the twelfth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -650,7 +660,9 @@ public static partial class ReactiveUIBindingExtensions
                 new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
     }
 
-    /// <summary>Observes changes on 13 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 13 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -680,7 +692,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12">An expression that selects the twelfth property to observe.</param>
     /// <param name="property13">An expression that selects the thirteenth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -749,7 +760,9 @@ public static partial class ReactiveUIBindingExtensions
                     new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
     }
 
-    /// <summary>Observes changes on 14 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 14 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -781,7 +794,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13">An expression that selects the thirteenth property to observe.</param>
     /// <param name="property14">An expression that selects the fourteenth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -839,7 +851,9 @@ public static partial class ReactiveUIBindingExtensions
                     new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
     }
 
-    /// <summary>Observes changes on 15 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 15 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -873,7 +887,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14">An expression that selects the fourteenth property to observe.</param>
     /// <param name="property15">An expression that selects the fifteenth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -935,7 +948,9 @@ public static partial class ReactiveUIBindingExtensions
                     new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
     }
 
-    /// <summary>Observes changes on 16 properties on the specified object and emits their values as a tuple after any property changes.</summary>
+    /// <summary>
+    /// Observes 16 properties by reflection and emits their values as a tuple, first on subscription and again after any of them changes.
+    /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -971,7 +986,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15">An expression that selects the fifteenth property to observe.</param>
     /// <param name="property16">An expression that selects the sixteenth property to observe.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="double"/> using <see cref="double.TryParse(string?, out double)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to a <see cref="double"/> with <see cref="double.TryParse(string?, out double)"/> under the current culture; a null or unparseable string fails.</summary>
 public sealed class StringToDoubleTypeConverter : BindingTypeConverter<string, double>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

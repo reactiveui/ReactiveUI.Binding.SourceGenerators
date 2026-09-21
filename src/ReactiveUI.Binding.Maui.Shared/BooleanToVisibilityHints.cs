@@ -8,16 +8,16 @@ namespace ReactiveUI.Binding.Reactive.Maui;
 namespace ReactiveUI.Binding.Maui;
 #endif
 
-/// <summary>Enum that hints at the visibility of a UI element.</summary>
+/// <summary>Conversion hints, passed as the conversion hint, that change how a boolean maps to a <c>Visibility</c>.</summary>
 [Flags]
 public enum BooleanToVisibilityHints
 {
-    /// <summary>Do not modify the boolean type conversion from its default action of using Visibility.Collapsed.</summary>
+    /// <summary>True is Visible and false is Collapsed.</summary>
     None = 0,
 
-    /// <summary>Inverse the action of the boolean type conversion; when true, collapse the visibility.</summary>
+    /// <summary>Swaps the mapping, so true is not visible and false is Visible.</summary>
     Inverse = 1 << 1,
 
-    /// <summary>Use the Hidden value rather than Collapsed (MAUI only; ignored on WinUI where Hidden is not available).</summary>
+    /// <summary>Uses Hidden rather than Collapsed as the value that is not visible; ignored on WinUI, which has no Hidden.</summary>
     UseHidden = 1 << 2,
 }

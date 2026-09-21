@@ -9,32 +9,12 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>
-/// Represents a converter that can handle runtime type pairs not covered by typed converters.
-/// Fallback converters are consulted only after all typed converters fail to match.
+/// Converts runtime type pairs that no typed converter covers. The converter service asks the fallback
+/// converters only when no typed converter with a positive affinity is registered for the pair.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Fallback converters exist for scenarios where conversion logic depends on runtime type
-/// characteristics that cannot be expressed as compile-time generic pairs.
-/// </para>
-/// <para>
-/// Common use cases:
-/// <list type="bullet">
-/// <item><description>Component model type descriptors (reflection-based)</description></item>
-/// <item><description>Platform-specific type conversions</description></item>
-/// <item><description>IConvertible-based conversions</description></item>
-/// </list>
-/// </para>
-/// <para>
-/// Affinity Guidelines:
-/// <list type="number">
-/// <item><description>0 = Not supported</description></item>
-/// <item><description>1 = Last resort (ComponentModel/TypeDescriptor)</description></item>
-/// <item><description>3 = Broad runtime conversion (IConvertible/numeric widening)</description></item>
-/// <item><description>5 = Strong structural match (enum parsing, nullable unwrapping)</description></item>
-/// </list>
-/// Do not return affinity greater than or equal to 10 to avoid competing with typed converters.
-/// </para>
+/// Affinity only ranks fallback converters against each other, and the earliest registered converter wins a tie.
+/// The library registers no fallback converters of its own.
 /// </remarks>
 public interface IBindingFallbackConverter : IEnableLogger
 {
@@ -42,8 +22,8 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// <param name="fromType">The runtime source type.</param>
     /// <param name="toType">The target type.</param>
     /// <returns>
-    /// Affinity score (0-5 range). Higher values indicate stronger match.
-    /// Return 0 or negative if this converter cannot handle the pair.
+    /// A positive value when the converter handles the pair, where a higher value wins over other fallback converters;
+    /// zero or less when it does not.
     /// </returns>
     /// <remarks>
     /// <para>

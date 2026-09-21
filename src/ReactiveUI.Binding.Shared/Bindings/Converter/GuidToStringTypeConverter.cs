@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).</summary>
+/// <summary>Converts a <see cref="Guid"/> to a <see cref="string"/> in the hyphenated <c>D</c> format.</summary>
 public sealed class GuidToStringTypeConverter : BindingTypeConverter<Guid, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

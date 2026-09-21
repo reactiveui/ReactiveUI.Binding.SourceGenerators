@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="bool"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a <see cref="bool"/> to a <see cref="string"/> as "True" or "False".</summary>
 public sealed class BooleanToStringTypeConverter : BindingTypeConverter<bool, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

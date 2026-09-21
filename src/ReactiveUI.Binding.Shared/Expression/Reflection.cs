@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Reactive.Expressions;
 namespace ReactiveUI.Binding.Expressions;
 #endif
 
-/// <summary>Helper class for handling reflection and expression-tree related operations.</summary>
+/// <summary>Reads and writes members along a property expression chain by reflection.</summary>
 public static class Reflection
 {
     /// <summary>Reported when an expression yields no chain to walk.</summary>
@@ -25,18 +25,20 @@ public static class Reflection
     /// </remarks>
     private static ExpressionRewriter? _expressionRewriter;
 
-    /// <summary>Uses the expression re-writer to simplify the expression down to its simplest expression.</summary>
+    /// <summary>Simplifies an expression with the shared expression rewriter.</summary>
     /// <param name="expression">The expression to rewrite.</param>
-    /// <returns>The rewritten expression.</returns>
+    /// <returns>The rewritten expression, or <see langword="null"/> when <paramref name="expression"/> is <see langword="null"/>.</returns>
     [RequiresUnreferencedCode(
         "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Expression Rewrite(Expression? expression) =>
         (_expressionRewriter ??= new()).Visit(expression);
 
-    /// <summary>Converts an expression that points to a property chain into a dotted path string.</summary>
-    /// <param name="expression">The expression to generate the property names from.</param>
-    /// <returns>A string representation for the property chain the expression points to.</returns>
+    /// <summary>Converts an expression that points to a property chain into a dotted path string, such as <c>A.B[0].C</c>.</summary>
+    /// <param name="expression">The expression to generate the property names from; an indexer's arguments must be constants.</param>
+    /// <returns>The member names joined by dots, with an indexer written as its name followed by its arguments in brackets.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+    /// <exception cref="NotSupportedException">The chain contains a node that is neither a member access nor an index.</exception>
     public static string ExpressionToPropertyNames(Expression? expression)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
@@ -87,7 +89,11 @@ public static class Reflection
 
     /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member.</summary>
     /// <param name="member">The member info to convert.</param>
-    /// <returns>A delegate that fetches the value, or null if unsupported.</returns>
+    /// <returns>
+    /// A delegate that fetches the value, or null when the member is neither a field nor a property. The delegate for
+    /// a field throws <see cref="InvalidOperationException"/> when the field holds null.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="member"/> is <see langword="null"/>.</exception>
     public static Func<object?, object?[]?, object?>? GetValueFetcherForProperty(MemberInfo? member)
     {
         ArgumentExceptionHelper.ThrowIfNull(member);
@@ -120,7 +126,8 @@ public static class Reflection
 
     /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member.</summary>
     /// <param name="member">The member info to convert.</param>
-    /// <returns>A delegate that sets the value, or null if unsupported.</returns>
+    /// <returns>A delegate that sets the value, or null when the member is neither a field nor a property.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="member"/> is <see langword="null"/>.</exception>
     public static Action<object?, object?, object?[]?>? GetValueSetterForProperty(MemberInfo? member)
     {
         ArgumentExceptionHelper.ThrowIfNull(member);
@@ -149,10 +156,10 @@ public static class Reflection
 
     /// <summary>Attempts to get the value of the last property in an expression chain.</summary>
     /// <typeparam name="TValue">The expected type of the final value.</typeparam>
-    /// <param name="changeValue">Receives the value if the chain can be evaluated.</param>
+    /// <param name="changeValue">Receives the value if the chain can be evaluated; otherwise the default.</param>
     /// <param name="current">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
-    /// <returns>True if the value was successfully retrieved; otherwise false.</returns>
+    /// <returns>True if the value was retrieved; false when <paramref name="current"/> or a property partway along the chain is null.</returns>
     /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to read a value from.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TryGetValueForPropertyChain<TValue>(
@@ -195,10 +202,10 @@ public static class Reflection
     }
 
     /// <summary>Attempts to get all intermediate values in a property chain as observed changes.</summary>
-    /// <param name="changeValues">Receives an array with one entry per expression in the chain.</param>
+    /// <param name="changeValues">Receives an array with one entry per expression in the chain; the entries from the first null link onward are null.</param>
     /// <param name="current">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
-    /// <returns>True if all values were successfully retrieved; otherwise false.</returns>
+    /// <returns>True if all values were retrieved; false when <paramref name="current"/> or a property partway along the chain is null.</returns>
     /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to read a value from.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TryGetAllValuesForPropertyChain(
@@ -247,12 +254,15 @@ public static class Reflection
         return true;
     }
 
-    /// <summary>Attempts to set the value of the last property in an expression chain, throwing when reflection members are missing.</summary>
+    /// <summary>Attempts to set the value of the last property in an expression chain, throwing when a chain member is not a field or property.</summary>
     /// <typeparam name="TValue">The type of the end value being set.</typeparam>
     /// <param name="target">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <param name="value">The value to set on the last property in the chain.</param>
-    /// <returns>True if the value was successfully set; otherwise false.</returns>
+    /// <returns>True if the value was set; false when the object owning the last property is null.</returns>
+    /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to set a value on.</exception>
+    /// <exception cref="ArgumentException">A member in the chain is neither a field nor a property.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="target"/> or a property before the last link's owner is <see langword="null"/>.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TrySetValueToPropertyChain<TValue>(
@@ -266,10 +276,11 @@ public static class Reflection
     /// <param name="target">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <param name="value">The value to set on the last property in the chain.</param>
-    /// <param name="shouldThrow">If true, throw when reflection members are missing.</param>
-    /// <returns>True if the value was successfully set; otherwise false.</returns>
+    /// <param name="shouldThrow">If true, throw when a chain member is not a field or property; otherwise, an unreadable link is skipped and an unwritable last member returns false.</param>
+    /// <returns>True if the value was set; false when the object owning the last property is null or the last member cannot be written.</returns>
     /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to set a value on.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="target"/> is <see langword="null"/> at a link of the chain that still has to be read through.</exception>
+    /// <exception cref="ArgumentException"><paramref name="shouldThrow"/> is true and a member in the chain is neither a field nor a property.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="target"/> or a property before the last link's owner is <see langword="null"/>.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TrySetValueToPropertyChain<TValue>(
         object? target,

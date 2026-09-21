@@ -73,7 +73,7 @@ internal static class InteractionExtractor
 
         var filePath = invocation.SyntaxTree.FilePath;
         var lineNumber = invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1;
-        var expressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(propertyNameArg.ToString());
+        var expressionText = propertyNameArg.ToString();
 
         return new(
             filePath,

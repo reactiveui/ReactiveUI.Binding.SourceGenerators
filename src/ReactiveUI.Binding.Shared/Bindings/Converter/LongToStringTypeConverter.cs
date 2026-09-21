@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="long"/> values to <see cref="string"/>.</summary>
+/// <summary>
+/// Converts a <see cref="long"/> to a <see cref="string"/> using the current culture. An <see cref="int"/> hint gives the
+/// minimum digit count (the <c>D</c> format) and a <see cref="string"/> hint gives the format string; a malformed format
+/// throws <see cref="FormatException"/>.
+/// </summary>
 public sealed class LongToStringTypeConverter : BindingTypeConverter<long, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

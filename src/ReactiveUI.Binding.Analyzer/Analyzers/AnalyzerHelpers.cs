@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
@@ -11,6 +12,15 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 /// <summary>Shared helper methods for analyzers. No LINQ, manual loops.</summary>
 internal static class AnalyzerHelpers
 {
+    /// <summary>The index <see cref="ObservedTypeArgumentIndex"/> returns for an API that observes none of its type arguments.</summary>
+    internal const int NoObservedTypeArgument = -1;
+
+    /// <summary>The suffix that marks the runtime-reflection twin of an API.</summary>
+    private const string UnsafeMethodSuffix = "Unsafe";
+
+    /// <summary>The name of the argument that carries the view model of a view-first binding.</summary>
+    private const string ViewModelParameterName = "viewModel";
+
     /// <summary>Checks if a method symbol belongs to our generated extension class.</summary>
     /// <param name="methodSymbol">The method symbol to check.</param>
     /// <returns>true if the method is from our generated extension class.</returns>
@@ -25,6 +35,36 @@ internal static class AnalyzerHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsInlineLambda(ExpressionSyntax expression) =>
         expression is SimpleLambdaExpressionSyntax or ParenthesizedLambdaExpressionSyntax;
+
+    /// <summary>
+    /// Steps over the null-forgiving operator and parentheses, which wrap a link of a property path without
+    /// changing which member it names: <c>(x.A)!</c> is read as <c>x.A</c>.
+    /// </summary>
+    /// <param name="expression">The expression to read through.</param>
+    /// <returns>The first expression that is neither a null-forgiving suppression nor parenthesized.</returns>
+    /// <remarks>
+    /// Every walk over a lambda body reads its links through this, so an operator in the middle of a path
+    /// cannot end one check early while another carries on. It reads a node's kind and allocates nothing.
+    /// </remarks>
+    internal static ExpressionSyntax SkipNullForgivingAndParentheses(ExpressionSyntax expression)
+    {
+        while (true)
+        {
+            var kind = expression.Kind();
+            if (kind == SyntaxKind.ParenthesizedExpression)
+            {
+                expression = ((ParenthesizedExpressionSyntax)expression).Expression;
+            }
+            else if (kind == SyntaxKind.SuppressNullableWarningExpression)
+            {
+                expression = ((PostfixUnaryExpressionSyntax)expression).Operand;
+            }
+            else
+            {
+                return expression;
+            }
+        }
+    }
 
     /// <summary>Checks if a type supports before-change notifications based on its notification mechanism.</summary>
     /// <param name="typeSymbol">The type to check.</param>
@@ -115,7 +155,40 @@ internal static class AnalyzerHelpers
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static INamedTypeSymbol? ExtractTypeArgument(IMethodSymbol methodSymbol, int index) =>
-        methodSymbol.TypeArguments.Length <= index ? null : methodSymbol.TypeArguments[index] as INamedTypeSymbol;
+        (uint)index >= (uint)methodSymbol.TypeArguments.Length ? null : methodSymbol.TypeArguments[index] as INamedTypeSymbol;
+
+    /// <summary>
+    /// Finds which type argument of a binding method names the object the method observes for property
+    /// notifications. The <c>Unsafe</c> twin of an API answers as the API does.
+    /// </summary>
+    /// <param name="methodSymbol">The binding method symbol.</param>
+    /// <returns>The index of that type argument, or <see cref="NoObservedTypeArgument"/> when the method observes none of them.</returns>
+    /// <remarks>
+    /// Most APIs name the observed object first. <c>BindTo</c> names the value type of a stream the caller already
+    /// built first, and its target is only written to, so nothing is observed. <c>InvokeCommand</c> names the
+    /// stream's value type first and the object holding the command second. <c>Bind</c> and <c>OneWayBind</c> name
+    /// the view model by the type parameter behind their <c>viewModel</c> argument, which sits first on some
+    /// overloads and second on others.
+    /// </remarks>
+    internal static int ObservedTypeArgumentIndex(IMethodSymbol methodSymbol)
+    {
+        var name = methodSymbol.Name;
+        if (IsApi(name, SourceGenerators.Constants.BindToMethodName))
+        {
+            return NoObservedTypeArgument;
+        }
+
+        if (IsApi(name, SourceGenerators.Constants.InvokeCommandMethodName))
+        {
+            return 1;
+        }
+
+        var isViewFirst = IsApi(name, SourceGenerators.Constants.BindMethodName)
+            || IsApi(name, SourceGenerators.Constants.OneWayBindMethodName);
+        return isViewFirst
+            ? ViewModelTypeArgumentIndex(methodSymbol)
+            : 0;
+    }
 
     /// <summary>
     /// Determines whether a method's first type argument lacks any observable notification mechanism.
@@ -277,6 +350,33 @@ internal static class AnalyzerHelpers
         }
 
         return false;
+    }
+
+    /// <summary>Checks if a method is an API or its <c>Unsafe</c> twin.</summary>
+    /// <param name="methodName">The name of the method.</param>
+    /// <param name="apiName">The name of the API.</param>
+    /// <returns>true if the method is the API or its <c>Unsafe</c> twin.</returns>
+    private static bool IsApi(string methodName, string apiName) =>
+        methodName.StartsWith(apiName, StringComparison.Ordinal)
+        && (methodName.Length == apiName.Length
+            || (methodName.Length == apiName.Length + UnsafeMethodSuffix.Length
+                && methodName.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal)));
+
+    /// <summary>Finds the type argument behind a method's <c>viewModel</c> argument.</summary>
+    /// <param name="methodSymbol">The binding method symbol.</param>
+    /// <returns>The index of that type argument, or 0 when the method has no such argument.</returns>
+    private static int ViewModelTypeArgumentIndex(IMethodSymbol methodSymbol)
+    {
+        var parameters = methodSymbol.OriginalDefinition.Parameters;
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].Name == ViewModelParameterName && parameters[i].Type is ITypeParameterSymbol typeParameter)
+            {
+                return typeParameter.Ordinal;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>

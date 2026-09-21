@@ -25,11 +25,14 @@ namespace ReactiveUI.Binding.CommandBinding;
 /// command can answer for that value, and an answer tracked from the event would have to be recomputed per value
 /// anyway. A value the command refuses is dropped rather than held.
 /// </para>
+/// <para>
+/// An error from a source sequence is rethrown on the thread that raised it, and completion is ignored.
+/// </para>
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class CommandInvoker
 {
-    /// <summary>Executes one command with each value the sequence produces.</summary>
+    /// <summary>Executes one command with each value the sequence produces, skipping values the command refuses.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
     /// <param name="command">The command to execute.</param>
@@ -51,8 +54,8 @@ public static class CommandInvoker
     /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="commands"/> is null.</exception>
     /// <remarks>
     /// <para>
-    /// The commands are subscribed first, so the command the property already holds is latched before any value
-    /// can arrive. Subscribing in the other order drops a value produced immediately.
+    /// The commands are subscribed first, so a command the sequence produces on subscription is latched before
+    /// any value can arrive. Subscribing in the other order drops a value produced immediately.
     /// </para>
     /// <para>
     /// A null command - a property not yet assigned, or a path through an absent parent - drops the values

@@ -8,55 +8,22 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Provides static access to the ReactiveUI.Binding converter service.</summary>
+/// <summary>Provides the process-wide <see cref="ConverterService"/> that generated and runtime bindings convert through.</summary>
 /// <remarks>
-/// <para>
-/// This class provides a global access point to the <see cref="ConverterService"/> instance
-/// used by ReactiveUI.Binding for binding type conversions.
-/// </para>
-/// <para>
-/// <strong>Custom Converter Registration:</strong>
-/// </para>
-/// <c>BindingConverters.Current.TypedConverters.Register(new MyCustomConverter());</c>
+/// <see cref="Current"/> starts empty. The builder's <c>BuildApp</c> replaces it with the service it configured,
+/// which holds the built-in converters.
 /// </remarks>
-/// <example>
-/// <para>
-/// <strong>Example: Manually resolving a converter</strong>
-/// </para>
-/// <code>
-/// var converter = BindingConverters.Current.ResolveConverter(typeof(int), typeof(string));
-/// if (converter is IBindingTypeConverter typedConverter)
-/// {
-///     if (typedConverter.TryConvertTyped(42, null, out var result))
-///     {
-///         Console.WriteLine(result); // "42"
-///     }
-/// }
-/// </code>
-/// </example>
 public static class BindingConverters
 {
     /// <summary>The backing field for the current converter service instance.</summary>
     private static ConverterService _current = new();
 
-    /// <summary>Gets the current converter service instance.</summary>
-    /// <value>
-    /// The <see cref="ConverterService"/> instance used by ReactiveUI.Binding.
-    /// </value>
+    /// <summary>Gets the converter service in use.</summary>
     public static ConverterService Current => _current;
 
-    /// <summary>Sets the converter service instance.</summary>
-    /// <param name="service">The converter service to use. Must not be null.</param>
+    /// <summary>Replaces the converter service in use.</summary>
+    /// <param name="service">The converter service to use.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="service"/> is null.</exception>
-    /// <remarks>
-    /// <para>
-    /// Application code should not normally call this method directly.
-    /// </para>
-    /// <para>
-    /// <strong>For Testing:</strong> Unit tests can call this method to inject a test service
-    /// with mock converters, but should restore the original service after the test completes.
-    /// </para>
-    /// </remarks>
     internal static void SetService(ConverterService service)
     {
         ArgumentExceptionHelper.ThrowIfNull(service);

@@ -8,29 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Thread-safe registry for typed binding converters using a lock-free snapshot pattern.</summary>
+/// <summary>Holds typed binding converters grouped by their exact source and target type pair.</summary>
 /// <remarks>
-/// <para>
-/// This registry uses a copy-on-write snapshot pattern optimized for read-heavy workloads:
-/// </para>
-/// <list type="bullet">
-/// <item><description>
-/// <strong>Reads:</strong> Lock-free via a volatile read of the snapshot reference.
-/// Multiple readers can access the registry concurrently without contention.
-/// </description></item>
-/// <item><description>
-/// <strong>Writes:</strong> Serialized under a lock. Writes clone the affected dictionary entry,
-/// mutate the clone, and publish a new snapshot atomically.
-/// </description></item>
-/// <item><description>
-/// <strong>Selection:</strong> Converters are grouped by (FromType, ToType) pair.
-/// When multiple converters match, the one with the highest affinity (&gt; 0) is selected.
-/// </description></item>
-/// </list>
-/// <para>
-/// This design prioritizes performance for the common case: converters are registered once at
-/// application startup, then looked up many times during binding operations.
-/// </para>
+/// Reads are lock-free against an immutable snapshot; each registration is serialized under a lock and publishes a
+/// new snapshot, so registering is expensive and lookups are cheap.
 /// </remarks>
 [DebuggerDisplay("Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
 public sealed class BindingTypeConverterRegistry
@@ -41,19 +22,12 @@ public sealed class BindingTypeConverterRegistry
     /// <summary>The current immutable snapshot of registered typed converters, read via volatile access.</summary>
     private Snapshot? _snapshot;
 
-    /// <summary>Registers a typed binding converter.</summary>
-    /// <param name="converter">The converter to register. Must not be null.</param>
+    /// <summary>Registers a converter under its <see cref="IBindingTypeConverter.FromType"/> and <see cref="IBindingTypeConverter.ToType"/> pair.</summary>
+    /// <param name="converter">The converter to register.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="converter"/> is null.</exception>
     /// <remarks>
-    /// <para>
-    /// Converters are grouped by their (FromType, ToType) pair. Multiple converters can be
-    /// registered for the same type pair; when retrieved, the converter with the highest
-    /// affinity (returned by <see cref="IBindingTypeConverter.GetAffinityForObjects"/>) will be selected.
-    /// </para>
-    /// <para>
-    /// This method is thread-safe but serialized (only one registration can occur at a time).
-    /// Reads can proceed concurrently with writes.
-    /// </para>
+    /// Several converters can share a pair; <see cref="TryGetConverter"/> picks the one with the highest affinity.
+    /// The pair is read once, at registration.
     /// </remarks>
     public void Register(IBindingTypeConverter converter)
     {
@@ -84,21 +58,16 @@ public sealed class BindingTypeConverterRegistry
         }
     }
 
-    /// <summary>Attempts to retrieve the best converter for the specified type pair.</summary>
+    /// <summary>Returns the registered converter with the highest positive affinity for the exact type pair.</summary>
     /// <param name="fromType">The source type to convert from.</param>
     /// <param name="toType">The target type to convert to.</param>
     /// <returns>
-    /// The converter with the highest affinity for the type pair, or <see langword="null"/> if no converter is registered.
+    /// The best converter, the earliest registered one on a tie in affinity; <see langword="null"/> when none is
+    /// registered for the pair or every one reports an affinity of zero or less.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
     /// </exception>
-    /// <remarks>
-    /// <para>
-    /// This method is lock-free and can be called concurrently from multiple threads.
-    /// It returns the converter with the highest affinity (&gt; 0) for the exact type pair.
-    /// </para>
-    /// </remarks>
     public IBindingTypeConverter? TryGetConverter(Type fromType, Type toType)
     {
         ArgumentExceptionHelper.ThrowIfNull(fromType);
@@ -135,15 +104,11 @@ public sealed class BindingTypeConverterRegistry
         return best;
     }
 
-    /// <summary>Returns all registered converters.</summary>
+    /// <summary>Returns a copy of every registered converter, in no particular order across type pairs.</summary>
     /// <returns>
-    /// A sequence of all converters currently registered in the registry.
-    /// Returns an empty sequence if no converters are registered.
+    /// The converters registered at the time of the call; empty when none are registered.
+    /// Later registrations do not change the returned sequence.
     /// </returns>
-    /// <remarks>
-    /// This method is lock-free and returns a snapshot of all converters at the time of the call.
-    /// The returned sequence is safe to enumerate even if concurrent registrations occur.
-    /// </remarks>
     public IEnumerable<IBindingTypeConverter> GetAllConverters()
     {
         var snap = Volatile.Read(ref _snapshot);

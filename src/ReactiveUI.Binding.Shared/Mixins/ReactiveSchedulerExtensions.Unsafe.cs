@@ -21,7 +21,9 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveSchedulerExtensions
 {
-    /// <summary>Creates a one-way binding from a source property to a target property with a specified scheduler.</summary>
+    /// <summary>
+    /// Creates a one-way binding from a source property to a target property with a specified scheduler, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -29,9 +31,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="target">The target object whose property will be updated.</param>
     /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindOneWayUnsafe<TSource, TTarget, TProperty>(
         this TSource source,
@@ -54,7 +55,7 @@ public static partial class ReactiveSchedulerExtensions
     }
 
     /// <summary>
-    /// Creates a one-way binding from a source property to a target property with a conversion function and a specified scheduler.
+    /// Creates a one-way binding from a source property to a target property with a conversion function and a specified scheduler, resolving the property chains by reflection.
     /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
@@ -65,9 +66,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="conversionFunc">A function that converts the source property value to the target property type.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindOneWayUnsafe<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -91,7 +91,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a source property to a target property using an explicit <see cref="IBindingTypeConverter"/>.</summary>
+    /// <summary>
+    /// Creates a one-way binding from a source property to a target property using an explicit <see cref="IBindingTypeConverter"/>, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -101,10 +103,10 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="converter">The binding type converter to use for converting between source and target types.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline.</param>
     /// <param name="conversionHint">An optional hint passed to the converter (e.g., format string).</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <remarks>A value the converter cannot convert is written as the default of the destination type.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindOneWayUnsafe<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -137,7 +139,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a source property and a target property with a specified scheduler.</summary>
+    /// <summary>
+    /// Creates a two-way binding between a source property and a target property with a specified scheduler, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -145,9 +149,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="target">The target object whose property will be updated.</param>
     /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline. Writes back are not scheduled.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindTwoWayUnsafe<TSource, TTarget, TProperty>(
         this TSource source,
@@ -170,7 +173,7 @@ public static partial class ReactiveSchedulerExtensions
     }
 
     /// <summary>
-    /// Creates a two-way binding between a source property and a target property with conversion functions and a specified scheduler.
+    /// Creates a two-way binding between a source property and a target property with conversion functions and a specified scheduler, resolving the property chains by reflection.
     /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
@@ -182,9 +185,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="sourceToTargetConv">A function that converts the source property value to the target property type.</param>
     /// <param name="targetToSourceConv">A function that converts the target property value back to the source property type.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline. Writes back are not scheduled.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindTwoWayUnsafe<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -209,7 +211,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a source property and a target property using explicit <see cref="IBindingTypeConverter"/> instances.</summary>
+    /// <summary>
+    /// Creates a two-way binding between a source property and a target property using explicit <see cref="IBindingTypeConverter"/> instances, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TSource">The type of the source.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -220,10 +224,10 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="targetProperty">An expression that selects the target property to update.</param>
     /// <param name="sourceToTargetConverter">The converter for source-to-target conversion.</param>
     /// <param name="targetToSourceConverter">The converter for target-to-source conversion.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the target is delivered on, or null for its owning thread; an immediate scheduler writes inline. Writes back are not scheduled.</param>
     /// <param name="conversionHint">An optional hint passed to the converters (e.g., format string).</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <remarks>A value the converter cannot convert is written as the default of the destination type.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IDisposable BindTwoWayUnsafe<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -267,7 +271,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector and scheduler.</summary>
+    /// <summary>
+    /// Creates a one-way binding from a view model property to a view property with a specified selector and scheduler, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the view model property.</typeparam>
@@ -277,9 +283,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="selector">A function that converts the view model property value to the view property type.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the view is delivered on, or null for its owning thread; an immediate scheduler writes inline.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, TOut> OneWayBindUnsafe<TView, TViewModel, TProp, TOut>(
         this TView view,
@@ -303,7 +308,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a view model property to a view property using an explicit <see cref="IBindingTypeConverter"/>.</summary>
+    /// <summary>
+    /// Creates a one-way binding from a view model property to a view property using an explicit <see cref="IBindingTypeConverter"/>, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -313,10 +320,10 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="converter">The binding type converter to use for converting between source and target types.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the view is delivered on, or null for its owning thread; an immediate scheduler writes inline.</param>
     /// <param name="conversionHint">An optional hint passed to the converter (e.g., format string).</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <remarks>A value the converter cannot convert is written as the default of the destination type.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, TVProp> OneWayBindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,
@@ -350,7 +357,7 @@ public static partial class ReactiveSchedulerExtensions
     }
 
     /// <summary>
-    /// Creates a two-way binding between a view model property and a view property with conversion functions and a specified scheduler.
+    /// Creates a two-way binding between a view model property and a view property with conversion functions and a specified scheduler, resolving the property chains by reflection.
     /// </summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
@@ -362,9 +369,8 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="viewModelToViewConverter">A function that converts the view model property value to the view property type.</param>
     /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the view is delivered on, or null for its owning thread; an immediate scheduler writes inline. Writes back are not scheduled.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,
@@ -389,7 +395,9 @@ public static partial class ReactiveSchedulerExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a view model property and a view property using explicit <see cref="IBindingTypeConverter"/> instances.</summary>
+    /// <summary>
+    /// Creates a two-way binding between a view model property and a view property using explicit <see cref="IBindingTypeConverter"/> instances, resolving the property chains by reflection.
+    /// </summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -400,10 +408,10 @@ public static partial class ReactiveSchedulerExtensions
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="viewModelToViewConverter">The converter for view model-to-view conversion.</param>
     /// <param name="viewToViewModelConverter">The converter for view-to-view model conversion.</param>
-    /// <param name="scheduler">The scheduler to use for the binding.</param>
+    /// <param name="scheduler">The scheduler the write to the view is delivered on, or null for its owning thread; an immediate scheduler writes inline. Writes back are not scheduled.</param>
     /// <param name="conversionHint">An optional hint passed to the converters (e.g., format string).</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <remarks>A value the converter cannot convert is written as the default of the destination type.</remarks>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,

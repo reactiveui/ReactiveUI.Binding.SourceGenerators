@@ -486,12 +486,14 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
+        bool supportsNullable,
         bool stubHasExpressionParameters,
         string methodPrefix)
     {
@@ -499,8 +501,7 @@ internal static class ObservationCodeGenerator
         var propCount = first.PropertyPaths.Length;
         var hasSelector = first.HasSelector;
 
-        EmitOverloadSignature(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, propCount, hasSelector);
-        CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
+        EmitOverloadSignature(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters, methodPrefix);
 
         // A registration that outranks the generated mechanism is honoured where the observation is built,
         // one property at a time, so the dispatch itself has nothing to decide.
@@ -1073,6 +1074,7 @@ internal static class ObservationCodeGenerator
                 sb,
                 group,
                 features.SupportsCallerArgExpr,
+                features.SupportsNullable,
                 features.StubHasExpressionParameters,
                 methodPrefix);
         }
@@ -1128,6 +1130,7 @@ internal static class ObservationCodeGenerator
                 builder,
                 first,
                 snapshot.SupportsCallerArgExpr,
+                snapshot.SupportsNullable,
                 snapshot.StubHasExpressionParameters,
                 first.PropertyPaths.Length,
                 first.HasSelector));
@@ -1170,25 +1173,30 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="first">The first invocation in the group, used for type information.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    /// <param name="hasSelector">Whether a selector function is present.</param>
     private static void EmitOverloadSignature(
         StringBuilder sb,
         InvocationInfo first,
         bool supportsCallerArgExpr,
+        bool supportsNullable,
         bool stubHasExpressionParameters,
-        string methodPrefix,
-        int propCount,
-        bool hasSelector)
+        string methodPrefix)
     {
         _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ").Append(methodPrefix).Append(" on ")
             .Append(first.SourceTypeFullName).AppendLine(".").AppendLine("        /// </summary>")
             .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).Append("> ").Append(methodPrefix)
             .AppendLine("(");
 
-        AppendParameterList(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, propCount, hasSelector);
+        AppendParameterList(
+            sb,
+            first,
+            supportsCallerArgExpr,
+            supportsNullable,
+            stubHasExpressionParameters,
+            first.PropertyPaths.Length,
+            first.HasSelector);
 
         _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
     }
@@ -1197,6 +1205,7 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="first">The invocation whose types the parameters are written from.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
     /// <param name="propCount">The number of property expressions.</param>
     /// <param name="hasSelector">Whether a selector function is present.</param>
@@ -1209,6 +1218,7 @@ internal static class ObservationCodeGenerator
         StringBuilder sb,
         InvocationInfo first,
         bool supportsCallerArgExpr,
+        bool supportsNullable,
         bool stubHasExpressionParameters,
         int propCount,
         bool hasSelector)
@@ -1217,7 +1227,7 @@ internal static class ObservationCodeGenerator
 
         for (var i = 0; i < propCount; i++)
         {
-            var type = first.PropertyPaths[i][first.PropertyPaths[i].Length - 1].PropertyTypeFullName;
+            var type = CodeGeneratorHelpers.NullableSelectorLeafType(first.PropertyPaths[i], supportsNullable);
             _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
                 .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
         }

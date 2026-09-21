@@ -169,7 +169,7 @@ internal static class ObservationExtractor
                 {
                     propertyPaths.Add(new(path));
                     expressionTexts.Add(
-                        CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
+                        args[i].Expression.ToString());
                 }
             }
             else if (IsSelectorParameterName(parameter.Name))

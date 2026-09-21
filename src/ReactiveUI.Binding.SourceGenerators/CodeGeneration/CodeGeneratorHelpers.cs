@@ -313,22 +313,6 @@ internal static class CodeGeneratorHelpers
         return sb.ToStringAndReturn();
     }
 
-    /// <summary>
-    /// Normalizes a CallerArgumentExpression lambda text by stripping the <c>static</c> modifier.
-    /// C# allows <c>static x =&gt; x.Name</c> to prevent captures, but CallerArgumentExpression
-    /// captures the literal text including "static ". This method strips that prefix so dispatch
-    /// table lookups match regardless of whether the user wrote <c>static</c>.
-    /// </summary>
-    /// <param name="expressionText">The raw expression text (e.g., "static x =&gt; x.Name").</param>
-    /// <returns>The normalized text (e.g., "x =&gt; x.Name").</returns>
-    internal static string NormalizeLambdaText(string expressionText)
-    {
-        const string StaticPrefix = "static ";
-        return expressionText.Length > StaticPrefix.Length
-            && expressionText[0] == 's'
-            && expressionText.StartsWith(StaticPrefix, StringComparison.Ordinal) ? expressionText.Substring(StaticPrefix.Length) : expressionText;
-    }
-
     /// <summary>Hands finished source to the compilation, retargeted onto the consumer's runtime flavour.</summary>
     /// <param name="context">The source production context.</param>
     /// <param name="hintName">The generated file name.</param>
@@ -649,51 +633,6 @@ internal static class CodeGeneratorHelpers
                 ? "        /// Uses CallerArgumentExpression for dispatch."
                 : "        /// Uses CallerFilePath + CallerLineNumber for dispatch.")
             .AppendLine("        /// </summary>");
-
-    /// <summary>Appends the strip that takes the <c>static</c> prefix off a captured expression.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="expressionParameterName">The parameter holding the captured expression text.</param>
-    /// <remarks>
-    /// A <c>static</c> lambda reaches the overload spelled with that prefix, which the recorded expression
-    /// text does not carry, so without the strip those call sites match nothing.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendStaticPrefixNormalization(StringBuilder sb, string expressionParameterName) =>
-        sb.Append(ParameterIndent).Append(expressionParameterName).Append(" = ").Append(expressionParameterName)
-            .AppendLine(".StartsWith(\"static \", global::System.StringComparison.Ordinal)")
-            .Append("                ? ").Append(expressionParameterName).AppendLine(".Substring(7)")
-            .Append("                : ").Append(expressionParameterName).AppendLine(";");
-
-    /// <summary>Appends that same strip for a run of numbered expression parameters.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="supportsCallerArgExpr">Whether dispatch matches on expression text at all.</param>
-    /// <param name="parameterPrefix">What the overload calls its selector parameters, before their index.</param>
-    /// <param name="count">How many selectors the overload declares.</param>
-    /// <remarks>
-    /// An overload taking several selectors captures the text of each, and any of them may have been written
-    /// as a <c>static</c> lambda. Below C# 10 there is no captured text to strip, so nothing is emitted.
-    /// </remarks>
-    internal static void AppendIndexedStaticPrefixNormalization(
-        StringBuilder sb,
-        bool supportsCallerArgExpr,
-        string parameterPrefix,
-        int count)
-    {
-        if (!supportsCallerArgExpr)
-        {
-            return;
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-            var parameterName = $"{parameterPrefix}{i + 1}{ExpressionParameterSuffix}";
-            _ = sb.Append(ParameterIndent).Append(parameterName).Append(" = ").Append(parameterName)
-                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(parameterName).Append(".Substring(7) : ")
-                .Append(parameterName).AppendLine(";");
-        }
-
-        _ = sb.AppendLine();
-    }
 
     /// <summary>Appends the condition that matches a call site by the text of both its selectors.</summary>
     /// <param name="sb">The string builder to append to.</param>

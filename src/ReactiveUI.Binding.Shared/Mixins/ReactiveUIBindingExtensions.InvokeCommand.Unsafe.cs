@@ -20,11 +20,11 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Executes the command a property holds with each value the sequence produces.</summary>
+    /// <summary>Executes the command a property holds with each value as its parameter, skipping a value while there is no command or the command cannot execute it.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <typeparam name="TTarget">The type declaring the command property.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
-    /// <param name="target">The object declaring the command property.</param>
+    /// <param name="target">The object declaring the command property; null executes nothing.</param>
     /// <param name="commandProperty">An expression that selects the command property to execute.</param>
     /// <returns>A disposable that, when disposed, stops executing the command and stops observing the property.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="commandProperty"/> is null.</exception>

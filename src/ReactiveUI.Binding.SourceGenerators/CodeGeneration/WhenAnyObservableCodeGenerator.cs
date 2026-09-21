@@ -77,7 +77,6 @@ internal static class WhenAnyObservableCodeGenerator
 
         _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
-        CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "obs", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount, hasSelector);
 
         GenerateRuntimeFallback(sb, propCount, hasSelector);

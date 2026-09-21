@@ -10,9 +10,9 @@ namespace ReactiveUI.Binding.Reactive.Wpf;
 namespace ReactiveUI.Binding.Wpf;
 #endif
 
-/// <summary>WPF-specific module that registers DependencyObject observation with the dependency resolver.</summary>
+/// <summary>Registers the WPF dependency-property observer and view thread invoker with the dependency resolver.</summary>
 /// <remarks>
-/// WPF command binding (via Command property) is handled at compile time by the source generator.
+/// WPF command binding is handled at compile time by the source generator.
 /// </remarks>
 public sealed class WpfBindingModule : IModule
 {

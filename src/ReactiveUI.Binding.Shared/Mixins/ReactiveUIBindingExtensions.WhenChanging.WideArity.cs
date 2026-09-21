@@ -18,7 +18,7 @@ public static partial class ReactiveUIBindingExtensions
         "No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.";
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes a property on the specified object and emits the value before it changes.</summary>
+    /// <summary>Observes a property and emits its current value when subscribed, then the value it holds just before each change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <param name="objectToMonitor">The object instance to observe for property changes.</param>
@@ -26,7 +26,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property1Expression">The caller argument expression for <paramref name="property1"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the property value before it changes.</returns>
+    /// <returns>An observable that emits the current value on subscription and the value held before each change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenChanging<TObj, T1>(
         this TObj objectToMonitor,
@@ -37,14 +37,14 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes a property on the specified object and emits the value before it changes.</summary>
+    /// <summary>Observes a property and emits its current value when subscribed, then the value it holds just before each change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <param name="objectToMonitor">The object instance to observe for property changes.</param>
     /// <param name="property1">An expression that selects the first property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the property value before it changes.</returns>
+    /// <returns>An observable that emits the current value on subscription and the value held before each change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenChanging<TObj, T1>(
         this TObj objectToMonitor,
@@ -58,7 +58,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 2 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 2 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -69,7 +69,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2Expression">The caller argument expression for <paramref name="property2"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenChanging<TObj, T1, T2>(
         this TObj objectToMonitor,
@@ -83,7 +83,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 2 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 2 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -92,7 +92,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression that selects the second property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenChanging<TObj, T1, T2>(
         this TObj objectToMonitor,
@@ -107,7 +107,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 3 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 3 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -121,7 +121,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3Expression">The caller argument expression for <paramref name="property3"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3>> WhenChanging<TObj, T1, T2, T3>(
@@ -139,7 +139,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 3 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 3 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -150,7 +150,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression that selects the third property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3>> WhenChanging<TObj, T1, T2, T3>(
         this TObj objectToMonitor,
@@ -166,7 +166,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 4 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 4 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -183,7 +183,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4Expression">The caller argument expression for <paramref name="property4"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -210,7 +210,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 4 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 4 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -223,7 +223,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression that selects the fourth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3, T4>> WhenChanging<TObj, T1, T2, T3, T4>(
         this TObj objectToMonitor,
@@ -240,7 +240,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 5 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 5 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -260,7 +260,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5Expression">The caller argument expression for <paramref name="property5"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -291,7 +291,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 5 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 5 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -306,7 +306,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression that selects the fifth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5>> WhenChanging<TObj, T1, T2, T3, T4, T5>(
@@ -325,7 +325,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 6 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 6 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -348,7 +348,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6Expression">The caller argument expression for <paramref name="property6"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -377,7 +377,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 6 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 6 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -394,7 +394,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression that selects the sixth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6>(
@@ -414,7 +414,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 7 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 7 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -440,7 +440,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7Expression">The caller argument expression for <paramref name="property7"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -473,7 +473,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 7 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 7 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -492,7 +492,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression that selects the seventh property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7>(
@@ -513,7 +513,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 8 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 8 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -542,7 +542,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8Expression">The caller argument expression for <paramref name="property8"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -577,7 +577,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 8 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 8 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -598,7 +598,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression that selects the eighth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8>(
@@ -620,7 +620,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 9 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 9 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -652,7 +652,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9Expression">The caller argument expression for <paramref name="property9"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -690,7 +690,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 9 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 9 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -713,7 +713,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression that selects the ninth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
@@ -736,7 +736,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 10 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 10 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -771,7 +771,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10Expression">The caller argument expression for <paramref name="property10"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -812,7 +812,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 10 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 10 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -837,7 +837,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression that selects the tenth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
@@ -861,7 +861,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 11 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 11 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -899,7 +899,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11Expression">The caller argument expression for <paramref name="property11"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -955,7 +955,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 11 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 11 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -982,7 +982,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression that selects the eleventh property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
@@ -1007,7 +1007,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 12 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 12 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1048,7 +1048,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12Expression">The caller argument expression for <paramref name="property12"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1108,7 +1108,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 12 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 12 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1137,7 +1137,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12">An expression that selects the twelfth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1164,7 +1164,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 13 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 13 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1208,7 +1208,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13Expression">The caller argument expression for <paramref name="property13"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1272,7 +1272,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 13 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 13 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1303,7 +1303,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13">An expression that selects the thirteenth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1331,7 +1331,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 14 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 14 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1378,7 +1378,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14Expression">The caller argument expression for <paramref name="property14"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1432,7 +1432,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 14 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 14 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1465,7 +1465,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14">An expression that selects the fourteenth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1494,7 +1494,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 15 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 15 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1544,7 +1544,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15Expression">The caller argument expression for <paramref name="property15"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1600,7 +1600,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 15 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 15 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1635,7 +1635,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15">An expression that selects the fifteenth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1665,7 +1665,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 16 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 16 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1718,7 +1718,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16Expression">The caller argument expression for <paramref name="property16"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1794,7 +1794,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>Observes 16 properties of the specified object and emits their values as a tuple before any property changes.</summary>
+    /// <summary>Observes 16 properties and emits a PropertyValues of their values when subscribed and each time one of them is about to change.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1831,7 +1831,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16">An expression that selects the sixteenth property to observe.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <returns>An observable that emits a PropertyValues holding the latest value of each property, on subscription and each time one of them is about to change.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]

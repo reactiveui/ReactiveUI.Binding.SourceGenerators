@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, string?>> viewProperty,
             global::System.Func<int, string> viewModelToViewConverter,
             global::System.Func<string, int> viewToViewModelConverter,
-            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer? scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -80,15 +80,16 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
         var __vmSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
         var __viewSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
-        var vmBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__vmSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__vmSelected, scheduler);
-        var viewBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__viewSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<int>(__viewSelected, scheduler);
+        var vmBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__vmSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__vmSelected, scheduler);
+        var viewBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__viewSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__viewSelected, scheduler);
 
             var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::System.ValueTuple<bool, string, int>>(vmBind, v => new global::System.ValueTuple<bool, string, int>(true, v, default(int)));
             var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::System.ValueTuple<bool, string, int>>(viewBind, v => new global::System.ValueTuple<bool, string, int>(false, default(string), v));
             var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::System.ValueTuple<bool, string, int>>(__vmTagged, __viewTagged);
+            var __routed = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__sides, view) : __sides;
             var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();
 
-            var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__sides, __change =>
+            var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__routed, __change =>
             {
                 if (__change.Item1)
                 {

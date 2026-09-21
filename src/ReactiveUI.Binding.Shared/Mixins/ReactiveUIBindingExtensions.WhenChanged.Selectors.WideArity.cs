@@ -15,7 +15,7 @@ public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 2 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 2 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -29,7 +29,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2Expression">The caller argument expression for <paramref name="property2"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, TReturn>(
@@ -46,7 +46,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 2 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 2 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -58,7 +58,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, TReturn>(
         this TObj objectToMonitor,
@@ -73,7 +73,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 3 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 3 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -90,7 +90,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3Expression">The caller argument expression for <paramref name="property3"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, TReturn>(
@@ -110,7 +110,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 3 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 3 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -124,7 +124,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, TReturn>(
         this TObj objectToMonitor,
@@ -140,7 +140,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 4 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 4 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -160,7 +160,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4Expression">The caller argument expression for <paramref name="property4"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, TReturn>(
@@ -183,7 +183,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 4 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 4 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -199,7 +199,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, TReturn>(
@@ -217,7 +217,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 5 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 5 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -240,7 +240,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5Expression">The caller argument expression for <paramref name="property5"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -267,7 +267,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 5 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 5 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -285,7 +285,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, TReturn>(
@@ -304,7 +304,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 6 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 6 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -330,7 +330,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6Expression">The caller argument expression for <paramref name="property6"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -360,7 +360,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 6 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 6 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -380,7 +380,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, TReturn>(
@@ -400,7 +400,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 7 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 7 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -429,7 +429,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7Expression">The caller argument expression for <paramref name="property7"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -462,7 +462,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 7 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 7 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -484,7 +484,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, TReturn>(
@@ -505,7 +505,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 8 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 8 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -537,7 +537,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8Expression">The caller argument expression for <paramref name="property8"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -573,7 +573,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 8 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 8 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -597,7 +597,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, TReturn>(
@@ -619,7 +619,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 9 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 9 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -654,7 +654,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9Expression">The caller argument expression for <paramref name="property9"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -693,7 +693,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 9 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 9 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -719,7 +719,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, TReturn>(
@@ -742,7 +742,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 10 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 10 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -780,7 +780,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10Expression">The caller argument expression for <paramref name="property10"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -822,7 +822,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 10 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 10 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -850,7 +850,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TReturn>(
@@ -874,7 +874,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 11 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 11 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -915,7 +915,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11Expression">The caller argument expression for <paramref name="property11"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -960,7 +960,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 11 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 11 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -990,7 +990,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TReturn>(
@@ -1015,7 +1015,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 12 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 12 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1059,7 +1059,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12Expression">The caller argument expression for <paramref name="property12"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1107,7 +1107,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 12 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 12 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1139,7 +1139,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TReturn>(
@@ -1165,7 +1165,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 13 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 13 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1212,7 +1212,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13Expression">The caller argument expression for <paramref name="property13"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1278,7 +1278,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 13 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 13 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1312,7 +1312,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TReturn>(
@@ -1339,7 +1339,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 14 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 14 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1389,7 +1389,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14Expression">The caller argument expression for <paramref name="property14"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1459,7 +1459,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 14 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 14 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1495,7 +1495,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TReturn>(
@@ -1523,7 +1523,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 15 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 15 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1576,7 +1576,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15Expression">The caller argument expression for <paramref name="property15"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1650,7 +1650,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 15 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 15 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1688,7 +1688,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TReturn>(
@@ -1717,7 +1717,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes changes on 16 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 16 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1773,7 +1773,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16Expression">The caller argument expression for <paramref name="property16"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1851,7 +1851,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #else
     /// <summary>
-    /// Observes changes on 16 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 16 properties and emits the result of applying a conversion function to their current values when subscribed and whenever any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1891,7 +1891,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the conversion result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn>(

@@ -107,7 +107,7 @@ public static partial class RuntimeBindingFallback
         where TSource : class
         where TTarget : class =>
         JoinBothDirections(
-            Schedule(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler, target),
+            ScheduleLatest(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler, target),
             RuntimeObservationFallback.WhenChanged(target, targetProperty),
             source,
             target,
@@ -144,7 +144,7 @@ public static partial class RuntimeBindingFallback
         ArgumentExceptionHelper.ThrowIfNull(converters);
 
         return JoinBothDirections(
-            Schedule(
+            ScheduleLatest(
                 new MapSignal<TSourceProp, TTargetProp>(
                     RuntimeObservationFallback.WhenChanged(source, sourceProperty),
                     converters.Forward),
@@ -255,7 +255,7 @@ public static partial class RuntimeBindingFallback
             viewModel,
             viewModelProperty,
             viewProperty,
-            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
+            ScheduleLatest(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
             RuntimeObservationFallback.WhenChanged(view, viewProperty).Skip(1),
             bindingExpression);
 
@@ -292,7 +292,7 @@ public static partial class RuntimeBindingFallback
             viewModel,
             viewModelProperty,
             viewProperty,
-            Schedule(
+            ScheduleLatest(
                 new MapSignal<TViewModelProp, TViewProp>(
                     RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty),
                     converters.Forward),
@@ -434,13 +434,40 @@ public static partial class RuntimeBindingFallback
             return BindingSchedulers.ObserveOnViewThread(values, target);
         }
 
-#if REACTIVE_SHIM
-        var immediate = Scheduler.Immediate;
-#else
-        var immediate = Sequencer.Immediate;
-#endif
-        return scheduler == immediate ? values : new WitnessOnSignal<T>(values, scheduler);
+        return IsImmediate(scheduler) ? values : new WitnessOnSignal<T>(values, scheduler);
     }
+
+    /// <summary>Routes the values a two-way binding writes onto a sequencer, delivering only the latest one that waits.</summary>
+    /// <typeparam name="T">The type of the observed values.</typeparam>
+    /// <param name="values">The values feeding a write.</param>
+    /// <param name="scheduler">The sequencer to use, or null to ask which thread owns the written object.</param>
+    /// <param name="target">The object the write lands on, which is what owns the thread it lands from.</param>
+    /// <returns>The sequence, observed on the chosen sequencer.</returns>
+    /// <remarks>
+    /// Each write raises the other side's change. A queue that replays every value writes an older value back
+    /// over a newer one, and the two sides then hand each other stale values without end.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IObservable<T> ScheduleLatest<T>(IObservable<T> values, ISequencer? scheduler, object? target)
+    {
+        if (scheduler is null)
+        {
+            return BindingSchedulers.ObserveOnViewThread(values, target);
+        }
+
+        return IsImmediate(scheduler) ? values : new ViewThreadObservable<T>(values, scheduler);
+    }
+
+    /// <summary>Determines whether a sequencer runs work on the calling thread at once.</summary>
+    /// <param name="scheduler">The sequencer to test.</param>
+    /// <returns><see langword="true"/> for the immediate sequencer.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsImmediate(ISequencer scheduler) =>
+#if REACTIVE_SHIM
+        scheduler == Scheduler.Immediate;
+#else
+        scheduler == Sequencer.Immediate;
+#endif
 
     /// <summary>Wires a forward and a reverse write, dropping the target's initial value so it does not echo back.</summary>
     /// <typeparam name="TSource">The type declaring the source property.</typeparam>

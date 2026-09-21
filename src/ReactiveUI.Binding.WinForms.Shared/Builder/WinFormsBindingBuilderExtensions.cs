@@ -15,13 +15,10 @@ namespace ReactiveUI.Binding.WinForms.Builder;
 public static class WinFormsBindingBuilderExtensions
 {
     /// <summary>Provides WithWinForms extension members for <paramref name="builder"/>.</summary>
-    /// <param name="builder">The builder instance.</param>
+    /// <param name="builder">The builder instance; it must be an <see cref="IReactiveUIBindingBuilder"/>.</param>
     extension(IAppBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
-        /// property observation for WinForms components.
-        /// </summary>
+        /// <summary>Registers the WinForms module, which adds event-based property observation and the control view thread invoker.</summary>
         /// <returns>The builder instance for chaining.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IReactiveUIBindingBuilder WithWinForms() =>
@@ -32,11 +29,9 @@ public static class WinFormsBindingBuilderExtensions
     /// <param name="builder">The builder instance.</param>
     extension(IReactiveUIBindingBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
-        /// property observation for WinForms components.
-        /// </summary>
+        /// <summary>Registers the WinForms module, which adds event-based property observation and the control view thread invoker.</summary>
         /// <returns>The builder instance for chaining.</returns>
+        /// <exception cref="ArgumentNullException">The builder is null.</exception>
         public IReactiveUIBindingBuilder WithWinForms()
         {
             ArgumentExceptionHelper.ThrowIfNull(builder);

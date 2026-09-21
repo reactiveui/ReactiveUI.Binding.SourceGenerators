@@ -19,8 +19,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            obs1Expression = obs1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs1Expression.Substring(7) : obs1Expression;
-
             if (obs1Expression == "x => x.MyCommand")
             {
                 return __WhenAnyObservable_7FFFCD9779338746(objectToMonitor);

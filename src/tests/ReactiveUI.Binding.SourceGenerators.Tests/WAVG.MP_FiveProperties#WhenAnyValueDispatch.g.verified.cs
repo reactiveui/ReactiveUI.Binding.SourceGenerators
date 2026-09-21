@@ -14,11 +14,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double, bool, string>> WhenAnyValue(
             this global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel objectToMonitor,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string>> property1,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string?>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, int>> property2,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, double>> property3,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, bool>> property4,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string>> property5,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string?>> property5,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property1")] string property1Expression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property2")] string property2Expression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property3")] string property3Expression = "",
@@ -27,12 +27,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
-            property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
-            property3Expression = property3Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property3Expression.Substring(7) : property3Expression;
-            property4Expression = property4Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property4Expression.Substring(7) : property4Expression;
-            property5Expression = property5Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property5Expression.Substring(7) : property5Expression;
-
             if (property1Expression == "x => x.Prop1" && property2Expression == "x => x.Prop2" && property3Expression == "x => x.Prop3" && property4Expression == "x => x.Prop4" && property5Expression == "x => x.Prop5")
             {
                 return __WhenAnyValue_00003486AFD4FA6C(objectToMonitor);

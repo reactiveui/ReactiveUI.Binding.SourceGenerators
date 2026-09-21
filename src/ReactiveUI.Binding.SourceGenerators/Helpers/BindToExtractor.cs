@@ -77,7 +77,7 @@ internal static class BindToExtractor
         DetectConversionParameters(methodSymbol, out var hasConversionHint, out var hasConverterOverride);
 
         var targetValueType = ConversionPluginRegistry.SelectorType(targetPropertyArg, semanticModel, ct);
-        var targetExpressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
+        var targetExpressionText = targetPropertyArg.ToString();
 
         return new(
             invocation.SyntaxTree.FilePath,

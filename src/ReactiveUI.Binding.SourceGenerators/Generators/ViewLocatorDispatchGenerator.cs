@@ -88,31 +88,11 @@ internal static class ViewLocatorDispatchGenerator
             features);
     }
 
-    /// <summary>Deduplicates view registrations by (view model fully qualified name, contract) pair.</summary>
-    /// <param name="registrations">The raw registrations.</param>
-    /// <returns>A deduplicated list of registrations.</returns>
-    private static List<ViewRegistrationInfo> Deduplicate(ImmutableArray<ViewRegistrationInfo> registrations)
-    {
-        var seen = new HashSet<ViewRegistrationKey>();
-        var result = new List<ViewRegistrationInfo>(registrations.Length);
-
-        for (var i = 0; i < registrations.Length; i++)
-        {
-            var reg = registrations[i];
-            if (seen.Add(new(reg.ViewModelFullyQualifiedName, reg.Contract)))
-            {
-                result.Add(reg);
-            }
-        }
-
-        return result;
-    }
-
     /// <summary>Generates the full source output into the StringBuilder.</summary>
     /// <param name="sb">The string builder to write to.</param>
     /// <param name="registrations">The deduplicated registrations.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    private static void GenerateSource(StringBuilder sb, List<ViewRegistrationInfo> registrations, in LanguageFeatures features)
+    internal static void GenerateSource(StringBuilder sb, List<ViewRegistrationInfo> registrations, in LanguageFeatures features)
     {
         var supportsNullable = features.SupportsNullable;
         EmitFileHeader(sb, features);
@@ -120,7 +100,7 @@ internal static class ViewLocatorDispatchGenerator
         // Singleton cache fields for [SingleInstanceView] views
         EmitSingletonFields(sb, registrations);
 
-        EmitRegistrationHook(sb, supportsNullable ? "?" : string.Empty);
+        EmitRegistrationHook(sb, features);
 
         // Emit the per-view-model dispatch branches into the dispatch function body.
         EmitDispatchBranches(sb, registrations);
@@ -142,7 +122,46 @@ internal static class ViewLocatorDispatchGenerator
                                    }
                                }
                                """);
+
+        if (features.DeclaresModuleInitializerAttribute)
+        {
+            EmitModuleInitializerAttribute(sb);
+        }
     }
+
+    /// <summary>Deduplicates view registrations by (view model fully qualified name, contract) pair.</summary>
+    /// <param name="registrations">The raw registrations.</param>
+    /// <returns>A deduplicated list of registrations.</returns>
+    private static List<ViewRegistrationInfo> Deduplicate(ImmutableArray<ViewRegistrationInfo> registrations)
+    {
+        var seen = new HashSet<ViewRegistrationKey>();
+        var result = new List<ViewRegistrationInfo>(registrations.Length);
+
+        for (var i = 0; i < registrations.Length; i++)
+        {
+            var reg = registrations[i];
+            if (seen.Add(new(reg.ViewModelFullyQualifiedName, reg.Contract)))
+            {
+                result.Add(reg);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>Declares the module initializer attribute for a consumer whose framework does not ship it.</summary>
+    /// <param name="sb">The string builder to write to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void EmitModuleInitializerAttribute(StringBuilder sb) =>
+        sb.AppendLine().AppendLine()
+            .AppendLine("namespace System.Runtime.CompilerServices")
+            .AppendLine("{")
+            .AppendLine("    /// <summary>Marks a method the runtime calls when its module loads.</summary>")
+            .AppendLine("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]")
+            .AppendLine("    internal sealed class ModuleInitializerAttribute : global::System.Attribute")
+            .AppendLine("    {")
+            .AppendLine("    }")
+            .Append('}');
 
     /// <summary>Emits the generated-file markers, nullable directive, and the enclosing namespace and class declarations.</summary>
     /// <param name="sb">The string builder to write to.</param>
@@ -162,26 +181,52 @@ internal static class ViewLocatorDispatchGenerator
             .Append("\n    {");
     }
 
-    /// <summary>
-    /// Emits the static field initializer that registers the dispatch function on class load, and
-    /// the signature of the dispatch function itself.
-    /// </summary>
+    /// <summary>Emits what registers the dispatch function, and the signature of the dispatch function itself.</summary>
+    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
+    /// <remarks>
+    /// From C# 9 the registration is a module initializer, which runs before any code in the assembly, so a
+    /// view resolves whether or not a binding has run. An older consumer has no such hook. Its registration is
+    /// a static constructor, which runs when the class is first used; a field initializer would not do, because
+    /// the runtime only runs one when a static field is read, and no generated member reads one.
+    /// </remarks>
+    private static void EmitRegistrationHook(StringBuilder sb, in LanguageFeatures features)
+    {
+        _ = sb.AppendLine();
+
+        if (features.SupportsModuleInitializer)
+        {
+            _ = sb.AppendLine(DocCommentOpen)
+                .AppendLine("            /// Registers the source-generated view dispatch function with")
+                .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/> when the module loads.")
+                .AppendLine(DocCommentClose)
+                .AppendLine("            [global::System.Runtime.CompilerServices.ModuleInitializer]")
+                .AppendLine("            internal static void __RegisterViewDispatch()");
+        }
+        else
+        {
+            _ = sb.AppendLine(DocCommentOpen)
+                .AppendLine("            /// Registers the source-generated view dispatch function with")
+                .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/> when this class is first used.")
+                .AppendLine(DocCommentClose)
+                .Append("            static ").Append(Constants.GeneratedExtensionClassName).AppendLine("()");
+        }
+
+        _ = sb.AppendLine("            {")
+            .AppendLine("                global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(")
+            .AppendLine("                    __TryResolveView);")
+            .AppendLine("            }")
+            .AppendLine();
+
+        EmitDispatchSignature(sb, features.SupportsNullable ? "?" : string.Empty);
+    }
+
+    /// <summary>Emits the documentation and signature of the dispatch function, and opens its body.</summary>
     /// <param name="sb">The string builder to write to.</param>
     /// <param name="nullable">The nullable annotation to emit, or an empty string when unsupported.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitRegistrationHook(StringBuilder sb, string nullable) =>
-        sb.AppendLine().AppendLine(DocCommentOpen)
-            .AppendLine("            /// Triggers view dispatch registration when the generated bindings class is loaded.")
-            .AppendLine(DocCommentClose)
-            .AppendLine("            private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();").AppendLine()
-            .AppendLine(DocCommentOpen).AppendLine("            /// Registers the source-generated view dispatch function with")
-            .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/>.")
-            .AppendLine("            /// Called once via static field initializer when this class is first accessed.")
-            .AppendLine(DocCommentClose).AppendLine("            /// <returns>Always returns <see langword=\"true\"/>.</returns>")
-            .AppendLine("            private static bool __RegisterViewDispatch()").AppendLine("            {")
-            .AppendLine("                global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(")
-            .AppendLine("                    __TryResolveView);").AppendLine("                return true;").AppendLine("            }").AppendLine()
-            .AppendLine(DocCommentOpen).AppendLine("            /// Compile-time generated type-switch dispatch for view resolution.")
+    private static void EmitDispatchSignature(StringBuilder sb, string nullable) =>
+        sb.AppendLine(DocCommentOpen).AppendLine("            /// Compile-time generated type-switch dispatch for view resolution.")
             .AppendLine("            /// Attempts to resolve a view for the given view model instance without reflection.")
             .AppendLine(DocCommentClose)
             .AppendLine("            /// <param name=\"instance\">The view model instance to resolve a view for.</param>")

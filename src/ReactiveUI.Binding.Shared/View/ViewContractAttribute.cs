@@ -9,10 +9,8 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>
-/// Allows an additional string to make view resolution more specific than
-/// just a type. When applied to your <see cref="IViewFor{T}"/>-derived
-/// View, the source generator will register this view under the specified
-/// contract, enabling selection between different Views for a single ViewModel.
+/// Registers an <see cref="IViewFor{T}"/> view in the generated view dispatch under a contract string,
+/// so one view model can have a different view per contract.
 /// </summary>
 /// <param name="contract">The contract value for view resolution.</param>
 [DebuggerDisplay("Contract = {Contract}")]

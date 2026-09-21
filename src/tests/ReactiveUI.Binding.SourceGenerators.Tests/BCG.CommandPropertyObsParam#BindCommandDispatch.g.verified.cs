@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable BindCommand(
             this global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyView view,
-            global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel viewModel,
+            global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyView, global::SharedScenarios.BindCommand.CommandPropertyObsParam.WpfLikeButton>> controlName,
             global::System.IObservable<string> withParameter,
@@ -25,13 +25,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? propertyNameExpression.Substring(7)
-                : propertyNameExpression;
-            controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? controlNameExpression.Substring(7)
-                : controlNameExpression;
-
             if (propertyNameExpression == "x => x.Save"
                 && controlNameExpression == "x => x.SaveButton")
             {

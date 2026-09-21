@@ -90,8 +90,8 @@ internal static class CommandExtractor
             controlBinding.EventName,
             controlBinding.EventArgsTypeFullName,
             Constants.BindCommandMethodName,
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandPropertyArg.ToString()),
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(controlPropertyArg.ToString()),
+            commandPropertyArg.ToString(),
+            controlPropertyArg.ToString(),
             parameterOverload.ParameterExpressionText,
             controlBinding.Capabilities.HasCommand,
             controlBinding.Capabilities.HasCommandParameter,
@@ -122,7 +122,7 @@ internal static class CommandExtractor
                 return new ParameterLambda(
                     paramPath,
                     paramPath[^1].PropertyTypeFullName,
-                    CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[argumentIndex].Expression.ToString()));
+                    args[argumentIndex].Expression.ToString());
             }
         }
 

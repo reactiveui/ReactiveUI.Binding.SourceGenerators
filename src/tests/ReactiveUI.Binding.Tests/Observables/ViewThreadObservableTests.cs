@@ -92,6 +92,47 @@ public class ViewThreadObservableTests
         }
     }
 
+    /// <summary>A value delivered on a sequencer waits for the sequencer even when the caller could write at once.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OnNext_OnASequencer_WaitsForTheSequencer()
+    {
+        var source = new ManualObservable<string>();
+        var observer = new RecordingObserver<string>();
+        var sequencer = new ManualSequencer();
+
+        using (new ViewThreadObservable<string>(source, sequencer).Subscribe(observer))
+        {
+            source.Observer?.OnNext(First);
+
+            await Assert.That(observer.Values.Count).IsEqualTo(0);
+
+            _ = sequencer.RunPending();
+
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(First);
+        }
+    }
+
+    /// <summary>A burst delivered on a sequencer queues one drain, and that drain carries only the latest value.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OnNext_ABurstOnASequencer_WritesOnlyTheLatestValue()
+    {
+        var source = new ManualObservable<string>();
+        var observer = new RecordingObserver<string>();
+        var sequencer = new ManualSequencer();
+
+        using (new ViewThreadObservable<string>(source, sequencer).Subscribe(observer))
+        {
+            source.Observer?.OnNext(First);
+            source.Observer?.OnNext(Second);
+            source.Observer?.OnNext(Third);
+
+            await Assert.That(sequencer.RunPending()).IsEqualTo(1);
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Third);
+        }
+    }
+
     /// <summary>A value on the owning thread replaces a value still waiting from another thread.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

@@ -14,11 +14,10 @@ namespace ReactiveUI.Binding;
 
 /// <summary>How a binding reacts when the sequence feeding its write faults.</summary>
 /// <remarks>
-/// A write that faults is not the consumer's own call stack: it arrives on whatever thread raised the change
-/// notification, so an unobserved fault there is lost rather than surfaced. The binding therefore records every
-/// fault, and rethrows the ones that carry an inner exception so a genuine failure inside a property setter is
-/// not swallowed. The two cases differ because a fault with no inner exception is the sequence itself ending in
-/// error, which the subscriber can already observe, while an inner exception is a setter that threw.
+/// A faulted write has no caller stack to surface on: it arrives on whichever thread raised the change
+/// notification. Every fault is logged against the bound expression. A fault that carries an inner exception,
+/// a setter that threw, is rethrown as a <see cref="TargetInvocationException"/>. A fault with none is the
+/// sequence itself ending in error, and is only logged. Completion is ignored.
 /// </remarks>
 public static class BindingErrors
 {

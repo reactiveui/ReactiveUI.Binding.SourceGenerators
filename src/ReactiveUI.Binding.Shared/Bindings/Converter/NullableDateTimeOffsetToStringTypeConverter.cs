@@ -8,7 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="DateTimeOffset"/> to <see cref="string"/>.</summary>
+/// <summary>
+/// Converts a nullable <see cref="DateTimeOffset"/> to a <see cref="string"/> in the general date and time format of the
+/// current culture, including the offset. A null value succeeds with a null string.
+/// </summary>
 public sealed class NullableDateTimeOffsetToStringTypeConverter : BindingTypeConverter<DateTimeOffset?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

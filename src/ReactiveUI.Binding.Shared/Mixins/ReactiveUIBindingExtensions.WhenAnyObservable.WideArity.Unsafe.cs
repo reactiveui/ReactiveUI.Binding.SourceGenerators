@@ -19,13 +19,14 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Observes 1 observable property on the specified sender and switches to the latest observable.</summary>
+    /// <summary>
+    /// Observes an observable-valued property by reflection and emits the values of its current observable, switching when the property changes; a null observable emits nothing.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
     /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
     /// <returns>An observable sequence that emits values from the latest observed observable.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet>(
         this TSender sender,
@@ -38,14 +39,15 @@ public static partial class ReactiveUIBindingExtensions
         return ObservableChainHelpers.SwitchLatest(sender, obs1);
     }
 
-    /// <summary>Observes 2 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 2 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
     /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
     /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet>(
         this TSender sender,
@@ -66,7 +68,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 3 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 3 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -74,7 +78,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
     /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet>(
@@ -99,7 +102,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 4 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 4 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -108,7 +113,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
     /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet>(
@@ -136,7 +140,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 5 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 5 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -146,7 +152,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
     /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet>(
@@ -177,7 +182,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 6 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 6 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -188,7 +195,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
     /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -223,7 +229,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 7 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 7 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -235,7 +243,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
     /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -273,7 +280,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 8 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 8 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -286,7 +295,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
     /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -327,7 +335,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 9 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 9 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -341,7 +351,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
     /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -385,7 +394,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 10 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 10 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -400,7 +411,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
     /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -447,7 +457,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 11 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 11 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -463,7 +475,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
     /// <param name="obs11">An expression that selects observable property 11 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -513,7 +524,9 @@ public static partial class ReactiveUIBindingExtensions
         return new EnumerableBlendSignal<TRet>(sources);
     }
 
-    /// <summary>Observes 12 observable properties on the specified sender and merges the switched observables.</summary>
+    /// <summary>
+    /// Observes 12 observable-valued properties by reflection and merges the values of their current observables, each switching when its property changes.
+    /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
     /// <param name="sender">The sender instance to observe for property changes.</param>
@@ -530,7 +543,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs11">An expression that selects observable property 11 to observe.</param>
     /// <param name="obs12">An expression that selects observable property 12 to observe.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -584,7 +596,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 2 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 2 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -595,7 +607,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet, T1, T2>(

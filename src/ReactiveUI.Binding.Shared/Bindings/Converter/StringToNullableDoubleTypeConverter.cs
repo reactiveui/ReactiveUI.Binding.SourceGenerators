@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="double"/> using <see cref="double.TryParse(string?, out double)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="double"/> with
+/// <see cref="double.TryParse(string?, out double)"/> under the current culture; a null or empty string succeeds with a
+/// null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableDoubleTypeConverter : BindingTypeConverter<string, double?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

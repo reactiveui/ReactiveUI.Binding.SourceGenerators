@@ -31,8 +31,9 @@ public static class BuilderMixins
     /// <summary>Builds the ReactiveUI.Binding application from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <returns>The configured application instance.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingInstance BuildApp(this IAppBuilder appBuilder)
     {
@@ -51,8 +52,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="module">The platform module instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder WithPlatformModule<T>(this IAppBuilder appBuilder, T module)
         where T : IModule
@@ -71,8 +73,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="configureAction">An action that receives the mutable dependency resolver.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder WithRegistration(
         this IAppBuilder appBuilder,
@@ -92,8 +95,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder WithConverter(this IAppBuilder appBuilder, IBindingTypeConverter converter)
     {
@@ -111,8 +115,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The fallback converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder WithFallbackConverter(
         this IAppBuilder appBuilder,
@@ -132,8 +137,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The set-method converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder WithSetMethodConverter(
         this IAppBuilder appBuilder,
@@ -153,8 +159,9 @@ public static class BuilderMixins
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="appBuilder"/> is null.</exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
     public static IReactiveUIBindingBuilder ConfigureViewLocator(
         this IAppBuilder appBuilder,

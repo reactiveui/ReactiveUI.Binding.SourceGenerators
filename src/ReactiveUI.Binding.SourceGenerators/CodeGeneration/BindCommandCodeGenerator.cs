@@ -20,6 +20,12 @@ internal static class BindCommandCodeGenerator
     /// <summary>The parameter carrying the text of the selector naming the control.</summary>
     private const string ControlExpressionParameter = "controlNameExpression";
 
+    /// <summary>The parameter carrying the text of the selector naming the command parameter.</summary>
+    private const string ParameterExpressionParameter = "withParameterExpression";
+
+    /// <summary>Continues a dispatch condition onto its next line.</summary>
+    private const string ConditionContinuation = "                && ";
+
     /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
     private const string WorkerMethodPrefix = "__BindCommand_";
 
@@ -135,16 +141,7 @@ internal static class BindCommandCodeGenerator
         AppendOverloadSummary(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
         AppendParameterList(sb, group, true, supportsNullable, true);
 
-        _ = sb.AppendLine("""
-                              {
-                                  propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                                      ? propertyNameExpression.Substring(7)
-                                      : propertyNameExpression;
-                                  controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                                      ? controlNameExpression.Substring(7)
-                                      : controlNameExpression;
-
-                      """);
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         EmitExpressionDispatchBranches(sb, group);
         EmitDispatchFallthrough(sb);
@@ -351,7 +348,8 @@ internal static class BindCommandCodeGenerator
         var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
 
         _ = sb.Append("            this ").Append(group.ViewTypeFullName)
-            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(group.ViewModelTypeFullName).AppendLine(" viewModel,")
+            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent)
+            .Append(CodeGeneratorHelpers.NullableSelectorType(group.ViewModelTypeFullName, true, supportsNullable)).AppendLine(" viewModel,")
             .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.ViewModelTypeFullName).Append(", ")
             .Append(commandType).AppendLine(">> propertyName,").Append(GeneratedSyntax.SelectorParameterOpen)
             .Append(group.ViewTypeFullName).Append(", ").Append(group.ControlTypeFullName).AppendLine(">> controlName,");
@@ -425,12 +423,7 @@ internal static class BindCommandCodeGenerator
         in LanguageFeatures features)
     {
         var collapsed = features.CollapsesIndistinguishableCallSites
-            ? group with
-            {
-                Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
-                    group.Invocations,
-                    static x => $"{x.CommandExpressionText}|{x.ControlExpressionText}"),
-            }
+            ? group with { Invocations = ExplicitEventsFirst(CodeGeneratorHelpers.CollapseIndistinguishableCallSites(group.Invocations, DispatchKey)) }
             : group;
 
         if (features.SupportsInterceptors)
@@ -473,15 +466,78 @@ internal static class BindCommandCodeGenerator
         {
             var inv = group.Invocations[i];
 
-            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
-                sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
-                CommandExpressionParameter,
-                inv.CommandExpressionText,
-                ControlExpressionParameter,
-                inv.ControlExpressionText);
+            AppendExpressionCondition(sb, CodeGeneratorHelpers.ConditionKeyword(i), inv, group.HasExpressionParameter);
             CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments + extraArgs);
         }
+    }
+
+    /// <summary>Appends the condition that matches a call site by everything that shapes what it binds.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="inv">The call site the branch stands for.</param>
+    /// <param name="comparesParameter">Whether the overload captures the text of the parameter selector.</param>
+    /// <remarks>
+    /// The command and control selectors are not all of it. A parameter selector picks which property feeds the
+    /// control, and an explicit event replaces the mechanism the control would have bound through, so two call
+    /// sites that spell the same command and control differently in either bind differently. A call site that
+    /// names no event carries no event condition, which is why the ones that do are tried first.
+    /// </remarks>
+    private static void AppendExpressionCondition(
+        StringBuilder sb,
+        string condition,
+        BindCommandInvocationInfo inv,
+        bool comparesParameter)
+    {
+        _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(condition).Append(" (").Append(CommandExpressionParameter)
+            .Append(CodeGeneratorHelpers.ExpressionTextComparison).Append(CodeGeneratorHelpers.EscapeString(inv.CommandExpressionText)).AppendLine("\"")
+            .Append(ConditionContinuation).Append(ControlExpressionParameter).Append(CodeGeneratorHelpers.ExpressionTextComparison)
+            .Append(CodeGeneratorHelpers.EscapeString(inv.ControlExpressionText)).Append('"');
+
+        if (comparesParameter && inv.ParameterExpressionText is not null)
+        {
+            _ = sb.AppendLine().Append(ConditionContinuation).Append(ParameterExpressionParameter).Append(CodeGeneratorHelpers.ExpressionTextComparison)
+                .Append(CodeGeneratorHelpers.EscapeString(inv.ParameterExpressionText)).Append('"');
+        }
+
+        if (inv.HasExplicitEvent && inv.ResolvedEventName is not null)
+        {
+            _ = sb.AppendLine().Append(ConditionContinuation).Append("toEvent").Append(CodeGeneratorHelpers.ExpressionTextComparison)
+                .Append(CodeGeneratorHelpers.EscapeString(inv.ResolvedEventName)).Append('"');
+        }
+
+        _ = sb.AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen);
+    }
+
+    /// <summary>Keys a call site by everything the condition that dispatches on it compares.</summary>
+    /// <param name="inv">The call site.</param>
+    /// <returns>The key two call sites share only when nothing can tell them apart.</returns>
+    private static string DispatchKey(BindCommandInvocationInfo inv) =>
+        $"{inv.CommandExpressionText}|{inv.ControlExpressionText}|{inv.ParameterExpressionText}|{(inv.HasExplicitEvent ? inv.ResolvedEventName : null)}";
+
+    /// <summary>Puts the call sites that name an event ahead of those that do not, keeping the order within each.</summary>
+    /// <param name="invocations">The call sites of one group.</param>
+    /// <returns>The same call sites, with the explicit-event ones first.</returns>
+    private static BindCommandInvocationInfo[] ExplicitEventsFirst(BindCommandInvocationInfo[] invocations)
+    {
+        var ordered = new List<BindCommandInvocationInfo>(invocations.Length);
+
+        for (var i = 0; i < invocations.Length; i++)
+        {
+            if (invocations[i].HasExplicitEvent)
+            {
+                ordered.Add(invocations[i]);
+            }
+        }
+
+        for (var i = 0; i < invocations.Length; i++)
+        {
+            if (!invocations[i].HasExplicitEvent)
+            {
+                ordered.Add(invocations[i]);
+            }
+        }
+
+        return [.. ordered];
     }
 
     /// <summary>Emits the throw that closes a dispatch method when no call site matched.</summary>

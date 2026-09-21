@@ -20,10 +20,11 @@ namespace ReactiveUI.Binding;
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>
-    /// Source-generated dispatch function set by the generated code.
-    /// Signature: (viewModelInstance, contract) returns IViewFor or null.
+    /// The source-generated lookups registered by the assemblies that contain views, in registration order.
+    /// Signature of each: (viewModelInstance, contract) returns IViewFor or null.
+    /// The array is immutable; registration swaps in a new one.
     /// </summary>
-    private static Func<object, string, IViewFor?>? _generatedDispatch;
+    private static Func<object, string, IViewFor?>[] _generatedDispatches = [];
 
     /// <summary>Synchronization lock for thread-safe access to this instance's mappings.</summary>
     private readonly Lock _lock = new();
@@ -35,15 +36,36 @@ public sealed class DefaultViewLocator : IViewLocator
     private Dictionary<ViewMappingKey, Func<IViewFor>> _mappings = [];
 
     /// <summary>
-    /// Registers the source-generated view dispatch function.
-    /// Called by the source generator's static field initializer on <c>__ReactiveUIGeneratedBindings</c>.
+    /// Adds a source-generated view dispatch function.
+    /// Called by <c>__ReactiveUIGeneratedBindings</c>: from a module initializer in a C# 9 or newer project,
+    /// and from its static constructor in an older one. Each assembly that contains views registers its own.
     /// </summary>
     /// <param name="dispatch">The dispatch function that resolves views by type-switching on the view model instance.</param>
+    /// <remarks>
+    /// Every registered function is consulted, the most recently registered first, and the first view it returns wins.
+    /// A view model that two assemblies both have a view for therefore resolves to the view of the assembly that registered last.
+    /// Registering a function that is already registered has no effect.
+    /// </remarks>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static void SetGeneratedViewDispatch(Func<object, string, IViewFor?> dispatch)
     {
         ArgumentExceptionHelper.ThrowIfNull(dispatch);
-        _generatedDispatch = dispatch;
+
+        var current = Volatile.Read(ref _generatedDispatches);
+        while (Array.IndexOf(current, dispatch) < 0)
+        {
+            var next = new Func<object, string, IViewFor?>[current.Length + 1];
+            Array.Copy(current, next, current.Length);
+            next[current.Length] = dispatch;
+
+            var witnessed = Interlocked.CompareExchange(ref _generatedDispatches, next, current);
+            if (ReferenceEquals(witnessed, current))
+            {
+                return;
+            }
+
+            current = witnessed;
+        }
     }
 
     /// <summary>Registers an explicit view mapping for a view model type.</summary>
@@ -134,15 +156,11 @@ public sealed class DefaultViewLocator : IViewLocator
         var normalizedContract = contract ?? string.Empty;
 
         // 1. Source-generated dispatch (AOT-safe)
-        var dispatch = _generatedDispatch;
-        if (dispatch is not null)
+        var result = TryResolveFromGeneratedDispatches(viewModel, normalizedContract);
+        if (result is not null)
         {
-            var result = dispatch(viewModel, normalizedContract);
-            if (result is not null)
-            {
-                SetViewModelOnView(result, viewModel);
-                return result;
-            }
+            SetViewModelOnView(result, viewModel);
+            return result;
         }
 
         // 2. Explicit runtime mappings (AOT-safe)
@@ -177,15 +195,11 @@ public sealed class DefaultViewLocator : IViewLocator
         var normalizedContract = contract ?? string.Empty;
 
         // 1. Source-generated dispatch (AOT-safe type-switch)
-        var dispatch = _generatedDispatch;
-        if (dispatch is not null)
+        var result = TryResolveFromGeneratedDispatches(viewModel, normalizedContract);
+        if (result is not null)
         {
-            var result = dispatch(viewModel, normalizedContract);
-            if (result is not null)
-            {
-                SetViewModelOnView(result, viewModel);
-                return result;
-            }
+            SetViewModelOnView(result, viewModel);
+            return result;
         }
 
         // 2. Explicit runtime mappings (AOT-safe)
@@ -204,9 +218,29 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <returns>A new <see cref="ViewMappingBuilder"/> targeting this locator instance.</returns>
     public ViewMappingBuilder CreateMappingBuilder() => new(this);
 
-    /// <summary>Resets the generated view dispatch for testing purposes.</summary>
+    /// <summary>Removes every registered generated view dispatch for testing purposes.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static void ResetGeneratedViewDispatchForTesting() => _generatedDispatch = null;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void ResetGeneratedViewDispatchForTesting() => Volatile.Write(ref _generatedDispatches, []);
+
+    /// <summary>Asks each registered generated lookup for a view, the most recently registered first.</summary>
+    /// <param name="viewModel">The view model instance.</param>
+    /// <param name="contract">The normalized contract string.</param>
+    /// <returns>The first view a lookup returns, or <see langword="null"/>.</returns>
+    private static IViewFor? TryResolveFromGeneratedDispatches(object viewModel, string contract)
+    {
+        var dispatches = Volatile.Read(ref _generatedDispatches);
+        for (var i = dispatches.Length - 1; i >= 0; i--)
+        {
+            var view = dispatches[i](viewModel, contract);
+            if (view is not null)
+            {
+                return view;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>Sets the view model on the resolved view.</summary>
     /// <param name="view">The view to set the view model on.</param>

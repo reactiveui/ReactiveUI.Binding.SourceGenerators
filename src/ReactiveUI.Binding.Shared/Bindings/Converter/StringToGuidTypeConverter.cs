@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="Guid"/> using <see cref="Guid.TryParse(string?, out Guid)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to a <see cref="Guid"/> with <see cref="Guid.TryParse(string?, out Guid)"/>; a null or unparseable string fails.</summary>
 public sealed class StringToGuidTypeConverter : BindingTypeConverter<string, Guid>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

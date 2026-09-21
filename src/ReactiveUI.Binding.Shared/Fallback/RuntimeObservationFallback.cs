@@ -11,20 +11,26 @@ namespace ReactiveUI.Binding.Fallback;
 #endif
 
 /// <summary>
-/// Provides runtime fallback implementations for WhenChanged, WhenChanging, and WhenAnyValue
-/// when the source generator cannot handle an invocation at compile time.
-/// Uses the ported expression chain analysis via <see cref="ICreatesObservableForProperty"/>.
+/// Observes properties of WhenChanged, WhenChanging and WhenAnyValue calls the source generator did not handle,
+/// by walking the property expression at runtime and resolving each link through the registered
+/// <see cref="ICreatesObservableForProperty"/> implementations.
 /// </summary>
+/// <remarks>
+/// Every observable emits the current value on subscribe and then again after each change, skipping a value equal to
+/// the one before it. When the observed object is null, or a property partway along a path is null, nothing is
+/// emitted until the path resolves. The multi-property overloads emit once every property has a value.
+/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
 public static class RuntimeObservationFallback
 {
-    /// <summary>Runtime fallback for WhenChanged with a single property.</summary>
+    /// <summary>Observes a property, emitting its value after each change.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="obj">The object to observe.</param>
     /// <param name="property">The property expression.</param>
     /// <returns>An observable that emits property values after they change.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="property"/> is <see langword="null"/>.</exception>
     public static IObservable<TValue> WhenChanged<TObj, TValue>(
         TObj obj,
         Expression<Func<TObj, TValue>> property)
@@ -37,7 +43,7 @@ public static class RuntimeObservationFallback
             static x => x.Value);
     }
 
-    /// <summary>Runtime fallback for multi-property WhenChanged, returning a tuple of values.</summary>
+    /// <summary>Observes two properties, emitting both values whenever either changes.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -56,7 +62,7 @@ public static class RuntimeObservationFallback
         return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
-    /// <summary>Runtime fallback for multi-property WhenChanged with 3 properties.</summary>
+    /// <summary>Observes three properties, emitting all their values whenever any changes.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -79,12 +85,13 @@ public static class RuntimeObservationFallback
         return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
     }
 
-    /// <summary>Runtime fallback for WhenChanging with a single property.</summary>
+    /// <summary>Observes a property, emitting its value just before each change.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="obj">The object to observe.</param>
     /// <param name="property">The property expression.</param>
     /// <returns>An observable that emits property values before they change.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="property"/> is <see langword="null"/>.</exception>
     public static IObservable<TValue> WhenChanging<TObj, TValue>(
         TObj obj,
         Expression<Func<TObj, TValue>> property)
@@ -97,7 +104,7 @@ public static class RuntimeObservationFallback
             static x => x.Value);
     }
 
-    /// <summary>Runtime fallback for multi-property WhenChanging with 2 properties.</summary>
+    /// <summary>Observes two properties, emitting both values whenever either is about to change.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -116,7 +123,7 @@ public static class RuntimeObservationFallback
         return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
-    /// <summary>Runtime fallback for multi-property WhenChanging with 3 properties.</summary>
+    /// <summary>Observes three properties, emitting all their values whenever any is about to change.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -139,12 +146,13 @@ public static class RuntimeObservationFallback
         return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
     }
 
-    /// <summary>Runtime fallback for WhenAnyValue with a single property.</summary>
+    /// <summary>Observes a property, emitting its value after each change.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="sender">The object to observe.</param>
     /// <param name="property">The property expression.</param>
     /// <returns>An observable that emits property values after they change.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="property"/> is <see langword="null"/>.</exception>
     public static IObservable<TValue> WhenAnyValue<TSender, TValue>(
         TSender sender,
         Expression<Func<TSender, TValue>> property)
@@ -157,7 +165,7 @@ public static class RuntimeObservationFallback
             static x => x.Value);
     }
 
-    /// <summary>Runtime fallback for multi-property WhenAnyValue with 2 properties.</summary>
+    /// <summary>Observes two properties, emitting both values whenever either changes.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -176,7 +184,7 @@ public static class RuntimeObservationFallback
         return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
-    /// <summary>Runtime fallback for multi-property WhenAnyValue with 3 properties.</summary>
+    /// <summary>Observes three properties, emitting all their values whenever any changes.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>

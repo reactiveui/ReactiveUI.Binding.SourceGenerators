@@ -21,7 +21,7 @@ public sealed class ViewMappingBuilder
     /// <param name="locator">The view locator to register mappings on.</param>
     internal ViewMappingBuilder(DefaultViewLocator locator) => _locator = locator;
 
-    /// <summary>Maps a view model type to a view type with direct construction.</summary>
+    /// <summary>Maps a view model type to a view type constructed with its parameterless constructor, replacing an existing mapping for the same view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must have a parameterless constructor.</typeparam>
     /// <returns>This builder for chaining.</returns>
@@ -31,10 +31,10 @@ public sealed class ViewMappingBuilder
         where TViewModel : class
         where TView : IViewFor, new() => Map<TViewModel, TView>(null);
 
-    /// <summary>Maps a view model type to a view type with direct construction.</summary>
+    /// <summary>Maps a view model type and contract to a view type constructed with its parameterless constructor, replacing an existing mapping for the same pair.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must have a parameterless constructor.</typeparam>
-    /// <param name="contract">A contract string for named registrations.</param>
+    /// <param name="contract">The contract the mapping is registered under; null registers the default mapping.</param>
     /// <returns>This builder for chaining.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public ViewMappingBuilder Map<TViewModel, TView>(string? contract)
@@ -45,20 +45,22 @@ public sealed class ViewMappingBuilder
         return this;
     }
 
-    /// <summary>Maps a view model type to a view using a custom factory function.</summary>
+    /// <summary>Maps a view model type to a view created by a factory, replacing an existing mapping for the same view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
     /// <returns>This builder for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="factory"/> is null.</exception>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory)
         where TViewModel : class => Map<TViewModel>(factory, null);
 
-    /// <summary>Maps a view model type to a view using a custom factory function.</summary>
+    /// <summary>Maps a view model type and contract to a view created by a factory, replacing an existing mapping for the same pair.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
-    /// <param name="contract">A contract string for named registrations.</param>
+    /// <param name="contract">The contract the mapping is registered under; null registers the default mapping.</param>
     /// <returns>This builder for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="factory"/> is null.</exception>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory, string? contract)
         where TViewModel : class

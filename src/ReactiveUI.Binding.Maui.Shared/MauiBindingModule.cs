@@ -10,7 +10,11 @@ namespace ReactiveUI.Binding.Reactive.Maui;
 namespace ReactiveUI.Binding.Maui;
 #endif
 
-/// <summary>MAUI-specific module that registers platform services with the dependency resolver.</summary>
+/// <summary>Registers the MAUI view thread invoker, the Visibility converters and, in the WinUI build, the dependency-property observer with the dependency resolver.</summary>
+/// <remarks>
+/// The converters are registered with the dependency resolver only; <see cref="ConverterMigrationHelperMixins"/>
+/// imports them into a <see cref="ConverterService"/>.
+/// </remarks>
 public sealed class MauiBindingModule : IModule
 {
     /// <inheritdoc/>

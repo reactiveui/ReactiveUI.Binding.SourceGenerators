@@ -8,28 +8,63 @@ namespace ReactiveUI.Binding.Reactive.Observables;
 namespace ReactiveUI.Binding.Observables;
 #endif
 
-/// <summary>Delivers each notification on the thread that owns the object a binding writes to.</summary>
+/// <summary>Delivers each notification on the thread that owns the object a binding writes to, or on a sequencer.</summary>
 /// <typeparam name="T">The type of the observed values.</typeparam>
-/// <param name="source">The observable feeding the write.</param>
-/// <param name="target">The object the write lands on.</param>
-/// <param name="invoker">The invoker for the thread that owns <paramref name="target"/>.</param>
-internal sealed class ViewThreadObservable<T>(IObservable<T> source, object target, IViewThreadInvoker invoker) : IObservable<T>
+/// <remarks>
+/// Both forms deliver only the latest value that is waiting. A delivery on a sequencer never runs inline, so a
+/// two-way binding that names a sequencer writes each side once with the newest value rather than replaying
+/// every value the other side raised in between.
+/// </remarks>
+internal sealed class ViewThreadObservable<T> : IObservable<T>
 {
+    /// <summary>The observable feeding the write.</summary>
+    private readonly IObservable<T> _source;
+
+    /// <summary>The object the write lands on, or null when a sequencer delivers.</summary>
+    private readonly object? _target;
+
+    /// <summary>The invoker for the thread that owns <see cref="_target"/>, or null when a sequencer delivers.</summary>
+    private readonly IViewThreadInvoker? _invoker;
+
+    /// <summary>The sequencer that delivers, or null when the owning thread does.</summary>
+    private readonly ISequencer? _sequencer;
+
+    /// <summary>Initializes a new instance of the <see cref="ViewThreadObservable{T}"/> class that delivers on the thread owning an object.</summary>
+    /// <param name="source">The observable feeding the write.</param>
+    /// <param name="target">The object the write lands on.</param>
+    /// <param name="invoker">The invoker for the thread that owns <paramref name="target"/>.</param>
+    internal ViewThreadObservable(IObservable<T> source, object target, IViewThreadInvoker invoker)
+    {
+        _source = source;
+        _target = target;
+        _invoker = invoker;
+    }
+
+    /// <summary>Initializes a new instance of the <see cref="ViewThreadObservable{T}"/> class that delivers on a sequencer.</summary>
+    /// <param name="source">The observable feeding the write.</param>
+    /// <param name="sequencer">The sequencer every delivery waits on.</param>
+    internal ViewThreadObservable(IObservable<T> source, ISequencer sequencer)
+    {
+        _source = source;
+        _sequencer = sequencer;
+    }
+
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        var sink = new Sink(observer, target, invoker);
-        sink.Attach(source.Subscribe(sink));
+        var sink = new Sink(observer, _target, _invoker, _sequencer);
+        sink.Attach(_source.Subscribe(sink));
         return sink;
     }
 
     /// <summary>The subscription that writes inline on the owning thread and holds the latest value for it otherwise.</summary>
     /// <param name="observer">The observer applying the write.</param>
-    /// <param name="target">The object the write lands on.</param>
-    /// <param name="invoker">The invoker for the thread that owns <paramref name="target"/>.</param>
-    private sealed class Sink(IObserver<T> observer, object target, IViewThreadInvoker invoker) : IObserver<T>, IDisposable
+    /// <param name="target">The object the write lands on, or null when a sequencer delivers.</param>
+    /// <param name="invoker">The invoker for the thread that owns <paramref name="target"/>, or null when a sequencer delivers.</param>
+    /// <param name="sequencer">The sequencer that delivers, or null when the owning thread does.</param>
+    private sealed class Sink(IObserver<T> observer, object? target, IViewThreadInvoker? invoker, ISequencer? sequencer) : IObserver<T>, IDisposable
     {
         /// <summary>Guards the waiting notifications and the scheduled flag.</summary>
         private readonly Lock _gate = new();
@@ -114,7 +149,7 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
             bool startDrain;
             lock (_gate)
             {
-                if (!_scheduled && invoker.CheckAccess(target))
+                if (!_scheduled && sequencer is null && invoker!.CheckAccess(target!))
                 {
                     return true;
                 }
@@ -162,17 +197,17 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
             }
         }
 
-        /// <summary>Schedules the drain on the host's main thread when one is set, and through the invoker otherwise.</summary>
+        /// <summary>Schedules the drain on the sequencer when one is named, on the host's main thread when one is set, and through the invoker otherwise.</summary>
         private void ScheduleDrain()
         {
-            var mainThread = BindingSchedulers.MainThread;
-            if (mainThread is null)
+            var deliverOn = sequencer ?? BindingSchedulers.MainThread;
+            if (deliverOn is null)
             {
-                invoker.Post(target, static state => ((Sink)state!).Drain(), this);
+                invoker!.Post(target!, static state => ((Sink)state!).Drain(), this);
                 return;
             }
 
-            _ = mainThread.Schedule(
+            _ = deliverOn.Schedule(
                 this,
                 static (_, sink) =>
                 {

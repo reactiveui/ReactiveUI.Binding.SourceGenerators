@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding
         /// </summary>
         public static global::System.IDisposable BindInteraction(
             this global::SharedScenarios.BindInteraction.DeepPropertyPath.MyView view,
-            global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
+            global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>> propertyName,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler,
             string propertyNameExpression = "",

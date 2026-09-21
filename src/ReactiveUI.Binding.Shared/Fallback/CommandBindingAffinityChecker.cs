@@ -11,10 +11,8 @@ namespace ReactiveUI.Binding.Fallback;
 #endif
 
 /// <summary>
-/// Checks whether any user-registered <see cref="ICreatesCommandBinding"/>
-/// implementation has higher affinity than the source generator's compile-time plugin
-/// for a given control type. Used by generated code to allow user-registered plugins to
-/// override source-generated command binding at runtime.
+/// Reports whether a registered <see cref="ICreatesCommandBinding"/> has a higher affinity for a control type than the
+/// mechanism the generator selected, so generated code can defer to it at runtime.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class CommandBindingAffinityChecker
@@ -23,7 +21,7 @@ public static class CommandBindingAffinityChecker
     /// <typeparam name="T">The control type being bound to.</typeparam>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
-    /// <returns><see langword="true"/> if a user plugin should override the generated binding.</returns>
+    /// <returns><see langword="true"/> if a user plugin should override the generated binding; the registrations are read from the service locator on every call.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
     public static bool HasHigherAffinityPlugin<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents

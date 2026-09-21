@@ -15,15 +15,12 @@ namespace ReactiveUI.Binding;
 /// <remarks>
 /// <para>
 /// A hook is consulted once per binding, before anything is wired, and a hook that returns false cancels the
-/// binding outright. Registration is by the service locator, so the set is only known at run time even though
-/// the binding itself was resolved at compile time.
+/// binding outright. Hooks are registered with the service locator, so the set is only known at run time.
 /// </para>
 /// <para>
-/// Nothing is asked of the locator until a hook is actually registered. Almost no application registers one,
-/// and a binding is created per control per view, so paying for a service lookup and two property-chain
-/// closures on every one of them would be a cost the overwhelming majority never gets anything back for.
-/// <see cref="Any"/> is the guard a caller tests first, and it stays false until <see cref="Refresh"/> is
-/// told the registrations changed.
+/// The locator is read on first use and the hooks are cached until <see cref="Refresh"/> is called.
+/// <see cref="Any"/> is the guard a caller tests first, so a binding builds the property-chain closures
+/// <see cref="ShouldBind"/> needs only when a hook exists.
 /// </para>
 /// </remarks>
 public static class BindingHooks
@@ -38,14 +35,14 @@ public static class BindingHooks
     /// <summary>The resolved hooks, or null while none has been resolved yet.</summary>
     private static IPropertyBindingHook[]? _hooks;
 
-    /// <summary>Gets a value indicating whether any hook is registered.</summary>
+    /// <summary>Gets a value indicating whether any hook was registered when the hooks were last read.</summary>
     /// <remarks>
     /// Test this before building the arguments to <see cref="ShouldBind"/>: the closures they need cost more
     /// than the check, and are wasted whenever the answer is false.
     /// </remarks>
     public static bool Any => Resolve().Length > 0;
 
-    /// <summary>Re-reads the registered hooks, for a host that registers them after the first binding.</summary>
+    /// <summary>Discards the cached hooks so the next use reads them from the service locator again.</summary>
     public static void Refresh()
     {
         lock (Gate)
@@ -54,14 +51,14 @@ public static class BindingHooks
         }
     }
 
-    /// <summary>Asks every registered hook whether this binding may be created.</summary>
-    /// <param name="source">The source object, typically the view model.</param>
+    /// <summary>Asks the registered hooks in turn whether this binding may be created, stopping at the first refusal.</summary>
+    /// <param name="source">The source object, typically the view model; may be null.</param>
     /// <param name="target">The target object, typically the view.</param>
     /// <param name="getSourceProperties">Reads the current source-side values.</param>
     /// <param name="getTargetProperties">Reads the current target-side values.</param>
     /// <param name="direction">Which way the binding runs.</param>
-    /// <returns><see langword="true"/> when the binding may proceed; <see langword="false"/> when a hook refused it.</returns>
-    /// <exception cref="ArgumentNullException">A required argument is null.</exception>
+    /// <returns><see langword="true"/> when the binding may proceed, including when no hook is registered; <see langword="false"/> when a hook refused it.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="target"/>, <paramref name="getSourceProperties"/> or <paramref name="getTargetProperties"/> is null.</exception>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static bool ShouldBind(
         object? source,

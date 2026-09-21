@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="DateOnly"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a <see cref="DateOnly"/> to a <see cref="string"/> in the short date format of the current culture.</summary>
 public sealed class DateOnlyToStringTypeConverter : BindingTypeConverter<DateOnly, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

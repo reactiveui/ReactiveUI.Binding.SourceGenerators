@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable BindCommand(
             this global::SharedScenarios.BindCommand.CommandProperty.MyView view,
-            global::SharedScenarios.BindCommand.CommandProperty.MyViewModel viewModel,
+            global::SharedScenarios.BindCommand.CommandProperty.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.CommandProperty.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.CommandProperty.MyView, global::SharedScenarios.BindCommand.CommandProperty.WpfLikeButton>> controlName,
             string? toEvent = null,
@@ -24,13 +24,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? propertyNameExpression.Substring(7)
-                : propertyNameExpression;
-            controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? controlNameExpression.Substring(7)
-                : controlNameExpression;
-
             if (propertyNameExpression == "x => x.Save"
                 && controlNameExpression == "x => x.SaveButton")
             {

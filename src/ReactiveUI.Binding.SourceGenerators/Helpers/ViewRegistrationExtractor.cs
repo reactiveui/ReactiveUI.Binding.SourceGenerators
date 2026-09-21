@@ -22,7 +22,9 @@ internal static class ViewRegistrationExtractor
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        if (semanticModel.GetDeclaredSymbol(classDecl, ct) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
+        if (semanticModel.GetDeclaredSymbol(classDecl, ct) is not INamedTypeSymbol typeSymbol
+            || typeSymbol.IsAbstract
+            || IsOpenGeneric(typeSymbol))
         {
             return null;
         }
@@ -70,6 +72,27 @@ internal static class ViewRegistrationExtractor
         }
 
         return null;
+    }
+
+    /// <summary>Checks whether the type, or a type it is nested in, still has type parameters to close.</summary>
+    /// <param name="type">The type to check.</param>
+    /// <returns><see langword="true"/> when the type cannot be named without type arguments; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>
+    /// A generated resolver names the view and constructs it, neither of which an open generic type allows.
+    /// The closed subclasses that derive from it are declared classes of their own and carry the closed
+    /// <c>IViewFor&lt;T&gt;</c> through their interface list, so each is registered in its own right.
+    /// </remarks>
+    private static bool IsOpenGeneric(INamedTypeSymbol type)
+    {
+        for (var current = type; current is not null; current = current.ContainingType)
+        {
+            if (!current.TypeParameters.IsEmpty)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Checks whether the type has the specified attribute applied.</summary>

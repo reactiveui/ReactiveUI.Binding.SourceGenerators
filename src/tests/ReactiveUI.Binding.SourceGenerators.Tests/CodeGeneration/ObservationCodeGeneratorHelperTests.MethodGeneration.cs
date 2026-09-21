@@ -24,7 +24,7 @@ public partial class ObservationCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -40,7 +40,7 @@ public partial class ObservationCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, false, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber");
@@ -242,7 +242,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ]));
         var group = new ObservationCodeGenerator.TypeGroup(inv1, [inv1, inv2]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("if (");
@@ -258,7 +258,7 @@ public partial class ObservationCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(returnTypeFullName: Int32TypeName, hasSelector: true);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Func<");
@@ -286,7 +286,7 @@ public partial class ObservationCodeGeneratorHelperTests
             expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("property1Expression");
@@ -402,7 +402,7 @@ public partial class ObservationCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangedName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).DoesNotContain(ObservationAffinityCheckerName);

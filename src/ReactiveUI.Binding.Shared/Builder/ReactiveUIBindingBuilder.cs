@@ -10,33 +10,16 @@ namespace ReactiveUI.Binding.Reactive.Builder;
 namespace ReactiveUI.Binding.Builder;
 #endif
 
-/// <summary>
-/// A builder class for configuring ReactiveUI.Binding services.
-/// Extends the Splat <see cref="AppBuilder"/> to provide binding-specific configuration.
-/// </summary>
-/// <remarks>
-/// <para>
-/// Use this builder to register core services, default converters, and platform-specific modules
-/// for property observation and binding.
-/// </para>
-/// <example>
-/// <code>
-/// RxBindingBuilder.CreateReactiveUIBindingBuilder()
-///     .WithCoreServices()
-///     .WithPlatformModule(new WpfBindingModule())
-///     .BuildApp();
-/// </code>
-/// </example>
-/// </remarks>
+/// <summary>Configures ReactiveUI.Binding services, converters and platform modules on a Splat <see cref="AppBuilder"/>.</summary>
 [DebuggerDisplay("CoreServicesRegistered = {_coreRegistered}")]
 public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBuilder, IReactiveUIBindingInstance
 {
-    /// <summary>Tracks whether core services have already been registered to prevent duplicate registration.</summary>
+    /// <summary>Tracks whether core services are registered, so a repeat call registers nothing.</summary>
     private bool _coreRegistered;
 
-    /// <summary>Initializes a new instance of the <see cref="ReactiveUIBindingBuilder"/> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="ReactiveUIBindingBuilder"/> class, initializing Splat on the resolver and registering <see cref="ConverterService"/> with it.</summary>
     /// <param name="resolver">The dependency resolver to configure.</param>
-    /// <param name="current">The configured services.</param>
+    /// <param name="current">The resolver that reads the configured services; may be null.</param>
     public ReactiveUIBindingBuilder(IMutableDependencyResolver resolver, IReadonlyDependencyResolver? current)
         : base(resolver, current)
     {
@@ -62,6 +45,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <typeparam name="T">The type of the platform module. Must implement <see cref="IModule"/>.</typeparam>
     /// <param name="module">The platform module instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="module"/> is null.</exception>
     public IReactiveUIBindingBuilder WithPlatformModule<T>(T module)
         where T : IModule
     {
@@ -70,9 +54,10 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
         return this;
     }
 
-    /// <summary>Adds a custom registration action to be executed during the build phase.</summary>
+    /// <summary>Runs a registration action against the mutable dependency resolver immediately.</summary>
     /// <param name="configureAction">An action that receives the mutable dependency resolver.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configureAction"/> is null.</exception>
     public IReactiveUIBindingBuilder WithRegistration(Action<IMutableDependencyResolver> configureAction)
     {
         ArgumentExceptionHelper.ThrowIfNull(configureAction);
@@ -83,6 +68,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <summary>Registers a typed binding converter.</summary>
     /// <param name="converter">The converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="converter"/> is null.</exception>
     public IReactiveUIBindingBuilder WithConverter(IBindingTypeConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
@@ -93,6 +79,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <summary>Registers a fallback binding converter.</summary>
     /// <param name="converter">The fallback converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="converter"/> is null.</exception>
     public IReactiveUIBindingBuilder WithFallbackConverter(IBindingFallbackConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
@@ -103,6 +90,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <summary>Registers a set-method binding converter.</summary>
     /// <param name="converter">The set-method converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="converter"/> is null.</exception>
     public IReactiveUIBindingBuilder WithSetMethodConverter(ISetMethodBindingConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
@@ -113,6 +101,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <summary>Registers a custom command binder for binding commands to UI controls.</summary>
     /// <param name="binder">The command binder instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="binder"/> is null.</exception>
     public IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder)
     {
         ArgumentExceptionHelper.ThrowIfNull(binder);
@@ -120,9 +109,10 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
         return this;
     }
 
-    /// <summary>Configures the default view locator with explicit view-to-view-model mappings.</summary>
+    /// <summary>Creates a <see cref="DefaultViewLocator"/> holding the explicit mappings and registers it as the <see cref="IViewLocator"/>.</summary>
     /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
     /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is null.</exception>
     public IReactiveUIBindingBuilder ConfigureViewLocator(Action<ViewMappingBuilder> configure)
     {
         ArgumentExceptionHelper.ThrowIfNull(configure);
@@ -134,7 +124,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
         return this;
     }
 
-    /// <summary>Registers the core ReactiveUI.Binding services in an AOT-compatible manner.</summary>
+    /// <summary>Registers the default converters, the INPC and POCO observation services and the default view locator; calling it again registers nothing more.</summary>
     /// <returns>The builder instance for chaining.</returns>
     public override IAppBuilder WithCoreServices()
     {
@@ -159,9 +149,9 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     IReactiveUIBindingBuilder IReactiveUIBindingBuilder.WithCoreServices() =>
         (IReactiveUIBindingBuilder)WithCoreServices();
 
-    /// <summary>Builds the application and returns the configured instance.</summary>
+    /// <summary>Builds the application, publishes <see cref="ConverterService"/> through <see cref="BindingConverters"/> and marks ReactiveUI.Binding initialized.</summary>
     /// <returns>The configured application instance.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if building the app instance fails.</exception>
+    /// <exception cref="InvalidOperationException">The build produced no usable instance.</exception>
     public IReactiveUIBindingInstance BuildApp()
     {
         var appInstance = (IReactiveUIBindingInstance)Build();

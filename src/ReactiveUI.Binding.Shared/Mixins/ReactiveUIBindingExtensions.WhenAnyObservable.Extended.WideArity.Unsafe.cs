@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding;
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>
-    /// Observes 3 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 3 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -33,7 +33,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservableUnsafe<TSender, TRet, T1, T2, T3>(
@@ -61,7 +60,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 4 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 4 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -76,7 +75,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -109,7 +107,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 5 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 5 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -126,7 +124,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -163,7 +160,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 6 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 6 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -182,7 +179,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -223,7 +219,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 7 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 7 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -244,7 +240,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -289,7 +284,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 8 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 8 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -312,7 +307,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -361,7 +355,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 9 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 9 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -386,7 +380,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -439,7 +432,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 10 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 10 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -466,7 +459,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -523,7 +515,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 11 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 11 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -552,7 +544,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs11">An expression that selects observable property 11 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
@@ -613,7 +604,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Observes 12 observable properties with different types on the specified sender and applies a selector to the combined latest values.
+    /// Observes 12 observable-valued properties of different element types by reflection and applies a selector to their latest values once every observable has produced one.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
@@ -644,7 +635,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="obs12">An expression that selects observable property 12 to observe.</param>
     /// <param name="selector">A function that combines the latest values from all observables.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]

@@ -15,13 +15,10 @@ namespace ReactiveUI.Binding.Maui.Builder;
 public static class MauiBindingBuilderExtensions
 {
     /// <summary>Provides WithMaui extension members for <paramref name="builder"/>.</summary>
-    /// <param name="builder">The builder instance.</param>
+    /// <param name="builder">The builder instance; it must be an <see cref="IReactiveUIBindingBuilder"/>.</param>
     extension(IAppBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
-        /// observation (on Windows) and Visibility converters.
-        /// </summary>
+        /// <summary>Registers the MAUI module, which adds the view thread invoker, the Visibility converters and, in the WinUI build, dependency-property observation.</summary>
         /// <returns>The builder instance for chaining.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IReactiveUIBindingBuilder WithMaui() =>
@@ -32,11 +29,9 @@ public static class MauiBindingBuilderExtensions
     /// <param name="builder">The builder instance.</param>
     extension(IReactiveUIBindingBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
-        /// observation (on Windows) and Visibility converters.
-        /// </summary>
+        /// <summary>Registers the MAUI module, which adds the view thread invoker, the Visibility converters and, in the WinUI build, dependency-property observation.</summary>
         /// <returns>The builder instance for chaining.</returns>
+        /// <exception cref="ArgumentNullException">The builder is null.</exception>
         public IReactiveUIBindingBuilder WithMaui()
         {
             ArgumentExceptionHelper.ThrowIfNull(builder);

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="int"/> using <see cref="int.TryParse(string?, out int)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to an <see cref="int"/> with <see cref="int.TryParse(string?, out int)"/> under the current culture; a null or unparseable string fails.</summary>
 public sealed class StringToIntegerTypeConverter : BindingTypeConverter<string, int>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

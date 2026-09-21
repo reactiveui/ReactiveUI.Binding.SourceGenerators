@@ -326,7 +326,7 @@ public class BindCodeGeneratorHelperTests
             false,
             []);
 
-        BindCodeGenerator.AppendExtraParameters(sb, group);
+        BindCodeGenerator.AppendExtraParameters(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ViewModelToViewConverterName);
@@ -349,9 +349,29 @@ public class BindCodeGeneratorHelperTests
             true,
             []);
 
-        BindCodeGenerator.AppendExtraParameters(sb, group);
+        BindCodeGenerator.AppendExtraParameters(sb, group, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ISequencer");
+        await Assert.That(result).Contains("ISequencer scheduler,");
+    }
+
+    /// <summary>Verifies AppendExtraParameters declares the scheduler nullable when the target supports it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AppendExtraParameters_WithSchedulerAndNullableSupport_DeclaresSchedulerNullable()
+    {
+        var sb = new StringBuilder();
+        var group = new BindingTypeGroup(
+            VMTypeName,
+            ViewTypeName,
+            StringTypeName,
+            StringTypeName,
+            false,
+            true,
+            []);
+
+        BindCodeGenerator.AppendExtraParameters(sb, group, true);
+
+        await Assert.That(sb.ToString()).Contains("ISequencer? scheduler,");
     }
 }

@@ -42,7 +42,9 @@ public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput,
     /// <inheritdoc />
     public bool IsHandled => Volatile.Read(ref _outputSet) == 1;
 
-    /// <inheritdoc />
+    /// <summary>Sets the output for the interaction and marks it handled.</summary>
+    /// <param name="output">The output.</param>
+    /// <exception cref="InvalidOperationException">The output has already been set.</exception>
     public void SetOutput(TOutput output)
     {
         if (!TryClaimOutput())

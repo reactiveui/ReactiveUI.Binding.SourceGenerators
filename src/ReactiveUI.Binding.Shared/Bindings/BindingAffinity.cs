@@ -13,9 +13,9 @@ namespace ReactiveUI.Binding;
 /// command binders, and the source generator's observation/command plugins. A higher value
 /// indicates a stronger match; zero means the candidate does not apply.
 /// <para>
-/// Mirrors ReactiveUI's <c>BindingAffinity</c> (the <see cref="DefaultInternalTypeConverter"/>,
-/// <see cref="DefaultEvent"/>, <see cref="Explicit"/> and <see cref="ExactType"/> scores) and is
-/// extended additively with the platform-specific scores this library also uses.
+/// <see cref="DefaultInternalTypeConverter"/>, <see cref="DefaultEvent"/>, <see cref="Explicit"/> and
+/// <see cref="ExactType"/> carry the same values as ReactiveUI's scores of those names; the platform-specific
+/// scores are this library's own.
 /// </para>
 /// </summary>
 public static class BindingAffinity

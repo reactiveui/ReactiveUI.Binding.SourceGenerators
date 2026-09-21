@@ -13,14 +13,12 @@ namespace ReactiveUI.Binding.Fallback;
 #endif
 
 /// <summary>
-/// Checks whether any user-registered <see cref="ICreatesObservableForProperty"/>
-/// implementation has higher affinity than the source generator's compile-time plugin
-/// for a given type. Used by generated code to allow user-registered plugins to
-/// override source-generated observation at runtime.
+/// Finds a registered <see cref="ICreatesObservableForProperty"/> whose affinity for a type and property is higher than
+/// the affinity of the mechanism the generator selected, so generated code can defer to it at runtime.
 /// </summary>
 /// <remarks>
-/// Registrations and their best score for each type, property and notification timing are cached until
-/// <see cref="Refresh"/>. The generated mechanism wins ties. Custom providers own their reflection and AOT requirements.
+/// Registrations are read from the service locator on first use, and their best score for each type, property and
+/// notification timing is cached until <see cref="Refresh"/>. The generated mechanism wins ties.
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ObservationAffinityChecker
@@ -28,23 +26,18 @@ public static class ObservationAffinityChecker
     /// <summary>The registrations and scores belonging to the current refresh generation.</summary>
     private static SelectionCache _cache = new();
 
-    /// <summary>Invalidates registrations and scores for subsequent selections.</summary>
-    /// <remarks>A selection overlapping refresh may finish using its captured registrations.</remarks>
+    /// <summary>Discards the cached registrations and scores so the next lookup reads the service locator again.</summary>
+    /// <remarks>A lookup running concurrently with the refresh may finish using the registrations it already captured.</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Refresh() => Interlocked.Exchange(ref _cache, new());
 
     /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesObservableForProperty"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
-    /// <param name="propertyName">The property being observed on that type.</param>
+    /// <param name="propertyName">The property being observed on that type; a plugin scores a type together with a property.</param>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="beforeChanged">Whether before-change (PropertyChanging) observation is requested.</param>
     /// <returns><see langword="true"/> if a user plugin should override the generated observation.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-    /// <remarks>
-    /// The property name is half the question. A plugin scores a type and a property together - the WPF, WinUI,
-    /// WinForms and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type -
-    /// so asking without one makes every mechanism-specific registration score 0 and lose by construction.
-    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="propertyName"/> is null.</exception>
     public static bool HasHigherAffinityPlugin(Type type, string propertyName, int generatedAffinity, bool beforeChanged) =>
         FindHigherAffinityPlugin(type, propertyName, generatedAffinity, beforeChanged) is not null;
 
@@ -53,12 +46,8 @@ public static class ObservationAffinityChecker
     /// <param name="propertyName">The property being observed on that type.</param>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="beforeChanged">Whether before-change (PropertyChanging) observation is requested.</param>
-    /// <returns>The highest-scoring registration that beats the generated one, or <see langword="null"/> when none does.</returns>
+    /// <returns>The highest-scoring registration whose score exceeds <paramref name="generatedAffinity"/>, or <see langword="null"/> when none does.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="propertyName"/> is null.</exception>
-    /// <remarks>
-    /// The cached custom score is compared with each call's generated affinity, so two generated mechanisms
-    /// observing the same property share scoring without sharing the outcome of that comparison.
-    /// </remarks>
     public static ICreatesObservableForProperty? FindHigherAffinityPlugin(
         Type type,
         string propertyName,

@@ -10,14 +10,8 @@ namespace ReactiveUI.Binding.Observables;
 
 /// <summary>The changes a two-way binding actually wrote, handed to whoever subscribes to the binding.</summary>
 /// <remarks>
-/// A two-way binding applies each change once and reports the same change to its subscribers, so both have to
-/// come from one place. Projecting the two observed sides a second time instead would attach another set of
-/// property handlers for every subscriber, and would report values the binding weighed and refused to write -
-/// the echo of a write is exactly what a subscriber is trying to tell apart from an edit.
-/// <para>
-/// Observers are kept in an array that is replaced rather than mutated, so a change already being delivered
-/// walks the set it started with and a subscription taken during delivery cannot disturb it.
-/// </para>
+/// A value the binding weighed and refused to write is not reported. Each change is delivered synchronously on
+/// the reporting thread to the observers subscribed when delivery starts. The sequence never completes.
 /// </remarks>
 [DebuggerDisplay("AppliedChangeObservable: {_observers.Length} observer(s)")]
 public sealed class AppliedChangeObservable : IObservable<BindingChange>
@@ -25,7 +19,7 @@ public sealed class AppliedChangeObservable : IObservable<BindingChange>
     /// <summary>The observers a change is delivered to, replaced whenever the set changes.</summary>
     private IObserver<BindingChange>[] _observers = [];
 
-    /// <summary>Gets whether constructing a public change notification has any recipient.</summary>
+    /// <summary>Gets a value indicating whether at least one observer is subscribed.</summary>
     public bool HasObservers => Volatile.Read(ref _observers).Length != 0;
 
     /// <summary>Reports a change the binding has written.</summary>

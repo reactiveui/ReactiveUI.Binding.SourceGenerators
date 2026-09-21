@@ -9,7 +9,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="TimeOnly"/> using <see cref="TimeOnly.TryParse(string?, out TimeOnly)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a <see cref="TimeOnly"/> with <see cref="TimeOnly.TryParse(string?, out TimeOnly)"/>
+/// under the current culture; a null or unparseable string fails.
+/// </summary>
 public sealed class StringToTimeOnlyTypeConverter : BindingTypeConverter<string, TimeOnly>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).</summary>
+/// <summary>Converts a nullable <see cref="Guid"/> to a <see cref="string"/> in the hyphenated <c>D</c> format. A null value succeeds with a null string.</summary>
 public sealed class NullableGuidToStringTypeConverter : BindingTypeConverter<Guid?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

@@ -11,12 +11,15 @@ namespace ReactiveUI.Binding.Observables;
 #endif
 
 /// <summary>
-/// Fused property observation observable for <see cref="INotifyPropertyChanging"/> objects.
-/// Collapses <c>Observable.Create + StartWith</c> into a single allocation.
-/// Does not apply DistinctUntilChanged because the value has not yet changed
-/// when <see cref="INotifyPropertyChanging.PropertyChanging"/> fires.
+/// Emits the current value of a property on subscribe, then its value as it stands before each change that an
+/// <see cref="INotifyPropertyChanging"/> source announces.
 /// </summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+/// <remarks>
+/// A <see cref="INotifyPropertyChanging.PropertyChanging"/> notification with a null or empty property name applies
+/// to every property. Consecutive equal values are not filtered, because the value has not changed when the event
+/// fires.
+/// </remarks>
 [DebuggerDisplay("Property = {_propertyName}, Source = {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyChangingObservable<T> : IObservable<T>
@@ -34,6 +37,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
     /// <param name="source">The object implementing <see cref="INotifyPropertyChanging"/>.</param>
     /// <param name="propertyName">The property name to observe.</param>
     /// <param name="getter">A delegate that reads the property value from the source.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/>, <paramref name="propertyName"/> or <paramref name="getter"/> is <see langword="null"/>.</exception>
     public PropertyChangingObservable(
         INotifyPropertyChanging source,
         string propertyName,
@@ -48,6 +52,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

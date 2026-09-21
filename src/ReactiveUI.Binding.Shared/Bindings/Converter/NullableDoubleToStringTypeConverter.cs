@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="double"/> values to <see cref="string"/>.</summary>
+/// <summary>
+/// Converts a nullable <see cref="double"/> to a <see cref="string"/> using the current culture. An <see cref="int"/> hint
+/// gives the number of decimal places (the <c>F</c> format) and a <see cref="string"/> hint gives the format string; a
+/// malformed format throws <see cref="FormatException"/>. A null value succeeds with a null string.
+/// </summary>
 public sealed class NullableDoubleToStringTypeConverter : BindingTypeConverter<double?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

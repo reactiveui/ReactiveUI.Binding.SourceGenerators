@@ -8,7 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="Uri"/> using <see cref="Uri.TryCreate(string?, UriKind, out Uri?)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a <see cref="Uri"/> with <see cref="Uri.TryCreate(string?, UriKind, out Uri?)"/>,
+/// accepting relative and absolute URIs; a null string or text that cannot form a URI fails.
+/// </summary>
 public sealed class StringToUriTypeConverter : BindingTypeConverter<string, Uri>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

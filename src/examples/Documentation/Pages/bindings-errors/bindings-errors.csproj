@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>ReactiveUI.Binding.Documentation</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="ReactiveUI.Binding" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../../ReactiveUI.Binding/ReactiveUI.Binding.csproj" />
+    <ProjectReference Include="../../../../ReactiveUI.Binding.SourceGenerators/ReactiveUI.Binding.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../../ReactiveUI.Binding.Analyzer/ReactiveUI.Binding.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <Compile Include="../../Common/**/*.cs" Link="Common/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

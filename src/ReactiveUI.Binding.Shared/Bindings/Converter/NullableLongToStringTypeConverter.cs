@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="long"/> values to <see cref="string"/>.</summary>
+/// <summary>
+/// Converts a nullable <see cref="long"/> to a <see cref="string"/> using the current culture. An <see cref="int"/> hint
+/// gives the minimum digit count (the <c>D</c> format) and a <see cref="string"/> hint gives the format string; a malformed
+/// format throws <see cref="FormatException"/>. A null value succeeds with a null string.
+/// </summary>
 public sealed class NullableLongToStringTypeConverter : BindingTypeConverter<long?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

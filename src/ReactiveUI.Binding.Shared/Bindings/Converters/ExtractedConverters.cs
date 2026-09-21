@@ -11,11 +11,7 @@ namespace ReactiveUI.Binding;
 /// <summary>The converters found in a dependency resolver, grouped by the role each one fills.</summary>
 /// <param name="TypedConverters">The converters that move a value between two known types.</param>
 /// <param name="FallbackConverters">The converters consulted when no typed converter matches.</param>
-/// <param name="SetMethodConverters">The converters that write a value rather than return one.</param>
-/// <remarks>
-/// The three lists are read together and mean nothing apart, so they travel as one value that names which
-/// list is which at the call site.
-/// </remarks>
+/// <param name="SetMethodConverters">The converters that write a value to a target rather than return one.</param>
 [DebuggerDisplay("ExtractedConverters: {TypedConverters.Count} typed, {FallbackConverters.Count} fallback, {SetMethodConverters.Count} set-method")]
 public sealed record ExtractedConverters(
     IList<IBindingTypeConverter> TypedConverters,

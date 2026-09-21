@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Generic type-safe interface for converting between specific types. Implement this alongside <see cref="IBindingTypeConverter"/> for AOT-safe conversions.</summary>
+/// <summary>Extends <see cref="IBindingTypeConverter"/> with a typed <c>TryConvert</c> for one type pair.</summary>
 /// <typeparam name="TFrom">The source type to convert from.</typeparam>
 /// <typeparam name="TTo">The target type to convert to.</typeparam>
 /// <remarks>
@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public interface IBindingTypeConverter<in TFrom, TTo> : IBindingTypeConverter
 {
-    /// <summary>Convert a value to the target type in a type-safe manner.</summary>
+    /// <summary>Converts a value to the target type without boxing.</summary>
     /// <param name="from">The value to convert.</param>
     /// <param name="conversionHint">Implementation-defined hint for conversion (e.g., format string, locale).</param>
     /// <param name="result">The converted value. May be <see langword="null"/> when conversion succeeds for nullable targets.</param>

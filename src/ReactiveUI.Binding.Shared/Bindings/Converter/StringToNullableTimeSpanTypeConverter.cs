@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="TimeSpan"/> using <see cref="TimeSpan.TryParse(string?, out TimeSpan)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="TimeSpan"/> with
+/// <see cref="TimeSpan.TryParse(string?, out TimeSpan)"/> under the current culture; a null or empty string succeeds with a
+/// null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableTimeSpanTypeConverter : BindingTypeConverter<string, TimeSpan?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

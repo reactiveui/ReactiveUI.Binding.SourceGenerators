@@ -14,17 +14,14 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IObservable<string> WhenChanged(
             this global::SharedScenarios.WhenChanged.MultiPropertyWithSelector.MyViewModel objectToMonitor,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyWithSelector.MyViewModel, string>> property1,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyWithSelector.MyViewModel, string>> property2,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyWithSelector.MyViewModel, string?>> property1,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyWithSelector.MyViewModel, string?>> property2,
             global::System.Func<string, string, string> selector,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property1")] string property1Expression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property2")] string property2Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
-            property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
-
             if (property1Expression == "x => x.FirstName" && property2Expression == "x => x.LastName")
             {
                 return __WhenChanged_00002EE07F183006(objectToMonitor, selector);

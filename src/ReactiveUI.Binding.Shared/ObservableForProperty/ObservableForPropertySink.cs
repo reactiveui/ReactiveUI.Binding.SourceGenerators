@@ -11,14 +11,14 @@ namespace ReactiveUI.Binding.Reactive.ObservableForProperty;
 namespace ReactiveUI.Binding.ObservableForProperty;
 #endif
 
-/// <summary>
-/// Single fused observable for one named property: optionally emits the current value on subscribe, then re-reads
-/// and emits the property value on each notification from the underlying change source, applying the optional
-/// distinct gate inline. Replaces an <c>Observable.Create</c> + <c>DistinctUntilChanged</c> pair with one
-/// allocation-light sink.
-/// </summary>
+/// <summary>Emits a property's value on subscribe, unless skipped, and again on each notification.</summary>
 /// <typeparam name="TSender">The type of the observed object surfaced on the emitted change.</typeparam>
 /// <typeparam name="TValue">The property value type.</typeparam>
+/// <remarks>
+/// The value is read through the supplied delegate on every notification, and the notification's own value is
+/// ignored. A read that throws is forwarded to the observer as an error. Errors and completion of the
+/// notification source pass through to the observer.
+/// </remarks>
 [DebuggerDisplay("{_expression}, Sender = {_sender}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>
@@ -48,6 +48,7 @@ public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IOb
     /// <param name="readValue">Reads the current property value from the sender.</param>
     /// <param name="skipInitial">When <see langword="true"/>, the current value is not emitted on subscribe.</param>
     /// <param name="isDistinct">When <see langword="true"/>, consecutive equal values are suppressed.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/>, <paramref name="notifications"/> or <paramref name="readValue"/> is <see langword="null"/>.</exception>
     public ObservableForPropertySink(
         TSender sender,
         Expression expression,
@@ -68,6 +69,7 @@ public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IOb
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<IObservedChange<TSender, TValue>> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

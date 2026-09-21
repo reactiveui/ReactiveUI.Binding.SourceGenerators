@@ -16,11 +16,9 @@ namespace ReactiveUI.Binding.Observables;
 /// </summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
 /// <remarks>
-/// A registration wins the observation but not the read. The plugin says <em>when</em> the property changed;
-/// the value is then taken with the accessor the generator emitted for that property, which is the same
-/// accessor the non-overridden path uses. Asking the notification for its value instead would walk the
-/// expression by reflection - the thing the generated path exists to avoid - and would make every consumer
-/// that publishes ahead-of-time carry the expression engine for a branch most of them never take.
+/// The plugin says when the property changed; the value is read with the supplied getter, never from the
+/// notification. The current value is emitted on subscribe and again after each notification. An error or
+/// completion from the plugin is passed on after any value still waiting to be read.
 /// </remarks>
 [DebuggerDisplay("Property = {_propertyName}, Source = {_source}, BeforeChange = {_beforeChange}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -55,6 +53,7 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
     /// <param name="getter">Reads the current property value from the source.</param>
     /// <param name="beforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="distinctUntilChanged">Whether to suppress duplicate consecutive values.</param>
+    /// <exception cref="ArgumentNullException">Any reference-type argument is <see langword="null"/>.</exception>
     public PluginPropertyObservable(
         ICreatesObservableForProperty plugin,
         object source,
@@ -79,6 +78,7 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

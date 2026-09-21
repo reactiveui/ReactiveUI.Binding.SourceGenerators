@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="TimeSpan"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a <see cref="TimeSpan"/> to a <see cref="string"/> in the culture-invariant constant format (<c>c</c>).</summary>
 public sealed class TimeSpanToStringTypeConverter : BindingTypeConverter<TimeSpan, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

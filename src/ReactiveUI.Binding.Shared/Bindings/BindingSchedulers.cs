@@ -41,7 +41,8 @@ public static class BindingSchedulers
     /// <typeparam name="T">The type of the observed values.</typeparam>
     /// <param name="source">The observable feeding a write.</param>
     /// <param name="target">The object the write lands on.</param>
-    /// <returns>The source itself when no invoker claims the object; otherwise the source routed onto its thread.</returns>
+    /// <returns>The source itself when <paramref name="target"/> is null or no registered invoker claims it; otherwise the source routed onto its thread.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static IObservable<T> ObserveOnViewThread<T>(IObservable<T> source, object? target)
     {
@@ -55,7 +56,8 @@ public static class BindingSchedulers
     /// <param name="source">The observable feeding a write.</param>
     /// <param name="target">The object the write lands on.</param>
     /// <param name="fallback">The invoker for the object's platform, used when no registered invoker claims it.</param>
-    /// <returns>The source itself when there is no object to write to; otherwise the source routed onto its thread.</returns>
+    /// <returns>The source itself when <paramref name="target"/> is null; otherwise the source routed onto its thread.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="fallback"/> is null.</exception>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static IObservable<T> ObserveOnViewThread<T>(IObservable<T> source, object? target, IViewThreadInvoker fallback)
     {
@@ -63,6 +65,20 @@ public static class BindingSchedulers
         ArgumentExceptionHelper.ThrowIfNull(fallback);
 
         return target is null ? source : Route(source, target, ViewThreadInvokers.ForTarget(target) ?? fallback);
+    }
+
+    /// <summary>Routes an observable onto a sequencer, delivering only the latest value that is waiting on it.</summary>
+    /// <typeparam name="T">The type of the observed values.</typeparam>
+    /// <param name="source">The observable feeding a write.</param>
+    /// <param name="scheduler">The sequencer every delivery waits on.</param>
+    /// <returns>The source, observed on the sequencer with a newer value replacing one that has not been delivered.</returns>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static IObservable<T> ObserveOnSequencer<T>(IObservable<T> source, ISequencer scheduler)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(source);
+        ArgumentExceptionHelper.ThrowIfNull(scheduler);
+
+        return new ViewThreadObservable<T>(source, scheduler);
     }
 
     /// <summary>Wraps an observable in the stage that writes on the invoker's thread.</summary>

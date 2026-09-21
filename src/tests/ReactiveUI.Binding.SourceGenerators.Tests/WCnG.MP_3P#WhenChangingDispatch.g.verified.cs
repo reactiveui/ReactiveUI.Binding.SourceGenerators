@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double>> WhenChanging(
             this global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel objectToMonitor,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, string>> property1,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, string?>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, int>> property2,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, double>> property3,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("property1")] string property1Expression = "",
@@ -23,10 +23,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
-            property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
-            property3Expression = property3Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property3Expression.Substring(7) : property3Expression;
-
             if (property1Expression == "x => x.Name" && property2Expression == "x => x.Age" && property3Expression == "x => x.Score")
             {
                 return __WhenChanging_7FFFF53EB8A56F90(objectToMonitor);

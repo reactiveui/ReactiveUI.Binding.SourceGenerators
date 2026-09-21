@@ -59,7 +59,11 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         return new ActionDisposable(() => RemoveHandler(handler));
     }
 
-    /// <inheritdoc />
+    /// <summary>Registers a handler that finishes when the observable it returns completes.</summary>
+    /// <typeparam name="TDontCare">The element type of the returned observable; the values are ignored.</typeparam>
+    /// <param name="handler">The handler; the interaction moves to the next handler once the observable completes, and a fault in the observable faults <see cref="Handle"/>.</param>
+    /// <returns>A disposable which, when disposed, unregisters the handler.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="handler"/> is null.</exception>
     public IDisposable RegisterHandler<TDontCare>(
         Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler)
     {
@@ -76,7 +80,10 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         return new ActionDisposable(() => RemoveHandler(ContentHandler));
     }
 
-    /// <inheritdoc />
+    /// <summary>Runs the handlers, latest registered first, until one sets an output, and returns that output.</summary>
+    /// <param name="input">The input for the interaction.</param>
+    /// <returns>A task that completes with the output the first handling handler set.</returns>
+    /// <exception cref="UnhandledInteractionException{TInput, TOutput}">No handler set an output.</exception>
     public virtual async Task<TOutput> Handle(TInput input)
     {
         var context = GenerateContext(input);
@@ -94,13 +101,13 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         throw new UnhandledInteractionException<TInput, TOutput>(this, input);
     }
 
-    /// <summary>Gets all registered handlers by order of registration.</summary>
-    /// <returns>All registered handlers.</returns>
+    /// <summary>Gets a copy of the registered handlers in order of registration.</summary>
+    /// <returns>The registered handlers, earliest first.</returns>
     protected Func<IInteractionContext<TInput, TOutput>, Task>[] GetHandlers() => [.. Volatile.Read(ref _handlers)];
 
-    /// <summary>Gets an interaction context which is used to provide information about the interaction.</summary>
-    /// <param name="input">The input that is being passed in.</param>
-    /// <returns>The interaction context.</returns>
+    /// <summary>Creates the context every handler receives for one call to <see cref="Handle"/>.</summary>
+    /// <param name="input">The input passed to <see cref="Handle"/>.</param>
+    /// <returns>A new interaction context carrying the input.</returns>
     protected virtual IOutputContext<TInput, TOutput> GenerateContext(TInput input) =>
         new InteractionContext<TInput, TOutput>(input);
 

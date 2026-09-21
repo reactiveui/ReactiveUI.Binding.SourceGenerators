@@ -10,11 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="string"/> (identity converter).</summary>
-/// <remarks>
-/// This converter provides a fast path for string-to-string bindings without
-/// requiring reflection or TypeDescriptor.
-/// </remarks>
+/// <summary>Passes a <see cref="string"/> through unchanged; a null or non-string value fails the conversion.</summary>
 [DebuggerDisplay("string -> string identity (affinity {Affinity})")]
 public sealed class StringConverter : IBindingTypeConverter
 {

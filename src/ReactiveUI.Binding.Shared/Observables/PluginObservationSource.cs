@@ -14,13 +14,6 @@ namespace ReactiveUI.Binding.Observables;
 /// Chooses between the observation the generator emitted for one link of a property chain and a registered
 /// <see cref="ICreatesObservableForProperty"/> that outranks the mechanism it was built from.
 /// </summary>
-/// <remarks>
-/// A link past the first is observed inside the switch that follows its parent, which is an expression rather
-/// than a statement, so the choice has to be a single call the generated code can sit in that position. Every
-/// argument is something the generator already knew - the declaring type, the property name, the accessor and
-/// the expression are all fixed at compile time - so a chain honours a registration link by link without
-/// anything being resolved by name, and an ahead-of-time consumer carries no expression engine for it.
-/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class PluginObservationSource
 {
@@ -33,11 +26,11 @@ public static class PluginObservationSource
     /// <param name="generatedAffinity">The affinity of the mechanism the generator picked for this link.</param>
     /// <param name="getter">Reads the current property value from the source.</param>
     /// <param name="generated">The observation the generator emitted for this link.</param>
-    /// <returns>Whichever of the two should drive this link.</returns>
-    /// <remarks>
-    /// The link does not filter consecutive equal values: a chain applies that once over its whole result, and
-    /// filtering per link as well would drop a value a later link still has to re-root on.
-    /// </remarks>
+    /// <returns>
+    /// The generated observation when no registration outranks <paramref name="generatedAffinity"/>; otherwise a
+    /// <see cref="PluginPropertyObservable{T}"/> that does not filter consecutive equal values.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="generated"/> is <see langword="null"/>.</exception>
     public static IObservable<T> Choose<T>(
         object source,
         Expression expression,

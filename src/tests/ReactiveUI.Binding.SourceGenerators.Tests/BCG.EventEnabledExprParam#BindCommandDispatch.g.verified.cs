@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable BindCommand(
             this global::SharedScenarios.BindCommand.EventEnabledExprParam.MyView view,
-            global::SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel viewModel,
+            global::SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledExprParam.MyView, global::SharedScenarios.BindCommand.EventEnabledExprParam.WinFormsLikeButton>> controlName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel, string?>> withParameter,
@@ -26,15 +26,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? propertyNameExpression.Substring(7)
-                : propertyNameExpression;
-            controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? controlNameExpression.Substring(7)
-                : controlNameExpression;
-
             if (propertyNameExpression == "x => x.Save"
-                && controlNameExpression == "x => x.SaveButton")
+                && controlNameExpression == "x => x.SaveButton"
+                && withParameterExpression == "x => x.CurrentItem")
             {
                 return __BindCommand_00001A92FB3E1A78(view, viewModel);
             }

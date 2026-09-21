@@ -30,9 +30,9 @@ public static class RuntimeInteractionFallback
     /// <returns>A disposable that, when disposed, unregisters the handler and stops observing.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="interactionProperty"/> or <paramref name="register"/> is null.</exception>
     /// <remarks>
-    /// The registration follows the property: replacing the interaction unregisters the handler from the one it
-    /// held before, so a view model that swaps an interaction does not leave a handler on the old one. A null view
-    /// model holds no property to observe, so nothing is registered rather than the call faulting.
+    /// The registration follows the property: when the property holds a different interaction, the handler is
+    /// unregistered from the interaction it replaced and registered on the new one, and a null interaction leaves
+    /// nothing registered. A null view model registers nothing rather than faulting the call.
     /// </remarks>
     [RequiresUnreferencedCode("Runtime interaction fallback resolves the property chain by reflection.")]
     public static IDisposable BindInteraction<TViewModel, TInput, TOutput>(

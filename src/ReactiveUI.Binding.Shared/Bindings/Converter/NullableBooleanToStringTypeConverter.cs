@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="bool"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a nullable <see cref="bool"/> to a <see cref="string"/> as "True" or "False". A null value succeeds with a null string.</summary>
 public sealed class NullableBooleanToStringTypeConverter : BindingTypeConverter<bool?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

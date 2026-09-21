@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding
         /// </summary>
         public static global::System.IDisposable BindCommand(
             this global::SharedScenarios.BindCommand.ObservableParam.MyView view,
-            global::SharedScenarios.BindCommand.ObservableParam.MyViewModel viewModel,
+            global::SharedScenarios.BindCommand.ObservableParam.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyView, global::SharedScenarios.BindCommand.ObservableParam.MyButton>> controlName,
             global::System.IObservable<string> withParameter,

@@ -327,10 +327,10 @@ public class BindTwoWayCodeGeneratorHelperTests
         await Assert.That(result).Contains(TargetToSourceConvName);
     }
 
-    /// <summary>Both binding directions construct typed witness operators and bypass the immediate scheduler.</summary>
+    /// <summary>Both binding directions route through the latest-wins sequencer stage and bypass the immediate scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindTwoWayMethod_WithScheduler_IncludesWitnessOnSignals()
+    public async Task GenerateBindTwoWayMethod_WithScheduler_RoutesBothDirectionsThroughTheLatestWinsStage()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
@@ -346,8 +346,9 @@ public class BindTwoWayCodeGeneratorHelperTests
         BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, TEST00000000TESTName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<global::System.String>(sourceObs, scheduler)");
-        await Assert.That(result).Contains("new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<global::System.String>(targetObs, scheduler)");
+        await Assert.That(result).Contains("global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<global::System.String>(sourceObs, scheduler)");
+        await Assert.That(result).Contains("global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<global::System.String>(targetObs, scheduler)");
+        await Assert.That(result).DoesNotContain("WitnessOnSignal");
         await Assert.That(result).Contains("scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<global::System.String>)sourceObs");
         await Assert.That(result).Contains("scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<global::System.String>)targetObs");
     }
@@ -392,7 +393,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             []);
 
-        BindTwoWayCodeGenerator.AppendExtraParameters(sb, group);
+        BindTwoWayCodeGenerator.AppendExtraParameters(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.Func<global::System.Int32, global::System.String>");

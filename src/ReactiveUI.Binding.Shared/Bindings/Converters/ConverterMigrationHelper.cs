@@ -8,27 +8,12 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Provides helper methods for migrating converters from Splat to the new <see cref="ConverterService"/>.</summary>
-/// <remarks>
-/// <para>
-/// This class assists with migrating from the legacy Splat-based converter registration
-/// to the new <see cref="ConverterService"/>-based system.
-/// </para>
-/// </remarks>
-/// <example>
-/// <para>
-/// <strong>Example: Direct import into existing service</strong>
-/// </para>
-/// <code>
-/// var converterService = BindingConverters.Current;
-/// converterService.ImportFrom(Splat.Locator.Current);
-/// </code>
-/// </example>
+/// <summary>Reads converters that were registered with a Splat dependency resolver.</summary>
 public static class ConverterMigrationHelper
 {
-    /// <summary>Extracts all converters from a Splat dependency resolver.</summary>
-    /// <param name="resolver">The Splat resolver to extract converters from. Must not be null.</param>
-    /// <returns>The typed, fallback, and set-method converters the resolver holds.</returns>
+    /// <summary>Collects every typed, fallback and set-method converter registered with a Splat resolver, without registering them anywhere.</summary>
+    /// <param name="resolver">The Splat resolver to read.</param>
+    /// <returns>The converters the resolver holds, in the order it returns them; a null registration is skipped.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="resolver"/> is null.</exception>
     public static ExtractedConverters ExtractConverters(IReadonlyDependencyResolver resolver)
     {

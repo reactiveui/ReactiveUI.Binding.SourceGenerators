@@ -10,10 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts a nullable <see cref="long"/> to <see cref="long"/>.</summary>
-/// <remarks>
-/// When the nullable value is null, the conversion fails and returns false.
-/// </remarks>
+/// <summary>Converts a nullable <see cref="long"/> to a <see cref="long"/>; a null value fails the conversion.</summary>
 [DebuggerDisplay("long? -> long (affinity {Affinity})")]
 public sealed class NullableLongToLongTypeConverter : IBindingTypeConverter<long?, long>
 {

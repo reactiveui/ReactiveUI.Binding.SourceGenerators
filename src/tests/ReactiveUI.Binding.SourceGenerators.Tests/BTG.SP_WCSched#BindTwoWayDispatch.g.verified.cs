@@ -20,19 +20,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string?>> targetProperty,
             global::System.Func<int, string> sourceToTargetConv,
             global::System.Func<string, int> targetToSourceConv,
-            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer? scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? sourcePropertyExpression.Substring(7)
-                : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? targetPropertyExpression.Substring(7)
-                : targetPropertyExpression;
-
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
@@ -87,10 +80,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
         var __srcSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
         var __tgtSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
-        var sourceBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__srcSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__srcSelected, scheduler);
-        var targetBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__tgtSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<int>(__tgtSelected, scheduler);
+        var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__srcSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__srcSelected, scheduler);
+        var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__tgtSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__tgtSelected, scheduler);
+            var targetThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceBind, target) : sourceBind;
+            var sourceThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetBind, source) : targetBind;
 
-            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.CountText, value))
                 {
@@ -100,7 +95,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 target.CountText = value;
             }, "x => x.CountText");
 
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetBind, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Count, value))
                 {

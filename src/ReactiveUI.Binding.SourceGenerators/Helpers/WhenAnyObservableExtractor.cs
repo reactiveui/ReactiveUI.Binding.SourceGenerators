@@ -123,7 +123,7 @@ internal static class WhenAnyObservableExtractor
 
             propertyPaths.Add(new(path));
             expressionTexts.Add(
-                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
+                args[i].Expression.ToString());
 
             // The leaf property type is IObservable<T>; the generated code needs T.
             innerObservableTypes.Add(

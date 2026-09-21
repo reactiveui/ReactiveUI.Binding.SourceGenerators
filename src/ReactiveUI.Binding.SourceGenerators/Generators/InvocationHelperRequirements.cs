@@ -153,11 +153,6 @@ internal static class InvocationHelperRequirements
             AddPath(invocation.TargetPropertyPath, targetInfo, false, ref kinds);
         }
 
-        if (invocation.HasScheduler)
-        {
-            return;
-        }
-
         AddName(invocation.TargetViewThreadInvoker, ref invokers);
         if (invocation.MethodName == "BindTwoWay")
         {
