@@ -33,7 +33,6 @@ public class ObservableObject : INotifyPropertyChanged
 
     /// <summary>Reports that a property changed.</summary>
     /// <param name="propertyName">The name of the property that changed.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

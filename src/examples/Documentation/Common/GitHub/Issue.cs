@@ -75,8 +75,8 @@ public sealed class Issue : ObservableObject
         State = State,
         Author = Author.Clone(),
         Assignee = Assignee?.Clone(),
-        Labels = [.. Labels],
-        Comments = [.. Comments],
+        Labels = Labels.ToList(),
+        Comments = Comments.ToList(),
         UpdatedAt = UpdatedAt,
     };
 

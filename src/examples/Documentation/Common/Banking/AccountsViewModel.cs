@@ -2,15 +2,15 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>
 /// The view model behind the accounts screen. It lists the accounts and the transactions of the selected account.
-/// Each command starts its work and returns; wait for it through the command's
-/// <see cref="AsyncDelegateCommand.Completion"/>. A refused request never throws from a command. It sets
-/// <see cref="ErrorMessage"/>.
+/// Each command starts the matching method and returns; await the method itself to wait for its work. A refused
+/// request never throws from a method. It sets <see cref="ErrorMessage"/>.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("Account = {SelectedAccount}, TotalBalance = {TotalBalance}")]
 public sealed class AccountsViewModel : ObservableObject
@@ -23,15 +23,15 @@ public sealed class AccountsViewModel : ObservableObject
     public AccountsViewModel(IBankingBackend backend)
     {
         _backend = backend;
-        LoadAccountsCommand = new(_ => LoadAccountsAsync());
-        LoadTransactionsCommand = new(_ => LoadTransactionsAsync(), _ => SelectedAccount is not null);
+        LoadAccountsCommand = new(() => _ = LoadAccountsAsync());
+        LoadTransactionsCommand = new(() => _ = LoadTransactionsAsync(), () => SelectedAccount is not null);
     }
 
-    /// <summary>Gets the command that loads the accounts.</summary>
-    public AsyncDelegateCommand LoadAccountsCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadAccountsAsync"/>.</summary>
+    public Command LoadAccountsCommand { get; }
 
-    /// <summary>Gets the command that loads the transactions of <see cref="SelectedAccount"/>.</summary>
-    public AsyncDelegateCommand LoadTransactionsCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadTransactionsAsync"/>; it runs only while an account is selected.</summary>
+    public Command LoadTransactionsCommand { get; }
 
     /// <summary>Gets the accounts of the customer.</summary>
     public IReadOnlyList<Account> Accounts
@@ -48,7 +48,7 @@ public sealed class AccountsViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                LoadTransactionsCommand.RaiseCanExecuteChanged();
+                LoadTransactionsCommand.ChangeCanExecute();
             }
         }
     }
@@ -76,27 +76,17 @@ public sealed class AccountsViewModel : ObservableObject
 
     /// <summary>Loads the accounts and keeps the selected account when it still exists.</summary>
     /// <returns>A task that completes when the accounts are loaded or the request was refused.</returns>
-    private async Task LoadAccountsAsync()
+    public async Task LoadAccountsAsync()
     {
         try
         {
             var accounts = await _backend.GetAccountsAsync().ConfigureAwait(false);
             var selectedId = SelectedAccount?.Id;
-            decimal total = 0;
-            Account? selected = null;
-            foreach (var account in accounts)
-            {
-                total += account.Balance;
-                if (account.Id == selectedId)
-                {
-                    selected = account;
-                }
-            }
 
             ErrorMessage = string.Empty;
             Accounts = accounts;
-            SelectedAccount = selected;
-            TotalBalance = total;
+            SelectedAccount = accounts.FirstOrDefault(account => account.Id == selectedId);
+            TotalBalance = accounts.Sum(static account => account.Balance);
         }
         catch (BankingException ex)
         {
@@ -106,7 +96,7 @@ public sealed class AccountsViewModel : ObservableObject
 
     /// <summary>Loads the transactions of the selected account.</summary>
     /// <returns>A task that completes when the transactions are loaded or the request was refused.</returns>
-    private async Task LoadTransactionsAsync()
+    public async Task LoadTransactionsAsync()
     {
         if (SelectedAccount is not { } account)
         {

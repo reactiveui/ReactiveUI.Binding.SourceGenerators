@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding.Documentation.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.CloudStorage;
@@ -22,40 +21,40 @@ public sealed class StorageBrowserView : ObservableObject, IViewFor<StorageBrows
     }
 
     /// <summary>Gets the list of buckets.</summary>
-    public ItemsListControl<Bucket> BucketList { get; } = new();
+    public CollectionView BucketList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the box that holds the folder being listed.</summary>
-    public TextBoxControl PrefixTextBox { get; } = new() { Placeholder = "Folder" };
+    public Entry PrefixTextBox { get; } = new() { Placeholder = "Folder" };
 
     /// <summary>Gets the button that lists the objects again.</summary>
-    public ButtonControl RefreshButton { get; } = new() { Content = "Refresh" };
+    public Button RefreshButton { get; } = new() { Text = "Refresh" };
 
     /// <summary>Gets the list of objects.</summary>
-    public ItemsListControl<StorageObject> ObjectList { get; } = new();
+    public CollectionView ObjectList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the button that uploads a file.</summary>
-    public ButtonControl UploadButton { get; } = new() { Content = "Upload" };
+    public Button UploadButton { get; } = new() { Text = "Upload" };
 
-    /// <summary>Gets the bar that shows how much of the running upload the service has received.</summary>
-    public ProgressBarControl UploadProgressBar { get; } = new();
+    /// <summary>Gets the bar that shows how much of the running upload the service has received, from 0 to 1.</summary>
+    public ProgressBar UploadProgressBar { get; } = new();
 
     /// <summary>Gets the label that shows the state of the link.</summary>
-    public LabelControl ConnectionLabel { get; } = new();
+    public Label ConnectionLabel { get; } = new();
 
     /// <summary>Gets the button that reopens the link.</summary>
-    public ButtonControl ConnectButton { get; } = new() { Content = "Reconnect" };
+    public Button ConnectButton { get; } = new() { Text = "Reconnect" };
 
     /// <summary>Gets the label that shows the combined size of the listed objects.</summary>
-    public LabelControl TotalSizeLabel { get; } = new();
+    public Label TotalSizeLabel { get; } = new();
 
     /// <summary>Gets the label that shows the size of the selected object.</summary>
-    public LabelControl SelectedSizeLabel { get; } = new();
+    public Label SelectedSizeLabel { get; } = new();
 
     /// <summary>Gets the label that shows the media type of the selected object.</summary>
-    public LabelControl SelectedTypeLabel { get; } = new();
+    public Label SelectedTypeLabel { get; } = new();
 
     /// <summary>Gets the label that shows the last error.</summary>
-    public LabelControl ErrorLabel { get; } = new();
+    public Label ErrorLabel { get; } = new();
 
     /// <inheritdoc/>
     object? IViewFor.ViewModel

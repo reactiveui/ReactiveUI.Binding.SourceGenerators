@@ -2,14 +2,14 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding.Documentation.Controls;
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Education;
 
 /// <summary>
 /// The gradebook screen: a course list, the roster of the selected course, the assignments and a grade entry
-/// area. A real UI framework builds these controls from markup; here the view creates them in code.
+/// area. A MAUI page builds these controls from markup; here the view creates them in code.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
 public sealed class GradebookView : ObservableObject, IViewFor<GradebookViewModel>
@@ -22,43 +22,43 @@ public sealed class GradebookView : ObservableObject, IViewFor<GradebookViewMode
     }
 
     /// <summary>Gets the list of courses.</summary>
-    public ItemsListControl<Course> CourseList { get; } = new();
+    public CollectionView CourseList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the list of students in the selected course.</summary>
-    public ItemsListControl<Student> RosterList { get; } = new();
+    public CollectionView RosterList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the list of students who could join the selected course.</summary>
-    public ItemsListControl<Student> CandidateList { get; } = new();
+    public CollectionView CandidateList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the list of assignments of the selected course.</summary>
-    public ItemsListControl<Assignment> AssignmentList { get; } = new();
+    public CollectionView AssignmentList { get; } = new() { SelectionMode = SelectionMode.Single };
 
     /// <summary>Gets the button that enrols the chosen candidate.</summary>
-    public ButtonControl EnrolButton { get; } = new() { Content = "Enrol" };
+    public Button EnrolButton { get; } = new() { Text = "Enrol" };
 
     /// <summary>Gets the button that drops the selected student.</summary>
-    public ButtonControl DropButton { get; } = new() { Content = "Drop" };
+    public Button DropButton { get; } = new() { Text = "Drop" };
 
-    /// <summary>Gets the box where the teacher types a score.</summary>
-    public TextBoxControl ScoreTextBox { get; } = new() { Placeholder = "Score" };
+    /// <summary>Gets the entry where the teacher types a score.</summary>
+    public Entry ScoreEntry { get; } = new() { Placeholder = "Score" };
 
     /// <summary>Gets the button that records the score.</summary>
-    public ButtonControl RecordGradeButton { get; } = new() { Content = "Record grade" };
+    public Button RecordGradeButton { get; } = new() { Text = "Record grade" };
 
     /// <summary>Gets the label that shows the name of the selected student.</summary>
-    public LabelControl StudentNameLabel { get; } = new();
+    public Label StudentNameLabel { get; } = new();
 
     /// <summary>Gets the label that shows the weighted average of the selected student.</summary>
-    public LabelControl AverageLabel { get; } = new();
+    public Label AverageLabel { get; } = new();
 
-    /// <summary>Gets the bar that shows the weighted average of the selected student.</summary>
-    public ProgressBarControl AverageBar { get; } = new();
+    /// <summary>Gets the bar that shows the weighted average of the selected student. Its <see cref="ProgressBar.Progress"/> runs from 0 to 1.</summary>
+    public ProgressBar AverageBar { get; } = new();
 
     /// <summary>Gets the box that is ticked while the selected student passes.</summary>
-    public CheckBoxControl PassCheckBox { get; } = new() { Content = "Passing" };
+    public CheckBox PassCheckBox { get; } = new();
 
     /// <summary>Gets the label that shows the last error.</summary>
-    public LabelControl ErrorLabel { get; } = new();
+    public Label ErrorLabel { get; } = new();
 
     /// <inheritdoc/>
     object? IViewFor.ViewModel

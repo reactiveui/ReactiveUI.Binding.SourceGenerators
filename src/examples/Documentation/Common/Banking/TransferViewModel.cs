@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Banking;
@@ -11,9 +11,8 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// <summary>
 /// The view model behind the transfer screen. It checks the draft as the customer edits it, and its
 /// <see cref="TransferCommand"/> asks the view for a confirmation, sends the transfer and, when the bank asks for
-/// one, asks the view for an approval code. The command starts its work and returns; wait for it through its
-/// <see cref="AsyncDelegateCommand.Completion"/>. A refused request never throws from the command. It sets
-/// <see cref="ErrorMessage"/>.
+/// one, asks the view for an approval code. Each command starts the matching method and returns; await the method
+/// itself to wait for its work. A refused request never throws from a method. It sets <see cref="ErrorMessage"/>.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("Draft = {Draft}, IsValid = {IsValid}")]
 public sealed class TransferViewModel : ObservableObject
@@ -29,8 +28,8 @@ public sealed class TransferViewModel : ObservableObject
     public TransferViewModel(IBankingBackend backend)
     {
         _backend = backend;
-        LoadCommand = new(_ => LoadAsync());
-        TransferCommand = new(_ => TransferAsync(), _ => IsValid);
+        LoadCommand = new(() => _ = LoadAsync());
+        TransferCommand = new(() => _ = TransferAsync(), () => IsValid);
         Draft.PropertyChanged += OnDraftChanged;
         Validate();
     }
@@ -41,11 +40,11 @@ public sealed class TransferViewModel : ObservableObject
     /// <summary>Gets the question the view answers when the bank wants a one-time code. The input is the draft; the answer is the code, or an empty string to cancel the transfer.</summary>
     public Interaction<TransferDraft, string> ApproveTransfer { get; } = new();
 
-    /// <summary>Gets the command that loads the accounts and the payees.</summary>
-    public AsyncDelegateCommand LoadCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadAsync"/>.</summary>
+    public Command LoadCommand { get; }
 
-    /// <summary>Gets the command that sends the draft; it runs only while <see cref="IsValid"/> is <see langword="true"/>.</summary>
-    public AsyncDelegateCommand TransferCommand { get; }
+    /// <summary>Gets the command that runs <see cref="TransferAsync"/>; it runs only while <see cref="IsValid"/> is <see langword="true"/>.</summary>
+    public Command TransferCommand { get; }
 
     /// <summary>Gets the transfer the customer is filling in.</summary>
     public TransferDraft Draft { get; } = new();
@@ -72,7 +71,7 @@ public sealed class TransferViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                TransferCommand.RaiseCanExecuteChanged();
+                TransferCommand.ChangeCanExecute();
             }
         }
     }
@@ -107,7 +106,7 @@ public sealed class TransferViewModel : ObservableObject
 
     /// <summary>Loads the accounts and the payees.</summary>
     /// <returns>A task that completes when both are loaded or the request was refused.</returns>
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         try
         {
@@ -123,7 +122,7 @@ public sealed class TransferViewModel : ObservableObject
 
     /// <summary>Confirms and sends the draft, asking for an approval code when the bank wants one.</summary>
     /// <returns>A task that completes when the transfer is sent, the customer cancelled or the request was refused.</returns>
-    private async Task TransferAsync()
+    public async Task TransferAsync()
     {
         if (Draft.Source is not { } source || Draft.Payee is not { } payee)
         {
@@ -178,7 +177,6 @@ public sealed class TransferViewModel : ObservableObject
     /// <summary>Checks the draft again when one of its properties changes.</summary>
     /// <param name="sender">The draft.</param>
     /// <param name="e">The event data.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void OnDraftChanged(object? sender, PropertyChangedEventArgs e) => Validate();
 
     /// <summary>Checks the draft against the rules the view model can check without the bank.</summary>

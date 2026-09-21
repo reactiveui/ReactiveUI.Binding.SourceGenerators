@@ -2,9 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
-using ReactiveUI.Binding.Documentation.Infrastructure;
-
 namespace ReactiveUI.Binding.Documentation.Todo;
 
 /// <summary>
@@ -17,19 +14,28 @@ public sealed class InMemoryTodoStore : ITodoStore
     /// <summary>The message of the exception thrown while the database is offline.</summary>
     private const string OfflineMessage = "The to-do database is unreachable.";
 
+    /// <summary>The due date of the car registration task.</summary>
+    private static readonly DateOnly RegistrationDue = new(2026, 3, 20);
+
+    /// <summary>The due date of the dentist task.</summary>
+    private static readonly DateOnly DentistDue = new(2026, 4, 2);
+
+    /// <summary>The due date of the tax return task.</summary>
+    private static readonly DateOnly TaxReturnDue = new(2026, 2, 28);
+
     /// <summary>The stored rows, in the order they were added.</summary>
     private readonly List<TodoItem> _rows = [];
 
     /// <summary>The identifier the next added item receives.</summary>
     private int _nextId = 1;
 
-    /// <summary>Gets the gate that decides when each call returns.</summary>
-    public ResponseGate Gate { get; } = new();
+    /// <summary>Gets or sets how long each call takes to answer; zero answers on the next turn of the scheduler.</summary>
+    public TimeSpan Latency { get; set; }
 
     /// <summary>Gets or sets a value indicating whether every call fails with a <see cref="TodoStoreException"/>.</summary>
     public bool IsOffline { get; set; }
 
-    /// <summary>Gets the number of stored rows, without going through the gate.</summary>
+    /// <summary>Gets the number of stored rows, without waiting for <see cref="Latency"/>.</summary>
     public int RowCount => _rows.Count;
 
     /// <summary>Creates a database that holds a few realistic household tasks.</summary>
@@ -37,15 +43,14 @@ public sealed class InMemoryTodoStore : ITodoStore
     public static InMemoryTodoStore CreateSeeded()
     {
         InMemoryTodoStore store = new();
-        store.Seed("Renew car registration", "Bring the insurance certificate.", SeedData.Date("2026-03-20"), TodoPriority.High, false, "car", "admin");
-        store.Seed("Book dentist appointment", "Ask about the evening slots.", SeedData.Date("2026-04-02"), TodoPriority.Normal, false, "health");
+        store.Seed("Renew car registration", "Bring the insurance certificate.", RegistrationDue, TodoPriority.High, false, "car", "admin");
+        store.Seed("Book dentist appointment", "Ask about the evening slots.", DentistDue, TodoPriority.Normal, false, "health");
         store.Seed("Buy birthday present for Sam", string.Empty, null, TodoPriority.Low, false, "family");
-        store.Seed("File quarterly tax return", "Receipts are in the shared folder.", SeedData.Date("2026-02-28"), TodoPriority.High, true, "admin", "money");
+        store.Seed("File quarterly tax return", "Receipts are in the shared folder.", TaxReturnDue, TodoPriority.High, true, "admin", "money");
         return store;
     }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Task<IReadOnlyList<TodoItem>> QueryAsync() => QueryAsync(string.Empty);
 
     /// <inheritdoc/>
@@ -116,12 +121,19 @@ public sealed class InMemoryTodoStore : ITodoStore
         }
     }
 
-    /// <summary>Waits for the gate, then fails when the database is offline.</summary>
+    /// <summary>Waits for <see cref="Latency"/>, then fails when the database is offline.</summary>
     /// <returns>A task that completes when the call may proceed.</returns>
     /// <exception cref="TodoStoreException">The database is offline.</exception>
     private async Task EnterAsync()
     {
-        await Gate.WaitAsync().ConfigureAwait(false);
+        if (Latency == TimeSpan.Zero)
+        {
+            await Task.Yield();
+        }
+        else
+        {
+            await Task.Delay(Latency).ConfigureAwait(false);
+        }
 
         if (IsOffline)
         {
@@ -129,7 +141,7 @@ public sealed class InMemoryTodoStore : ITodoStore
         }
     }
 
-    /// <summary>Adds a row without going through the gate.</summary>
+    /// <summary>Adds a row without waiting for <see cref="Latency"/>.</summary>
     /// <param name="title">The title of the row.</param>
     /// <param name="notes">The notes of the row.</param>
     /// <param name="dueDate">The due date of the row.</param>

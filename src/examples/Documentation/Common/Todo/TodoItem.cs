@@ -61,7 +61,7 @@ public sealed class TodoItem : ObservableObject
 
     /// <summary>Creates an independent copy, as a database returns a new row each time it is read.</summary>
     /// <returns>A copy with the same values.</returns>
-    public TodoItem Clone() => new() { Id = Id, Title = Title, Notes = Notes, IsDone = IsDone, DueDate = DueDate, Priority = Priority, Tags = [.. Tags] };
+    public TodoItem Clone() => new() { Id = Id, Title = Title, Notes = Notes, IsDone = IsDone, DueDate = DueDate, Priority = Priority, Tags = Tags.ToList() };
 
     /// <summary>Checks whether the title or notes contain a text, ignoring case.</summary>
     /// <param name="text">The text to look for; blank matches every item.</param>

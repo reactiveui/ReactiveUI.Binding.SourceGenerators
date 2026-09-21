@@ -2,15 +2,16 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Education;
 
 /// <summary>
 /// The view model behind the gradebook. It shows one course at a time: the roster, the assignments and, for the
-/// selected student, a weighted average and a pass or fail flag. Each command starts its work and returns; wait
-/// for it through the command's <see cref="AsyncDelegateCommand.Completion"/>. A refused request never throws
-/// from a command. It sets <see cref="ErrorMessage"/>.
+/// selected student, a weighted average and a pass or fail flag. Each command starts one of the asynchronous
+/// methods and returns; call the method itself to wait for the work. A refused request never throws. It sets
+/// <see cref="ErrorMessage"/>.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("Course = {SelectedCourse}, Student = {SelectedStudent}, Average = {Average}")]
 public sealed class GradebookViewModel : ObservableObject
@@ -23,30 +24,30 @@ public sealed class GradebookViewModel : ObservableObject
     public GradebookViewModel(IStudentRecords records)
     {
         _records = records;
-        LoadCoursesCommand = new(_ => LoadCoursesAsync());
-        OpenCourseCommand = new(_ => OpenCourseAsync(), _ => SelectedCourse is not null);
-        EnrolCommand = new(parameter => EnrolAsync((Student)parameter!), parameter => parameter is Student && SelectedCourse is not null);
-        DropCommand = new(_ => DropAsync(), _ => SelectedCourse is not null && SelectedStudent is not null);
-        RecordGradeCommand = new(_ => RecordGradeAsync(), _ => SelectedStudent is not null && SelectedAssignment is not null);
+        LoadCoursesCommand = new(() => _ = LoadCoursesAsync());
+        OpenCourseCommand = new(() => _ = OpenCourseAsync(), () => SelectedCourse is not null);
+        EnrolCommand = new(candidate => _ = EnrolAsync(candidate), candidate => candidate is not null && SelectedCourse is not null);
+        DropCommand = new(() => _ = DropAsync(), () => SelectedCourse is not null && SelectedStudent is not null);
+        RecordGradeCommand = new(() => _ = RecordGradeAsync(), () => SelectedStudent is not null && SelectedAssignment is not null);
     }
 
     /// <summary>Gets the question the view answers before a student is dropped. The answer is <see langword="true"/> to drop the student.</summary>
     public Interaction<DropRequest, bool> ConfirmDrop { get; } = new();
 
-    /// <summary>Gets the command that lists the courses.</summary>
-    public AsyncDelegateCommand LoadCoursesCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadCoursesAsync"/>.</summary>
+    public Command LoadCoursesCommand { get; }
 
-    /// <summary>Gets the command that loads the roster, the candidates and the assignments of <see cref="SelectedCourse"/>.</summary>
-    public AsyncDelegateCommand OpenCourseCommand { get; }
+    /// <summary>Gets the command that runs <see cref="OpenCourseAsync"/>.</summary>
+    public Command OpenCourseCommand { get; }
 
-    /// <summary>Gets the command that enrols a student in <see cref="SelectedCourse"/>. Its parameter is the <see cref="Student"/> to enrol.</summary>
-    public AsyncDelegateCommand EnrolCommand { get; }
+    /// <summary>Gets the command that runs <see cref="EnrolAsync"/>. Its parameter is the <see cref="Student"/> to enrol.</summary>
+    public Command<Student> EnrolCommand { get; }
 
-    /// <summary>Gets the command that drops <see cref="SelectedStudent"/> from <see cref="SelectedCourse"/> once <see cref="ConfirmDrop"/> answers <see langword="true"/>.</summary>
-    public AsyncDelegateCommand DropCommand { get; }
+    /// <summary>Gets the command that runs <see cref="DropAsync"/>.</summary>
+    public Command DropCommand { get; }
 
-    /// <summary>Gets the command that records <see cref="ScoreToRecord"/> for <see cref="SelectedStudent"/> on <see cref="SelectedAssignment"/>.</summary>
-    public AsyncDelegateCommand RecordGradeCommand { get; }
+    /// <summary>Gets the command that runs <see cref="RecordGradeAsync"/>.</summary>
+    public Command RecordGradeCommand { get; }
 
     /// <summary>Gets the courses.</summary>
     public IReadOnlyList<Course> Courses
@@ -66,9 +67,9 @@ public sealed class GradebookViewModel : ObservableObject
                 return;
             }
 
-            OpenCourseCommand.RaiseCanExecuteChanged();
-            EnrolCommand.RaiseCanExecuteChanged();
-            DropCommand.RaiseCanExecuteChanged();
+            OpenCourseCommand.ChangeCanExecute();
+            EnrolCommand.ChangeCanExecute();
+            DropCommand.ChangeCanExecute();
         }
     }
 
@@ -104,8 +105,8 @@ public sealed class GradebookViewModel : ObservableObject
                 return;
             }
 
-            DropCommand.RaiseCanExecuteChanged();
-            RecordGradeCommand.RaiseCanExecuteChanged();
+            DropCommand.ChangeCanExecute();
+            RecordGradeCommand.ChangeCanExecute();
             RecomputeAverage();
         }
     }
@@ -118,7 +119,7 @@ public sealed class GradebookViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                RecordGradeCommand.RaiseCanExecuteChanged();
+                RecordGradeCommand.ChangeCanExecute();
             }
         }
     }
@@ -151,61 +152,9 @@ public sealed class GradebookViewModel : ObservableObject
         private set => SetProperty(ref field, value);
     } = string.Empty;
 
-    /// <summary>Finds the enrolment of a student in a course.</summary>
-    /// <param name="student">The student.</param>
-    /// <param name="courseCode">The code of the course.</param>
-    /// <returns>The enrolment, or <see langword="null"/> when the student is not enrolled.</returns>
-    private static Enrolment? FindEnrolment(Student student, string courseCode)
-    {
-        foreach (var enrolment in student.Enrolments)
-        {
-            if (enrolment.CourseCode == courseCode)
-            {
-                return enrolment;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>Finds a student in a list.</summary>
-    /// <param name="students">The list to search.</param>
-    /// <param name="id">The identifier of the student.</param>
-    /// <returns>The student, or <see langword="null"/> when the list does not hold the student.</returns>
-    private static Student? FindStudent(IReadOnlyList<Student> students, int? id)
-    {
-        foreach (var student in students)
-        {
-            if (student.Id == id)
-            {
-                return student;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>Lists the students who are not on a roster.</summary>
-    /// <param name="students">Every student.</param>
-    /// <param name="roster">The students already on the roster.</param>
-    /// <returns>The students who could join.</returns>
-    private static List<Student> NotOn(IReadOnlyList<Student> students, IReadOnlyList<Student> roster)
-    {
-        List<Student> others = [];
-        foreach (var student in students)
-        {
-            if (FindStudent(roster, student.Id) is null)
-            {
-                others.Add(student);
-            }
-        }
-
-        return others;
-    }
-
     /// <summary>Lists the courses.</summary>
     /// <returns>A task that completes when the courses are listed or the request was refused.</returns>
-    private async Task LoadCoursesAsync()
+    public async Task LoadCoursesAsync()
     {
         try
         {
@@ -218,9 +167,9 @@ public sealed class GradebookViewModel : ObservableObject
         }
     }
 
-    /// <summary>Loads the selected course.</summary>
+    /// <summary>Loads the roster, the candidates and the assignments of <see cref="SelectedCourse"/>.</summary>
     /// <returns>A task that completes when the course is loaded or the request was refused.</returns>
-    private async Task OpenCourseAsync()
+    public async Task OpenCourseAsync()
     {
         if (SelectedCourse is not { } course)
         {
@@ -238,10 +187,10 @@ public sealed class GradebookViewModel : ObservableObject
         }
     }
 
-    /// <summary>Enrols a student in the selected course.</summary>
+    /// <summary>Enrols a student in <see cref="SelectedCourse"/>.</summary>
     /// <param name="candidate">The student to enrol.</param>
     /// <returns>A task that completes when the student is enrolled or the request was refused.</returns>
-    private async Task EnrolAsync(Student candidate)
+    public async Task EnrolAsync(Student candidate)
     {
         if (SelectedCourse is not { } course)
         {
@@ -260,9 +209,9 @@ public sealed class GradebookViewModel : ObservableObject
         }
     }
 
-    /// <summary>Asks the view to confirm, then drops the selected student.</summary>
+    /// <summary>Asks the view to confirm through <see cref="ConfirmDrop"/>, then drops <see cref="SelectedStudent"/> from <see cref="SelectedCourse"/>.</summary>
     /// <returns>A task that completes when the student is dropped, the teacher declined or the request was refused.</returns>
-    private async Task DropAsync()
+    public async Task DropAsync()
     {
         if (SelectedCourse is not { } course || SelectedStudent is not { } student)
         {
@@ -286,9 +235,9 @@ public sealed class GradebookViewModel : ObservableObject
         }
     }
 
-    /// <summary>Records the typed score for the selected student and assignment.</summary>
+    /// <summary>Records <see cref="ScoreToRecord"/> for <see cref="SelectedStudent"/> on <see cref="SelectedAssignment"/>.</summary>
     /// <returns>A task that completes when the score is recorded or the request was refused.</returns>
-    private async Task RecordGradeAsync()
+    public async Task RecordGradeAsync()
     {
         if (SelectedStudent is not { } student || SelectedAssignment is not { } assignment)
         {
@@ -307,6 +256,27 @@ public sealed class GradebookViewModel : ObservableObject
             Refused(ex);
         }
     }
+
+    /// <summary>Finds the enrolment of a student in a course.</summary>
+    /// <param name="student">The student.</param>
+    /// <param name="courseCode">The code of the course.</param>
+    /// <returns>The enrolment, or <see langword="null"/> when the student is not enrolled.</returns>
+    private static Enrolment? FindEnrolment(Student student, string courseCode) =>
+        student.Enrolments.FirstOrDefault(enrolment => enrolment.CourseCode == courseCode);
+
+    /// <summary>Finds a student in a list.</summary>
+    /// <param name="students">The list to search.</param>
+    /// <param name="id">The identifier of the student.</param>
+    /// <returns>The student, or <see langword="null"/> when the list does not hold the student.</returns>
+    private static Student? FindStudent(IReadOnlyList<Student> students, int? id) =>
+        students.FirstOrDefault(student => student.Id == id);
+
+    /// <summary>Lists the students who are not on a roster.</summary>
+    /// <param name="students">Every student.</param>
+    /// <param name="roster">The students already on the roster.</param>
+    /// <returns>The students who could join.</returns>
+    private static List<Student> NotOn(IReadOnlyList<Student> students, IReadOnlyList<Student> roster) =>
+        students.Where(student => FindStudent(roster, student.Id) is null).ToList();
 
     /// <summary>Loads the roster, the candidates and the assignments of a course, keeping the selected student when the student is still on the roster.</summary>
     /// <param name="course">The course to load.</param>
