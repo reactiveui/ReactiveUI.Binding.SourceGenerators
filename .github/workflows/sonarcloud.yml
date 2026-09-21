@@ -19,7 +19,7 @@ jobs:
             sonarProjectKey: ReactiveUI.Binding.SourceGenerators
             sonarOrganization: reactiveui
             sonarExclusions: '**/tests/**,**/benchmarks/**,**/TestResults/**'
-            sonarCoverageExclusions: '**/tests/**,**/benchmarks/**,**/*Tests/**,**/*Tests.cs,**/*TestModels/**'
+            sonarCoverageExclusions: '**/tests/**,**/benchmarks/**,**/examples/**,**/*Tests/**,**/*Tests.cs,**/*TestModels/**'
             # Copy-paste detection is switched off for the arity-expanded surface and the platform packages.
             # A *.WideArity.cs file is the same operator written once per type-parameter count, and the
             # CombineLatest observables are one class per arity; each repetition is what makes the call site
