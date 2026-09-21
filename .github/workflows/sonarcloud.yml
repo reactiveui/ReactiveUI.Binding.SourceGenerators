@@ -26,7 +26,7 @@ jobs:
             # allocation-free and reflection-free, so collapsing them is not an option. The platform packages
             # implement the same small abstractions against different UI frameworks.
             sonarCpdExclusions: '**/tests/**,**/benchmarks/**,**/examples/**,**/*.WideArity.cs,**/*.WideArity.Unsafe.cs,**/Observables/CombineLatest*Observable.cs,**/ReactiveUI.Binding.Maui.Shared/**,**/ReactiveUI.Binding.Wpf.Shared/**,**/ReactiveUI.Binding.WinForms.Shared/**,**/ReactiveUI.Binding.Platform.Shared/**'
-            sonarTestExclusions: '**/tests/**,**/benchmarks/**'
+            sonarTestExclusions: '**/tests/**,**/benchmarks/**,**/examples/**'
             # Matches ci-build.yml: the MTP/TUnit suite is far slower on Windows net10
             # than on net8/9, so allow generous headroom for the coverage run.
             testTimeout: '15m'
