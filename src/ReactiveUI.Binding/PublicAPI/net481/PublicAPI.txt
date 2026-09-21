@@ -282,7 +282,6 @@ namespace ReactiveUI.Binding
     }
     public interface IInteraction<TInput, TOutput>
     {
-        System.Threading.Tasks.Task<TOutput> Handle(TInput input) { }
         System.IDisposable RegisterHandler(System.Action<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>> handler) { }
         System.IDisposable RegisterHandler(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.Threading.Tasks.Task> handler) { }
         System.IDisposable RegisterHandler<TDontCare>(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.IObservable<TDontCare>> handler) { }
