@@ -40,5 +40,5 @@ public sealed class Student : ObservableObject
 
     /// <summary>Creates an independent copy, as the records service returns a new object for each response.</summary>
     /// <returns>A copy with the same values.</returns>
-    public Student Clone() => new() { Id = Id, Name = Name, Email = Email, Enrolments = [.. Enrolments] };
+    public Student Clone() => new() { Id = Id, Name = Name, Email = Email, Enrolments = Enrolments.ToList() };
 }

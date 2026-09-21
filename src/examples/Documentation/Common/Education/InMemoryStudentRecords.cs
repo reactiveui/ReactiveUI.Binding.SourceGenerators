@@ -2,20 +2,16 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
-using ReactiveUI.Binding.Documentation.Infrastructure;
-
 namespace ReactiveUI.Binding.Documentation.Education;
 
 /// <summary>
 /// A student records service that lives in memory. It refuses a request the way a real registrar does: a full
-/// course, a timetable clash, a score out of range. Time comes from a <see cref="ManualClock"/>, and the
-/// <see cref="Gate"/> decides when each response arrives. It hands out copies, so changing a student you read
+/// course, a timetable clash, a score out of range. <see cref="Now"/> stamps submissions and grades, and
+/// <see cref="Latency"/> sets how long each response takes. It hands out copies, so changing a student you read
 /// does not change the records.
 /// </summary>
-/// <param name="clock">The clock that stamps submissions and grades.</param>
 [System.Diagnostics.DebuggerDisplay("Students = {_students.Count}, Enrolments = {_enrolments.Count}, IsUnavailable = {IsUnavailable}")]
-public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
+public sealed class InMemoryStudentRecords : IStudentRecords
 {
     /// <summary>The courses a new service starts with. CS101 has three places, and HIST110 meets while CS101 does.</summary>
     private static readonly Course[] _seedCourses =
@@ -28,12 +24,12 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
     /// <summary>The assignments a new service starts with.</summary>
     private static readonly Assignment[] _seedAssignments =
     [
-        new(1, "CS101", "Loops and functions", 20, 100, SeedData.Date("2026-03-06")),
-        new(2, "CS101", "Text adventure", 30, 100, SeedData.Date("2026-03-27")),
-        new(3, "CS101", "Final project", 50, 100, SeedData.Date("2026-05-29")),
-        new(4, "MATH201", "Problem set 1", 40, 50, SeedData.Date("2026-03-13")),
-        new(5, "MATH201", "Midterm", 60, 100, SeedData.Date("2026-04-10")),
-        new(6, "HIST110", "Essay on the 1848 revolutions", 100, 100, SeedData.Date("2026-04-17")),
+        new(1, "CS101", "Loops and functions", 20, 100, new(2026, 3, 6)),
+        new(2, "CS101", "Text adventure", 30, 100, new(2026, 3, 27)),
+        new(3, "CS101", "Final project", 50, 100, new(2026, 5, 29)),
+        new(4, "MATH201", "Problem set 1", 40, 50, new(2026, 3, 13)),
+        new(5, "MATH201", "Midterm", 60, 100, new(2026, 4, 10)),
+        new(6, "HIST110", "Essay on the 1848 revolutions", 100, 100, new(2026, 4, 17)),
     ];
 
     /// <summary>The students a new service starts with.</summary>
@@ -52,14 +48,14 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
         new(
             1,
             "CS101",
-            SeedData.Date("2026-02-16"),
-            [new(1, 1, 85, SeedData.Instant("2026-03-09T12:00:00Z")), new(1, 2, 72, SeedData.Instant("2026-03-30T12:00:00Z"))],
-            [new(1, 1, SeedData.Instant("2026-03-05T10:00:00Z"), false)]),
-        new(2, "CS101", SeedData.Date("2026-02-16"), [new(2, 1, 40, SeedData.Instant("2026-03-09T12:00:00Z")), new(2, 2, 35, SeedData.Instant("2026-03-30T12:00:00Z"))], []),
-        new(3, "CS101", SeedData.Date("2026-02-17"), [], []),
-        new(3, "MATH201", SeedData.Date("2026-02-17"), [new(3, 4, 45, SeedData.Instant("2026-03-16T12:00:00Z"))], []),
-        new(4, "HIST110", SeedData.Date("2026-02-18"), [], []),
-        new(5, "MATH201", SeedData.Date("2026-02-18"), [new(5, 4, 30, SeedData.Instant("2026-03-16T12:00:00Z"))], []),
+            new(2026, 2, 16),
+            new List<Grade> { new(1, 1, 85, new(2026, 3, 9, 12, 0, 0, TimeSpan.Zero)), new(1, 2, 72, new(2026, 3, 30, 12, 0, 0, TimeSpan.Zero)) },
+            new List<Submission> { new(1, 1, new(2026, 3, 5, 10, 0, 0, TimeSpan.Zero), false) }),
+        new(2, "CS101", new(2026, 2, 16), new List<Grade> { new(2, 1, 40, new(2026, 3, 9, 12, 0, 0, TimeSpan.Zero)), new(2, 2, 35, new(2026, 3, 30, 12, 0, 0, TimeSpan.Zero)) }, []),
+        new(3, "CS101", new(2026, 2, 17), [], []),
+        new(3, "MATH201", new(2026, 2, 17), new List<Grade> { new(3, 4, 45, new(2026, 3, 16, 12, 0, 0, TimeSpan.Zero)) }, []),
+        new(4, "HIST110", new(2026, 2, 18), [], []),
+        new(5, "MATH201", new(2026, 2, 18), new List<Grade> { new(5, 4, 30, new(2026, 3, 16, 12, 0, 0, TimeSpan.Zero)) }, []),
     ];
 
     /// <summary>The courses, by code.</summary>
@@ -74,18 +70,20 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
     /// <summary>The enrolments of every student. An enrolment is replaced, not changed, when its grades or submissions change.</summary>
     private readonly List<Enrolment> _enrolments = [.. _seedEnrolments];
 
-    /// <summary>Gets the gate that decides when each response arrives.</summary>
-    public ResponseGate Gate { get; } = new();
+    /// <summary>Gets or sets how long each call takes. A call yields once when the latency is zero.</summary>
+    public TimeSpan Latency { get; set; }
+
+    /// <summary>Gets or sets the moment that stamps submissions and grades, and that decides whether a submission is late.</summary>
+    public DateTimeOffset Now { get; set; } = new(2026, 3, 3, 9, 0, 0, TimeSpan.Zero);
 
     /// <summary>Gets or sets a value indicating whether every call fails with <see cref="RecordsFailure.ServiceUnavailable"/>.</summary>
     public bool IsUnavailable { get; set; }
 
     /// <summary>Creates a service with three courses, five students and six assignments.</summary>
-    /// <param name="clock">The clock that stamps submissions and grades.</param>
     /// <returns>A new service.</returns>
-    public static InMemoryStudentRecords CreateSeeded(ManualClock clock)
+    public static InMemoryStudentRecords CreateSeeded()
     {
-        InMemoryStudentRecords records = new(clock);
+        InMemoryStudentRecords records = new();
         foreach (var (id, name) in _seedStudents)
         {
             records._students.Add(new() { Id = id, Name = name, Email = $"student{id}@example.edu" });
@@ -99,7 +97,7 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
     {
         await EnterAsync().ConfigureAwait(false);
 
-        return [.. _courses];
+        return _courses.ToList();
     }
 
     /// <inheritdoc/>
@@ -217,8 +215,7 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
         var index = RequireEnrolment(studentId, assignment.CourseCode);
         var enrolment = _enrolments[index];
 
-        var now = clock.GetUtcNow();
-        Submission submission = new(studentId, assignmentId, now, DateOnly.FromDateTime(now.UtcDateTime) > assignment.DueDate);
+        Submission submission = new(studentId, assignmentId, Now, Today() > assignment.DueDate);
         List<Submission> submissions = [.. enrolment.Submissions];
         _ = submissions.RemoveAll(existing => existing.AssignmentId == assignmentId);
         submissions.Add(submission);
@@ -239,7 +236,7 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
         }
 
         var enrolment = _enrolments[index];
-        Grade grade = new(studentId, assignmentId, score, clock.GetUtcNow());
+        Grade grade = new(studentId, assignmentId, score, Now);
         List<Grade> grades = [.. enrolment.Grades];
         _ = grades.RemoveAll(existing => existing.AssignmentId == assignmentId);
         grades.Add(grade);
@@ -247,12 +244,19 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
         return grade;
     }
 
-    /// <summary>Waits for the gate, then fails when the service is unavailable.</summary>
+    /// <summary>Waits for <see cref="Latency"/>, then fails when the service is unavailable.</summary>
     /// <returns>A task that completes when the call may proceed.</returns>
     /// <exception cref="StudentRecordsException">The service is unavailable.</exception>
     private async Task EnterAsync()
     {
-        await Gate.WaitAsync().ConfigureAwait(false);
+        if (Latency == TimeSpan.Zero)
+        {
+            await Task.Yield();
+        }
+        else
+        {
+            await Task.Delay(Latency).ConfigureAwait(false);
+        }
 
         if (IsUnavailable)
         {
@@ -260,10 +264,9 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
         }
     }
 
-    /// <summary>Gets today's date from the clock.</summary>
+    /// <summary>Gets the date of <see cref="Now"/>.</summary>
     /// <returns>The date in UTC.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private DateOnly Today() => DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+    private DateOnly Today() => DateOnly.FromDateTime(Now.UtcDateTime);
 
     /// <summary>Copies a student together with the courses the student takes.</summary>
     /// <param name="student">The stored student.</param>
@@ -296,7 +299,6 @@ public sealed class InMemoryStudentRecords(ManualClock clock) : IStudentRecords
     /// <param name="studentId">The identifier of the student.</param>
     /// <param name="courseCode">The code of the course.</param>
     /// <returns>The index of the enrolment, or -1 when the student is not enrolled.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int IndexOfEnrolment(int studentId, string courseCode) =>
         _enrolments.FindIndex(enrolment => enrolment.StudentId == studentId && enrolment.CourseCode == courseCode);
 

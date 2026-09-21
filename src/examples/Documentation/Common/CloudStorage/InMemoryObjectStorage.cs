@@ -3,20 +3,16 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.CloudStorage;
 
 /// <summary>
-/// An S3-style storage service that lives in memory. Time comes from a <see cref="ManualClock"/>. A held
-/// <see cref="Gate"/> makes every request wait once to start, and an upload wait once more for each part, so an
-/// example decides when each progress report arrives. <see cref="ThrottleNext"/> and <see cref="Disconnect"/>
-/// make the service refuse requests.
+/// An S3-style storage service that lives in memory. <see cref="Latency"/> makes every request, and every part of
+/// an upload, take time, so an example decides how long each step lasts. <see cref="ThrottleNext"/> and
+/// <see cref="Disconnect"/> make the service refuse requests.
 /// </summary>
-/// <param name="clock">The clock that stamps stored objects.</param>
 [System.Diagnostics.DebuggerDisplay("Connection = {Connection.State}, Throttled = {_throttled}")]
-public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
+public sealed class InMemoryObjectStorage : IObjectStorage
 {
     /// <summary>The size of one part of an upload, 4 MiB.</summary>
     private const long PartSizeBytes = 4_194_304;
@@ -63,27 +59,26 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
     /// <summary>The number that makes each stored object's tag unique.</summary>
     private int _version;
 
-    /// <summary>Gets the gate that decides when each request and each upload part completes.</summary>
-    public ResponseGate Gate { get; } = new();
+    /// <summary>Gets or sets how long each request, and each part of an upload, takes. Zero yields once and carries on.</summary>
+    public TimeSpan Latency { get; set; }
 
     /// <inheritdoc/>
     public StorageConnection Connection { get; } = new() { Endpoint = "https://s3.ap-southeast-2.storage.example", State = ConnectionState.Connected };
 
     /// <summary>Creates a service with two buckets and seven objects, already connected.</summary>
-    /// <param name="clock">The clock that stamps stored objects.</param>
     /// <returns>A new service.</returns>
-    public static InMemoryObjectStorage CreateSeeded(ManualClock clock)
+    public static InMemoryObjectStorage CreateSeeded()
     {
-        InMemoryObjectStorage storage = new(clock);
-        storage.AddBucket(MediaBucket, "ap-southeast-2", "2025-06-12T08:30:00Z");
-        storage.Seed(MediaBucket, "index.html", LandingPageSize, "text/html", "2026-01-15T10:00:00Z");
-        storage.Seed(MediaBucket, "photos/2025/warehouse.jpg", WarehousePhotoSize, JpegType, "2025-11-20T16:45:00Z");
-        storage.Seed(MediaBucket, "photos/2026/launch-banner.png", BannerSize, "image/png", "2026-02-10T09:12:00Z");
-        storage.Seed(MediaBucket, "photos/2026/team-offsite.jpg", OffsitePhotoSize, JpegType, "2026-02-27T18:30:00Z");
-        storage.Seed(MediaBucket, "videos/product-tour.mp4", ProductTourSize, "video/mp4", "2026-01-30T13:05:00Z");
-        storage.AddBucket(BackupsBucket, "us-east-1", "2024-09-01T00:00:00Z");
-        storage.Seed(BackupsBucket, "db/2026-03-01.sql.gz", DatabaseDumpSize, GzipType, "2026-03-01T02:00:00Z");
-        storage.Seed(BackupsBucket, "db/2026-03-02.sql.gz", DatabaseDumpSize, GzipType, "2026-03-02T02:00:00Z");
+        InMemoryObjectStorage storage = new();
+        storage.AddBucket(MediaBucket, "ap-southeast-2", new(2025, 6, 12, 8, 30, 0, TimeSpan.Zero));
+        storage.Seed(MediaBucket, "index.html", LandingPageSize, "text/html", new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero));
+        storage.Seed(MediaBucket, "photos/2025/warehouse.jpg", WarehousePhotoSize, JpegType, new(2025, 11, 20, 16, 45, 0, TimeSpan.Zero));
+        storage.Seed(MediaBucket, "photos/2026/launch-banner.png", BannerSize, "image/png", new(2026, 2, 10, 9, 12, 0, TimeSpan.Zero));
+        storage.Seed(MediaBucket, "photos/2026/team-offsite.jpg", OffsitePhotoSize, JpegType, new(2026, 2, 27, 18, 30, 0, TimeSpan.Zero));
+        storage.Seed(MediaBucket, "videos/product-tour.mp4", ProductTourSize, "video/mp4", new(2026, 1, 30, 13, 5, 0, TimeSpan.Zero));
+        storage.AddBucket(BackupsBucket, "us-east-1", new(2024, 9, 1, 0, 0, 0, TimeSpan.Zero));
+        storage.Seed(BackupsBucket, "db/2026-03-01.sql.gz", DatabaseDumpSize, GzipType, new(2026, 3, 1, 2, 0, 0, TimeSpan.Zero));
+        storage.Seed(BackupsBucket, "db/2026-03-02.sql.gz", DatabaseDumpSize, GzipType, new(2026, 3, 2, 2, 0, 0, TimeSpan.Zero));
         return storage;
     }
 
@@ -91,7 +86,7 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
     public async Task ConnectAsync()
     {
         Connection.State = ConnectionState.Connecting;
-        await Gate.WaitAsync().ConfigureAwait(false);
+        await PauseAsync().ConfigureAwait(false);
         Connection.State = ConnectionState.Connected;
     }
 
@@ -100,7 +95,7 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
     {
         await EnterAsync().ConfigureAwait(false);
 
-        return [.. _buckets];
+        return _buckets.ToList();
     }
 
     /// <inheritdoc/>
@@ -121,27 +116,11 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
     }
 
     /// <inheritdoc/>
-    public async Task<StorageObject> UploadAsync(string bucket, string key, long sizeBytes, string contentType, IProgress<UploadProgress> progress)
+    public IAsyncEnumerable<UploadProgress> UploadAsync(string bucket, string key, long sizeBytes, string contentType)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sizeBytes);
-        await EnterAsync().ConfigureAwait(false);
 
-        var stored = ObjectsOf(bucket);
-        long sent = 0;
-        while (sent < sizeBytes)
-        {
-            await Gate.WaitAsync().ConfigureAwait(false);
-            EnsureConnected();
-            sent = Math.Min(sent + PartSizeBytes, sizeBytes);
-            progress.Report(new(sent, sizeBytes));
-        }
-
-        StorageObject uploaded = new() { Key = key, Size = sizeBytes, LastModified = clock.GetUtcNow(), ContentType = contentType, ETag = NextETag() };
-
-        _ = stored.RemoveAll(existing => existing.Key == key);
-        stored.Add(uploaded);
-        stored.Sort(static (left, right) => string.CompareOrdinal(left.Key, right.Key));
-        return uploaded.Clone();
+        return UploadPartsAsync(bucket, key, sizeBytes, contentType);
     }
 
     /// <inheritdoc/>
@@ -162,12 +141,40 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
     /// <summary>Drops the link. Requests fail with <see cref="StorageFailure.ConnectionLost"/> until <see cref="ConnectAsync"/> completes.</summary>
     public void Disconnect() => Connection.State = ConnectionState.Disconnected;
 
-    /// <summary>Waits for the gate, then refuses the request when the link is down or the service is throttling.</summary>
+    /// <summary>Sends an object one part at a time, then stores it.</summary>
+    /// <param name="bucket">The name of the bucket.</param>
+    /// <param name="key">The key to store the object under.</param>
+    /// <param name="sizeBytes">The size of the object in bytes.</param>
+    /// <param name="contentType">The media type of the object.</param>
+    /// <returns>A report after each part the service has received.</returns>
+    /// <exception cref="StorageException">The bucket does not exist, the service throttles the request or the link is down.</exception>
+    private async IAsyncEnumerable<UploadProgress> UploadPartsAsync(string bucket, string key, long sizeBytes, string contentType)
+    {
+        await EnterAsync().ConfigureAwait(false);
+
+        var stored = ObjectsOf(bucket);
+        long sent = 0;
+        while (sent < sizeBytes)
+        {
+            await PauseAsync().ConfigureAwait(false);
+            EnsureConnected();
+            sent = Math.Min(sent + PartSizeBytes, sizeBytes);
+            yield return new(sent, sizeBytes);
+        }
+
+        StorageObject uploaded = new() { Key = key, Size = sizeBytes, LastModified = new(2026, 3, 3, 9, 0, 0, TimeSpan.Zero), ContentType = contentType, ETag = NextETag() };
+
+        _ = stored.RemoveAll(existing => existing.Key == key);
+        stored.Add(uploaded);
+        stored.Sort(static (left, right) => string.CompareOrdinal(left.Key, right.Key));
+    }
+
+    /// <summary>Waits for <see cref="Latency"/>, then refuses the request when the link is down or the service is throttling.</summary>
     /// <returns>A task that completes when the request may proceed.</returns>
     /// <exception cref="StorageException">The link is down or the service is throttling.</exception>
     private async Task EnterAsync()
     {
-        await Gate.WaitAsync().ConfigureAwait(false);
+        await PauseAsync().ConfigureAwait(false);
         EnsureConnected();
 
         if (_throttled == 0)
@@ -177,6 +184,19 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
 
         _throttled--;
         throw new StorageException(StorageFailure.SlowDown, "Please reduce your request rate.");
+    }
+
+    /// <summary>Waits for <see cref="Latency"/>, or yields once when it is zero.</summary>
+    /// <returns>A task that completes when the wait is over.</returns>
+    private async Task PauseAsync()
+    {
+        if (Latency == TimeSpan.Zero)
+        {
+            await Task.Yield();
+            return;
+        }
+
+        await Task.Delay(Latency).ConfigureAwait(false);
     }
 
     /// <summary>Refuses the request when the link is down.</summary>
@@ -206,23 +226,22 @@ public sealed class InMemoryObjectStorage(ManualClock clock) : IObjectStorage
         return $"etag-{_version.ToString(CultureInfo.InvariantCulture)}";
     }
 
-    /// <summary>Adds a bucket without going through the gate.</summary>
+    /// <summary>Adds a bucket without waiting.</summary>
     /// <param name="name">The name of the bucket.</param>
     /// <param name="region">The region of the bucket.</param>
-    /// <param name="createdAt">When the bucket was created, as an ISO 8601 text.</param>
-    private void AddBucket(string name, string region, string createdAt)
+    /// <param name="createdAt">When the bucket was created.</param>
+    private void AddBucket(string name, string region, DateTimeOffset createdAt)
     {
-        _buckets.Add(new(name, region, SeedData.Instant(createdAt)));
+        _buckets.Add(new(name, region, createdAt));
         _objects[name] = [];
     }
 
-    /// <summary>Adds an object without going through the gate.</summary>
+    /// <summary>Adds an object without waiting.</summary>
     /// <param name="bucket">The name of the bucket.</param>
     /// <param name="key">The key of the object.</param>
     /// <param name="size">The size of the object in bytes.</param>
     /// <param name="contentType">The media type of the object.</param>
-    /// <param name="lastModified">When the object was written, as an ISO 8601 text.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void Seed(string bucket, string key, long size, string contentType, string lastModified) =>
-        _objects[bucket].Add(new() { Key = key, Size = size, LastModified = SeedData.Instant(lastModified), ContentType = contentType, ETag = NextETag() });
+    /// <param name="lastModified">When the object was written.</param>
+    private void Seed(string bucket, string key, long size, string contentType, DateTimeOffset lastModified) =>
+        _objects[bucket].Add(new() { Key = key, Size = size, LastModified = lastModified, ContentType = contentType, ETag = NextETag() });
 }

@@ -4,14 +4,15 @@
 
 using System.Globalization;
 using System.Net;
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.GitHub;
 
 /// <summary>
 /// The view model behind the issue board. It signs in, lists repositories and their open issues, and closes or
-/// comments on the selected issue. Each command starts its work and returns; wait for it through the command's
-/// <see cref="AsyncDelegateCommand.Completion"/>. A failed request never throws from a command. It sets
+/// comments on the selected issue. Each command starts the matching <c>Async</c> method and returns; await the
+/// method to wait for the work. A failed request never throws from those methods. It sets
 /// <see cref="ErrorMessage"/>, and a 401 signs the user out.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("IsSignedIn = {IsSignedIn}, Issues = {Issues.Count}")]
@@ -26,30 +27,30 @@ public sealed class IssueBoardViewModel : ObservableObject
     {
         _api = api;
         RateLimitRemaining = api.RateLimitRemaining;
-        SignInCommand = new(_ => SignInAsync(), _ => !IsSignedIn && !string.IsNullOrWhiteSpace(Token));
-        SignOutCommand = new(_ => SignOut(), _ => IsSignedIn);
-        LoadIssuesCommand = new(_ => LoadIssuesAsync(), _ => IsSignedIn && SelectedRepository is not null);
-        CloseIssueCommand = new(_ => CloseIssueAsync(), _ => SelectedIssue is { State: IssueState.Open });
-        AddCommentCommand = new(_ => AddCommentAsync(), _ => SelectedIssue is not null && !string.IsNullOrWhiteSpace(NewCommentText));
+        SignInCommand = new(() => _ = SignInAsync(), () => !IsSignedIn && !string.IsNullOrWhiteSpace(Token));
+        SignOutCommand = new(SignOut, () => IsSignedIn);
+        LoadIssuesCommand = new(() => _ = LoadIssuesAsync(), () => IsSignedIn && SelectedRepository is not null);
+        CloseIssueCommand = new(() => _ = CloseIssueAsync(), () => SelectedIssue is { State: IssueState.Open });
+        AddCommentCommand = new(() => _ = AddCommentAsync(), () => SelectedIssue is not null && !string.IsNullOrWhiteSpace(NewCommentText));
     }
 
     /// <summary>Gets the question the view answers before an issue closes. The input is the issue; the answer is <see langword="true"/> to close it.</summary>
     public Interaction<Issue, bool> ConfirmClose { get; } = new();
 
-    /// <summary>Gets the command that signs in with <see cref="Token"/> and then loads the repositories.</summary>
-    public AsyncDelegateCommand SignInCommand { get; }
+    /// <summary>Gets the command that runs <see cref="SignInAsync"/>.</summary>
+    public Command SignInCommand { get; }
 
-    /// <summary>Gets the command that signs out and clears the board.</summary>
-    public DelegateCommand SignOutCommand { get; }
+    /// <summary>Gets the command that runs <see cref="SignOut"/>.</summary>
+    public Command SignOutCommand { get; }
 
-    /// <summary>Gets the command that loads the open issues of <see cref="SelectedRepository"/>.</summary>
-    public AsyncDelegateCommand LoadIssuesCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadIssuesAsync"/>.</summary>
+    public Command LoadIssuesCommand { get; }
 
-    /// <summary>Gets the command that closes <see cref="SelectedIssue"/> once <see cref="ConfirmClose"/> answers <see langword="true"/>.</summary>
-    public AsyncDelegateCommand CloseIssueCommand { get; }
+    /// <summary>Gets the command that runs <see cref="CloseIssueAsync"/>.</summary>
+    public Command CloseIssueCommand { get; }
 
-    /// <summary>Gets the command that posts <see cref="NewCommentText"/> on <see cref="SelectedIssue"/>.</summary>
-    public AsyncDelegateCommand AddCommentCommand { get; }
+    /// <summary>Gets the command that runs <see cref="AddCommentAsync"/>.</summary>
+    public Command AddCommentCommand { get; }
 
     /// <summary>Gets or sets the access token the user typed.</summary>
     public string Token
@@ -59,7 +60,7 @@ public sealed class IssueBoardViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                SignInCommand.RaiseCanExecuteChanged();
+                SignInCommand.ChangeCanExecute();
             }
         }
     } = string.Empty;
@@ -75,9 +76,9 @@ public sealed class IssueBoardViewModel : ObservableObject
                 return;
             }
 
-            SignInCommand.RaiseCanExecuteChanged();
-            SignOutCommand.RaiseCanExecuteChanged();
-            LoadIssuesCommand.RaiseCanExecuteChanged();
+            SignInCommand.ChangeCanExecute();
+            SignOutCommand.ChangeCanExecute();
+            LoadIssuesCommand.ChangeCanExecute();
         }
     }
 
@@ -103,7 +104,7 @@ public sealed class IssueBoardViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                LoadIssuesCommand.RaiseCanExecuteChanged();
+                LoadIssuesCommand.ChangeCanExecute();
             }
         }
     }
@@ -126,8 +127,8 @@ public sealed class IssueBoardViewModel : ObservableObject
                 return;
             }
 
-            CloseIssueCommand.RaiseCanExecuteChanged();
-            AddCommentCommand.RaiseCanExecuteChanged();
+            CloseIssueCommand.ChangeCanExecute();
+            AddCommentCommand.ChangeCanExecute();
         }
     }
 
@@ -139,7 +140,7 @@ public sealed class IssueBoardViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                AddCommentCommand.RaiseCanExecuteChanged();
+                AddCommentCommand.ChangeCanExecute();
             }
         }
     } = string.Empty;
@@ -158,9 +159,9 @@ public sealed class IssueBoardViewModel : ObservableObject
         private set => SetProperty(ref field, value);
     } = string.Empty;
 
-    /// <summary>Signs in and loads the repositories.</summary>
+    /// <summary>Signs in with <see cref="Token"/> and loads the repositories.</summary>
     /// <returns>A task that completes when the repositories are loaded or the request failed.</returns>
-    private async Task SignInAsync()
+    public async Task SignInAsync()
     {
         try
         {
@@ -181,15 +182,15 @@ public sealed class IssueBoardViewModel : ObservableObject
     }
 
     /// <summary>Signs out and clears everything the account could see.</summary>
-    private void SignOut()
+    public void SignOut()
     {
         _api.SignOut();
         Reset();
     }
 
-    /// <summary>Loads the open issues of the selected repository.</summary>
+    /// <summary>Loads the open issues of <see cref="SelectedRepository"/>.</summary>
     /// <returns>A task that completes when the issues are loaded or the request failed.</returns>
-    private async Task LoadIssuesAsync()
+    public async Task LoadIssuesAsync()
     {
         if (SelectedRepository is not { } repository)
         {
@@ -213,9 +214,9 @@ public sealed class IssueBoardViewModel : ObservableObject
         }
     }
 
-    /// <summary>Asks the view to confirm, then closes the selected issue.</summary>
+    /// <summary>Asks <see cref="ConfirmClose"/> to confirm, then closes <see cref="SelectedIssue"/>.</summary>
     /// <returns>A task that completes when the issue is closed, the user declined or the request failed.</returns>
-    private async Task CloseIssueAsync()
+    public async Task CloseIssueAsync()
     {
         if (SelectedIssue is not { } issue || SelectedRepository is not { } repository)
         {
@@ -232,7 +233,7 @@ public sealed class IssueBoardViewModel : ObservableObject
             var closed = await _api.CloseIssueAsync(repository.FullName, issue.Number).ConfigureAwait(false);
             ErrorMessage = string.Empty;
             issue.UpdateFrom(closed);
-            CloseIssueCommand.RaiseCanExecuteChanged();
+            CloseIssueCommand.ChangeCanExecute();
         }
         catch (GitHubApiException ex)
         {
@@ -244,9 +245,9 @@ public sealed class IssueBoardViewModel : ObservableObject
         }
     }
 
-    /// <summary>Posts the comment the user wrote on the selected issue.</summary>
+    /// <summary>Posts <see cref="NewCommentText"/> on <see cref="SelectedIssue"/>.</summary>
     /// <returns>A task that completes when the comment is posted or the request failed.</returns>
-    private async Task AddCommentAsync()
+    public async Task AddCommentAsync()
     {
         if (SelectedIssue is not { } issue || SelectedRepository is not { } repository)
         {

@@ -26,15 +26,14 @@ public interface IObjectStorage
     /// <exception cref="StorageException">The bucket does not exist, the service throttles the request or the link is down.</exception>
     Task<IReadOnlyList<StorageObject>> ListObjectsAsync(string bucket, string prefix);
 
-    /// <summary>Uploads an object in parts, reporting progress after each part.</summary>
+    /// <summary>Uploads an object in parts. The object is stored once the sequence has been read to its end.</summary>
     /// <param name="bucket">The name of the bucket.</param>
     /// <param name="key">The key to store the object under; an existing object with that key is replaced.</param>
     /// <param name="sizeBytes">The size of the object in bytes.</param>
     /// <param name="contentType">The media type of the object.</param>
-    /// <param name="progress">Receives a report after each part.</param>
-    /// <returns>The stored object.</returns>
+    /// <returns>A report after each part the service has received.</returns>
     /// <exception cref="StorageException">The bucket does not exist, the service throttles the request or the link is down.</exception>
-    Task<StorageObject> UploadAsync(string bucket, string key, long sizeBytes, string contentType, IProgress<UploadProgress> progress);
+    IAsyncEnumerable<UploadProgress> UploadAsync(string bucket, string key, long sizeBytes, string contentType);
 
     /// <summary>Deletes an object.</summary>
     /// <param name="bucket">The name of the bucket.</param>

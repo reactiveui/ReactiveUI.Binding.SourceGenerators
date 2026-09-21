@@ -51,6 +51,9 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.1"/>
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.16.0-preview.1"/>
 
+    <!-- Avalonia -->
+    <PackageVersion Include="Avalonia" Version="12.1.2"/>
+
     <!-- Test App Dependencies-->
     <PackageVersion Include="ReactiveUI" Version="24.2.0"/>
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="3.2.0"/>

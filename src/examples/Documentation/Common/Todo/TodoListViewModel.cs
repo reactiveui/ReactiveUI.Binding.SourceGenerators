@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using Microsoft.Maui.Controls;
 using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Todo;
 
 /// <summary>
 /// The view model behind the to-do screen. It loads items from an <see cref="ITodoStore"/>, filters them by text
-/// and keeps a count of the items still to do. Each command starts its work and returns; wait for it through
-/// the command's <see cref="AsyncDelegateCommand.Completion"/>.
+/// and keeps a count of the items still to do. Each command starts the matching method and returns; await the
+/// method itself to wait for its work.
 /// </summary>
 [System.Diagnostics.DebuggerDisplay("Items = {Items.Count}, RemainingCount = {RemainingCount}")]
 public sealed class TodoListViewModel : ObservableObject
@@ -26,19 +27,19 @@ public sealed class TodoListViewModel : ObservableObject
     public TodoListViewModel(ITodoStore store)
     {
         _store = store;
-        LoadCommand = new(_ => LoadAsync());
-        AddCommand = new(_ => AddAsync(), _ => !string.IsNullOrWhiteSpace(NewTitle));
-        CompleteCommand = new(_ => CompleteAsync(), _ => SelectedItem is { IsDone: false });
+        LoadCommand = new(() => _ = LoadAsync());
+        AddCommand = new(() => _ = AddAsync(), () => !string.IsNullOrWhiteSpace(NewTitle));
+        CompleteCommand = new(() => _ = CompleteAsync(), () => SelectedItem is { IsDone: false });
     }
 
-    /// <summary>Gets the command that loads the items from the database.</summary>
-    public AsyncDelegateCommand LoadCommand { get; }
+    /// <summary>Gets the command that runs <see cref="LoadAsync"/>.</summary>
+    public Command LoadCommand { get; }
 
-    /// <summary>Gets the command that adds an item titled <see cref="NewTitle"/>; it runs only while the title is not blank.</summary>
-    public AsyncDelegateCommand AddCommand { get; }
+    /// <summary>Gets the command that runs <see cref="AddAsync"/>; it runs only while <see cref="NewTitle"/> is not blank.</summary>
+    public Command AddCommand { get; }
 
-    /// <summary>Gets the command that finishes <see cref="SelectedItem"/>; it runs only while an unfinished item is selected.</summary>
-    public AsyncDelegateCommand CompleteCommand { get; }
+    /// <summary>Gets the command that runs <see cref="CompleteAsync"/>; it runs only while an unfinished item is selected.</summary>
+    public Command CompleteCommand { get; }
 
     /// <summary>Gets the items that match <see cref="FilterText"/>.</summary>
     public IReadOnlyList<TodoItem> Items
@@ -55,7 +56,7 @@ public sealed class TodoListViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                CompleteCommand.RaiseCanExecuteChanged();
+                CompleteCommand.ChangeCanExecute();
             }
         }
     }
@@ -68,7 +69,7 @@ public sealed class TodoListViewModel : ObservableObject
         {
             if (SetProperty(ref field, value))
             {
-                AddCommand.RaiseCanExecuteChanged();
+                AddCommand.ChangeCanExecute();
             }
         }
     } = string.Empty;
@@ -102,11 +103,11 @@ public sealed class TodoListViewModel : ObservableObject
 
     /// <summary>Reads every item and replaces the list.</summary>
     /// <returns>A task that completes when the list is replaced.</returns>
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         try
         {
-            var rows = await _store.QueryAsync().ConfigureAwait(false);
+            var rows = await _store.QueryAsync();
             ErrorMessage = string.Empty;
             ReplaceAll(rows);
         }
@@ -118,14 +119,14 @@ public sealed class TodoListViewModel : ObservableObject
 
     /// <summary>Stores <see cref="NewTitle"/> as a new item and selects it.</summary>
     /// <returns>A task that completes when the item is stored.</returns>
-    private async Task AddAsync()
+    public async Task AddAsync()
     {
         try
         {
-            var added = await _store.AddAsync(new TodoItem { Title = NewTitle.Trim() }).ConfigureAwait(false);
+            var added = await _store.AddAsync(new TodoItem { Title = NewTitle.Trim() });
             ErrorMessage = string.Empty;
             NewTitle = string.Empty;
-            ReplaceAll([.. _all, added]);
+            ReplaceAll(_all.Append(added));
             SelectedItem = Find(added.Id);
         }
         catch (TodoStoreException ex)
@@ -136,7 +137,7 @@ public sealed class TodoListViewModel : ObservableObject
 
     /// <summary>Stores the selected item as finished.</summary>
     /// <returns>A task that completes when the item is stored.</returns>
-    private async Task CompleteAsync()
+    public async Task CompleteAsync()
     {
         if (SelectedItem is not { } item)
         {
@@ -147,10 +148,10 @@ public sealed class TodoListViewModel : ObservableObject
         {
             var update = item.Clone();
             update.IsDone = true;
-            var saved = await _store.UpdateAsync(update).ConfigureAwait(false);
+            var saved = await _store.UpdateAsync(update);
             ErrorMessage = string.Empty;
             item.IsDone = saved.IsDone;
-            CompleteCommand.RaiseCanExecuteChanged();
+            CompleteCommand.ChangeCanExecute();
         }
         catch (TodoStoreException ex)
         {
@@ -182,16 +183,7 @@ public sealed class TodoListViewModel : ObservableObject
     {
         var selectedId = SelectedItem?.Id;
 
-        List<TodoItem> visible = [];
-        foreach (var item in _all)
-        {
-            if (item.Matches(FilterText))
-            {
-                visible.Add(item);
-            }
-        }
-
-        Items = visible;
+        Items = _all.Where(item => item.Matches(FilterText)).ToList();
         SelectedItem = selectedId is { } id ? Find(id) : null;
         RemainingCount = CountRemaining();
     }
@@ -199,34 +191,11 @@ public sealed class TodoListViewModel : ObservableObject
     /// <summary>Finds a visible item.</summary>
     /// <param name="id">The identifier of the item.</param>
     /// <returns>The item, or <see langword="null"/> when the filter hides it or it does not exist.</returns>
-    private TodoItem? Find(int id)
-    {
-        foreach (var item in Items)
-        {
-            if (item.Id == id)
-            {
-                return item;
-            }
-        }
-
-        return null;
-    }
+    private TodoItem? Find(int id) => Items.FirstOrDefault(item => item.Id == id);
 
     /// <summary>Counts the loaded items that are not finished.</summary>
     /// <returns>The number of unfinished items.</returns>
-    private int CountRemaining()
-    {
-        var remaining = 0;
-        foreach (var item in _all)
-        {
-            if (!item.IsDone)
-            {
-                remaining++;
-            }
-        }
-
-        return remaining;
-    }
+    private int CountRemaining() => _all.Count(static item => !item.IsDone);
 
     /// <summary>Recounts the remaining items when one is finished or reopened.</summary>
     /// <param name="sender">The item that changed.</param>
@@ -239,6 +208,6 @@ public sealed class TodoListViewModel : ObservableObject
         }
 
         RemainingCount = CountRemaining();
-        CompleteCommand.RaiseCanExecuteChanged();
+        CompleteCommand.ChangeCanExecute();
     }
 }

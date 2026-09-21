@@ -3,22 +3,19 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>
 /// A core banking backend that lives in memory. It checks a transfer against the balance of the account, the limit
 /// of the payee and the limit of the day. It holds a transfer to a flagged payee for a fraud review, and it asks for
-/// a one-time approval code from <see cref="ApprovalThreshold"/> upwards. Time comes from a
-/// <see cref="ManualClock"/>, so the daily limit resets when the example advances the clock past midnight UTC,
-/// and the <see cref="Gate"/> decides when each response arrives. It hands out copies, so changing an account you
-/// read does not change the bank until you make a transfer.
+/// a one-time approval code from <see cref="ApprovalThreshold"/> upwards. Its time is <see cref="Now"/>, which
+/// starts at 09:00 UTC on Tuesday 3 March 2026 and stamps transactions and starts each day's limit. Each call
+/// takes <see cref="Latency"/> to answer. It hands out copies, so changing an account you read does not change the
+/// bank until you make a transfer.
 /// </summary>
-/// <param name="clock">The clock that stamps transactions and starts each day's limit.</param>
 [System.Diagnostics.DebuggerDisplay("DailyLimit = {DailyLimit}, IsUnavailable = {IsUnavailable}")]
-public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
+public sealed class InMemoryBankingBackend : IBankingBackend
 {
     /// <summary>The currency of every account.</summary>
     private const string Aud = "AUD";
@@ -44,10 +41,10 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
     /// <summary>The transactions a new backend starts with, newest first.</summary>
     private static readonly Transaction[] _seedTransactions =
     [
-        new(4, "ACC-1001", SeedData.Instant("2026-03-02T23:10:00Z"), "Coles Supermarket", -86.40M, 2450.75M),
-        new(3, "ACC-1001", SeedData.Instant("2026-03-01T09:00:00Z"), "Rent to Sam Whitfield", -1200.00M, 2537.15M),
-        new(2, "ACC-1001", SeedData.Instant("2026-02-27T00:00:00Z"), "Salary from Acme Pty Ltd", 3200.00M, 3737.15M),
-        new(1, "ACC-1001", SeedData.Instant("2026-02-24T05:30:00Z"), "Energex electricity", -142.30M, 537.15M),
+        new(4, "ACC-1001", new DateTimeOffset(2026, 3, 2, 23, 10, 0, TimeSpan.Zero), "Coles Supermarket", -86.40M, 2450.75M),
+        new(3, "ACC-1001", new DateTimeOffset(2026, 3, 1, 9, 0, 0, TimeSpan.Zero), "Rent to Sam Whitfield", -1200.00M, 2537.15M),
+        new(2, "ACC-1001", new DateTimeOffset(2026, 2, 27, 0, 0, 0, TimeSpan.Zero), "Salary from Acme Pty Ltd", 3200.00M, 3737.15M),
+        new(1, "ACC-1001", new DateTimeOffset(2026, 2, 24, 5, 30, 0, TimeSpan.Zero), "Energex electricity", -142.30M, 537.15M),
     ];
 
     /// <summary>The stored accounts, copies of the seed so each backend changes its own.</summary>
@@ -65,8 +62,11 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
     /// <summary>Gets the one-time code that approves a large transfer.</summary>
     public static string ApprovalCode { get; } = "482913";
 
-    /// <summary>Gets the gate that decides when each response arrives.</summary>
-    public ResponseGate Gate { get; } = new();
+    /// <summary>Gets or sets how long each call takes to answer. Zero answers on the next turn of the scheduler.</summary>
+    public TimeSpan Latency { get; set; }
+
+    /// <summary>Gets or sets the time the backend reports. It stamps transactions and receipts and decides which day a transfer counts against.</summary>
+    public DateTimeOffset Now { get; set; } = new(2026, 3, 3, 9, 0, 0, TimeSpan.Zero);
 
     /// <summary>Gets or sets a value indicating whether every call fails with <see cref="BankingFailure.ServiceUnavailable"/>.</summary>
     public bool IsUnavailable { get; set; }
@@ -114,7 +114,7 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
     {
         await EnterAsync().ConfigureAwait(false);
 
-        return [.. _seedPayees];
+        return _seedPayees.ToList();
     }
 
     /// <inheritdoc/>
@@ -132,11 +132,9 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
     }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Task<TransferReceipt> SubmitTransferAsync(TransferRequest request) => SubmitAsync(request, null);
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Task<TransferReceipt> SubmitTransferAsync(TransferRequest request, string approvalCode) => SubmitAsync(request, approvalCode);
 
     /// <summary>Copies the accounts a new backend starts with.</summary>
@@ -196,21 +194,27 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
         }
 
         var account = FindAccount(request.SourceAccountId);
-        var now = clock.GetUtcNow();
-        var day = DateOnly.FromDateTime(now.UtcDateTime);
+        var day = DateOnly.FromDateTime(Now.UtcDateTime);
         account.Balance -= request.Amount;
         _sentByDay[day] = SentOn(day) + request.Amount;
-        _transactions.Insert(0, new(_transactions.Count + 1, account.Id, now, $"Transfer to {payee.Name}", -request.Amount, account.Balance));
+        _transactions.Insert(0, new(_transactions.Count + 1, account.Id, Now, $"Transfer to {payee.Name}", -request.Amount, account.Balance));
         _receipts++;
-        return new($"RCPT-{_receipts.ToString("D6", CultureInfo.InvariantCulture)}", request.Amount, account.Balance, now);
+        return new($"RCPT-{_receipts.ToString("D6", CultureInfo.InvariantCulture)}", request.Amount, account.Balance, Now);
     }
 
-    /// <summary>Waits for the gate, then fails when the backend is unavailable.</summary>
+    /// <summary>Waits for <see cref="Latency"/>, then fails when the backend is unavailable.</summary>
     /// <returns>A task that completes when the call may proceed.</returns>
     /// <exception cref="BankingException">The backend is unavailable.</exception>
     private async Task EnterAsync()
     {
-        await Gate.WaitAsync().ConfigureAwait(false);
+        if (Latency == TimeSpan.Zero)
+        {
+            await Task.Yield();
+        }
+        else
+        {
+            await Task.Delay(Latency).ConfigureAwait(false);
+        }
 
         if (IsUnavailable)
         {
@@ -260,7 +264,7 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
             violations.Add((BankingFailure.InsufficientFunds, $"{account.Name} has {account.AvailableBalance} available."));
         }
 
-        var day = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var day = DateOnly.FromDateTime(Now.UtcDateTime);
         if (SentOn(day) + request.Amount > DailyLimit)
         {
             violations.Add((BankingFailure.DailyLimitExceeded, $"The daily limit is {DailyLimit}."));
@@ -272,7 +276,6 @@ public sealed class InMemoryBankingBackend(ManualClock clock) : IBankingBackend
     /// <summary>Adds up the money sent on a day.</summary>
     /// <param name="day">The day.</param>
     /// <returns>The money sent, or 0 when nothing was sent.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private decimal SentOn(DateOnly day) => _sentByDay.GetValueOrDefault(day);
 
     /// <summary>Finds an account.</summary>

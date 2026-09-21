@@ -3,20 +3,18 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Net;
-using System.Runtime.CompilerServices;
-using ReactiveUI.Binding.Documentation.Infrastructure;
 
 namespace ReactiveUI.Binding.Documentation.GitHub;
 
 /// <summary>
 /// A GitHub-style issue tracker that lives in memory. It answers with the same statuses a real server does:
-/// 401 without a valid token, 403 once the hourly request quota is used up, 404 for an unknown repository or
-/// issue, and 422 for a request it cannot accept. Time comes from a <see cref="ManualClock"/>, and the
-/// <see cref="Gate"/> decides when each response arrives.
+/// 401 without a valid token, 403 once the request quota is used up, 404 for an unknown repository or issue,
+/// and 422 for a request it cannot accept. Every change is stamped with a fixed date that moves forward one
+/// minute per change, so the data never depends on the wall clock. Set <see cref="Latency"/> to delay each
+/// response.
 /// </summary>
-/// <param name="clock">The clock that stamps changes and renews the request quota.</param>
 [System.Diagnostics.DebuggerDisplay("RateLimitRemaining = {RateLimitRemaining}")]
-public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
+public sealed class InMemoryGitHubServer : IGitHubApi
 {
     /// <summary>The number the first issue of each repository receives.</summary>
     private const int FirstIssueNumber = 101;
@@ -36,8 +34,8 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
     /// <summary>The name of the payments repository.</summary>
     private const string PaymentsApi = "acme/payments-api";
 
-    /// <summary>How long a quota window lasts.</summary>
-    private static readonly TimeSpan _quotaWindow = TimeSpan.FromHours(1);
+    /// <summary>When the request quota renews.</summary>
+    private static readonly DateTimeOffset _quotaRenewsAt = new(2026, 3, 3, 10, 0, 0, TimeSpan.Zero);
 
     /// <summary>The known accounts.</summary>
     private readonly List<User> _users = [];
@@ -51,10 +49,10 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
     /// <summary>The issues of each repository, by repository name, oldest first.</summary>
     private readonly Dictionary<string, List<Issue>> _issues = [];
 
-    /// <summary>When the current quota window ends.</summary>
-    private DateTimeOffset _windowEnds = clock.GetUtcNow() + _quotaWindow;
+    /// <summary>The time the next change is stamped with.</summary>
+    private DateTimeOffset _now = new(2026, 3, 3, 9, 0, 0, TimeSpan.Zero);
 
-    /// <summary>The number of requests made in the current quota window.</summary>
+    /// <summary>The number of requests made since the quota last renewed.</summary>
     private int _used;
 
     /// <summary>The account the current token belongs to, or <see langword="null"/> when nobody is signed in.</summary>
@@ -69,38 +67,30 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
     /// <summary>Gets the access token of the account <c>maria-santos</c>.</summary>
     public static string MariaToken { get; } = "ghp_maria_c07a55";
 
-    /// <summary>Gets the number of requests an account may make in each quota window.</summary>
+    /// <summary>Gets the number of requests an account may make before the quota renews.</summary>
     public static int HourlyQuota { get; } = 60;
 
-    /// <summary>Gets the gate that decides when each response arrives.</summary>
-    public ResponseGate Gate { get; } = new();
+    /// <summary>Gets or sets how long each response takes. Zero, the default, answers on the next turn of the scheduler.</summary>
+    public TimeSpan Latency { get; set; }
 
     /// <inheritdoc/>
-    public int RateLimitRemaining
-    {
-        get
-        {
-            RenewQuota();
-            return HourlyQuota - _used;
-        }
-    }
+    public int RateLimitRemaining => HourlyQuota - _used;
 
     /// <summary>Creates a server with three accounts, two repositories and five issues.</summary>
-    /// <param name="clock">The clock that stamps changes and renews the request quota.</param>
     /// <returns>A new server; sign in with <see cref="PriyaToken"/> or <see cref="TomasToken"/>.</returns>
-    public static InMemoryGitHubServer CreateSeeded(ManualClock clock)
+    public static InMemoryGitHubServer CreateSeeded()
     {
-        InMemoryGitHubServer server = new(clock);
+        InMemoryGitHubServer server = new();
         server.AddUser(PriyaLogin, "Priya Nair", PriyaToken);
         server.AddUser(TomasLogin, "Tomas Berg", TomasToken);
         server.AddUser(MariaLogin, "Maria Santos", MariaToken);
 
         server.AddRepository("acme", "webshop", "Storefront and checkout");
         var safari = server.Seed(Webshop, "Checkout button unresponsive on Safari", IssueState.Open, MariaLogin, PriyaLogin, "bug", "checkout");
-        safari.Comments =
+        safari.Comments = (List<IssueComment>)
         [
-            new IssueComment(TomasLogin, "Reproduced on Safari 17.", SeedData.Instant("2026-03-02T14:20:00Z")),
-            new IssueComment(PriyaLogin, "Looking into the click handler.", SeedData.Instant("2026-03-02T15:05:00Z")),
+            new IssueComment(TomasLogin, "Reproduced on Safari 17.", new DateTimeOffset(2026, 3, 2, 14, 20, 0, TimeSpan.Zero)),
+            new IssueComment(PriyaLogin, "Looking into the click handler.", new DateTimeOffset(2026, 3, 2, 15, 5, 0, TimeSpan.Zero)),
         ];
         _ = server.Seed(Webshop, "Add gift-card support", IssueState.Open, TomasLogin, null, "enhancement");
         _ = server.Seed(Webshop, "Order confirmation email shows the wrong currency", IssueState.Closed, PriyaLogin, TomasLogin, "bug", "email");
@@ -173,15 +163,7 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
             throw new GitHubApiException(HttpStatusCode.UnprocessableEntity, "Validation failed: the title is required.", null);
         }
 
-        Issue issue = new()
-        {
-            Number = FirstIssueNumber + stored.Count,
-            Title = title.Trim(),
-            State = IssueState.Open,
-            Author = _signedIn!.Clone(),
-            Assignee = assignee?.Clone(),
-            UpdatedAt = clock.GetUtcNow(),
-        };
+        Issue issue = new() { Number = FirstIssueNumber + stored.Count, Title = title.Trim(), State = IssueState.Open, Author = _signedIn!.Clone(), Assignee = assignee?.Clone(), UpdatedAt = Stamp() };
 
         stored.Add(issue);
         return issue.Clone();
@@ -199,7 +181,7 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
         }
 
         issue.State = IssueState.Closed;
-        issue.UpdatedAt = clock.GetUtcNow();
+        issue.UpdatedAt = Stamp();
         return issue.Clone();
     }
 
@@ -214,30 +196,39 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
             throw new GitHubApiException(HttpStatusCode.UnprocessableEntity, "Validation failed: the comment body is required.", null);
         }
 
-        issue.Comments = [.. issue.Comments, new IssueComment(_signedIn!.Login, body.Trim(), clock.GetUtcNow())];
-        issue.UpdatedAt = clock.GetUtcNow();
+        var stamp = Stamp();
+        issue.Comments = issue.Comments.Append(new(_signedIn!.Login, body.Trim(), stamp)).ToList();
+        issue.UpdatedAt = stamp;
         return issue.Clone();
     }
 
-    /// <summary>Uses up the request quota, so the next request fails with 403 until the clock passes the end of the window.</summary>
+    /// <summary>Uses up the request quota, so the next request fails with 403 until <see cref="RenewQuota"/> runs.</summary>
     public void ExhaustQuota() => _used = HourlyQuota;
 
+    /// <summary>Starts a new request quota, as the server does when the quota window ends.</summary>
+    public void RenewQuota() => _used = 0;
+
     /// <summary>Makes the server forget the signed-in account, as an expired token does. The next request fails with 401.</summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ExpireSession() => SignOut();
 
-    /// <summary>Waits for the gate, renews the quota when its window ended, then charges one request.</summary>
+    /// <summary>Waits for <see cref="Latency"/>, then charges one request.</summary>
     /// <param name="requiresSignIn">Whether the request needs a signed-in account.</param>
     /// <returns>A task that completes when the request may proceed.</returns>
     /// <exception cref="GitHubApiException">The quota is used up (403) or the caller is not signed in (401).</exception>
     private async Task EnterAsync(bool requiresSignIn)
     {
-        await Gate.WaitAsync().ConfigureAwait(false);
-        RenewQuota();
+        if (Latency == TimeSpan.Zero)
+        {
+            await Task.Yield();
+        }
+        else
+        {
+            await Task.Delay(Latency).ConfigureAwait(false);
+        }
 
         if (_used >= HourlyQuota)
         {
-            throw new GitHubApiException(HttpStatusCode.Forbidden, "API rate limit exceeded.", _windowEnds);
+            throw new GitHubApiException(HttpStatusCode.Forbidden, "API rate limit exceeded.", _quotaRenewsAt);
         }
 
         _used++;
@@ -248,16 +239,13 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
         }
     }
 
-    /// <summary>Starts a new quota window when the clock has passed the end of the current one.</summary>
-    private void RenewQuota()
+    /// <summary>Takes the time to stamp a change with, then moves it forward one minute.</summary>
+    /// <returns>The time of the change.</returns>
+    private DateTimeOffset Stamp()
     {
-        if (clock.GetUtcNow() < _windowEnds)
-        {
-            return;
-        }
-
-        _used = 0;
-        _windowEnds = clock.GetUtcNow() + _quotaWindow;
+        var stamp = _now;
+        _now = _now.AddMinutes(1);
+        return stamp;
     }
 
     /// <summary>Counts the open issues of a repository.</summary>
@@ -361,7 +349,7 @@ public sealed class InMemoryGitHubServer(ManualClock clock) : IGitHubApi
             Author = FindUser(author).Clone(),
             Assignee = assignee is null ? null : FindUser(assignee).Clone(),
             Labels = labels,
-            UpdatedAt = clock.GetUtcNow(),
+            UpdatedAt = Stamp(),
         };
 
         stored.Add(issue);
