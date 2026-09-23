@@ -32,6 +32,28 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTo_7FFFD2E8338B15D7(global::System.IObservable<string> source, global::TestApp.MyControl target)
         {
             // BindTo: observable -> Text
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                source,
+                target,
+                () => global::System.Array.Empty<global::ReactiveUI.Binding.IObservedChange<object, object>>(),
+                () =>
+                {
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = target;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.Text;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyControl, string>>)(__property => __property.Text)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
+                },
+                global::ReactiveUI.Binding.BindingDirection.OneWay))
+        {
+            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+        }
+
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
             if (__convertedSourceConverter == null)
             {

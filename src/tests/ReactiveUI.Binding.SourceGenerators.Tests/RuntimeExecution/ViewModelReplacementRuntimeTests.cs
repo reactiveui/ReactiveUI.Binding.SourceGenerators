@@ -294,6 +294,16 @@ public class ViewModelReplacementRuntimeTests
     public Task BindCommand_AfterTheViewModelIsReplaced_InvokesTheNewViewModelsCommand() =>
         AssertTracksReplacement(CommandReplacementSource);
 
+    /// <summary>A command binding created while the view has no view model follows the first assigned model.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindCommand_WhenViewModelInitiallyNull_InvokesTheAssignedCommand() =>
+        AssertTracksReplacement(CommandReplacementSource.Replace(
+            "var binding = view.BindCommand",
+            "view.ViewModel = null; var binding = view.BindCommand",
+            StringComparison.Ordinal));
+
     /// <summary>
     /// An interaction binding follows the view's current view model, so the handler answers the interaction the
     /// view model on display raises rather than staying registered against the one it replaced.
@@ -303,6 +313,16 @@ public class ViewModelReplacementRuntimeTests
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Task BindInteraction_AfterTheViewModelIsReplaced_HandlesTheNewViewModelsInteraction() =>
         AssertTracksReplacement(InteractionReplacementSource);
+
+    /// <summary>An interaction binding created while the view has no view model follows the first assigned model.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindInteraction_WhenViewModelInitiallyNull_HandlesTheAssignedInteraction() =>
+        AssertTracksReplacement(InteractionReplacementSource.Replace(
+            "var binding = view.BindInteraction",
+            "view.ViewModel = null; var binding = view.BindInteraction",
+            StringComparison.Ordinal));
 
     /// <summary>Runs a replacement scenario and asserts the view ends up showing the replacement's value.</summary>
     /// <param name="source">The scenario source to generate, compile and run.</param>

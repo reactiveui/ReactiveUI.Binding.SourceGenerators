@@ -25,6 +25,18 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(builder.ConverterService).IsNotNull();
     }
 
+    /// <summary>The builder registers its converter service instance under its concrete service type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Constructor_RegistersConverterServiceInstance()
+    {
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        var app = builder.BuildApp();
+
+        await Assert.That(ReferenceEquals(app.Current?.GetService<ConverterService>(), builder.ConverterService)).IsTrue();
+    }
+
     /// <summary>Verifies that WithCoreServices registers INPC and POCO observation services.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

@@ -190,15 +190,27 @@ internal static class BindCommandCodeGenerator
             ? $", global::System.IObservable<{inv.ParameterTypeFullName}> withParameter"
             : string.Empty;
 
+        var commandObservation = BindingEmitterHelpers.ResolveViewModelObservation(
+            inv.ViewModelTypeFullName,
+            inv.ViewTypeFullName,
+            inv.CommandPropertyPath,
+            viewModelClassInfo,
+            viewClassInfo);
+
         _ = sb.Append("        private static global::System.IDisposable __BindCommand_").Append(suffix).AppendLine("(").Append("            ")
             .Append(inv.ViewTypeFullName).AppendLine(ViewParameterSuffix).Append("            ").Append(inv.ViewModelTypeFullName).Append(" viewModel")
             .Append(extraParams).AppendLine(")").AppendLine("        {").Append("            // BindCommand: ").Append(cmdPathComment).Append(" -> ")
-            .Append(ctrlPathComment).Append(" (event: ").Append(inv.ResolvedEventName ?? "none").AppendLine(")")
-            .AppendLine("            if (viewModel == null)").AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine("                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;").AppendLine(GeneratedSyntax.StatementBlockClose)
-            .AppendLine();
+            .Append(ctrlPathComment).Append(" (event: ").Append(inv.ResolvedEventName ?? "none").AppendLine(")");
 
-        EmitViewModelObservations(sb, inv, viewModelClassInfo, viewClassInfo);
+        if (commandObservation.RootVariable == "viewModel")
+        {
+            _ = sb.AppendLine("            if (viewModel == null)").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .AppendLine("                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;").AppendLine(GeneratedSyntax.StatementBlockClose);
+        }
+
+        _ = sb.AppendLine();
+
+        EmitViewModelObservations(sb, inv, viewModelClassInfo, viewClassInfo, in commandObservation);
         CommandControlEmitter.EmitRebinding(sb, inv, viewClassInfo, suffix);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -271,19 +283,14 @@ internal static class BindCommandCodeGenerator
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
     /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
+    /// <param name="commandObservation">The command path rooted at the view or the supplied model.</param>
     private static void EmitViewModelObservations(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
-        ClassBindingInfo? viewClassInfo)
+        ClassBindingInfo? viewClassInfo,
+        in BindingEmitterHelpers.ViewModelObservation commandObservation)
     {
-        var commandObservation = BindingEmitterHelpers.ResolveViewModelObservation(
-            inv.ViewModelTypeFullName,
-            inv.ViewTypeFullName,
-            inv.CommandPropertyPath,
-            viewModelClassInfo,
-            viewClassInfo);
-
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
             commandObservation.RootVariable,

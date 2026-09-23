@@ -13,6 +13,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// <summary>Tests for <see cref="SymbolHelpers"/> methods.</summary>
 public class SymbolHelpersTests
 {
+    /// <summary>The interaction property selected in symbol tests.</summary>
+    private const string InteractionPropertyName = "Confirm";
+
     /// <summary>Verifies GetWellKnownSymbols resolves INPC symbol from a compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -104,7 +107,7 @@ public class SymbolHelpersTests
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
-        var prop = typeSymbol.GetMembers("Confirm").OfType<IPropertySymbol>().First();
+        var prop = typeSymbol.GetMembers(InteractionPropertyName).OfType<IPropertySymbol>().First();
 
         var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
 
@@ -147,7 +150,34 @@ public class SymbolHelpersTests
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
-        var prop = typeSymbol.GetMembers("Confirm").OfType<IPropertySymbol>().First();
+        var prop = typeSymbol.GetMembers(InteractionPropertyName).OfType<IPropertySymbol>().First();
+
+        var result = SymbolHelpers.ExtractInteractionTypeArguments(
+            prop.Type,
+            out var inputType,
+            out var outputType);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(inputType).IsEqualTo("string");
+        await Assert.That(outputType).IsEqualTo("bool");
+    }
+
+    /// <summary>Extracts interaction arguments from the System.Reactive runtime flavor.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractInteractionTypeArguments_ReactiveFlavor_ReturnsTrueWithTypes()
+    {
+        const string source = """
+            using ReactiveUI.Binding.Reactive;
+            namespace TestApp
+            {
+                public class MyVm { public IInteraction<string, bool> Confirm { get; set; } }
+            }
+            """;
+
+        var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10, true);
+        var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
+        var prop = typeSymbol.GetMembers(InteractionPropertyName).OfType<IPropertySymbol>().First();
 
         var result = SymbolHelpers.ExtractInteractionTypeArguments(
             prop.Type,

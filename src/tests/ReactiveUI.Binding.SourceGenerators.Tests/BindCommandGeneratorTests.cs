@@ -10,6 +10,56 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// <summary>Snapshot tests for BindCommand invocation generation.</summary>
 public class BindCommandGeneratorTests
 {
+    /// <summary>Compiles a binding for a command whose ICommand members are explicit and whose CanExecute name is a property.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConcreteCommandWithExplicitICommandMembersCompiles()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Windows.Input;
+            using ReactiveUI.Binding;
+
+            public sealed class ExplicitCommand : ICommand
+            {
+                public bool CanExecute => true;
+                event EventHandler ICommand.CanExecuteChanged { add { } remove { } }
+                bool ICommand.CanExecute(object parameter) => true;
+                void ICommand.Execute(object parameter) { }
+            }
+
+            public sealed class Model : INotifyPropertyChanged
+            {
+                public event PropertyChangedEventHandler PropertyChanged;
+                public ExplicitCommand Command { get; } = new();
+            }
+
+            public sealed class Button
+            {
+                public event EventHandler Click;
+                public bool Enabled { get; set; }
+            }
+
+            public sealed class View : IViewFor<Model>
+            {
+                public Model ViewModel { get; set; }
+                object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (Model)value; }
+                public Button Control { get; } = new();
+            }
+
+            public static class Usage
+            {
+                public static IDisposable Bind(View view, Model model) =>
+                    view.BindCommand(model, x => x.Command, x => x.Control);
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
     /// <summary>Verifies BindCommand with a basic button and no parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

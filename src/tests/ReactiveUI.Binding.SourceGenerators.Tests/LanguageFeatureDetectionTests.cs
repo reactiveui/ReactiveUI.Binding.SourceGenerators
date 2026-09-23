@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -64,5 +65,101 @@ public class LanguageFeatureDetectionTests
         var compilation = CSharpCompilation.Create("Probe");
 
         await Assert.That(BindingGenerator.HasAccessibleExpressionAttribute(compilation)).IsFalse();
+    }
+
+    /// <summary>A runtime stub without expression-text parameters keeps the shorter interceptor signature.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task StubHasExpressionParameters_AttributeAvailableButStubOmittedThem_ReturnsFalse()
+    {
+        const string source = """
+            namespace Probe
+            {
+                public static class Stub
+                {
+                    public static void WhenAnyValue<TSender, TValue>(
+                        TSender sender,
+                        System.Linq.Expressions.Expression<System.Func<TSender, TValue>> property1,
+                        string callerFilePath = "",
+                        int callerLineNumber = 0) { }
+                }
+            }
+            """;
+        var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
+        var stub = compilation.GetTypeByMetadataName("Probe.Stub");
+
+        await Assert.That(BindingGenerator.HasAccessibleExpressionAttribute(compilation)).IsTrue();
+        await Assert.That(BindingGenerator.StubHasExpressionParameters(stub)).IsFalse();
+    }
+
+    /// <summary>A runtime stub with expression-text parameters exposes the longer interceptor signature.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task StubHasExpressionParameters_RuntimeStubDeclaresThem_ReturnsTrue()
+    {
+        const string source = """
+            namespace Probe
+            {
+                public static class Stub
+                {
+                    public static void WhenAnyValue<TSender, TValue>(
+                        TSender sender,
+                        System.Linq.Expressions.Expression<System.Func<TSender, TValue>> property1,
+                        string property1Expression = "",
+                        string callerFilePath = "",
+                        int callerLineNumber = 0) { }
+                }
+            }
+            """;
+        var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
+        var stub = compilation.GetTypeByMetadataName("Probe.Stub");
+
+        await Assert.That(BindingGenerator.StubHasExpressionParameters(stub)).IsTrue();
+    }
+
+    /// <summary>An interceptor matches a runtime stub built without caller-expression parameters.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NetFrameworkStyleStub_InterceptorMatchesShortSignature()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Linq.Expressions;
+            using System.Runtime.CompilerServices;
+            using ReactiveUI.Binding;
+
+            namespace ReactiveUI.Binding
+            {
+                public static class ReactiveUIBindingExtensions
+                {
+                    public static IObservable<TValue> WhenAnyValue<TSender, TValue>(
+                        this TSender sender,
+                        Expression<Func<TSender, TValue>> property1,
+                        [CallerFilePath] string callerFilePath = "",
+                        [CallerLineNumber] int callerLineNumber = 0)
+                        where TSender : class => throw new NotImplementedException();
+                }
+            }
+
+            public sealed class Model : INotifyPropertyChanged
+            {
+                public event PropertyChangedEventHandler PropertyChanged;
+                public string Name { get; set; } = "initial";
+            }
+
+            public static class Usage
+            {
+                public static IObservable<string> Observe(Model model) => model.WhenAnyValue(x => x.Name, "", 0);
+            }
+            """;
+        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10);
+        var compilation = TestHelper.CreateCompilation(source, parseOptions, false, "TestAssembly", []);
+        var result = TestHelper.RunGenerator(compilation, parseOptions, "Probe", true);
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceContains(
+            "WhenAnyValueDispatch.g.cs",
+            InterceptableLocationReader.IsSupported ? "__Intercept_WhenAnyValue_" : "Concrete typed overload for WhenAnyValue");
     }
 }

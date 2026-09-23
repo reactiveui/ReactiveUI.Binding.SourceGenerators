@@ -120,7 +120,7 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Win
 
 
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
+            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, (global::System.Windows.Input.ICommand cmd) =>
             {
                 serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                 if (cmd == null)

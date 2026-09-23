@@ -36,6 +36,9 @@ internal static class BindToCodeGenerator
     /// <summary>The worker parameter naming the object a write lands on.</summary>
     private const string TargetParameterName = "target";
 
+    /// <summary>The worker parameter naming the source observable.</summary>
+    private const string SourceParameterName = "source";
+
     /// <summary>Generates concrete typed overloads and binding methods for <c>BindTo</c> invocations.</summary>
     /// <param name="invocations">All detected <c>BindTo</c> invocations.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
@@ -257,11 +260,14 @@ internal static class BindToCodeGenerator
         // Direct assignment is only safe when the value type matches the property type and the caller did
         // not supply an explicit converter. A conversion hint alone is meaningless for identity assignment.
         var directAssign = inv.SourceValueTypeFullName == inv.TargetPropertyTypeFullName && !inv.HasConverterOverride;
-        var sourceVariable = "source";
+        var sourceVariable = SourceParameterName;
 
         _ = sb.Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(" __BindTo_").Append(suffix).Append('(')
             .Append(ObservableOf(inv.SourceValueTypeFullName)).Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams)
             .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen).Append("            // BindTo: observable -> ").Append(targetPathComment).AppendLine();
+
+        EmitBindingHookGuard(sb, inv);
+        _ = sb.AppendLine();
 
         if (inv.SetMethod is { } setMethod)
         {
@@ -369,6 +375,20 @@ internal static class BindToCodeGenerator
 
         return sb.ToStringAndReturn();
     }
+
+    /// <summary>Offers the target property path to registered hooks before a BindTo subscription is created.</summary>
+    /// <param name="sb">The generated source builder.</param>
+    /// <param name="inv">The binding invocation being emitted.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void EmitBindingHookGuard(StringBuilder sb, BindToInvocationInfo inv) =>
+        BindingEmitterHelpers.EmitBindingHookGuard(
+            sb,
+            SourceParameterName,
+            default,
+            TargetParameterName,
+            inv.TargetPropertyPath,
+            "OneWay",
+            $"{EmptyDisposable}.Instance");
 
     /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
     /// <param name="sb">The string builder to append to.</param>
