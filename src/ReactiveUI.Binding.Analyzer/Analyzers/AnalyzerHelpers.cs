@@ -29,6 +29,13 @@ internal static class AnalyzerHelpers
         methodSymbol.ContainingType?.Name is SourceGenerators.Constants.GeneratedExtensionClassName
             or SourceGenerators.Constants.StubExtensionClassName;
 
+    /// <summary>Checks whether an API deliberately resolves notification providers at run time.</summary>
+    /// <param name="methodSymbol">The binding method symbol.</param>
+    /// <returns><see langword="true"/> for an Unsafe binding call.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsUnsafeBindingMethod(IMethodSymbol methodSymbol) =>
+        methodSymbol.Name.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal);
+
     /// <summary>Checks if an expression is an inline lambda (not a variable reference or method call).</summary>
     /// <param name="expression">The expression to check.</param>
     /// <returns>true if the expression is an inline lambda.</returns>

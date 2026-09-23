@@ -62,6 +62,46 @@ public partial class TypeAnalyzerTests
         await Assert.That(diagnostics[0].Id).IsEqualTo(NoObservablePropertiesDiagnosticId);
     }
 
+    /// <summary>Verifies that an Unsafe call can observe a notification interface implemented only by the runtime type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_UnsafeInterfaceReceiver_NoDiagnostic()
+    {
+        const string Source = Preamble + """
+
+                                         namespace ReactiveUI.Binding
+                                         {
+                                             public static class ReactiveUIBindingExtensions
+                                             {
+                                                 public static object WhenAnyValueUnsafe<TObj, TReturn>(
+                                                     this TObj obj,
+                                                     Expression<Func<TObj, TReturn>> property)
+                                                     where TObj : class
+                                                     => throw new NotImplementedException();
+                                             }
+                                         }
+
+                                         namespace TestApp
+                                         {
+                                             public interface IViewFor
+                                             {
+                                                 object ViewModel { get; }
+                                             }
+
+                                             public class Usage
+                                             {
+                                                 public void Test(IViewFor view)
+                                                 {
+                                                     ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyValueUnsafe(view, x => x.ViewModel);
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
     /// <summary>Verifies RXUIBIND002 is NOT reported when the source type implements INotifyPropertyChanged.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
