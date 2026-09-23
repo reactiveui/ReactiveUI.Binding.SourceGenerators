@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <!-- Testing Framework -->
-    <PackageVersion Include="TUnit" Version="1.68.4"/>
+    <PackageVersion Include="TUnit" Version="1.68.17"/>
 
     <!-- Roslyn Framework -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0"/>
