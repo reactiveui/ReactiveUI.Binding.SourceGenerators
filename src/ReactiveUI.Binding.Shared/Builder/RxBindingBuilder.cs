@@ -42,7 +42,7 @@ public static class RxBindingBuilder
     /// <remarks>
     /// WARNING: This method should ONLY be used in unit tests. Never call in production code.
     /// </remarks>
-    internal static void ResetForTesting()
+    public static void ResetForTesting()
     {
         AppBuilder.ResetBuilderStateForTests();
         AppLocator.SetLocator(new ModernDependencyResolver());
@@ -51,5 +51,5 @@ public static class RxBindingBuilder
 
     /// <summary>Marks ReactiveUI.Binding as initialized. Called by <see cref="ReactiveUIBindingBuilder.BuildApp"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void MarkAsInitialized() => Volatile.Write(ref _hasBeenInitialized, 1);
+    public static void MarkAsInitialized() => Volatile.Write(ref _hasBeenInitialized, 1);
 }

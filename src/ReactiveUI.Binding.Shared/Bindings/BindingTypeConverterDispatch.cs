@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Dispatches conversions using a type-only fast-path, avoiding reflection.</summary>
-internal static class BindingTypeConverterDispatch
+public static class BindingTypeConverterDispatch
 {
     /// <summary>Attempts conversion via the converter's type-only metadata and its object shim.</summary>
     /// <param name="converter">The converter.</param>
@@ -18,7 +18,7 @@ internal static class BindingTypeConverterDispatch
     /// <param name="conversionHint">Implementation-defined hint.</param>
     /// <param name="result">The converted result.</param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise <see langword="false"/>.</returns>
-    internal static bool TryConvert(
+    public static bool TryConvert(
         IBindingTypeConverter converter,
         object? from,
         Type toType,
@@ -69,7 +69,7 @@ internal static class BindingTypeConverterDispatch
     /// <param name="conversionHint">Implementation-defined hint.</param>
     /// <param name="result">The converted result.</param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise, <see langword="false"/>.</returns>
-    internal static bool TryConvertFallback(
+    public static bool TryConvertFallback(
         IBindingFallbackConverter converter,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
@@ -109,7 +109,7 @@ internal static class BindingTypeConverterDispatch
     /// <item><description><see cref="IBindingFallbackConverter"/> - requires non-null input</description></item>
     /// </list>
     /// </remarks>
-    internal static bool TryConvertAny(
+    public static bool TryConvertAny(
         object? converter,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,

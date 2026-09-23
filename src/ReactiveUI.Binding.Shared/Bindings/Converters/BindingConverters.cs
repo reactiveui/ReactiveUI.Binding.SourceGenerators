@@ -24,7 +24,7 @@ public static class BindingConverters
     /// <summary>Replaces the converter service in use.</summary>
     /// <param name="service">The converter service to use.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="service"/> is null.</exception>
-    internal static void SetService(ConverterService service)
+    public static void SetService(ConverterService service)
     {
         ArgumentExceptionHelper.ThrowIfNull(service);
         _current = service;

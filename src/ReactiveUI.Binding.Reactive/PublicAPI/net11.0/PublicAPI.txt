@@ -40,6 +40,7 @@ namespace ReactiveUI.Binding.Reactive
     public static class BindingConverters
     {
         public static ReactiveUI.Binding.Reactive.ConverterService Current { get; }
+        public static void SetService(ReactiveUI.Binding.Reactive.ConverterService service) { }
     }
     public enum BindingDirection
     {
@@ -87,6 +88,12 @@ namespace ReactiveUI.Binding.Reactive
         public abstract int GetAffinityForObjects() { }
         public abstract bool TryConvert(TFrom? from, object? conversionHint, out TTo? result) { }
         public bool TryConvertTyped(object? from, object? conversionHint, out object? result) { }
+    }
+    public static class BindingTypeConverterDispatch
+    {
+        public static bool TryConvert(ReactiveUI.Binding.Reactive.IBindingTypeConverter converter, object? from, System.Type toType, object? conversionHint, out object? result) { }
+        public static bool TryConvertAny(object? converter, System.Type fromType, object? from, System.Type toType, object? conversionHint, out object? result) { }
+        public static bool TryConvertFallback(ReactiveUI.Binding.Reactive.IBindingFallbackConverter converter, System.Type fromType, object from, System.Type toType, object? conversionHint, out object? result) { }
     }
     [System.Diagnostics.DebuggerDisplay("Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
     public sealed class BindingTypeConverterRegistry
@@ -1751,6 +1758,9 @@ namespace ReactiveUI.Binding.Reactive.Builder
     {
         public static ReactiveUI.Binding.Reactive.Builder.ReactiveUIBindingBuilder CreateReactiveUIBindingBuilder() { }
         public static void EnsureInitialized() { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static void MarkAsInitialized() { }
+        public static void ResetForTesting() { }
     }
     public static class RxBindingBuilderMixins
     {
