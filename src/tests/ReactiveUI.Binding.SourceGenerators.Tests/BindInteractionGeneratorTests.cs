@@ -13,12 +13,15 @@ public class BindInteractionGeneratorTests
     /// <summary>The <c>BindInteractionDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindInteractionDispatchgcsName = "BindInteractionDispatch.g.cs";
 
+    /// <summary>The task-handler scenario used by both runtime flavors.</summary>
+    private const string TaskHandlerScenario = "BindInteraction/TaskHandler";
+
     /// <summary>Verifies BindInteraction with a task-based handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler()
     {
-        var source = SharedSourceReader.ReadScenario("BindInteraction/TaskHandler");
+        var source = SharedSourceReader.ReadScenario(TaskHandlerScenario);
         var result =
             await TestHelper.TestPassWithResult(
                 source,
@@ -26,6 +29,20 @@ public class BindInteractionGeneratorTests
                 LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>Generates an interaction binding against the System.Reactive runtime flavor.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TaskHandler_ReactiveRuntime()
+    {
+        var source = SharedSourceReader.ReadScenario(TaskHandlerScenario)
+            .Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, null, true);
+
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+        await result.GeneratedSourceContains(BindInteractionDispatchgcsName, "global::ReactiveUI.Binding.Reactive.IInteraction<");
     }
 
     /// <summary>Verifies BindInteraction with an observable-based handler.</summary>
@@ -82,7 +99,7 @@ public class BindInteractionGeneratorTests
     [Test]
     public async Task CallerFilePathFallback()
     {
-        var source = SharedSourceReader.ReadScenario("BindInteraction/TaskHandler");
+        var source = SharedSourceReader.ReadScenario(TaskHandlerScenario);
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindInteractionGeneratorTests),

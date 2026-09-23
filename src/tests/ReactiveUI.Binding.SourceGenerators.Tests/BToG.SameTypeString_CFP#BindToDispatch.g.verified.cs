@@ -33,6 +33,28 @@ namespace ReactiveUI.Binding
         private static global::System.IDisposable __BindTo_000016A7FA446B38(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                source,
+                target,
+                () => global::System.Array.Empty<global::ReactiveUI.Binding.IObservedChange<object, object>>(),
+                () =>
+                {
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = target;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.Caption;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.SameTypeString.MyView, string>>)(__property => __property.Caption)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
+                },
+                global::ReactiveUI.Binding.BindingDirection.OneWay))
+        {
+            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+        }
+
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
             if (__convertedSourceConverter == null)
             {

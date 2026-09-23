@@ -41,7 +41,7 @@ internal static class NativeCommandEmitter
         var parameter = CommandParameterEmitter.Read(inv);
         _ = sb.Append("            var __nativeControl = (global::UIKit.UIControl)").Append(controlAccess).AppendLine(";")
             .AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
-            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
+            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, (global::System.Windows.Input.ICommand cmd) =>")
             .AppendLine("            {")
             .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .AppendLine("                if (cmd == null)")

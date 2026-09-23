@@ -93,7 +93,7 @@ internal static class SymbolHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsInteractionType(INamedTypeSymbol type) =>
         type is { IsGenericType: true, TypeArguments.Length: InteractionTypeArgumentCount, MetadataName: "IInteraction`2" }
-        && type.ContainingNamespace!.ToDisplayString() == "ReactiveUI.Binding";
+        && type.ContainingNamespace!.ToDisplayString() is "ReactiveUI.Binding" or Constants.ReactiveRuntimeNamespace;
 
     /// <summary>Extracts TInput and TOutput type arguments from a type that implements IInteraction&lt;TInput, TOutput&gt;.</summary>
     /// <param name="type">The type symbol.</param>

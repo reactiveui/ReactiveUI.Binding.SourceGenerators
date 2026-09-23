@@ -37,8 +37,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// calls reach the generated code through the registry instead.
 /// </param>
 /// <param name="StubHasExpressionParameters">
-/// Whether the runtime stub the generated overload competes with carries the optional expression parameters -
-/// which it does wherever <c>CallerArgumentExpression</c> is available to it. The generated overload must take
+/// Whether the referenced runtime stub carries optional expression parameters. The generated overload must take
 /// the same parameters whether or not it dispatches on them, because the tie-break that lets a concrete
 /// overload beat the generic stub only applies once the parameter lists match: a shorter one leaves both
 /// candidates merely applicable, and every call site is then ambiguous (CS0121). This is independent of

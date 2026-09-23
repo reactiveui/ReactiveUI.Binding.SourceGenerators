@@ -28,7 +28,7 @@ internal static class AppKitCommandEmitter
         var native = inv.NativeCommand!;
         var parameter = CommandParameterEmitter.Read(inv);
         _ = sb.AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
-            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
+            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, (global::System.Windows.Input.ICommand cmd) =>")
             .AppendLine("            {")
             .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .AppendLine("                if (cmd == null)")

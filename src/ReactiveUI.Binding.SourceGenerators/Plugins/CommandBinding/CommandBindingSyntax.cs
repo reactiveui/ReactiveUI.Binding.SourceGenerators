@@ -24,7 +24,7 @@ internal static class CommandBindingSyntax
 
     /// <summary>Opens the subscription that rebinds whenever the command property changes.</summary>
     internal const string CommandSubscriptionOpen =
-        "            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>";
+        "            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, (global::System.Windows.Input.ICommand cmd) =>";
 
     /// <summary>Closes the subscription that rebinds whenever the command property changes.</summary>
     internal const string CommandSubscriptionClose = "            });";

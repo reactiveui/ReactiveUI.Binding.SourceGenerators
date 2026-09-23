@@ -26,7 +26,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
         CurrentMutable.InitializeSplat();
 
         // Register the ConverterService instance so it's accessible to registrations
-        CurrentMutable.RegisterConstant(() => ConverterService);
+        CurrentMutable.RegisterConstant(ConverterService);
     }
 
     /// <summary>Gets the converter service used for binding type conversions.</summary>

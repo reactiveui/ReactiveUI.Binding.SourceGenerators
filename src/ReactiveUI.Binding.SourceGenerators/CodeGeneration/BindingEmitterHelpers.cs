@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -139,30 +140,93 @@ internal static class BindingEmitterHelpers
     /// <summary>Emits the guard that lets a registered binding hook refuse this binding.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="sourceVar">The generated name of the source object.</param>
+    /// <param name="sourcePath">The source property path supplied to hooks.</param>
     /// <param name="targetVar">The generated name of the target object.</param>
+    /// <param name="targetPath">The target property path supplied to hooks.</param>
     /// <param name="direction">The binding direction reported to the hook.</param>
     /// <param name="earlyReturn">What the generated method returns when a hook refuses.</param>
     /// <remarks>
-    /// The <c>Any</c> test comes first so the two closures are only built once a hook is registered. The
-    /// changes handed to a hook carry the bound objects with no expression, the shape ReactiveUI itself
-    /// passes when it has no expression to walk, which cannot fault on a chain whose intermediate is null.
+    /// The <c>Any</c> test comes first so the closures are only built once a hook is registered. Each reader
+    /// walks its path when requested, returning the changes reached before a null intermediate.
     /// </remarks>
     internal static void EmitBindingHookGuard(
         StringBuilder sb,
         string sourceVar,
+        EquatableArray<PropertyPathSegment> sourcePath,
         string targetVar,
+        EquatableArray<PropertyPathSegment> targetPath,
         string direction,
-        string earlyReturn) => _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any").Append("            && !")
+        string earlyReturn)
+    {
+        _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any").Append("            && !")
             .Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(").Append("                ").Append(sourceVar).AppendLine(",")
-            .Append("                ").Append(targetVar).AppendLine(",").Append("                () => new ")
-            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
-            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(sourceVar)
-            .Append(", null, ").Append(sourceVar).AppendLine("),").AppendLine("                },").Append("                () => new ")
-            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
-            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(targetVar)
-            .Append(", null, ").Append(targetVar).AppendLine("),").AppendLine("                },").Append("                ")
-            .Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction).AppendLine("))").AppendLine("        {")
-            .Append("            return ").Append(earlyReturn).AppendLine(";").AppendLine("        }");
+            .Append("                ").Append(targetVar).AppendLine(",");
+
+        AppendHookPropertyReader(sb, sourceVar, sourcePath);
+        _ = sb.AppendLine(",");
+        AppendHookPropertyReader(sb, targetVar, targetPath);
+
+        _ = sb.AppendLine(",").Append("                ").Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction)
+            .AppendLine("))").AppendLine("        {").Append("            return ").Append(earlyReturn)
+            .AppendLine(";").AppendLine("        }");
+    }
+
+    /// <summary>Emits a lazy reader whose changes retain each segment's owner, expression and value.</summary>
+    /// <param name="sb">The generated source builder.</param>
+    /// <param name="root">The object at the start of the path.</param>
+    /// <param name="path">The property path, empty when the source is already an observable.</param>
+    internal static void AppendHookPropertyReader(StringBuilder sb, string root, EquatableArray<PropertyPathSegment> path)
+    {
+        if (path.Length == 0)
+        {
+            _ = sb.Append("                () => global::System.Array.Empty<")
+                .Append(GeneratedTypeNames.IObservedChange).Append("<object, object>>()");
+            return;
+        }
+
+        _ = sb.AppendLine("                () =>")
+            .AppendLine("                {")
+            .Append("                    var __hookChanges = new global::System.Collections.Generic.List<")
+            .Append(GeneratedTypeNames.IObservedChange).Append("<object, object>>(").Append(path.Length).AppendLine(");");
+
+        for (var i = 0; i < path.Length; i++)
+        {
+            AppendHookPropertySegment(sb, root, path, i);
+        }
+
+        _ = sb.AppendLine("                    return __hookChanges.ToArray();")
+            .Append("                }");
+    }
+
+    /// <summary>Emits one guarded property read and the change describing it.</summary>
+    /// <param name="sb">The generated source builder.</param>
+    /// <param name="root">The first owner in the path.</param>
+    /// <param name="path">The property path being read.</param>
+    /// <param name="index">The segment to emit.</param>
+    internal static void AppendHookPropertySegment(
+        StringBuilder sb,
+        string root,
+        EquatableArray<PropertyPathSegment> path,
+        int index)
+    {
+        var number = index.ToString(CultureInfo.InvariantCulture);
+        var owner = $"__hookOwner{number}";
+        var value = $"__hookValue{number}";
+        var previous = index == 0 ? root : $"__hookValue{(index - 1).ToString(CultureInfo.InvariantCulture)}";
+        var segment = path[index];
+
+        _ = sb.Append("                    var ").Append(owner).Append(" = ").Append(previous).AppendLine(";")
+            .Append("                    if (").Append(owner).AppendLine(" is null)")
+            .AppendLine("                    {")
+            .AppendLine("                        return __hookChanges.ToArray();")
+            .AppendLine("                    }")
+            .Append("                    var ").Append(value).Append(" = ").Append(owner).Append('.').Append(segment.PropertyName).AppendLine(";")
+            .Append("                    __hookChanges.Add(new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(")
+            .Append(owner).Append(", ((global::System.Linq.Expressions.Expression<global::System.Func<")
+            .Append(segment.DeclaringTypeFullName).Append(", ").Append(segment.PropertyTypeFullName)
+            .Append(">>)(__property => __property.").Append(segment.PropertyName).Append(")).Body, ")
+            .Append(value).AppendLine("));");
+    }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
     /// <param name="invocations">The detected call sites.</param>
@@ -811,7 +875,9 @@ internal static class BindingEmitterHelpers
         EmitBindingHookGuard(
             sb,
             api.WorkerSourceParameterName,
+            inv.SourcePropertyPath,
             api.WorkerTargetParameterName,
+            inv.TargetPropertyPath,
             api.IsTwoWay ? "TwoWay" : "OneWay",
             api.HookRefusalValue);
     }

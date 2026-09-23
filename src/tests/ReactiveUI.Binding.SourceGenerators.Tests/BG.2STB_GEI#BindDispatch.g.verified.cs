@@ -44,13 +44,29 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
                 viewModel,
                 view,
-                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                () =>
                 {
-                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = viewModel;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.FirstName;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.FirstName)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
                 },
-                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                () =>
                 {
-                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = view;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.FirstNameText;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, string>>)(__property => __property.FirstNameText)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
         {
@@ -213,13 +229,29 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
                 viewModel,
                 view,
-                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                () =>
                 {
-                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = viewModel;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.LastName;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.LastName)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
                 },
-                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                () =>
                 {
-                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                    var __hookOwner0 = view;
+                    if (__hookOwner0 is null)
+                    {
+                        return __hookChanges.ToArray();
+                    }
+                    var __hookValue0 = __hookOwner0.LastNameText;
+                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, string>>)(__property => __property.LastNameText)).Body, __hookValue0));
+                    return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
         {

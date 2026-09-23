@@ -360,14 +360,17 @@ internal static class BindInteractionCodeGenerator
         ClassBindingInfo? viewClassInfo,
         string interactionType)
     {
-        AppendViewModelGuard(sb);
-
         var observation = BindingEmitterHelpers.ResolveViewModelObservation(
             inv.ViewModelTypeFullName,
             inv.ViewTypeFullName,
             inv.InteractionPropertyPath,
             viewModelClassInfo,
             viewClassInfo);
+
+        if (observation.RootVariable == "viewModel")
+        {
+            AppendViewModelGuard(sb);
+        }
 
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
