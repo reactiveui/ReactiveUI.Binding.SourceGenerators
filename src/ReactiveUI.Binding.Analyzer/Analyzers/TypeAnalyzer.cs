@@ -56,6 +56,13 @@ public class TypeAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // An interface may be implemented by a notifying runtime type. Unsafe calls discover its provider
+        // at runtime, while generated calls must rely on the declared type's mechanism.
+        if (sourceType?.TypeKind == TypeKind.Interface && AnalyzerHelpers.IsUnsafeBindingMethod(methodSymbol))
+        {
+            return;
+        }
+
         context.ReportDiagnostic(
             Diagnostic.Create(
                 DiagnosticWarnings.NoObservableProperties,
