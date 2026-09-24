@@ -49,6 +49,29 @@ internal static class EventCommandBindingEmitter
             .Append("                        cmd.Execute(").Append(argument).AppendLine(");").AppendLine(CommandBindingSyntax.NestedBlockClose)
             .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine();
 
+    /// <summary>Appends the handler that runs the command, reading the parameter from the view model when one is named.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="eventArgsType">The event args type the control's event carries.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
+    /// <param name="paramAccess">The typed access that reads the command parameter, or null to run the command with none.</param>
+    internal static void AppendHandler(StringBuilder sb, string eventArgsType, bool supportsNullable, string? paramAccess)
+    {
+        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
+        if (paramAccess is null)
+        {
+            AppendHandlerExecution(sb, "null");
+            return;
+        }
+
+        _ = sb.Append("                    var param = ").Append(paramAccess).AppendLine(";");
+        AppendHandlerExecution(sb, "param");
+    }
+
+    /// <summary>Appends the return of the command subscription when no parameter stream was subscribed to, and closes the member.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    internal static void AppendCommandOnlyReturn(StringBuilder sb) =>
+        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+
     /// <summary>Appends the return of the binding's own subscriptions when a parameter stream was subscribed to.</summary>
     /// <param name="sb">The string builder to append to.</param>
     internal static void AppendParameterisedDisposableReturn(StringBuilder sb) =>

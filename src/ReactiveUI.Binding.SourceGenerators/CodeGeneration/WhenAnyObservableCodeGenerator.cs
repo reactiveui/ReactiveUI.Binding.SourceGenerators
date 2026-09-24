@@ -231,45 +231,24 @@ internal static class WhenAnyObservableCodeGenerator
     /// <summary>Groups WhenAnyObservable invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">All detected invocations.</param>
     /// <returns>A list of type groups.</returns>
-    internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<WhenAnyObservableInvocationInfo> invocations)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<WhenAnyObservableInvocationInfo> invocations) =>
+        SignatureGrouping.Group(invocations, AppendSignatureKey, static (first, members) => new TypeGroup(first, members));
+
+    /// <summary>Writes the parts of a call site that decide its overload: the types and each inner observable's type.</summary>
+    /// <param name="key">The key being built.</param>
+    /// <param name="inv">The call site.</param>
+    private static void AppendSignatureKey(PooledStringBuilder key, WhenAnyObservableInvocationInfo inv)
     {
-        var groupMap = new Dictionary<string, List<WhenAnyObservableInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
+        _ = key
+            .Append(inv.SourceTypeFullName).Append('|')
+            .Append(inv.ReturnTypeFullName).Append('|')
+            .Append(inv.PropertyPaths.Length).Append('|')
+            .Append(inv.HasSelector);
+        for (var p = 0; p < inv.InnerObservableTypeFullNames.Length; p++)
         {
-            var inv = invocations[i];
-            _ = keySb.Clear()
-                .Append(inv.SourceTypeFullName).Append('|')
-                .Append(inv.ReturnTypeFullName).Append('|')
-                .Append(inv.PropertyPaths.Length).Append('|')
-                .Append(inv.HasSelector);
-
-            for (var p = 0; p < inv.InnerObservableTypeFullNames.Length; p++)
-            {
-                _ = keySb.Append('|').Append(inv.InnerObservableTypeFullNames[p]);
-            }
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
+            _ = key.Append('|').Append(inv.InnerObservableTypeFullNames[p]);
         }
-
-        keySb.Return();
-
-        var result = new List<TypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            result.Add(new(kvp.Value[0], [.. kvp.Value]));
-        }
-
-        return result;
     }
 
     /// <summary>Emits one variable per observed property, each switched to the latest value its property holds.</summary>

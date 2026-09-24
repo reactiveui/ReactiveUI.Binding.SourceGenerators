@@ -57,42 +57,20 @@ internal static class BindCommandCodeGenerator
     /// <summary>Groups BindCommand invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindCommand invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<BindCommandTypeGroup> GroupByTypeSignature(
-        ImmutableArray<BindCommandInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindCommandInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
+        ImmutableArray<BindCommandInvocationInfo> invocations) =>
+        SignatureGrouping.Group(
+            invocations,
+            static (key, inv) => _ = key
                 .Append(inv.ViewTypeFullName).Append('|')
                 .Append(inv.ViewModelTypeFullName).Append('|')
                 .Append(inv.CommandTypeFullName).Append('|')
                 .Append(inv.ControlTypeFullName).Append('|')
                 .Append(inv.HasObservableParameter).Append('|')
                 .Append(inv.HasExpressionParameter).Append('|')
-                .Append(inv.ParameterTypeFullName ?? string.Empty);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindCommandTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
+                .Append(inv.ParameterTypeFullName ?? string.Empty),
+            static (first, members) => new BindCommandTypeGroup(
                 first.ViewTypeFullName,
                 first.ViewModelTypeFullName,
                 first.CommandTypeFullName,
@@ -100,11 +78,15 @@ internal static class BindCommandCodeGenerator
                 first.HasObservableParameter,
                 first.HasExpressionParameter,
                 first.ParameterTypeFullName,
-                [.. kvp.Value]));
-        }
+                members));
 
-        return result;
-    }
+    /// <summary>Generates the concrete typed overload the consumer's language features call for.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The BindCommand type group.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateConcreteOverload(StringBuilder sb, BindCommandTypeGroup group, in LanguageFeatures features) =>
+        GenerateConcreteOverload(sb, group, features.SupportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
 
     /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -404,13 +386,12 @@ internal static class BindCommandCodeGenerator
 
         foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
         {
-            foreach (var callSite in entry.Value)
-            {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
-            }
-
-            _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindCommand_").Append(entry.Key).AppendLine("(");
-
+            InterceptorEmitter.AppendClaimingMethodOpen(
+                sb,
+                entry.Value,
+                static x => x.Interceptor,
+                "        internal static global::System.IDisposable __Intercept_BindCommand_",
+                entry.Key);
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
             _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
@@ -439,12 +420,7 @@ internal static class BindCommandCodeGenerator
         }
         else
         {
-            GenerateConcreteOverload(
-                sb,
-                collapsed,
-                features.SupportsCallerArgExpr,
-                features.SupportsNullable,
-                features.StubHasExpressionParameters);
+            GenerateConcreteOverload(sb, collapsed, in features);
         }
 
         _ = sb.AppendLine();
@@ -566,13 +542,13 @@ internal static class BindCommandCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+            CodeGeneratorHelpers.AppendCallerInfoDispatchBranch(
                 sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
+                i,
                 inv.CallerLineNumber,
-                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
-            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments + extraArgs);
+                inv.CallerFilePath,
+                WorkerMethodPrefix + MethodSuffix(inv),
+                WorkerArguments + extraArgs);
         }
     }
 

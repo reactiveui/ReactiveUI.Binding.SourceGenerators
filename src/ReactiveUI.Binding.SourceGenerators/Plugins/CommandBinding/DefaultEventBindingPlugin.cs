@@ -4,7 +4,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventCommandBindingEmitter;
 
@@ -61,41 +60,9 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     {
         AppendLatestParameterCapture(sb, inv);
         AppendCommandMissingExit(sb);
-        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
-
-        _ = sb.Append("                    var param = ").Append(CommandParameterEmitter.Read(inv)).AppendLine(";");
-
-        AppendHandlerExecution(sb, "param");
+        AppendHandler(sb, eventArgsType, supportsNullable, CommandParameterEmitter.Read(inv));
         AppendHandlerAttachment(sb, inv, controlAccess);
         AppendParameterisedDisposableReturn(sb);
-    }
-
-    /// <summary>Emits command execution using the selected parameter property.</summary>
-    /// <param name="sb">The output builder.</param>
-    /// <param name="inv">The extracted binding call.</param>
-    /// <param name="controlAccess">The control's typed access expression.</param>
-    /// <param name="eventArgsType">The framework event argument type.</param>
-    /// <param name="paramAccess">The typed command parameter access.</param>
-    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
-    internal static void EmitWithExpressionParameter(
-        StringBuilder sb,
-        BindCommandInvocationInfo inv,
-        string controlAccess,
-        string eventArgsType,
-        string paramAccess,
-        bool supportsNullable)
-    {
-        _ = sb.AppendLine();
-        AppendCommandSubscription(sb);
-        AppendCommandMissingExit(sb);
-        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
-
-        _ = sb.Append("                    var param = ").Append(paramAccess).AppendLine(";");
-
-        AppendHandlerExecution(sb, "param");
-        AppendHandlerAttachment(sb, inv, controlAccess);
-
-        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
     }
 
     /// <summary>Emits command execution without a parameter.</summary>
@@ -114,11 +81,9 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         _ = sb.AppendLine();
         AppendCommandSubscription(sb);
         AppendCommandMissingExit(sb);
-        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
-        AppendHandlerExecution(sb, "null");
+        AppendHandler(sb, eventArgsType, supportsNullable, null);
         AppendHandlerAttachment(sb, inv, controlAccess);
-
-        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+        AppendCommandOnlyReturn(sb);
     }
 
     /// <summary>Appends the exit taken while the view model has handed over no command.</summary>

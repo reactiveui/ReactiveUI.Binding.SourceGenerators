@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -10,35 +9,27 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
 /// <summary>Observes UIKit text, selection, date and switch properties through their native notifications.</summary>
-internal sealed class UIKitObservationPlugin : IPlatformObservationPlugin
+internal static class UIKitObservation
 {
+    /// <summary>The mechanism's identity.</summary>
+    internal const string Kind = "UIKit";
+
     /// <summary>The native UIKit property-specific score.</summary>
     private const int PropertyAffinity = 30;
 
-    /// <inheritdoc/>
-    public int Affinity => PropertyAffinity;
+    /// <summary>Gets the plugin the registry selects this mechanism through.</summary>
+    internal static NativeObservationPlugin Plugin { get; } = new(Kind, PropertyAffinity, Inspect, AppendSubscription);
 
-    /// <inheritdoc/>
-    public string ObservationKind => "UIKit";
-
-    /// <inheritdoc/>
-    public bool SupportsBeforeChanged => false;
-
-    /// <inheritdoc/>
-    public bool RequiresHelperClasses => true;
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
-        !isBeforeChange && CanObserveProperty(classInfo, propertyName) ? Affinity : 0;
-
-    /// <inheritdoc/>
-    public PlatformObservationInfo? InspectProperty(INamedTypeSymbol owner, IPropertySymbol property)
+    /// <summary>Offers a candidate for a text control's notification or a control's typed change event.</summary>
+    /// <param name="owner">The concrete type through which the property is accessed.</param>
+    /// <param name="property">The property being observed.</param>
+    /// <returns>The eligible candidate, or null.</returns>
+    internal static PlatformObservationInfo? Inspect(INamedTypeSymbol owner, IPropertySymbol property)
     {
         var notification = NotificationFor(owner, property.Name);
         if (notification is not null)
         {
-            return new(ObservationKind, Affinity, default, notification, null, null);
+            return new(Kind, PropertyAffinity, default, notification, null, null);
         }
 
         var widget = property.Name switch
@@ -62,25 +53,8 @@ internal sealed class UIKitObservationPlugin : IPlatformObservationPlugin
             _ => "ValueChanged",
         };
         var changeEvent = PlatformSymbols.FindEvent(owner, eventName);
-        return changeEvent is null ? null : new(ObservationKind, Affinity, new([changeEvent]), null, null, null);
+        return changeEvent is null ? null : new(Kind, PropertyAffinity, new([changeEvent]), null, null, null);
     }
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsAMatch(ClassBindingInfo classInfo) => PlatformSymbols.HasCandidate(classInfo, ObservationKind);
-
-    /// <inheritdoc/>
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
-        PlatformSymbols.Candidate(classInfo, propertyName, ObservationKind) is not null;
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitHelperClasses(StringBuilder sb) => NativeObservableEmitter.EmitHelper(sb, "__UIKitObservable");
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
-        NativeObservationEmitter.Emit(sb, observation, ObservationKind, AppendSubscription);
 
     /// <summary>Emits the native notification selected for this property.</summary>
     /// <param name="sb">The output builder.</param>

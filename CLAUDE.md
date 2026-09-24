@@ -193,11 +193,13 @@ src/
 │   │   └── Observation/                         # One plugin per mechanism, scored from BindingAffinity
 │   │       ├── KVOObservationPlugin.cs          # Apple KVO/NSObject (Kvo, 15)
 │   │       ├── ReactiveObjectObservationPlugin.cs # IReactiveObject (ExactType, 10)
-│   │       ├── WinFormsObservationPlugin.cs     # WinForms Component (WinFormsEvent, 8)
-│   │       ├── WinUIObservationPlugin.cs        # WinUI DependencyObject (WinUiDependencyObject, 6)
 │   │       ├── INPCObservationPlugin.cs         # INotifyPropertyChanged (Explicit, 5)
-│   │       ├── AndroidObservationPlugin.cs      # Android View (Explicit, 5)
 │   │       ├── WpfObservationPlugin.cs          # WPF DependencyObject (WpfDependencyObject, 4)
+│   │       ├── NativeObservationPlugin.cs       # The one plugin every native after-change mechanism registers
+│   │       ├── WinFormsObservation.cs           # WinForms Component (WinFormsEvent, 8)
+│   │       ├── WinUIObservation.cs, UnoObservation.cs # Dependency objects (WinUiDependencyObject, 6)
+│   │       ├── AndroidObservation.cs            # Android View (Explicit, 5)
+│   │       ├── UIKit*/AppKitObservation.cs      # Apple controls (30 and 20)
 │   │       ├── ObservationEmissionExtensions.cs  # Shared expression and chain composition
 │   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
 │   │   └── ViewThread/                          # The invoker a generated binding carries for its target
@@ -260,6 +262,11 @@ extraction handles source and referenced types. Selection emits the binding dire
 Observation, command and conversion mechanisms implement their interfaces directly. They use no plugin base
 classes. Shared logic lives in static helpers with internal methods. Each mechanism owns its eligibility and
 emission; registries compare affinity and retain declaration order on ties.
+
+The native after-change mechanisms (WinForms, WinUI, Uno, Android, UIKit and AppKit) answer the registry the
+same way, so one sealed `NativeObservationPlugin` implements the interface for all of them. Each platform is a
+static class, such as `WinFormsObservation`. It supplies its kind and affinity, its `Inspect` method, which
+decides eligibility, and the statements that attach to its notification. It exposes the result as `Plugin`.
 
 Affinity values match the corresponding ReactiveUI mechanisms, including property-specific UIKit scores of 30,
 Apple value notifications at 20, KVO at 15, and ordinary CLR fallback at 1. Registered providers and generated
@@ -742,19 +749,32 @@ The concrete overload only beats the generic stub once their parameter lists mat
 preferred over a generic one, but that tie-break needs the two to be otherwise indistinguishable. A shorter
 parameter list leaves both merely applicable, neither better, and **every matching call site fails with CS0121**.
 
-The stub declares its `[CallerArgumentExpression]` parameters wherever the attribute is available to it, which
-is a property of the *target framework*. Whether dispatch can use them is a property of the *language version*,
-and the two vary independently: `<LangVersion>7.3</LangVersion>` on `net8.0` is a perfectly ordinary project.
-So `LanguageFeatures` carries them separately:
+Every stub declares its `[CallerArgumentExpression]` parameters on every target framework. Below .NET 5 the
+attribute comes from the runtime library's `internal` polyfill in `Polyfills/`. The stub files carry no
+`#if` around those parameters, so each overload is written once.
 
-- `StubHasExpressionParameters` — the attribute type is present **and accessible** from the consumer's assembly.
-  Drives whether the parameters are emitted at all. Accessibility matters: on a framework without the attribute
-  the only one in reach is the runtime library's own `internal` polyfill, which generated code cannot apply.
-- `SupportsCallerArgExpr` — the above **and** C# 10. Drives whether the parameters carry the attribute and
-  whether dispatch matches on expression text rather than on `CallerFilePath` + `CallerLineNumber`.
+Declaring a parameter does not mean the compiler fills it. The compiler fills the parameter on the generated
+overload only when two things hold:
 
-Below C# 10 on a framework that has the attribute, the parameters are emitted unattributed and inert: they exist
-only so the lists line up, and dispatch runs off the file and line.
+- The consumer compiles at C# 10 or later.
+- The generated overload can apply the attribute, because exactly one accessible attribute type resolves in the
+  consumer's compilation. On .NET Framework the only copy is the runtime's `internal` one, which the consumer
+  cannot apply.
+
+`LanguageFeatures` carries the two answers separately:
+
+- `StubHasExpressionParameters` reads the referenced stub's own parameter list. It decides whether the generated
+  overload declares the parameters, so the two lists match. A runtime package built before the parameters
+  existed on every framework reads as `false`.
+- `SupportsCallerArgExpr` is the above, C# 10, and an accessible attribute. It decides whether the parameters
+  carry the attribute and whether dispatch matches on expression text rather than on `CallerFilePath` +
+  `CallerLineNumber`.
+
+When the compiler will not fill the parameters, the generated overload declares them unattributed. They exist
+only so the lists line up, and dispatch runs off the file and line. The generator never declares the attribute
+itself. Another generator, such as PolySharp, can declare it in the same compilation, and two declarations do not
+compile (CS0101). `LanguageFeatureDetectionTests` covers a .NET Framework consumer and one on a framework that
+declares the attribute.
 
 The overloads that take an `IBindingTypeConverter` - `BindOneWay`, `BindTwoWay`, `OneWayBind` and `Bind` with a
 converter, an optional hint and an optional scheduler - declare no expression parameters at all. Their call sites
@@ -896,7 +916,7 @@ All pipeline models are `sealed record` types with value equality. NEVER include
 
 ### Where the Observation Helper Classes Are Declared
 
-Some plugins (`KVOObservationPlugin`, `WinUIObservationPlugin`) emit observation code that instantiates helper
+Some plugins (`KVOObservationPlugin`, `WinUIObservation.Plugin`) emit observation code that instantiates helper
 classes by bare name — `__KVOObservable<T>`, `__KVOObserver`, `__WinUIDPObservable<TSource, TValue>`. Every dispatch file is
 another part of the same `__ReactiveUIGeneratedBindings` class, so one part declaring them is enough for all of
 them, and two parts declaring them is a duplicate-member error.

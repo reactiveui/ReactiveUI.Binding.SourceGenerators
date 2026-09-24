@@ -300,13 +300,13 @@ public class ObservationPluginTests
         await Assert.That(plugin.IsAMatch(classInfo)).IsTrue();
     }
 
-    // ========== WinFormsObservationPlugin ==========
+    // ========== WinFormsObservation ==========
     /// <summary>Verifies WinForms plugin shallow observation variable after-change emits EventObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WinFormsPlugin_EmitShallowObservationVariable_AfterChange_EmitsEventObservable()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -322,7 +322,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -336,7 +336,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -350,7 +350,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitDeepChainRootSegment_AfterChange_EmitsEventObservable()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -366,7 +366,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -380,7 +380,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsEventObservable()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -396,7 +396,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -410,7 +410,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -426,7 +426,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitInlineObservationVariable_EmitsEventObservable()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -442,7 +442,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitHelperClasses_DeclaresTypedSubscription()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
 
         plugin.EmitHelperClasses(sb);
@@ -450,13 +450,13 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains(WinFormsObservableName);
     }
 
-    // ========== WinUIObservationPlugin ==========
+    // ========== WinUIObservation ==========
     /// <summary>Verifies WinUI plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -470,7 +470,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitShallowObservationVariable_AfterChange_EmitsWinUIDPObservable()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -486,7 +486,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -500,7 +500,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitDeepChainRootSegment_AfterChange_EmitsWinUIDPObservable()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -514,7 +514,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -528,7 +528,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsWinUIDPObservable()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -544,7 +544,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -558,7 +558,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
@@ -574,7 +574,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitInlineObservationVariable_EmitsWinUIDPObservable()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -590,7 +590,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitHelperClasses_EmitsWinUIDPObservable()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
 
         plugin.EmitHelperClasses(sb);
@@ -803,13 +803,13 @@ public class ObservationPluginTests
         await Assert.That(result).Contains("true, true");
     }
 
-    // ========== AndroidObservationPlugin ==========
+    // ========== AndroidObservation ==========
     /// <summary>The variable form subscribes the same widget event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AndroidPlugin_EmitShallowObservationVariable_SubscribesTheWidgetEvent()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
@@ -825,7 +825,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitShallowObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
@@ -841,7 +841,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitDeepChainRootSegment_SubscribesTheWidgetEvent()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
@@ -857,7 +857,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitDeepChainRootSegment_UnreportedProperty_EmitsTheUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
@@ -873,7 +873,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
@@ -889,7 +889,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
@@ -905,7 +905,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitInlineObservationVariable_SubscribesTheWidgetEvent()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
@@ -921,7 +921,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitInlineObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
@@ -937,7 +937,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitHelperClasses_DeclaresTypedSubscription()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
 
         plugin.EmitHelperClasses(sb);
@@ -951,7 +951,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_Properties_AreCorrect()
     {
         const int ExpectedPluginAffinity = 5;
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
 
         await Assert.That(plugin.Affinity).IsEqualTo(ExpectedPluginAffinity);
         await Assert.That(plugin.ObservationKind).IsEqualTo("Android");
@@ -1007,7 +1007,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinFormsPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -1021,7 +1021,7 @@ public class ObservationPluginTests
     [Test]
     public async Task WinUIPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
-        var plugin = new WinUIObservationPlugin();
+        var plugin = WinUIObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
@@ -1049,7 +1049,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitShallowObservation_SubscribesTheWidgetEvent()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
@@ -1065,7 +1065,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitShallowObservation_UnreportedProperty_EmitsTheUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
@@ -1082,7 +1082,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
@@ -1098,7 +1098,7 @@ public class ObservationPluginTests
     [Test]
     public async Task AndroidPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var sb = new StringBuilder();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 

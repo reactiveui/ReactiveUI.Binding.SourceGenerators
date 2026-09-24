@@ -37,7 +37,6 @@ public static partial class ReactiveUIBindingExtensions
     public static IDisposable InvokeCommand<T>(this IObservable<T> source, ICommand command) =>
         CommandBinding.CommandInvoker.Invoke(source, command);
 
-#if NET8_0_OR_GREATER
     /// <summary>Executes the command a property holds with each value as its parameter, skipping a value while there is no command or the command cannot execute it.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <typeparam name="TTarget">The type declaring the command property.</typeparam>
@@ -57,24 +56,5 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
-#else
-    /// <summary>Executes the command a property holds with each value as its parameter, skipping a value while there is no command or the command cannot execute it.</summary>
-    /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
-    /// <typeparam name="TTarget">The type declaring the command property.</typeparam>
-    /// <param name="source">The sequence driving the executions.</param>
-    /// <param name="target">The object declaring the command property; null executes nothing.</param>
-    /// <param name="commandProperty">An expression that selects the command property to execute.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, stops executing the command and stops observing the property.</returns>
-    /// <exception cref="InvalidOperationException">No generated InvokeCommand dispatch matched this call site. Use InvokeCommandUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable InvokeCommand<T, TTarget>(
-        this IObservable<T> source,
-        TTarget? target,
-        Expression<Func<TTarget, ICommand?>> commandProperty,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TTarget : class
-#endif
         => throw new InvalidOperationException(NoInvokeCommandDispatchMessage);
 }

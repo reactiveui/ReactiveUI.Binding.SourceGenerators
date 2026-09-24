@@ -27,6 +27,7 @@
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.12"/>
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.12"/>
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.12"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net472" Version="1.8.12"/>
 
     <!-- Dependencies -->
     <PackageVersion Include="Splat" Version="21.0.0"/>

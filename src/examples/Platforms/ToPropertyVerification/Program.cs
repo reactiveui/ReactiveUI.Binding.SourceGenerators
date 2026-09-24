@@ -11,17 +11,17 @@ const string ChangedLabel = "changed";
 
 var failures = 0;
 
-Run("Selector + out overload, field-event raise mechanism", FieldEventScenario);
+failures += Run("Selector + out overload, field-event raise mechanism", FieldEventScenario);
 
-Run("Name overload with initial value + selector overload with initial-value factory, public raise-method mechanism", RaiseMethodScenario);
+failures += Run("Name overload with initial value + selector overload with initial-value factory, public raise-method mechanism", RaiseMethodScenario);
 
-Run("Deferred subscription + explicit scheduler, protected raise-method mechanism", ProtectedBaseScenario);
+failures += Run("Deferred subscription + explicit scheduler, protected raise-method mechanism", ProtectedBaseScenario);
 
-Run("Deferred+scheduler combo, and out combined with initial value / initial-value factory", CombinedOverloadsScenario);
+failures += Run("Deferred+scheduler combo, and out combined with initial value / initial-value factory", CombinedOverloadsScenario);
 
-Run("ReactiveObject (IReactiveObject raise mechanism), selector + out overloads", ReactiveObjectScenario);
+failures += Run("ReactiveObject (IReactiveObject raise mechanism), selector + out overloads", ReactiveObjectScenario);
 
-Run("[ObservableAsProperty] partial properties", AttributeScenario);
+failures += Run("[ObservableAsProperty] partial properties", AttributeScenario);
 
 Console.WriteLine();
 
@@ -29,18 +29,19 @@ Console.WriteLine(failures == 0 ? "ALL SCENARIOS PASSED" : $"{failures} SCENARIO
 
 return failures == 0 ? 0 : 1;
 
-void Run(string name, Action scenario)
+static int Run(string name, Action scenario)
 {
     try
     {
         scenario();
         Console.WriteLine($"PASS: {name}");
+        return 0;
     }
     catch (Exception ex)
     {
-        failures++;
         Console.WriteLine($"FAIL: {name}");
         Console.WriteLine($"      {ex}");
+        return 1;
     }
 }
 

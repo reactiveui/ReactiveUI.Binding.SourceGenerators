@@ -19,7 +19,6 @@ public static partial class ReactiveUIBindingExtensions
     private const string NoBindToDispatchMessage =
         "No generated BindTo dispatch matched this call site. Use BindToUnsafe to resolve the expression at run time.";
 
-#if NET8_0_OR_GREATER
     /// <summary>Writes each value the source produces to a target property, on the target's owning thread when its platform has one.</summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -40,31 +39,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
-#else
-    /// <summary>Writes each value the source produces to a target property, on the target's owning thread when its platform has one.</summary>
-    /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
-    /// <typeparam name="TTarget">The type of the target object.</typeparam>
-    /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
-    /// <param name="source">The observable stream to bind to a target property.</param>
-    /// <param name="target">The target object whose property will be set.</param>
-    /// <param name="property">An expression that selects the target property to set.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site. Use BindToUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
-        this IObservable<TValue> source,
-        TTarget? target,
-        Expression<Func<TTarget, TTargetValue?>> property,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TTarget : class
-#endif
     {
         throw new InvalidOperationException(NoBindToDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Writes each value the source produces to a target property, passing the conversion hint to the
     /// converter that coerces the value to the property type.
@@ -90,36 +68,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
-#else
-    /// <summary>
-    /// Writes each value the source produces to a target property, passing the conversion hint to the
-    /// converter that coerces the value to the property type.
-    /// </summary>
-    /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
-    /// <typeparam name="TTarget">The type of the target object.</typeparam>
-    /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
-    /// <param name="source">The observable stream to bind to a target property.</param>
-    /// <param name="target">The target object whose property will be set.</param>
-    /// <param name="property">An expression that selects the target property to set.</param>
-    /// <param name="conversionHint">An object that provides a hint to the converter. The semantics are defined by the converter.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site. Use BindToUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
-        this IObservable<TValue> source,
-        TTarget? target,
-        Expression<Func<TTarget, TTargetValue?>> property,
-        object? conversionHint,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TTarget : class
-#endif
     {
         throw new InvalidOperationException(NoBindToDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Writes each value the source produces to a target property, coercing it with the supplied converter
     /// instead of a registered one.
@@ -145,36 +97,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
-#else
-    /// <summary>
-    /// Writes each value the source produces to a target property, coercing it with the supplied converter
-    /// instead of a registered one.
-    /// </summary>
-    /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
-    /// <typeparam name="TTarget">The type of the target object.</typeparam>
-    /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
-    /// <param name="source">The observable stream to bind to a target property.</param>
-    /// <param name="target">The target object whose property will be set.</param>
-    /// <param name="property">An expression that selects the target property to set.</param>
-    /// <param name="converterOverride">An explicit converter to use when converting the source value to the target property type.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site. Use BindToUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
-        this IObservable<TValue> source,
-        TTarget? target,
-        Expression<Func<TTarget, TTargetValue?>> property,
-        IBindingTypeConverter? converterOverride,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TTarget : class
-#endif
     {
         throw new InvalidOperationException(NoBindToDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Writes each value the source produces to a target property, coercing it with the supplied converter
     /// instead of a registered one and passing the conversion hint to it.
@@ -203,33 +129,6 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
-#else
-    /// <summary>
-    /// Writes each value the source produces to a target property, coercing it with the supplied converter
-    /// instead of a registered one and passing the conversion hint to it.
-    /// </summary>
-    /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
-    /// <typeparam name="TTarget">The type of the target object.</typeparam>
-    /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
-    /// <param name="source">The observable stream to bind to a target property.</param>
-    /// <param name="target">The target object whose property will be set.</param>
-    /// <param name="property">An expression that selects the target property to set.</param>
-    /// <param name="conversionHint">An object that provides a hint to the converter. The semantics are defined by the converter.</param>
-    /// <param name="converterOverride">An explicit converter to use when converting the source value to the target property type.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site. Use BindToUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
-        this IObservable<TValue> source,
-        TTarget? target,
-        Expression<Func<TTarget, TTargetValue?>> property,
-        object? conversionHint,
-        IBindingTypeConverter? converterOverride,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TTarget : class
-#endif
     {
         throw new InvalidOperationException(NoBindToDispatchMessage);
     }

@@ -500,4 +500,36 @@ public class CodeGeneratorHelpersTests
 
         await Assert.That(result).IsEqualTo("((global::TestApp.MyViewModel)(object)view.ViewModel)");
     }
+
+    /// <summary>
+    /// A file-and-line branch is the call site's condition followed by the return of its worker. The first branch of
+    /// an overload opens with <c>if</c> and every later one with <c>else if</c>.
+    /// </summary>
+    /// <param name="index">The branch's position in the overload.</param>
+    /// <param name="keyword">The keyword the branch is expected to open with.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments(0, "if")]
+    [Arguments(1, "else if")]
+    [Arguments(2, "else if")]
+    public async Task AppendCallerInfoDispatchBranch_WritesConditionThenWorkerReturn(int index, string keyword)
+    {
+        const int line = 42;
+        const string worker = "__Worker_1";
+        const string arguments = "view, viewModel";
+        var expected = new StringBuilder();
+        CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+            expected,
+            keyword,
+            line,
+            CodeGeneratorHelpers.ComputePathSuffix(SrcTestcsName));
+        CodeGeneratorHelpers.AppendDispatchReturn(expected, worker, arguments);
+        var actual = new StringBuilder();
+
+        CodeGeneratorHelpers.AppendCallerInfoDispatchBranch(actual, index, line, SrcTestcsName, worker, arguments);
+
+        await Assert.That(actual.ToString()).IsEqualTo(expected.ToString());
+        await Assert.That(actual.ToString()).Contains($"{keyword} (callerLineNumber == {line}");
+        await Assert.That(actual.ToString()).Contains($"return {worker}({arguments});");
+    }
 }

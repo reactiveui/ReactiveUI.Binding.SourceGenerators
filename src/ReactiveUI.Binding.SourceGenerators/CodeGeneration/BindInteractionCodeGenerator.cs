@@ -49,52 +49,34 @@ internal static class BindInteractionCodeGenerator
     /// <summary>Groups BindInteraction invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindInteraction invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<BindInteractionTypeGroup> GroupByTypeSignature(
-        ImmutableArray<BindInteractionInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindInteractionInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
+        ImmutableArray<BindInteractionInvocationInfo> invocations) =>
+        SignatureGrouping.Group(
+            invocations,
+            static (key, inv) => _ = key
                 .Append(inv.ViewTypeFullName).Append('|')
                 .Append(inv.ViewModelTypeFullName).Append('|')
                 .Append(inv.InputTypeFullName).Append('|')
                 .Append(inv.OutputTypeFullName).Append('|')
                 .Append(inv.IsTaskHandler).Append('|')
-                .Append(inv.DontCareTypeFullName);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindInteractionTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
+                .Append(inv.DontCareTypeFullName),
+            static (first, members) => new BindInteractionTypeGroup(
                 first.ViewTypeFullName,
                 first.ViewModelTypeFullName,
                 first.InputTypeFullName,
                 first.OutputTypeFullName,
                 first.IsTaskHandler,
                 first.DontCareTypeFullName,
-                [.. kvp.Value]));
-        }
+                members));
 
-        return result;
-    }
+    /// <summary>Generates the concrete typed overload the consumer's language features call for.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The BindInteraction type group.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateConcreteOverload(StringBuilder sb, BindInteractionTypeGroup group, in LanguageFeatures features) =>
+        GenerateConcreteOverload(sb, group, features.SupportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
 
     /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -165,13 +147,13 @@ internal static class BindInteractionCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+            CodeGeneratorHelpers.AppendCallerInfoDispatchBranch(
                 sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
+                i,
                 inv.CallerLineNumber,
-                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
-            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments);
+                inv.CallerFilePath,
+                WorkerMethodPrefix + MethodSuffix(inv),
+                WorkerArguments);
         }
 
         CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
@@ -281,13 +263,12 @@ internal static class BindInteractionCodeGenerator
 
         foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
         {
-            foreach (var callSite in entry.Value)
-            {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
-            }
-
-            _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindInteraction_").Append(entry.Key).AppendLine("(");
-
+            InterceptorEmitter.AppendClaimingMethodOpen(
+                sb,
+                entry.Value,
+                static x => x.Interceptor,
+                "        internal static global::System.IDisposable __Intercept_BindInteraction_",
+                entry.Key);
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
             _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
@@ -321,12 +302,7 @@ internal static class BindInteractionCodeGenerator
         }
         else
         {
-            GenerateConcreteOverload(
-                sb,
-                collapsed,
-                features.SupportsCallerArgExpr,
-                features.SupportsNullable,
-                features.StubHasExpressionParameters);
+            GenerateConcreteOverload(sb, collapsed, in features);
         }
 
         _ = sb.AppendLine();

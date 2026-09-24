@@ -231,52 +231,26 @@ internal static class BindingEmitterHelpers
     /// <summary>Groups call sites that can share one generated overload.</summary>
     /// <param name="invocations">The detected call sites.</param>
     /// <returns>The groups, in the order their signatures were first seen.</returns>
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindingInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
+        SignatureGrouping.Group(
+            invocations,
+            static (key, inv) => _ = key
                 .Append(inv.SourceTypeFullName).Append('|')
                 .Append(inv.TargetTypeFullName).Append('|')
                 .Append(inv.SourcePropertyTypeFullName).Append('|')
                 .Append(inv.TargetPropertyTypeFullName).Append('|')
                 .Append(inv.HasConversion).Append('|')
                 .Append(inv.HasScheduler).Append('|')
-                .Append(inv.HasConverterOverride);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindingTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
+                .Append(inv.HasConverterOverride),
+            static (first, members) => new BindingTypeGroup(
                 first.SourceTypeFullName,
                 first.TargetTypeFullName,
                 first.SourcePropertyTypeFullName,
                 first.TargetPropertyTypeFullName,
                 first.HasConversion,
                 first.HasScheduler,
-                [.. kvp.Value]) { HasConverterOverride = first.HasConverterOverride });
-        }
-
-        return result;
-    }
+                members) { HasConverterOverride = first.HasConverterOverride });
 
     /// <summary>Appends the optional converters and scheduler for a two-way overload's parameter list.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -1062,14 +1036,11 @@ internal static class BindingEmitterHelpers
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+            CodeGeneratorHelpers.AppendCallerInfoDispatchBranch(
                 sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
+                i,
                 inv.CallerLineNumber,
-                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
-            CodeGeneratorHelpers.AppendDispatchReturn(
-                sb,
+                inv.CallerFilePath,
                 api.WorkerMethodPrefix + BindingMethodSuffix(inv),
                 api.WorkerArguments + extraArguments);
         }

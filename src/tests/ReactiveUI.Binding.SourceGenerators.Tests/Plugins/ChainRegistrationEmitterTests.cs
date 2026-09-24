@@ -32,4 +32,42 @@ public class ChainRegistrationEmitterTests
         await Assert.That(windowsOutput.ToString(windowsStart, windowsOutput.Length - windowsStart))
             .IsEqualTo(unixOutput.ToString(unixStart, unixOutput.Length - unixStart));
     }
+
+    /// <summary>
+    /// The arguments hand the registration everything it needs fixed at compile time, in the order the observable's
+    /// constructor takes them, and end on the timing so each caller can finish the call its own way.
+    /// </summary>
+    /// <param name="isBeforeChange">Whether the registration observes before-change notifications.</param>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AppendPluginObservableArguments_WritesTheLinkInConstructorOrder(bool isBeforeChange)
+    {
+        const string indent = "  ";
+        var segment = ModelFactory.CreatePropertyPathSegment();
+        var sb = new StringBuilder();
+
+        var returned = ChainRegistrationEmitter.AppendPluginObservableArguments(
+            sb,
+            indent,
+            "__registration",
+            "__source",
+            segment,
+            "global::System.Int32",
+            isBeforeChange);
+
+        string[] expected =
+        [
+            $"{indent}__registration,",
+            $"{indent}__source,",
+            $"{indent}((global::System.Linq.Expressions.Expression<global::System.Func<{segment.DeclaringTypeFullName}, global::System.Int32>>)(__e => __e.{segment.PropertyName})).Body,",
+            $"{indent}\"{segment.PropertyName}\",",
+            $"{indent}(object __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},",
+            $"{indent}{(isBeforeChange ? "true" : "false")}",
+        ];
+
+        await Assert.That(returned).IsSameReferenceAs(sb);
+        await Assert.That(sb.ToString()).IsEqualTo(string.Join(Environment.NewLine, expected));
+    }
 }
