@@ -51,6 +51,13 @@ public partial class RepeatedCallSiteDispatchTests
     public Task RepeatedBindInteraction_UnderInterception_ClaimsEveryCallSite() =>
         AssertEveryCallSiteIsClaimed(RepeatedBindInteractionSource, "BindInteractionDispatch.g.cs");
 
+    /// <summary>Two ToProperty call sites naming the same property by string are each claimed, not only the first.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task RepeatedToProperty_UnderInterception_ClaimsEveryCallSite() =>
+        AssertEveryCallSiteIsClaimed(RepeatedToPropertySource, "ToPropertyDispatch.g.cs");
+
     /// <summary>Generates a scenario for an opted-in build and counts the call sites it claimed.</summary>
     /// <param name="source">The consumer source, which writes the same call site twice.</param>
     /// <param name="dispatchFileName">The dispatch file the API generates into.</param>

@@ -72,9 +72,11 @@ internal static class ToPropertyCodeGenerator
         for (var g = 0; g < groups.Count; g++)
         {
             // A string name is matched on its value, and a selector on its text under expression dispatch; either way
-            // call sites that agree on the key reach the same body, so only the first of them needs a branch.
+            // call sites that agree on the key reach the same body, so only the first of them needs a branch. An
+            // interceptor claims each call site by its location instead, so every one of them has to be kept, or the
+            // later ones fall through to the stub's runtime throw.
             var group = groups[g];
-            if (group.Shape.NamesPropertyByString)
+            if (group.Shape.NamesPropertyByString && !features.SupportsInterceptors)
             {
                 group = group with { Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(group.Invocations, static x => x.PropertyName) };
             }
