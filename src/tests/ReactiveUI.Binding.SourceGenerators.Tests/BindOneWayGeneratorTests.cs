@@ -287,14 +287,10 @@ public class BindOneWayGeneratorTests
         await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay with a field access lambda produces no dispatch code.
-    /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
-    /// the extraction helpers.ExtractPropertyPathFromLambda (line 558-561) for bind invocations.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay with a source path ending at a read-only field produces no dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task FieldAccessLambda_Source_GeneratesNoDispatch()
+    public async Task ReadOnlyLeafFieldLambda_Source_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -306,7 +302,7 @@ public class BindOneWayGeneratorTests
                                   public class MyViewModel : INotifyPropertyChanged
                                   {
                                       public event PropertyChangedEventHandler? PropertyChanged;
-                                      public string _name = "";
+                                      public readonly string _name = "";
                                   }
 
                                   public class MyView : INotifyPropertyChanged
@@ -319,7 +315,7 @@ public class BindOneWayGeneratorTests
                                   {
                                       public static void Execute(MyViewModel vm, MyView view)
                                       {
-                                          // Source property is a field, not a property
+                                          // Source path ends at a read-only field
                                           var binding = vm.BindOneWay(view, x => x._name, x => x.NameText);
                                       }
                                   }

@@ -811,7 +811,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND003 | Warning | Expression contains private/protected member |
 | RXUIBIND004 | Warning | Type does not support before-change notifications |
 | RXUIBIND005 | Info | Source type implements INotifyDataErrorInfo; validation binding requires runtime engine |
-| RXUIBIND006 | Warning | Expression contains an unsupported path segment (indexer, field, or method call) |
+| RXUIBIND006 | Warning | Expression contains an unsupported path segment (indexer, static field, read-only leaf field, or method call) |
 | RXUIBIND007 | Warning | BindCommand control has no bindable event |
 | RXUIBIND008 | Warning | Property does not implement IInteraction |
 | RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |

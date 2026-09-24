@@ -142,11 +142,12 @@ internal static class DiagnosticWarnings
         true,
         DispatchOutOfReachDescription);
 
-    /// <summary>RXUIBIND006: Expression contains unsupported path segment (indexer, field, or method call).</summary>
+    /// <summary>RXUIBIND006: Expression contains unsupported path segment (indexer, static field, read-only leaf field, or method call).</summary>
     internal static readonly DiagnosticDescriptor UnsupportedPathSegment = new(
         "RXUIBIND006",
         "Expression contains unsupported path segment",
-        "Expression contains '{0}' which is not a simple property access. Indexers, fields, and method calls are not generated, so the call throws unless it names the Unsafe overload.",
+        "Expression contains '{0}' which is not a property or instance field access. Indexers, static fields, a read-only field at the end of "
+        + "the path, and method calls are not generated, so the call throws unless it names the Unsafe overload.",
         UsageCategory,
         DiagnosticSeverity.Warning,
         true,
@@ -212,8 +213,9 @@ internal static class DiagnosticWarnings
 
     /// <summary>The string description of the unsupported path segment warning.</summary>
     private const string UnsupportedPathSegmentDescription =
-        "The source generator can only observe simple property access chains (e.g., x => x.Foo.Bar). "
-        + "Indexers, fields, and method calls in the path require runtime expression analysis.";
+        "The source generator reads chains of properties and instance fields (e.g., x => x.Foo.Bar, or v => v.NameBox.Text "
+        + "through a control named in XAML). A field raises no notification, so it is read once. Indexers, static fields, "
+        + "a read-only field at the end of the path, and method calls require runtime expression analysis.";
 
     /// <summary>The string description of the no bindable event warning.</summary>
     private const string NoBindableEventDescription =

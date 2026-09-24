@@ -51,7 +51,7 @@ public partial class BindingInvocationAnalyzerTests
 
             public class Model : INotifyPropertyChanged
             {
-                public string _name = "";
+                public readonly string _name = "";
 
                 public Inner _inner = new();
 
@@ -163,7 +163,7 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(diagnostics.Count(static d => d.Id == PrivateMemberDiagnosticId)).IsEqualTo(0);
     }
 
-    /// <summary>A field, indexer or method call is reported wherever a <c>!</c> or parenthesis sits in the path.</summary>
+    /// <summary>A read-only leaf field, indexer or method call is reported wherever a <c>!</c> or parenthesis sits in the path.</summary>
     /// <param name="form">The binding call the path is written in.</param>
     /// <param name="lambda">The property path lambda.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -173,7 +173,6 @@ public partial class BindingInvocationAnalyzerTests
         [Matrix(WhenChangedForm, BindOneWaySourceForm, BindTwoWayTargetForm)] string form,
         [Matrix(
             "x => x._name!",
-            "x => x._inner!.Name",
             "x => x.GetName()!",
             "x => x.GetInner()!.Name",
             "x => x.Items[0]!",
@@ -181,8 +180,7 @@ public partial class BindingInvocationAnalyzerTests
             "x => x.Items![0]",
             "x => x.Name!.ToUpperInvariant()",
             "x => (x._name)",
-            "x => (x.GetInner()).Name",
-            "x => (x._inner!).Name")] string lambda)
+            "x => (x.GetInner()).Name")] string lambda)
     {
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(
             BuildNullForgivingSource(form, lambda));
@@ -201,7 +199,9 @@ public partial class BindingInvocationAnalyzerTests
         [Matrix(
             "x => x.NotifyingAddress!.City",
             "x => x.Name!",
-            "x => (x.NotifyingAddress!).City")] string lambda)
+            "x => (x.NotifyingAddress!).City",
+            "x => x._inner!.Name",
+            "x => (x._inner!).Name")] string lambda)
     {
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(
             BuildNullForgivingSource(form, lambda));

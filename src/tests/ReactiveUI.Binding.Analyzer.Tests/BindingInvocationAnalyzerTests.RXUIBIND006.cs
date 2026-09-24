@@ -44,10 +44,10 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>Verifies RXUIBIND006 is reported when a property path contains a field access.</summary>
+    /// <summary>Verifies RXUIBIND006 is reported when the path ends at a read-only field, which a binding may assign.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_FieldAccess_InPropertyPath_ReportsDiagnostic()
+    public async Task RXUIBIND006_ReadOnlyLeafField_ReportsDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -56,7 +56,7 @@ public partial class BindingInvocationAnalyzerTests
                                              public class MyViewModel : INotifyPropertyChanged
                                              {
                                                  public event PropertyChangedEventHandler? PropertyChanged;
-                                                 public string _name = "";
+                                                 public readonly string _name = "";
                                              }
 
                                              public class Usage
@@ -292,10 +292,10 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>Verifies RXUIBIND006 is reported for BindTwoWay when target property path contains a field access.</summary>
+    /// <summary>Verifies RXUIBIND006 is reported for BindTwoWay when the target path ends at a read-only field.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_BindTwoWay_FieldInTargetPath_ReportsDiagnostic()
+    public async Task RXUIBIND006_BindTwoWay_ReadOnlyFieldInTargetPath_ReportsDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -310,7 +310,7 @@ public partial class BindingInvocationAnalyzerTests
                                              public class MyView : INotifyPropertyChanged
                                              {
                                                  public event PropertyChangedEventHandler? PropertyChanged;
-                                                 public string _nameText = "";
+                                                 public readonly string _nameText = "";
                                              }
 
                                              public class Usage
@@ -330,10 +330,10 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>Verifies RXUIBIND006 is reported for a field access in the middle of a property chain.</summary>
+    /// <summary>Verifies an instance field part way along a chain, such as a control named in XAML, is not reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_FieldInChain_ReportsDiagnostic()
+    public async Task RXUIBIND006_InstanceFieldInChain_NoDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -364,7 +364,7 @@ public partial class BindingInvocationAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
         var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
-        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
     /// <summary>Verifies RXUIBIND006 is reported for WhenChanging with a method call in the property path.</summary>
@@ -399,10 +399,10 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>Verifies RXUIBIND006 is reported for WhenChanging with a field access in the property path.</summary>
+    /// <summary>Verifies RXUIBIND006 is reported for WhenChanging when the path ends at a read-only field.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_WhenChanging_FieldAccess_ReportsDiagnostic()
+    public async Task RXUIBIND006_WhenChanging_ReadOnlyLeafField_ReportsDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -412,7 +412,7 @@ public partial class BindingInvocationAnalyzerTests
                                              {
                                                  public event PropertyChangedEventHandler? PropertyChanged;
                                                  public event PropertyChangingEventHandler? PropertyChanging;
-                                                 public string _name = "";
+                                                 public readonly string _name = "";
                                              }
 
                                              public class Usage
@@ -567,13 +567,10 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported when a BindOneWay target property path contains a field
-    /// inside the target lambda. Both source and target lambdas are checked for unsupported segments.
-    /// </summary>
+    /// <summary>Verifies an assignable instance field at the end of a BindOneWay target path is not reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_BindOneWay_FieldInTargetPath_ReportsDiagnostic()
+    public async Task RXUIBIND006_BindOneWay_InstanceFieldInTargetPath_NoDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -605,16 +602,13 @@ public partial class BindingInvocationAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
         var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
-        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 reports a field access through a parenthesized lambda expression.
-    /// This exercises the ParenthesizedLambdaExpressionSyntax branch in CheckUnsupportedPathSegment.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 reports a read-only leaf field through a parenthesized lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND006_ParenthesizedLambda_FieldAccess_ReportsDiagnostic()
+    public async Task RXUIBIND006_ParenthesizedLambda_ReadOnlyLeafField_ReportsDiagnostic()
     {
         const string Source = Preamble + """
 
@@ -623,7 +617,7 @@ public partial class BindingInvocationAnalyzerTests
                                              public class MyViewModel : INotifyPropertyChanged
                                              {
                                                  public event PropertyChangedEventHandler? PropertyChanged;
-                                                 public string _name = "";
+                                                 public readonly string _name = "";
                                              }
 
                                              public class Usage
@@ -664,6 +658,78 @@ public partial class BindingInvocationAnalyzerTests
                                                      IObservable<string> source = null!;
                                                      var view = new MyView();
                                                      ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(source, view, x => x.GetName());
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>Verifies a read-only field part way along a chain is not reported, because it is only read.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_ReadOnlyFieldInChain_NoDiagnostic()
+    {
+        const string Source = Preamble + """
+
+                                         namespace TestApp
+                                         {
+                                             public class Inner : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public string Name { get; set; } = "";
+                                             }
+
+                                             public class MyView : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 internal readonly Inner NameBox = new();
+                                             }
+
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var view = new MyView();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(view, x => x.NameBox.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>Verifies RXUIBIND006 is reported for a static field in the path.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_StaticField_ReportsDiagnostic()
+    {
+        const string Source = Preamble + """
+
+                                         namespace TestApp
+                                         {
+                                             public class Shared
+                                             {
+                                                 public static string Name = "";
+                                             }
+
+                                             public class MyViewModel : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                             }
+
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new MyViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => Shared.Name);
                                                  }
                                              }
                                          }

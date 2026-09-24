@@ -786,7 +786,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND003 | Warning | The expression reads a private or protected member. A generated extension method cannot read it. |
 | RXUIBIND004 | Warning | The type raises no before-change event. `WhenChanging` reads the value once and then stays silent. |
 | RXUIBIND005 | Info | The source implements `INotifyDataErrorInfo`. No code is generated for validation state. |
-| RXUIBIND006 | Warning | The path contains an indexer, a field or a method call. Only property reads are generated. |
+| RXUIBIND006 | Warning | The path contains an indexer, a static field, a read-only field at its end, or a method call. Properties and instance fields are generated; a field is read once, because it raises no notification. |
 | RXUIBIND007 | Warning | The control named by `BindCommand` has no default event to bind. Pass `toEvent`. |
 | RXUIBIND008 | Warning | The property named by `BindInteraction` does not implement `IInteraction<TInput, TOutput>`. |
 | RXUIBIND009 | Warning | The generated overload cannot be reached from this file, so the call throws. Not reported when an interceptor takes the call. |
