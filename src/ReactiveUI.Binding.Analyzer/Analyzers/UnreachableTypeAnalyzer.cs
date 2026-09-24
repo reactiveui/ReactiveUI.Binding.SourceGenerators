@@ -20,7 +20,8 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 /// <remarks>
 /// Generated overloads and interceptors are declared in a class of their own, so the generator declines such a call
 /// and it stays on the runtime stub, which throws when it runs. The checks mirror the generator's: the closed
-/// signature of the resolved method, then each link of every selector lambda.
+/// type arguments of the resolved method, then the owner of each link of every selector lambda. A link's value type
+/// is the next link's owner, or at the leaf one of the type arguments, so it needs no check of its own.
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
@@ -66,7 +67,7 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
             unreachable.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)));
     }
 
-    /// <summary>Finds the first type in a resolved method's closed signature that generated code cannot name.</summary>
+    /// <summary>Finds the first type argument of a resolved method that generated code cannot name.</summary>
     /// <param name="method">The resolved binding method.</param>
     /// <param name="compilation">The consumer compilation.</param>
     /// <returns>The unreachable type, or null when every type is reachable.</returns>
@@ -81,19 +82,10 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        var parameters = method.Parameters;
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            if (!IsReachable(parameters[i].Type, compilation))
-            {
-                return parameters[i].Type;
-            }
-        }
-
-        return method.ReturnsVoid || IsReachable(method.ReturnType, compilation) ? null : method.ReturnType;
+        return null;
     }
 
-    /// <summary>Finds the first link of a selector lambda whose owner or value type generated code cannot name.</summary>
+    /// <summary>Finds the first link of a selector lambda whose owner generated code cannot name.</summary>
     /// <param name="arguments">The invocation arguments.</param>
     /// <param name="context">The operation analysis context.</param>
     /// <returns>The unreachable type, or null when every link is reachable.</returns>
@@ -114,12 +106,6 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
                 if (owner is not null && !IsReachable(owner, context.Compilation))
                 {
                     return owner;
-                }
-
-                if (semanticModel.GetSymbolInfo(memberAccess, context.CancellationToken).Symbol is IPropertySymbol property
-                    && !IsReachable(property.Type, context.Compilation))
-                {
-                    return property.Type;
                 }
 
                 current = AnalyzerHelpers.SkipNullForgivingAndParentheses(memberAccess.Expression);

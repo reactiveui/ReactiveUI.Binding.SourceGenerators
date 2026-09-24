@@ -89,13 +89,13 @@ internal static class ExtractorValidation
     internal static bool IsReachableFromGeneratedCode(ITypeSymbol? type, Compilation compilation) =>
         type is not null && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
 
-    /// <summary>Determines whether generated code can name every type an invoked binding method's signature carries.</summary>
+    /// <summary>Determines whether generated code can name every type an invoked binding method is closed over.</summary>
     /// <param name="method">The resolved binding method.</param>
     /// <param name="compilation">The consumer compilation.</param>
-    /// <returns><see langword="true"/> when every type argument, parameter type and the return type is reachable.</returns>
+    /// <returns><see langword="true"/> when every type argument is reachable.</returns>
     /// <remarks>
-    /// A generated overload repeats the stub's signature with its type arguments substituted, so the closed
-    /// signature lists every type the overload names.
+    /// A generated overload repeats the stub's signature with its type arguments substituted, and the stub's own
+    /// types are public, so the type arguments are the only types the overload names that can be out of reach.
     /// </remarks>
     internal static bool NamesOnlyReachableTypes(IMethodSymbol method, Compilation compilation)
     {
@@ -108,16 +108,7 @@ internal static class ExtractorValidation
             }
         }
 
-        var parameters = method.Parameters;
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            if (!IsReachableFromGeneratedCode(parameters[i].Type, compilation))
-            {
-                return false;
-            }
-        }
-
-        return method.ReturnsVoid || IsReachableFromGeneratedCode(method.ReturnType, compilation);
+        return true;
     }
 
     /// <summary>Gets the fully qualified display name of a type symbol, returning null if the symbol is null.</summary>
