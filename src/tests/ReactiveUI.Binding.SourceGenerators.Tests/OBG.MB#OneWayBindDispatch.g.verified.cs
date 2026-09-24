@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.MultipleBindings.MyView view,
-            global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel,
+            global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string?>> viewProperty,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
@@ -144,7 +144,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> OneWayBind(
             this global::SharedScenarios.OneWayBind.MultipleBindings.MyView view,
-            global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel,
+            global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int>> viewProperty,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",

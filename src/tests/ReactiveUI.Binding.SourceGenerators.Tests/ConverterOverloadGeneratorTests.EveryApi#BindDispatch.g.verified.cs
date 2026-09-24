@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::ReactiveUI.Binding.IReactiveBinding<global::TestApp.PersonView, global::ReactiveUI.Binding.BindingChange> Bind(
             this global::TestApp.PersonView view,
-            global::TestApp.Person viewModel,
+            global::TestApp.Person? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.Person, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.PersonView, string?>> viewProperty,
             global::ReactiveUI.Binding.IBindingTypeConverter viewModelToViewConverter,

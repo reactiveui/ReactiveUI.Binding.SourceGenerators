@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::ReactiveUI.Binding.IReactiveBinding<global::NullableSchedulerProbe.ProbeView, string> OneWayBind(
             this global::NullableSchedulerProbe.ProbeView view,
-            global::NullableSchedulerProbe.ProbeViewModel viewModel,
+            global::NullableSchedulerProbe.ProbeViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::NullableSchedulerProbe.ProbeViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::NullableSchedulerProbe.ProbeView, string?>> viewProperty,
             global::System.Func<string, string> selector,

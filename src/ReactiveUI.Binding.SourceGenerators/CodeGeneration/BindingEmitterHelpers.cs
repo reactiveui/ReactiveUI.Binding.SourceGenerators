@@ -664,7 +664,9 @@ internal static class BindingEmitterHelpers
         _ = sb.Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
             .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
             .Append(CodeGeneratorHelpers.ParameterIndent)
-            .Append(api.ReceiverIsTarget ? group.SourceTypeFullName : group.TargetTypeFullName)
+            .Append(api.ReceiverIsTarget
+                ? CodeGeneratorHelpers.NullableSelectorType(group.SourceTypeFullName, true, supportsNullable)
+                : group.TargetTypeFullName)
             .Append(' ').Append(api.OtherParameterName).AppendLine(",")
             .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
             .Append(">> ").Append(api.SourceSelectorName).AppendLine(",")

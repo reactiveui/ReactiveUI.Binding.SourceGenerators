@@ -168,7 +168,7 @@ public static partial class ReactiveUIBindingExtensions
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, TVProp> OneWayBindUnsafe<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty)
         where TViewModel : class
@@ -206,7 +206,7 @@ public static partial class ReactiveUIBindingExtensions
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, TOut> OneWayBindUnsafe<TViewModel, TView, TProp, TOut>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TProp>> viewModelProperty,
         Expression<Func<TView, TOut>> viewProperty,
         Func<TProp, TOut> selector)
@@ -244,7 +244,7 @@ public static partial class ReactiveUIBindingExtensions
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty)
         where TViewModel : class
@@ -292,7 +292,7 @@ public static partial class ReactiveUIBindingExtensions
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         Func<TVMProp, TVProp> viewModelToViewConverter,
@@ -335,7 +335,7 @@ public static partial class ReactiveUIBindingExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp, TDontCare>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         IObservable<TDontCare>? signalViewUpdate,
@@ -368,7 +368,7 @@ public static partial class ReactiveUIBindingExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp, TDontCare>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         Func<TVMProp, TVProp> viewModelToViewConverter,

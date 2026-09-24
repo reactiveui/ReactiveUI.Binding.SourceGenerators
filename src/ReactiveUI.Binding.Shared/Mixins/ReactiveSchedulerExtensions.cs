@@ -263,7 +263,7 @@ public static partial class ReactiveSchedulerExtensions
             "SST1711:Extension block members should use the block's receiver",
             Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
-            TViewModel viewModel,
+            TViewModel? viewModel,
             Expression<Func<TViewModel, TProp>> viewModelProperty,
             Expression<Func<TView, TOut>> viewProperty,
             Func<TProp, TOut> selector,
@@ -302,7 +302,7 @@ public static partial class ReactiveSchedulerExtensions
             "SST1711:Extension block members should use the block's receiver",
             Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TVMProp, TVProp>(
-            TViewModel viewModel,
+            TViewModel? viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,
             IBindingTypeConverter converter,
@@ -336,7 +336,7 @@ public static partial class ReactiveSchedulerExtensions
             "SST1711:Extension block members should use the block's receiver",
             Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
-            TViewModel viewModel,
+            TViewModel? viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,
             Func<TVMProp, TVProp> viewModelToViewConverter,
@@ -377,7 +377,7 @@ public static partial class ReactiveSchedulerExtensions
             "SST1711:Extension block members should use the block's receiver",
             Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
-            TViewModel viewModel,
+            TViewModel? viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,
             IBindingTypeConverter viewModelToViewConverter,

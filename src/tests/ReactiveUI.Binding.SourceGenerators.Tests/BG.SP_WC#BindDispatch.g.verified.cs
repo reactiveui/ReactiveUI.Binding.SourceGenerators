@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, global::ReactiveUI.Binding.BindingChange> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view,
-            global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel,
+            global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string?>> viewProperty,
             global::System.Func<int, string> viewModelToViewConverter,

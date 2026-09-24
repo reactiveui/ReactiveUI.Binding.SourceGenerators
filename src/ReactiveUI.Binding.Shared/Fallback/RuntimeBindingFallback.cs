@@ -175,7 +175,7 @@ public static partial class RuntimeBindingFallback
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TView, TProp> OneWayBind<TViewModel, TView, TProp>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TProp>> viewModelProperty,
         Expression<Func<TView, TProp>> viewProperty,
         ISequencer? scheduler,
@@ -185,7 +185,7 @@ public static partial class RuntimeBindingFallback
         OneWayBinding(
             view,
             viewProperty,
-            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
+            Schedule(ObserveViewModel(view, viewModel, viewModelProperty), scheduler, view),
             bindingExpression);
 
     /// <summary>Binds a view-model property one way onto a view property of another type, applying a conversion.</summary>
@@ -205,7 +205,7 @@ public static partial class RuntimeBindingFallback
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, TViewProp> OneWayBind<TViewModel, TView, TViewModelProp, TViewProp>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TViewModelProp>> viewModelProperty,
         Expression<Func<TView, TViewProp>> viewProperty,
         Func<TViewModelProp, TViewProp> conversion,
@@ -221,7 +221,7 @@ public static partial class RuntimeBindingFallback
             viewProperty,
             Schedule(
                 new MapSignal<TViewModelProp, TViewProp>(
-                    RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty),
+                    ObserveViewModel(view, viewModel, viewModelProperty),
                     conversion),
                 scheduler,
                 view),
@@ -243,7 +243,7 @@ public static partial class RuntimeBindingFallback
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TProp>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TProp>> viewModelProperty,
         Expression<Func<TView, TProp>> viewProperty,
         ISequencer? scheduler,
@@ -255,7 +255,7 @@ public static partial class RuntimeBindingFallback
             viewModel,
             viewModelProperty,
             viewProperty,
-            ScheduleLatest(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
+            ScheduleLatest(ObserveViewModel(view, viewModel, viewModelProperty), scheduler, view),
             RuntimeObservationFallback.WhenChanged(view, viewProperty).Skip(1),
             bindingExpression);
 
@@ -276,7 +276,7 @@ public static partial class RuntimeBindingFallback
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TViewModelProp, TViewProp>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TViewModelProp>> viewModelProperty,
         Expression<Func<TView, TViewProp>> viewProperty,
         TwoWayConverterPair<TViewModelProp, TViewProp> converters,
@@ -294,7 +294,7 @@ public static partial class RuntimeBindingFallback
             viewProperty,
             ScheduleLatest(
                 new MapSignal<TViewModelProp, TViewProp>(
-                    RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty),
+                    ObserveViewModel(view, viewModel, viewModelProperty),
                     converters.Forward),
                 scheduler,
                 view),
@@ -356,6 +356,68 @@ public static partial class RuntimeBindingFallback
         return Write(Schedule(converted, scheduler, target), target, targetProperty, bindingExpression);
     }
 
+    /// <summary>Roots a view-model property path at the view model the view currently holds.</summary>
+    /// <typeparam name="TViewModel">The type declaring the view-model property.</typeparam>
+    /// <typeparam name="TProp">The type of the view-model property.</typeparam>
+    /// <param name="viewModelProperty">The path from the view model.</param>
+    /// <returns>The same path, read from the view through <see cref="IViewFor{T}.ViewModel"/>.</returns>
+    /// <remarks>
+    /// A view-first binding follows the view's view model rather than the instance handed to it, the way the
+    /// generated path does: replacing the view model rebinds, and a view without one yet waits for it. Rooting the
+    /// path at the view lets the runtime chain do that, for observation and for the write back alike. The typed
+    /// property is used so the chain carries the view model's type without a cast the chain would strip.
+    /// </remarks>
+    [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
+    internal static Expression<Func<IViewFor<TViewModel>, TProp>> RootAtViewModel<TViewModel, TProp>(Expression<Func<TViewModel, TProp>> viewModelProperty)
+        where TViewModel : class
+    {
+        ArgumentExceptionHelper.ThrowIfNull(viewModelProperty);
+
+        var view = Expression.Parameter(typeof(IViewFor<TViewModel>), "view");
+        var viewModel = Expression.Property(view, typeof(IViewFor<TViewModel>).GetProperty(nameof(IViewFor<>.ViewModel))!);
+        var body = new ParameterReplacer(viewModelProperty.Parameters[0], viewModel).Visit(viewModelProperty.Body);
+        return Expression.Lambda<Func<IViewFor<TViewModel>, TProp>>(body, view);
+    }
+
+    /// <summary>Observes a view-model property through the view model the view holds, or the one handed in.</summary>
+    /// <typeparam name="TView">The type of the view.</typeparam>
+    /// <typeparam name="TViewModel">The type declaring the view-model property.</typeparam>
+    /// <typeparam name="TProp">The type of the view-model property.</typeparam>
+    /// <param name="view">The view holding the view model.</param>
+    /// <param name="viewModel">The view model handed to the binding, used when the view does not hold one of this type.</param>
+    /// <param name="viewModelProperty">The path from the view model.</param>
+    /// <returns>The property's values, following the view's view model as it is replaced.</returns>
+    [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
+    private static IObservable<TProp> ObserveViewModel<TView, TViewModel, TProp>(TView view, TViewModel? viewModel, Expression<Func<TViewModel, TProp>> viewModelProperty)
+        where TView : IViewFor
+        where TViewModel : class =>
+        view is IViewFor<TViewModel> typedView
+            ? RuntimeObservationFallback.WhenChanged(typedView, RootAtViewModel(viewModelProperty))
+            : RuntimeObservationFallback.WhenChanged(viewModel!, viewModelProperty);
+
+    /// <summary>Writes values back to the view model the view holds, or the one handed in.</summary>
+    /// <typeparam name="TView">The type of the view.</typeparam>
+    /// <typeparam name="TViewModel">The type declaring the view-model property.</typeparam>
+    /// <typeparam name="TProp">The type of the view-model property.</typeparam>
+    /// <param name="values">The values to write.</param>
+    /// <param name="view">The view holding the view model.</param>
+    /// <param name="viewModel">The view model handed to the binding, used when the view does not hold one of this type.</param>
+    /// <param name="viewModelProperty">The path from the view model.</param>
+    /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
+    /// <returns>A disposable that stops writing.</returns>
+    [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
+    private static IDisposable WriteViewModel<TView, TViewModel, TProp>(
+        IObservable<TProp> values,
+        TView view,
+        TViewModel? viewModel,
+        Expression<Func<TViewModel, TProp>> viewModelProperty,
+        string bindingExpression)
+        where TView : IViewFor
+        where TViewModel : class =>
+        view is IViewFor<TViewModel> typedView
+            ? Write(values, typedView, RootAtViewModel(viewModelProperty), bindingExpression)
+            : Write(values, viewModel!, viewModelProperty, bindingExpression);
+
     /// <summary>Wraps a two-way pair of writes as the binding value the view-first APIs hand back.</summary>
     /// <typeparam name="TViewModel">The type declaring the view-model property.</typeparam>
     /// <typeparam name="TView">The type declaring the view property.</typeparam>
@@ -376,16 +438,17 @@ public static partial class RuntimeBindingFallback
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     private static ReactiveBinding<TView, BindingChange> TwoWayBinding<TViewModel, TView, TViewModelProp, TViewProp>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TViewModelProp>> viewModelProperty,
         Expression<Func<TView, TViewProp>> viewProperty,
         IObservable<TViewProp> toView,
         IObservable<TViewModelProp> fromView,
         string bindingExpression)
+        where TViewModel : class
         where TView : IViewFor
     {
         var toViewWrite = Write(toView, view, viewProperty, bindingExpression);
-        var toViewModelWrite = Write(fromView, viewModel, viewModelProperty, bindingExpression);
+        var toViewModelWrite = WriteViewModel(fromView, view, viewModel, viewModelProperty, bindingExpression);
 
         var changed = new MergeSignal<BindingChange>(
             new MapSignal<TViewProp, BindingChange>(toView, static v => new BindingChange(v, true)),
@@ -529,5 +592,15 @@ public static partial class RuntimeBindingFallback
             values,
             value => _ = Reflection.TrySetValueToPropertyChain(written, chain, value),
             bindingExpression);
+    }
+
+    /// <summary>Replaces one parameter of an expression with another expression.</summary>
+    /// <param name="parameter">The parameter to replace.</param>
+    /// <param name="replacement">The expression that stands in for it.</param>
+    private sealed class ParameterReplacer(ParameterExpression parameter, Expression replacement) : ExpressionVisitor
+    {
+        /// <inheritdoc/>
+        protected override Expression VisitParameter(ParameterExpression node) =>
+            node == parameter ? replacement : base.VisitParameter(node);
     }
 }
