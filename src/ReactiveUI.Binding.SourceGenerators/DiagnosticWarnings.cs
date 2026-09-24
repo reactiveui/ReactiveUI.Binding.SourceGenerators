@@ -89,6 +89,16 @@ internal static class DiagnosticWarnings
         true,
         UnnamedToPropertyInitialValueDescription);
 
+    /// <summary>RXUIBIND015: a binding call names a type that generated code cannot reach.</summary>
+    internal static readonly DiagnosticDescriptor UnreachableType = new(
+        "RXUIBIND015",
+        "Binding call names a type generated code cannot reach",
+        "'{0}' is private or protected, so generated code cannot name it; this call generates nothing and throws when it runs",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        UnreachableTypeDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -240,6 +250,12 @@ internal static class DiagnosticWarnings
     private const string UnreadableToPropertyNameDescription =
         "The generator reads the property's name from the call. A selector has to read one member straight off its "
         + "parameter, as in x => x.Property, and a string has to be a compile-time constant.";
+
+    /// <summary>The string description of the unreachable type warning.</summary>
+    private const string UnreachableTypeDescription =
+        "Generated overloads and interceptors live in a class of their own, so they can only name types that are "
+        + "accessible from outside the types that declare them. A private or protected nested type, or a generic "
+        + "closed over one, is out of reach. Make the type internal or public, or call the Unsafe overload.";
 
     /// <summary>The string description of the silent path link warning.</summary>
     private const string SilentPathLinkDescription =

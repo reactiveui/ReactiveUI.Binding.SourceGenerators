@@ -32,7 +32,8 @@ internal static class InvokeCommandExtractor
             return null;
         }
 
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
+            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
         {
             return null;
         }

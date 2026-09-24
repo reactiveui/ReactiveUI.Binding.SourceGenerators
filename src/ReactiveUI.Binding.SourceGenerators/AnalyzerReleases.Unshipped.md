@@ -16,3 +16,4 @@
  RXUIBIND012 | Usage    | Warning  | ToProperty source raises no notification generated code can reach
  RXUIBIND013 | Usage    | Warning  | ToProperty property must be named directly
  RXUIBIND014 | Usage    | Error    | Name the ToProperty initial value below C# 13
+ RXUIBIND015 | Usage    | Warning  | Binding call names a type generated code cannot reach
