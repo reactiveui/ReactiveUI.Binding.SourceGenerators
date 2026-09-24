@@ -182,6 +182,51 @@ public class MixinShadowAnalyzerTests
         await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
     }
 
+    /// <summary>A ReactiveUI method that shares a binding API's name but takes no selector is a different API.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SameNamedReactiveUiMethodWithoutASelector_IsNotReported()
+    {
+        const string Source = """
+            using System;
+            using System.Collections.Generic;
+
+            namespace ReactiveUI
+            {
+                public sealed class TableView
+                {
+                }
+
+                public static class TableSourceExtensions
+                {
+                    public static IDisposable BindTo<TSource>(this IObservable<IReadOnlyList<TSource>> sections, TableView tableView) =>
+                        throw new NotImplementedException();
+                }
+            }
+
+            namespace ReactiveUI.Binding
+            {
+                public static class ReactiveUIBindingExtensions
+                {
+                }
+            }
+
+            namespace Consumer
+            {
+                using ReactiveUI;
+
+                public static class Usage
+                {
+                    public static IDisposable Bind(IObservable<IReadOnlyList<string>> sections) => sections.BindTo(new TableView());
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<MixinShadowAnalyzer>(Source);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
     /// <summary>Without this package there is no generated overload to have lost, so nothing is reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
