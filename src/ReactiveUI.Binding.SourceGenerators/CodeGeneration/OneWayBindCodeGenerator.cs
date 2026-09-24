@@ -5,6 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
@@ -75,7 +76,8 @@ internal static class OneWayBindCodeGenerator
             observation.Path,
             inv.SourcePropertyTypeFullName,
             observation.RootClassInfo,
-            SourceObservableVariable);
+            SourceObservableVariable,
+            NullParentObservationBehavior.SuppressEmission);
 
         var currentVar = BindingEmitterHelpers.EmitSingleStreamStages(sb, DispatchApi, inv);
 

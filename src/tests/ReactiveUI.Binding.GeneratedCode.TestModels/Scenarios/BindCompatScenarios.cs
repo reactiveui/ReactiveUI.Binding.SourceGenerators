@@ -19,4 +19,14 @@ public static class BindCompatScenarios
         TestView view,
         TestViewModel vm) =>
         view.Bind(vm, x => x.Name, x => x.DisplayName);
+
+    /// <summary>View-first two-way binding through a nullable child using the Bind compat alias.</summary>
+    /// <param name="view">The target view.</param>
+    /// <param name="vm">The source view model.</param>
+    /// <returns>A reactive binding representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IReactiveBinding<TestView, BindingChange> ChildName(
+        TestView view,
+        TestViewModel vm) =>
+        view.Bind(vm, x => x.Child!.Name, x => x.DisplayName);
 }

@@ -13,6 +13,12 @@ public class BindCompatTests
     /// <summary>The initial property value used across the binding tests.</summary>
     private const string InitialPropertyValue = "Hello";
 
+    /// <summary>The value the view model changes to.</summary>
+    private const string ChangedPropertyValue = "World";
+
+    /// <summary>The value the view writes back.</summary>
+    private const string ViewPropertyValue = "FromView";
+
     /// <summary>Verifies that Bind syncs the initial value from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -36,9 +42,9 @@ public class BindCompatTests
 
         using var binding = BindCompatScenarios.StringProperty(view, vm);
 
-        vm.Name = "World";
+        vm.Name = ChangedPropertyValue;
 
-        await Assert.That(view.DisplayName).IsEqualTo("World");
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
     }
 
     /// <summary>Verifies that Bind syncs changes from view back to view model.</summary>
@@ -51,9 +57,9 @@ public class BindCompatTests
 
         using var binding = BindCompatScenarios.StringProperty(view, vm);
 
-        view.DisplayName = "FromView";
+        view.DisplayName = ViewPropertyValue;
 
-        await Assert.That(vm.Name).IsEqualTo("FromView");
+        await Assert.That(vm.Name).IsEqualTo(ViewPropertyValue);
     }
 
     /// <summary>Verifies that disposing the Bind binding stops syncing.</summary>
@@ -70,5 +76,27 @@ public class BindCompatTests
         vm.Name = "AfterDisposal";
 
         await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
+    }
+
+    /// <summary>Verifies that Bind leaves the view untouched while the view model path passes through null.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Bind_NullIntermediate_LeavesViewUntouched()
+    {
+        var vm = new TestViewModel();
+        var view = new TestView { DisplayName = InitialPropertyValue };
+
+        using var binding = BindCompatScenarios.ChildName(view, vm);
+        await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
+
+        var child = new TestViewModel { Name = ChangedPropertyValue };
+        vm.Child = child;
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
+
+        vm.Child = null;
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
+
+        view.DisplayName = ViewPropertyValue;
+        await Assert.That(child.Name).IsEqualTo(ChangedPropertyValue);
     }
 }
