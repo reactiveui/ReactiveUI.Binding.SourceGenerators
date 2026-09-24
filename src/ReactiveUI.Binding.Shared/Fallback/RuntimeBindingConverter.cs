@@ -15,8 +15,8 @@ namespace ReactiveUI.Binding.Fallback;
 /// </summary>
 /// <remarks>
 /// An explicit converter override wins; otherwise <see cref="BindingConverters.Current"/> resolves the best
-/// converter for the declared source and target types. With no converter registered for the pair, a value whose
-/// declared type is assignable to the target passes through unchanged. When no converter can produce a value, the
+/// converter for the declared source and target types. With no converter registered for the pair, a value that is
+/// already an instance of the target type passes through unchanged. When no converter can produce a value, the
 /// conversion fails and the generated binding skips the assignment for that emission.
 /// </remarks>
 public static class RuntimeBindingConverter
@@ -62,11 +62,8 @@ public static class RuntimeBindingConverter
             return false;
         }
 
-        // Nothing is registered for the pair: a value that already has the target type passes through unchanged,
-        // as it does in the generated bindings.
-        if (resolved is null && typeof(TTo).IsAssignableFrom(fromType))
+        if (resolved is null && TryPassThrough(boxed, out result))
         {
-            result = (TTo)boxed!;
             return true;
         }
 
@@ -79,5 +76,25 @@ public static class RuntimeBindingConverter
 
         result = default!;
         return false;
+    }
+
+    /// <summary>Passes a value through unconverted when nothing is registered for the pair.</summary>
+    /// <typeparam name="TTo">The target property type.</typeparam>
+    /// <param name="value">The boxed source value.</param>
+    /// <param name="result">The value as the target type when it passes through.</param>
+    /// <returns>
+    /// <see langword="true"/> when the value already is the target type at runtime (an object-typed
+    /// <c>SelectedItem</c> holding a string, or an int bound to an int), or is a null the target can hold.
+    /// </returns>
+    private static bool TryPassThrough<TTo>(object? value, out TTo result)
+    {
+        if (value is TTo same)
+        {
+            result = same;
+            return true;
+        }
+
+        result = default!;
+        return value is null && default(TTo) is null;
     }
 }

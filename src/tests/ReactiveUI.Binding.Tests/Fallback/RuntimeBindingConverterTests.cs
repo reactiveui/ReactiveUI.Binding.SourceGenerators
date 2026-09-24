@@ -34,6 +34,36 @@ public class RuntimeBindingConverterTests
         }
     }
 
+    /// <summary>An object-typed value that is the target type at runtime passes through unchanged.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryConvert_ObjectHoldingTheTargetType_PassesTheValueThrough()
+    {
+        var converted = RuntimeBindingConverter.TryConvert<object, string>(SourceValue, null, null, out var result);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(converted).IsTrue();
+            await Assert.That(result).IsEqualTo(SourceValue);
+        }
+    }
+
+    /// <summary>A null passes through to a target that can hold it, and fails for one that cannot.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryConvert_NullWithNothingRegistered_PassesThroughOnlyWhenTheTargetCanHoldIt()
+    {
+        var toReference = RuntimeBindingConverter.TryConvert<object?, string?>(null, null, null, out var reference);
+        var toValue = RuntimeBindingConverter.TryConvert<object?, int>(null, null, null, out _);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(toReference).IsTrue();
+            await Assert.That(reference).IsNull();
+            await Assert.That(toValue).IsFalse();
+        }
+    }
+
     /// <summary>An explicit converter takes precedence over the registry.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
