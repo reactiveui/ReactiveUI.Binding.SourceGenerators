@@ -70,31 +70,12 @@ internal static class SyntaxHelpers
         {
             ct.ThrowIfCancellationRequested();
 
-            var memberSymbolInfo = semanticModel.GetSymbolInfo(memberAccess, ct);
-            if (memberSymbolInfo.Symbol is not IPropertySymbol propertySymbol)
+            if (ReadPathSegment(memberAccess, semanticModel, ct) is not { } segment)
             {
                 return null;
             }
 
-            // Check accessibility — skip private/protected members
-            if (propertySymbol.DeclaredAccessibility is not Accessibility.Public
-                and not Accessibility.Internal)
-            {
-                return null;
-            }
-
-            var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? propertySymbol.ContainingType;
-            segments.Add(new(
-                propertySymbol.Name,
-                propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                propertySymbol.Type.IsReferenceType,
-                TypeDetectionExtractor.ExtractPropertyOwner(
-                    owner,
-                    propertySymbol,
-                    semanticModel.Compilation,
-                    ct)));
-
+            segments.Add(segment);
             current = UnwrapNullForgiving(memberAccess.Expression);
         }
 
@@ -133,5 +114,41 @@ internal static class SyntaxHelpers
         }
 
         return expression;
+    }
+
+    /// <summary>Reads one link of an observed property path.</summary>
+    /// <param name="memberAccess">The member access naming the link.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The segment, or null when the link is not a property generated code can observe.</returns>
+    private static PropertyPathSegment? ReadPathSegment(
+        MemberAccessExpressionSyntax memberAccess,
+        SemanticModel semanticModel,
+        CancellationToken ct)
+    {
+        // Private and protected members are out of reach of generated code.
+        if (semanticModel.GetSymbolInfo(memberAccess, ct).Symbol is not IPropertySymbol propertySymbol
+            || propertySymbol.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+        {
+            return null;
+        }
+
+        var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? propertySymbol.ContainingType;
+
+        // Generated code names every link's owner and value type, so a link through a type it cannot reach
+        // leaves the whole path to the runtime stub.
+        return !ExtractorValidation.IsReachableFromGeneratedCode(owner, semanticModel.Compilation)
+            || !ExtractorValidation.IsReachableFromGeneratedCode(propertySymbol.Type, semanticModel.Compilation)
+            ? null
+            : new(
+                propertySymbol.Name,
+                propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                propertySymbol.Type.IsReferenceType,
+                TypeDetectionExtractor.ExtractPropertyOwner(
+                    owner,
+                    propertySymbol,
+                    semanticModel.Compilation,
+                    ct));
     }
 }

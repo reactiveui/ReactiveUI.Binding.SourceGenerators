@@ -574,6 +574,43 @@ public class ViewLocatorDispatchGeneratorTests
         await result.DoesNotHaveGeneratedSource(DispatchHintName);
     }
 
+    /// <summary>Verifies a private nested view is not dispatched, since the generated resolver cannot name it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PrivateNestedViewOrViewModelIsSkipped()
+    {
+        const string source = """
+                              using System.ComponentModel;
+
+                              namespace TestApp
+                              {
+                                  public class NoteViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Title { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
+
+                                  public class Host
+                                  {
+                                      private sealed class HiddenNoteView : ReactiveUI.Binding.IViewFor<NoteViewModel>
+                                      {
+                                          public NoteViewModel ViewModel { get; set; }
+                                          object ReactiveUI.Binding.IViewFor.ViewModel
+                                          {
+                                              get => ViewModel;
+                                              set => ViewModel = (NoteViewModel)value;
+                                          }
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(DispatchHintName);
+    }
+
     /// <summary>Verifies [SingleInstanceView] on a view without a parameterless constructor generates no singleton cache.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

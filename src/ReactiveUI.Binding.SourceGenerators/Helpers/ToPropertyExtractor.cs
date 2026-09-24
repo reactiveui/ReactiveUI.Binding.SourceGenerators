@@ -58,7 +58,9 @@ internal static class ToPropertyExtractor
 
         var semanticModel = context.SemanticModel;
         var method = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (method is not { TypeArguments.Length: StubTypeArgumentCount } || !ExtractorValidation.IsRecognizedExtensionClass(method.ContainingType))
+        if (method is not { TypeArguments.Length: StubTypeArgumentCount }
+            || !ExtractorValidation.IsRecognizedExtensionClass(method.ContainingType)
+            || !ExtractorValidation.NamesOnlyReachableTypes(method, semanticModel.Compilation))
         {
             return null;
         }

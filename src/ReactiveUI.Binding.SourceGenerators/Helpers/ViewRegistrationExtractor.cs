@@ -24,7 +24,7 @@ internal static class ViewRegistrationExtractor
 
         if (semanticModel.GetDeclaredSymbol(classDecl, ct) is not INamedTypeSymbol typeSymbol
             || typeSymbol.IsAbstract
-            || IsOpenGeneric(typeSymbol))
+            || !CanBeNamed(typeSymbol, semanticModel.Compilation))
         {
             return null;
         }
@@ -59,6 +59,7 @@ internal static class ViewRegistrationExtractor
             }
 
             var viewModelType = iface.TypeArguments[0];
+
             var viewModelFqn = viewModelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var hasParameterlessCtor = HasAccessibleParameterlessConstructor(typeSymbol);
@@ -73,6 +74,18 @@ internal static class ViewRegistrationExtractor
 
         return null;
     }
+
+    /// <summary>Checks whether a generated resolver can name the view type.</summary>
+    /// <param name="type">The type to check.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns><see langword="true"/> when the type is reachable and closed; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>
+    /// The resolver lives in a class of its own, so a private or protected nested view is out of its reach and is
+    /// left to the runtime locator. Its view model is at least as accessible, or the view could not implement
+    /// <c>IViewFor&lt;T&gt;</c> of it.
+    /// </remarks>
+    private static bool CanBeNamed(INamedTypeSymbol type, Compilation compilation) =>
+        !IsOpenGeneric(type) && ExtractorValidation.IsReachableFromGeneratedCode(type, compilation);
 
     /// <summary>Checks whether the type, or a type it is nested in, still has type parameters to close.</summary>
     /// <param name="type">The type to check.</param>

@@ -28,12 +28,9 @@ internal static class BindToExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol is null)
-        {
-            return null;
-        }
-
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
+        if (methodSymbol is null
+            || !ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
+            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
         {
             return null;
         }

@@ -76,6 +76,41 @@ internal static class ExtractorValidation
     internal static IMethodSymbol? ExtractMethodSymbol(SymbolInfo symbolInfo) =>
         symbolInfo.Symbol as IMethodSymbol;
 
+    /// <summary>Determines whether generated code in the consumer's assembly can name a type.</summary>
+    /// <param name="type">The type, which may be null.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns><see langword="true"/> when the type is accessible from outside every type that declares it.</returns>
+    /// <remarks>
+    /// Generated overloads and interceptors are declared in a class of their own, so a private or protected
+    /// nested type - or a generic closed over one - is out of their reach. Naming one anyway fails the
+    /// consumer's whole build over generated code they cannot edit.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsReachableFromGeneratedCode(ITypeSymbol? type, Compilation compilation) =>
+        type is not null && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+
+    /// <summary>Determines whether generated code can name every type an invoked binding method is closed over.</summary>
+    /// <param name="method">The resolved binding method.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns><see langword="true"/> when every type argument is reachable.</returns>
+    /// <remarks>
+    /// A generated overload repeats the stub's signature with its type arguments substituted, and the stub's own
+    /// types are public, so the type arguments are the only types the overload names that can be out of reach.
+    /// </remarks>
+    internal static bool NamesOnlyReachableTypes(IMethodSymbol method, Compilation compilation)
+    {
+        var typeArguments = method.TypeArguments;
+        for (var i = 0; i < typeArguments.Length; i++)
+        {
+            if (!IsReachableFromGeneratedCode(typeArguments[i], compilation))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>Gets the fully qualified display name of a type symbol, returning null if the symbol is null.</summary>
     /// <param name="type">The type symbol, which may be null.</param>
     /// <returns>The fully qualified type name, or null.</returns>

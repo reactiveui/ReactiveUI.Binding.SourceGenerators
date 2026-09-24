@@ -37,25 +37,6 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
     private const string ReactiveStubMetadataName =
         $"{Constants.ReactiveRuntimeNamespace}.{Constants.StubExtensionClassName}";
 
-    /// <summary>The API names this package generates bindings for.</summary>
-    private static readonly ImmutableHashSet<string> GeneratedApiNames = new[]
-    {
-        Constants.WhenChangedMethodName,
-        Constants.WhenChangingMethodName,
-        Constants.WhenAnyMethodName,
-        Constants.WhenAnyValueMethodName,
-        Constants.WhenAnyObservableMethodName,
-        Constants.BindOneWayMethodName,
-        Constants.BindTwoWayMethodName,
-        Constants.OneWayBindMethodName,
-        Constants.BindMethodName,
-        Constants.BindToMethodName,
-        Constants.BindCommandMethodName,
-        Constants.BindInteractionMethodName,
-        Constants.InvokeCommandMethodName,
-        Constants.ToPropertyMethodName,
-    }.ToImmutableHashSet(StringComparer.Ordinal);
-
     /// <summary>The diagnostics this analyzer reports.</summary>
     private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
         new[] { DiagnosticWarnings.MixinShadowsGeneratedBinding }.ToImmutableArray();
@@ -91,7 +72,7 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
     {
         var method = ((IInvocationOperation)context.Operation).TargetMethod;
 
-        if (!GeneratedApiNames.Contains(method.Name) || AnalyzerHelpers.IsBindingExtensionMethod(method))
+        if (!AnalyzerHelpers.GeneratedApiNames.Contains(method.Name) || AnalyzerHelpers.IsBindingExtensionMethod(method))
         {
             return;
         }

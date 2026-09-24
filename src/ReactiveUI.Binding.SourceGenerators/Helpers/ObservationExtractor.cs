@@ -79,7 +79,8 @@ internal static class ObservationExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
+            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
         {
             return null;
         }
