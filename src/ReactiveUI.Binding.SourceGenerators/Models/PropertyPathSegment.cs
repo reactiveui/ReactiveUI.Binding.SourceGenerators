@@ -34,10 +34,15 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// the view model itself, so the read has to narrow to it. Observables are covariant, which converts the other
 /// way, so nothing downstream can do this for us.
 /// </param>
+/// <param name="IsField">
+/// Whether the link is a field, such as a control named in XAML. A field raises no notification, so the link is
+/// read once and never resolves an observation mechanism.
+/// </param>
 internal sealed record PropertyPathSegment(
     string PropertyName,
     string PropertyTypeFullName,
     string DeclaringTypeFullName,
     bool IsReferenceType,
     ClassBindingInfo? DeclaringTypeInfo,
-    string? ReadCastTypeFullName = null);
+    string? ReadCastTypeFullName = null,
+    bool IsField = false);

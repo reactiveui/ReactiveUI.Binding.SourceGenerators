@@ -62,7 +62,7 @@ internal static class SymbolHelpers
                 if (body is Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax memberAccess)
                 {
                     var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
-                    if (memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType })
+                    if (((memberSymbol as IPropertySymbol)?.Type ?? (memberSymbol as IFieldSymbol)?.Type) is INamedTypeSymbol namedType)
                     {
                         var observableType = TryGetObservableTypeArgument(namedType);
                         if (observableType is not null)
@@ -151,7 +151,7 @@ internal static class SymbolHelpers
         && paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
 
-    /// <summary>Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.</summary>
+    /// <summary>Resolves a path's leaf property or field type to its INamedTypeSymbol using the semantic model.</summary>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="lambdaExpression">The lambda expression.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -180,7 +180,12 @@ internal static class SymbolHelpers
         }
 
         var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
-        return memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType } ? namedType : null;
+        return memberSymbol switch
+        {
+            IPropertySymbol { Type: INamedTypeSymbol propertyType } => propertyType,
+            IFieldSymbol { Type: INamedTypeSymbol fieldType } => fieldType,
+            _ => null,
+        };
     }
 
     /// <summary>

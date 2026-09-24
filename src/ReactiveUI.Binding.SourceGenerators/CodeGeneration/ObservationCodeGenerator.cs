@@ -665,7 +665,7 @@ internal static class ObservationCodeGenerator
     internal static IObservationPlugin? ResolveRootPlugin(ClassBindingInfo? classInfo, PropertyPathSegment segment, bool isBeforeChange = false)
     {
         var owner = segment.DeclaringTypeInfo ?? classInfo;
-        return owner is null ? null : ObservationPluginRegistry.GetBestPlugin(owner, segment.PropertyName, isBeforeChange);
+        return owner is null || segment.IsField ? null : ObservationPluginRegistry.GetBestPlugin(owner, segment.PropertyName, isBeforeChange);
     }
 
     /// <summary>Writes the parts of a call site that decide its overload: the types and each observed leaf's type.</summary>
@@ -813,7 +813,7 @@ internal static class ObservationCodeGenerator
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IObservationPlugin? ResolveSegmentPlugin(PropertyPathSegment segment, bool isBeforeChange = false) =>
-        segment.DeclaringTypeInfo is null
+        segment.DeclaringTypeInfo is null || segment.IsField
             ? null
             : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName, isBeforeChange);
 

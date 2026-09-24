@@ -450,7 +450,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>Walks a member access chain looking for unsupported path segments (method calls, indexers, or fields).</summary>
+    /// <summary>Walks a member access chain looking for unsupported path segments (method calls, indexers, static fields, or a read-only field at the leaf).</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="expression">The expression to walk.</param>
     internal static void WalkForUnsupportedSegments(
@@ -458,6 +458,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         ExpressionSyntax expression)
     {
         var current = AnalyzerHelpers.SkipNullForgivingAndParentheses(expression);
+        var isLeaf = true;
         while (current is not null)
         {
             if (current is InvocationExpressionSyntax invocation)
@@ -486,7 +487,10 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             {
                 // Check if the member is a field
                 var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess, context.CancellationToken).Symbol;
-                if (memberSymbol is IFieldSymbol { IsConst: false })
+
+                // An instance field is read once, like any link that raises no notification. The leaf may be
+                // assigned, so a read-only one there is not generated.
+                if (memberSymbol is IFieldSymbol { IsConst: false } field && (field.IsStatic || (isLeaf && field.IsReadOnly)))
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(
@@ -496,6 +500,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                     return;
                 }
 
+                isLeaf = false;
                 current = AnalyzerHelpers.SkipNullForgivingAndParentheses(memberAccess.Expression);
                 continue;
             }

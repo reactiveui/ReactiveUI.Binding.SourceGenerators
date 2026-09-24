@@ -70,7 +70,7 @@ internal static class SyntaxHelpers
         {
             ct.ThrowIfCancellationRequested();
 
-            if (ReadPathSegment(memberAccess, semanticModel, ct) is not { } segment)
+            if (ReadPathSegment(memberAccess, semanticModel, segments.Count == 0, ct) is not { } segment)
             {
                 return null;
             }
@@ -119,36 +119,67 @@ internal static class SyntaxHelpers
     /// <summary>Reads one link of an observed property path.</summary>
     /// <param name="memberAccess">The member access naming the link.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="isLeaf">Whether the link is the last of the path.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The segment, or null when the link is not a property generated code can observe.</returns>
+    /// <returns>The segment, or null when the link is not a property or field generated code can read.</returns>
     private static PropertyPathSegment? ReadPathSegment(
         MemberAccessExpressionSyntax memberAccess,
         SemanticModel semanticModel,
+        bool isLeaf,
         CancellationToken ct)
     {
+        var member = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
+        var memberType = member switch
+        {
+            IPropertySymbol property => property.Type,
+            IFieldSymbol field when IsReadableFieldLink(field, isLeaf) => field.Type,
+            _ => null,
+        };
+
         // Private and protected members are out of reach of generated code.
-        if (semanticModel.GetSymbolInfo(memberAccess, ct).Symbol is not IPropertySymbol propertySymbol
-            || propertySymbol.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+        if (memberType is null || member!.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
         {
             return null;
         }
 
-        var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? propertySymbol.ContainingType;
+        var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? member.ContainingType;
 
         // Generated code names every link's owner and value type, so a link through a type it cannot reach
         // leaves the whole path to the runtime stub.
-        return !ExtractorValidation.IsReachableFromGeneratedCode(owner, semanticModel.Compilation)
-            || !ExtractorValidation.IsReachableFromGeneratedCode(propertySymbol.Type, semanticModel.Compilation)
-            ? null
-            : new(
+        if (!ExtractorValidation.IsReachableFromGeneratedCode(owner, semanticModel.Compilation)
+            || !ExtractorValidation.IsReachableFromGeneratedCode(memberType, semanticModel.Compilation))
+        {
+            return null;
+        }
+
+        // A field raises no notification, so it carries no mechanism and is read once, like any other link
+        // whose owner cannot notify.
+        return member is IPropertySymbol propertySymbol
+            ? new(
                 propertySymbol.Name,
-                propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                propertySymbol.Type.IsReferenceType,
-                TypeDetectionExtractor.ExtractPropertyOwner(
-                    owner,
-                    propertySymbol,
-                    semanticModel.Compilation,
-                    ct));
+                memberType.IsReferenceType,
+                TypeDetectionExtractor.ExtractPropertyOwner(owner, propertySymbol, semanticModel.Compilation, ct))
+            : new(
+                member.Name,
+                memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                memberType.IsReferenceType,
+                null,
+                IsField: true);
     }
+
+    /// <summary>Determines whether a field can stand as a link of a generated path.</summary>
+    /// <param name="field">The field.</param>
+    /// <param name="isLeaf">Whether the field is the last link, which a binding may write.</param>
+    /// <returns><see langword="true"/> for an instance field that generated code may read, and write at the leaf.</returns>
+    /// <remarks>
+    /// Controls named in XAML or by a designer are exposed as fields, so a view binding usually reads through one,
+    /// as in <c>v =&gt; v.NameBox.Text</c>. A read-only field is fine along the way but not at the leaf, which a
+    /// two-way binding or <c>BindTo</c> assigns.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsReadableFieldLink(IFieldSymbol field, bool isLeaf) =>
+        !field.IsStatic && !field.IsConst && (!isLeaf || !field.IsReadOnly);
 }

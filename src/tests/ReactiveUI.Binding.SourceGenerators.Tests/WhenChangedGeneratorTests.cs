@@ -628,14 +628,10 @@ public class WhenChangedGeneratorTests
         await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
-    /// <summary>
-    /// Verifies that a lambda accessing a field (non-property member) is skipped by the generator.
-    /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
-    /// the extraction helpers.ExtractPropertyPathFromLambda (line 558-561).
-    /// </summary>
+    /// <summary>Verifies that a lambda ending at a read-only field is skipped by the generator.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task FieldAccessLambda_GeneratesNoDispatch()
+    public async Task ReadOnlyLeafFieldLambda_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -647,14 +643,14 @@ public class WhenChangedGeneratorTests
                                   public class MyViewModel : INotifyPropertyChanged
                                   {
                                       public event PropertyChangedEventHandler? PropertyChanged;
-                                      public string _name = "";
+                                      public readonly string _name = "";
                                   }
 
                                   public static class Scenario
                                   {
                                       public static void Execute(MyViewModel vm)
                                       {
-                                          // Accessing a public field, not a property
+                                          // Accessing a read-only field at the leaf
                                           var obs = vm.WhenChanged(x => x._name);
                                       }
                                   }

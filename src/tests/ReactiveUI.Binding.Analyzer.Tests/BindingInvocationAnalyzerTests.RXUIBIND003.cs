@@ -403,14 +403,12 @@ public partial class BindingInvocationAnalyzerTests
     }
 
     /// <summary>
-    /// Verifies that RXUIBIND003 and RXUIBIND006 are both reported when a private field
-    /// is accessed in the lambda body. The field is both private (RXUIBIND003) and a field
-    /// rather than a property (RXUIBIND006). The analyzer should report RXUIBIND003 first
-    /// because it is checked first and breaks out of the while loop.
+    /// Verifies that a private instance field reports RXUIBIND003 alone: generated code cannot reach it, but an
+    /// instance field is otherwise a supported link, so RXUIBIND006 does not apply.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task RXUIBIND003_And_RXUIBIND006_PrivateField_ReportsBothDiagnostics()
+    public async Task RXUIBIND003_PrivateField_ReportsPrivateMemberOnly()
     {
         const string Source = Preamble + """
 
@@ -435,9 +433,9 @@ public partial class BindingInvocationAnalyzerTests
         var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
 
-        // RXUIBIND006 for field access (separate check)
+        // An instance field is a supported link, so RXUIBIND006 does not apply
         var unsupportedDiags = diagnostics.Where(static d => d.Id == "RXUIBIND006").ToArray();
-        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
     /// <summary>Verifies RXUIBIND003 is reported for BindTo when the target lambda accesses a private member.</summary>
