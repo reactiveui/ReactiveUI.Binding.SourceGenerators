@@ -241,7 +241,7 @@ src/
 │       ├── DispatchReachAnalyzer.cs              # RXUIBIND009
 │       ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
 │       ├── ToPropertyInitialValueAnalyzer.cs     # RXUIBIND014
-│       ├── UnreachableTypeAnalyzer.cs            # RXUIBIND015
+│       ├── UnreachableTypeAnalyzer.cs            # RXUIBIND015, 016
 │       └── TypeAnalyzer.cs                       # RXUIBIND002
 │
 ├── benchmarks/
@@ -821,6 +821,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND013 | Warning | ToProperty property must be named directly |
 | RXUIBIND014 | Error | ToProperty initial value must be named below C# 13 |
 | RXUIBIND015 | Warning | Binding call names a type generated code cannot reach |
+| RXUIBIND016 | Warning | Binding call is made through a type parameter |
 
 ## Code Style & Quality Requirements
 

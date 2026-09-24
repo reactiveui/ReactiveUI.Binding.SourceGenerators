@@ -796,6 +796,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND013 | Warning | `ToProperty` names its property in a form the generator cannot read. Use `x => x.Property` or a constant, or call `ToPropertyUnsafe`. |
 | RXUIBIND014 | Error | Below C# 13, a `string` initial value passed by position makes a `ToProperty` call ambiguous. Write it as `initialValue: ...`. |
 | RXUIBIND015 | Warning | The call names a private or protected nested type, which generated code cannot reach, so nothing is generated and the call throws. Make the type `internal` or `public`, or call the `Unsafe` overload. |
+| RXUIBIND016 | Warning | The call is made through a type parameter of the calling code, so generated code cannot name its types and the call throws. Call the `Unsafe` overload. |
 
 The package's build targets report one error of their own.
 

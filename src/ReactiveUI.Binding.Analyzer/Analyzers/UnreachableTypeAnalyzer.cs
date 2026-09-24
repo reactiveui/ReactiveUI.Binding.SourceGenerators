@@ -28,7 +28,7 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
 {
     /// <summary>The diagnostics this analyzer reports.</summary>
     private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
-        new[] { DiagnosticWarnings.UnreachableType }.ToImmutableArray();
+        new[] { DiagnosticWarnings.UnreachableType, DiagnosticWarnings.TypeParameterCall }.ToImmutableArray();
 
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ReportedDiagnostics;
@@ -62,7 +62,9 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
         }
 
         context.ReportDiagnostic(Diagnostic.Create(
-            DiagnosticWarnings.UnreachableType,
+            SourceGenerators.Helpers.ExtractorValidation.ContainsTypeParameter(unreachable)
+                ? DiagnosticWarnings.TypeParameterCall
+                : DiagnosticWarnings.UnreachableType,
             invocation.Syntax.GetLocation(),
             unreachable.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)));
     }
@@ -127,5 +129,5 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
     /// <returns><see langword="true"/> when the type is accessible from outside every type that declares it.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsReachable(ITypeSymbol type, Compilation compilation) =>
-        compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+        SourceGenerators.Helpers.ExtractorValidation.IsReachableFromGeneratedCode(type, compilation);
 }

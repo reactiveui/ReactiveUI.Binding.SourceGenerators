@@ -166,6 +166,40 @@ public class UnreachableTypeInvocationTests
         await result.DoesNotHaveGeneratedSource(ToPropertyDispatchName);
     }
 
+    /// <summary>A BindTo onto a generic type closed over the calling method's type parameter generates nothing.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindTo_TargetClosedOverATypeParameter_GeneratesNothing()
+    {
+        const string source = """
+                              using System;
+                              using System.Collections.Generic;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public sealed class Source<TItem> : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public IReadOnlyList<TItem>? Data { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Run<TItem>(IObservable<IReadOnlyList<TItem>?> items) =>
+                                          items.BindTo(new Source<TItem>(), static x => x.Data);
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource("BindToDispatch.g.cs");
+    }
+
     /// <summary>An internal nested type is reachable, so the call still generates.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
