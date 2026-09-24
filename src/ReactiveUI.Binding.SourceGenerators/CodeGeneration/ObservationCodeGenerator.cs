@@ -896,27 +896,16 @@ internal static class ObservationCodeGenerator
             return;
         }
 
+        // Every known type resolves a plugin, the POCO fallback at worst, so only a segment whose declaring type
+        // is unknown reaches here. Nothing about such a type says it notifies, so the stage reads the value once.
         var lambdaParam = variables.ParentParameter;
         _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(variables.CurrentObservable).Append(" = ")
             .Append(OpenChainSwitchMap(seg, segType, variables.PreviousObservable)).AppendLine()
             .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-            .Append(ObservableTrueBranchOpen).Append(segType);
-        if (IsINPChanging(seg.DeclaringTypeInfo) && isBeforeChange)
-        {
-            _ = sb.Append(ChangingObservableOpen).Append(segType).AppendLine(">(")
-                .Append("                    (global::System.ComponentModel.INotifyPropertyChanging)").Append(lambdaParam).AppendLine(",")
-                .Append("                    \"").Append(seg.PropertyName).AppendLine("\",")
-                .Append("                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(seg.DeclaringTypeFullName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(seg.PropertyName).AppendLine(")");
-        }
-        else
-        {
-            _ = sb.AppendLine(">)")
-                .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
-                .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")");
-        }
-
-        _ = sb.Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
+            .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
+            .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
+            .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
+            .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 
     /// <summary>
