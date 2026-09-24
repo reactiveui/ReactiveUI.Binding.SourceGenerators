@@ -100,6 +100,38 @@ public partial class RepeatedCallSiteDispatchTests
                               }
                               """;
 
+    /// <summary>Two ToProperty call sites naming the same property by string, and two naming it by selector.</summary>
+    private const string RepeatedToPropertySource = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace RepeatedProbe
+                              {
+                                  public class ProbeViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler PropertyChanged;
+
+                                      public string Caption => "";
+
+                                      internal void RaisePropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static ObservableAsPropertyHelper<string> First(IObservable<string> source, ProbeViewModel vm)
+                                      {
+                                          return source.ToProperty(vm, nameof(ProbeViewModel.Caption));
+                                      }
+
+                                      public static ObservableAsPropertyHelper<string> Second(IObservable<string> source, ProbeViewModel vm)
+                                      {
+                                          return source.ToProperty(vm, nameof(ProbeViewModel.Caption));
+                                      }
+                                  }
+                              }
+                              """;
+
     /// <summary>Two BindCommand call sites binding the same command to the same control, spelled identically.</summary>
     private const string RepeatedBindCommandSource = """
                               using System;
