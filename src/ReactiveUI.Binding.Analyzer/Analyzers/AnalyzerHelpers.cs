@@ -180,7 +180,9 @@ internal static class AnalyzerHelpers
     internal static int ObservedTypeArgumentIndex(IMethodSymbol methodSymbol)
     {
         var name = methodSymbol.Name;
-        if (IsApi(name, SourceGenerators.Constants.BindToMethodName))
+
+        // ToProperty raises the source's notifications rather than observing them; RXUIBIND012 covers its source.
+        if (IsApi(name, SourceGenerators.Constants.BindToMethodName) || IsApi(name, SourceGenerators.Constants.ToPropertyMethodName))
         {
             return NoObservedTypeArgument;
         }

@@ -13,3 +13,6 @@
  RXUIBIND009 | Usage    | Warning  | Generated binding dispatch is out of reach for this file
  RXUIBIND010 | Usage    | Warning  | Observed path passes through a type that raises no notification
  RXUIBIND011 | Usage    | Warning  | Binding call resolved to ReactiveUI's own mixin
+ RXUIBIND012 | Usage    | Warning  | ToProperty source raises no notification generated code can reach
+ RXUIBIND013 | Usage    | Warning  | ToProperty property must be named directly
+ RXUIBIND014 | Usage    | Error    | Name the ToProperty initial value below C# 13

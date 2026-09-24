@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
@@ -13,7 +12,6 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// and applied once, and the changes it wrote are published to whoever subscribes to the binding - so the cost
 /// of making one, of driving it from either side, and of watching what it did are all measured here.
 /// </summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>

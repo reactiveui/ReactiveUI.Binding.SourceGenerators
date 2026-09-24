@@ -44,7 +44,6 @@ or another property. This library lets you say that in one line. It writes the c
 - [Which mechanism wins](#which-mechanism-wins)
 - [Which thread a binding writes on](#which-thread-a-binding-writes-on)
 - [Rx library compatibility](#rx-library-compatibility)
-- [Performance](#performance)
 - [Diagnostics](#diagnostics)
 - [Where this differs from ReactiveUI](#where-this-differs-from-reactiveui)
 - [Core team](#core-team)
@@ -303,7 +302,7 @@ vm.WhenChanged(selector);        // throws, and names WhenChangedUnsafe
 vm.WhenChangedUnsafe(selector);  // walks the path by reflection
 ```
 
-Thirteen methods have an `Unsafe` twin.
+Fourteen methods have an `Unsafe` twin.
 
 | Resolved when you build | Resolved by reflection |
 |-------------------------|------------------------|
@@ -320,6 +319,7 @@ Thirteen methods have an `Unsafe` twin.
 | `BindCommand` | `BindCommandUnsafe` |
 | `BindInteraction` | `BindInteractionUnsafe` |
 | `InvokeCommand` | `InvokeCommandUnsafe` |
+| `ToProperty` | `ToPropertyUnsafe` |
 
 Every `Unsafe` overload carries `[RequiresUnreferencedCode]`. The plain overloads carry none. So a
 `PublishTrimmed` or `PublishAot` build warns about each call that uses reflection, and about nothing else.
@@ -406,6 +406,7 @@ through the runtime package.
 | `BindCommand` | Binds a command to a control's event. | 1 |
 | `BindInteraction` | Registers a handler for an interaction a property holds. | 1 |
 | `InvokeCommand` | Runs a command with each value an observable produces. | 1 |
+| `ToProperty` | Backs a read-only property with the latest value an observable produces. | 1 |
 
 Each of them reads a single property, a path such as `x => x.Address.City`, or several properties at once. When
 an object in the middle of a path is replaced, the subscription moves to the new object.
@@ -478,6 +479,88 @@ IDisposable direct = searchText.InvokeCommand(vm.Search);
 
 A `ReactiveCommand` works like any other `ICommand`. The parameter arrives as `object`, not as the command's
 declared input type.
+
+### Backing a property with an observable
+
+`ToProperty` turns an observable into a read-only property. It returns an `ObservableAsPropertyHelper<T>`, a
+helper that keeps the latest value. Each new value raises your type's own change notification for the property.
+
+```csharp
+public partial class PersonViewModel : INotifyPropertyChanged
+{
+    private readonly ObservableAsPropertyHelper<string> _fullName;
+
+    public PersonViewModel(IObservable<string> fullNames) =>
+        _fullName = fullNames.ToProperty(this, x => x.FullName);
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string FullName => _fullName.Value;
+}
+```
+
+A type can only raise its own events, so the generator needs a way in. It uses the first of these that your type
+offers:
+
+| Your type | How the generator raises the notification |
+|-----------|-------------------------------------------|
+| A ReactiveUI `ReactiveObject`, or another `IReactiveObject` | ReactiveUI's own `RaisePropertyChanged`, so suppressed and delayed notifications still work. |
+| A public or internal `RaisePropertyChanged`, `OnPropertyChanged`, `NotifyPropertyChanged` or `NotifyOfPropertyChange` method | Calls that method. |
+| A `partial` type | Adds one small member to your type. The member invokes your `PropertyChanged` event, or calls a protected raise method your base class has. |
+
+When the raise method takes `PropertyChangedEventArgs`, the generator passes one cached instance per property. So
+raising a notification allocates nothing.
+
+Name the property with a lambda of the form `x => x.Property`, or with a constant such as `nameof(Property)`.
+The overloads that take an initial value, an initial value factory, `deferSubscription`, a scheduler, or an `out`
+parameter for the helper all work the same way.
+
+Below C# 13, name the initial value of a `string` property when you name the property with a lambda:
+`ToProperty(this, x => x.Title, initialValue: "(untitled)")`. Without the name the compiler cannot choose an overload,
+and RXUIBIND014 tells you which argument to name. From C# 13, and with a `nameof` name at any version, the plain
+argument works.
+
+RXUIBIND012 warns you when the generator has no way to raise your type's notifications. RXUIBIND013 warns you
+when it cannot read the property's name. Either way the call throws when it runs. Call `ToPropertyUnsafe` for those
+properties instead. It reads the name and finds the raise member by reflection, so it also reaches a protected raise
+method or a plain `PropertyChanged` event on a type that is not `partial`.
+
+#### The helper
+
+`ObservableAsPropertyHelper<T>` holds the latest value and raises the notification for each new one.
+
+| Member | What it does |
+|--------|--------------|
+| `Value` | The latest value. A deferred helper subscribes the first time you read it. |
+| `IsSubscribed` | Whether the helper follows its observable yet. |
+| `ThrownExceptions` | The errors the observable produced. With no observer, an error is rethrown on the thread that produced it. |
+| `Dispose()` | Stops following the observable. `Value` keeps the last value. |
+| `Default(...)` | A helper that never changes, for a property with nothing to follow yet. |
+
+A helper that subscribes straight away announces its initial value once, then each value that differs from the one
+before. A deferred helper announces nothing until you read `Value`. Values arrive in order, one at a time. Pass a
+scheduler to raise the notifications on another thread.
+
+#### Declaring the property with `[ObservableAsProperty]`
+
+From C# 13 you can declare the property as `partial` and mark it `[ObservableAsProperty]`. The generator writes the
+property's body and a field named after it, such as `_fullNameHelper`. You assign that field with `ToProperty`.
+
+```csharp
+public partial class PersonViewModel : INotifyPropertyChanged
+{
+    public PersonViewModel(IObservable<string> fullNames) =>
+        _fullNameHelper = fullNames.ToProperty(this, x => x.FullName);
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    [ObservableAsProperty]
+    public partial string FullName { get; }
+}
+```
+
+The attribute ships in the runtime package, so the generator adds no types to your assembly. Two projects that see
+each other's internals both keep working.
 
 ### Observing a path built at run time
 
@@ -692,15 +775,6 @@ Every binding returns a standard .NET `IObservable<T>`. So you are not tied to e
 | R3 | R3 has its own `Observable<T>` class. Convert with `.ToObservable()`. |
 | Anything else | Any library that accepts `IObservable<T>` works as it is. |
 
-## Performance
-
-On .NET 10, a thousand property changes through a two-way binding take 53.6 us and allocate 42.2 KB. Observing
-one property takes 79.5 us and allocates 65.5 KB. Published ahead of time, the same code runs within a few per
-cent of the JIT build.
-
-[src/benchmarks/README.md](src/benchmarks/README.md) lists the benchmarks, the machine they ran on, what each one
-covers, and how to run them.
-
 ## Diagnostics
 
 The analyzer ships inside the runtime packages. It reports these diagnostics.
@@ -718,6 +792,9 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND009 | Warning | The generated overload cannot be reached from this file, so the call throws. Not reported when an interceptor takes the call. |
 | RXUIBIND010 | Warning | The path passes through a type that raises no change event. The value is read once, and the path is followed no further. |
 | RXUIBIND011 | Warning | The call resolved to ReactiveUI's own extension method. Nothing is generated, and the call uses reflection. |
+| RXUIBIND012 | Warning | Generated code has no way to raise the `ToProperty` source's notifications. Make the type `partial`, add a raise method, or call `ToPropertyUnsafe`. |
+| RXUIBIND013 | Warning | `ToProperty` names its property in a form the generator cannot read. Use `x => x.Property` or a constant, or call `ToPropertyUnsafe`. |
+| RXUIBIND014 | Error | Below C# 13, a `string` initial value passed by position makes a `ToProperty` call ambiguous. Write it as `initialValue: ...`. |
 
 The package's build targets report one error of their own.
 
@@ -735,10 +812,8 @@ ReactiveUI does the generator's job while the app runs. It compiles the lambda i
 property by name. That costs time on every binding. A trimmer cannot see which members those lookups need, so it
 may remove them.
 
-The generated code is faster and allocates less. On .NET 10, a thousand property changes through a two-way
-binding take 53.6 us and 42.2 KB here. ReactiveUI's engine takes 686.5 us and 932.3 KB. Observing one property
-takes 79.5 us and 65.5 KB here, against 145.6 us and 105.5 KB. ReactiveUI's engine compiles expressions at run
-time, so it cannot run under NativeAOT.
+The generated code does that work once, when you build, so it runs faster and allocates less. ReactiveUI's engine
+compiles expressions at run time, so it cannot run under NativeAOT.
 
 ### ReactiveUI's method names are kept
 
@@ -805,6 +880,36 @@ build instead. From the helper, call the `Unsafe` twin to bind by reflection.
 ReactiveUI logs a warning the first time it observes a property on a type that raises no change event.
 RXUIBIND010 reports the same thing when you build. A generator can only report it then. The observation behaves
 the same either way. The value is read when you subscribe; replacing that property cannot be detected.
+
+### `ToProperty` works without a ReactiveUI base class
+
+ReactiveUI's `ToProperty` only accepts an `IReactiveObject`. Here it accepts any class the generator can raise
+notifications for, including a plain `INotifyPropertyChanged` type. A ReactiveUI object still raises through
+ReactiveUI, so its `Changed` stream and suppressed notifications behave as before.
+
+ReactiveUI's `ToProperty` takes the property as an expression tree. The compiler builds that tree every time the
+line runs, and ReactiveUI reads the property name from it by reflection. Here the property is a plain lambda. The
+generator reads its name when you build, and the lambda is never called. So creating the property builds no tree,
+uses no reflection, and passes one cached delegate per notification instead of new delegates and a closure.
+
+A property backed this way costs one small helper. Raising each new value allocates nothing, unless your own raise
+method takes the property name as a string and builds new event args.
+
+The helper type has ReactiveUI's name, `ObservableAsPropertyHelper<T>`, in the `ReactiveUI.Binding` namespace. A
+file that imports both `ReactiveUI` and `ReactiveUI.Binding` has to name one of them in full, or give it an alias.
+
+### A helper delivers its values in order, on the thread that produced them
+
+ReactiveUI's helper raises its notifications through the current-thread scheduler. Here a helper with no scheduler
+raises them straight away, on the thread that produced the value. A value produced while an earlier one is still
+being delivered waits for it, whether it came from a notification handler or from another thread. So the
+notifications never overlap and always arrive in order. Pass a scheduler to raise them somewhere else.
+
+### An error nobody observes is rethrown where it happened
+
+ReactiveUI sends a helper's error to its default exception handler, which throws on the main thread. Here the error
+goes to the helper's `ThrownExceptions` stream. When nothing observes that stream, the error is rethrown on the
+thread that produced it.
 
 ### A write that throws behaves the same
 

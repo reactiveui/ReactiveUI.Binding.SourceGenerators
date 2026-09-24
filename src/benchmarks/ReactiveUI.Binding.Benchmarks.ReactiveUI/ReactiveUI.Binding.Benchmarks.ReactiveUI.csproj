@@ -14,6 +14,7 @@
     <Compile Include="..\ReactiveUI.Binding.Benchmarks\Mocks\BenchmarkViewModel.cs" Link="Mocks\BenchmarkViewModel.cs"/>
     <Compile Include="..\ReactiveUI.Binding.Benchmarks\Mocks\BenchmarkChildViewModel.cs" Link="Mocks\BenchmarkChildViewModel.cs"/>
     <Compile Include="..\ReactiveUI.Binding.Benchmarks\Mocks\BenchmarkView.cs" Link="Mocks\BenchmarkView.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Benchmarks\Mocks\BenchmarkSource.cs" Link="Mocks\BenchmarkSource.cs"/>
   </ItemGroup>
 
 </Project>

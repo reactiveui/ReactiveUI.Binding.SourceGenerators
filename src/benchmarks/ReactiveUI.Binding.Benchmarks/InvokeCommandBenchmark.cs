@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated InvokeCommand benchmarks, which run a command with each value a stream produces.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class InvokeCommandBenchmark
 {
     /// <summary>How many values each benchmark pushes through one invocation.</summary>

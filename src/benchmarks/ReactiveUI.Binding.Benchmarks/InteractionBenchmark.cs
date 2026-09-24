@@ -3,12 +3,10 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Interaction benchmarks: asking a question, and registering and removing handlers.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class InteractionBenchmark
 {
     /// <summary>How many questions each Handle benchmark asks.</summary>

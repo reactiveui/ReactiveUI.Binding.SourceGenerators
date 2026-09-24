@@ -31,6 +31,7 @@
     <Folder Name="/examples/">
         <Project Path="examples/Documentation/Pages/index/index.csproj" />
         <Project Path="examples/Documentation/Pages/observing/observing.csproj" />
+        <Project Path="examples/Documentation/Pages/properties/properties.csproj" />
         <Project Path="examples/Documentation/Pages/bindings/bindings.csproj" />
         <Project Path="examples/Documentation/Pages/converters/converters.csproj" />
         <Project Path="examples/Documentation/Pages/custom-converters/custom-converters.csproj" />
@@ -39,8 +40,9 @@
         <Project Path="examples/Documentation/Pages/threading/threading.csproj" />
         <Project Path="examples/Documentation/Pages/setup/setup.csproj" />
         <Project Path="examples/Documentation/Pages/setup/aot/aot.csproj" />
-        <Project Path="examples/Documentation/Pages/setup/reactive/reactive.csproj" />
         <Project Path="examples/Documentation/Pages/unsafe/unsafe.csproj" />
+        <Project Path="examples/Platforms/PlatformBindingsVerification/PlatformBindingsVerification.csproj" />
+        <Project Path="examples/Platforms/ToPropertyVerification/ToPropertyVerification.csproj" />
     </Folder>
     
     

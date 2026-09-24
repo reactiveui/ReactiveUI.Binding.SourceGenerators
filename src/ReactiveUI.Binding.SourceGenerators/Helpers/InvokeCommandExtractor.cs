@@ -69,7 +69,7 @@ internal static class InvokeCommandExtractor
             ? null
             : new(
                 invocation.SyntaxTree.FilePath,
-                invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
+                SyntaxHelpers.CallerLineNumber(invocation, ct),
                 sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 targetTypeName,
                 new(commandPropertyPath),

@@ -37,6 +37,15 @@
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Helpers\NativeTypeIdentity.cs" Link="Helpers\NativeTypeIdentity.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\AppKitCommandSymbols.cs" Link="Helpers\AppKitCommandSymbols.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\UIKitCommandSymbols.cs" Link="Helpers\UIKitCommandSymbols.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\PropertyRaise\*.cs" Link="Plugins\PropertyRaise\%(Filename)%(Extension)"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseInfo.cs" Link="Models\PropertyRaiseInfo.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseCall.cs" Link="Models\PropertyRaiseCall.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseCallKind.cs" Link="Models\PropertyRaiseCallKind.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseArgumentKind.cs" Link="Models\PropertyRaiseArgumentKind.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PartialTypeDeclaration.cs" Link="Models\PartialTypeDeclaration.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\EquatableArray.cs" Link="Models\EquatableArray.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Bindings\BindingAffinity.cs" Link="Bindings\BindingAffinity.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\CodeGeneration\PooledStringBuilder.cs" Link="CodeGeneration\PooledStringBuilder.cs"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
   </ItemGroup>

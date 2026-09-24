@@ -38,6 +38,9 @@ public class BindingGenerator : IIncrementalGenerator
         // Pipeline C: View locator dispatch (IViewFor<T> scanning)
         ViewLocatorDispatchGenerator.Register(context, languageFeatures);
 
+        // Partial properties marked [ObservableAsProperty]: their bodies and helper fields.
+        ObservableAsPropertyGenerator.Register(context, languageFeatures);
+
         // Pipeline B: Invocation detection, one provider per API. The scan lives here rather than inside each
         // generator so that everything this generator looks at in the consumer's syntax is visible in one
         // place; each generator is handed the invocations it asked for and only turns them into source.
@@ -59,6 +62,7 @@ public class BindingGenerator : IIncrementalGenerator
         var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation);
         var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
         var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation);
+        var toProperty = Detect(in context, RoslynHelpers.IsToPropertyInvocation, ToPropertyExtractor.ExtractToPropertyInvocation);
         var helpers = InvocationHelperRequirements.Select(whenChanged);
         helpers = InvocationHelperRequirements.Combine(helpers, whenChanging);
         helpers = InvocationHelperRequirements.Combine(helpers, whenAnyValue);
@@ -88,6 +92,7 @@ public class BindingGenerator : IIncrementalGenerator
         BindCommandInvocationGenerator.Register(context, bindCommand, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
         InvokeCommandInvocationGenerator.Register(context, invokeCommand, languageFeatures);
+        ToPropertyInvocationGenerator.Register(context, toProperty, languageFeatures);
     }
 
     /// <summary>Reads the C# language version the consumer is compiling with.</summary>
@@ -342,7 +347,9 @@ public class BindingGenerator : IIncrementalGenerator
                     supportsInterceptors,
                     supportsModuleInitializer,
                     supportsModuleInitializer
-                        && !HasAccessibleAttribute(compilation, Constants.ModuleInitializerAttributeMetadataName));
+                        && !HasAccessibleAttribute(compilation, Constants.ModuleInitializerAttributeMetadataName),
+                    languageVersion > LanguageVersion.CSharp12
+                        && HasAccessibleAttribute(compilation, Constants.OverloadResolutionPriorityAttributeMetadataName));
             });
 
     /// <summary>

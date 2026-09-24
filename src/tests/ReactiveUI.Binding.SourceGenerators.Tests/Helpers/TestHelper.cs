@@ -407,6 +407,7 @@ public static class TestHelper
         "BindCommandGeneratorTests" => "BCG",
         "BindToGeneratorTests" => "BToG",
         "InvokeCommandGeneratorTests" => "ICG",
+        "ToPropertyGeneratorTests" => "TPG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
         "ViewThreadInvokerGeneratorTests" => "VTIG",
         "NullableSchedulerDispatchTests" => "NSD",

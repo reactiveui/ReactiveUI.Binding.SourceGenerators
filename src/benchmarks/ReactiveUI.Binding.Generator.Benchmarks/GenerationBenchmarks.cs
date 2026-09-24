@@ -4,7 +4,6 @@
 
 using BenchmarkDotNet.Attributes;
 using Microsoft.CodeAnalysis;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Generator.Benchmarks.Support;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
@@ -15,7 +14,6 @@ namespace ReactiveUI.Binding.Generator.Benchmarks;
 /// build actually pays. Reusing a primed driver would measure the incremental cache instead, and hoisting the
 /// driver into setup would let one iteration's caches serve the next.
 /// </remarks>
-[Config(typeof(ProfilerConfig))]
 public class GenerationBenchmarks
 {
     /// <summary>The mock consumer compilation, built once per parameter set.</summary>

@@ -193,6 +193,25 @@ Each command retains the shared managed tracing and NativeAOT jobs. On Linux, pi
 physical cores and raise priority where permitted. Compare error ranges as well as means, and inspect the
 allocation trace when a route allocates more. Keep benchmark runs separate from builds and tests.
 
+## ToProperty
+
+`ToPropertyBenchmark` creates a helper-backed property through each way the generator can raise notifications,
+and pushes values through a live one. `ReactiveUIToPropertyBenchmark`, in the ReactiveUI project, runs the same
+cases on ReactiveUI's own `ToProperty`. `ToPropertyContentionBenchmark` pushes distinct values into one helper
+from one, two and four threads at once. `ToPropertyUnsafeBenchmark` creates and drives properties backed by
+`ToPropertyUnsafe`, on a view model with a protected raise method and on one with only a field-like event.
+
+`ToPropertyExtractionBenchmarks`, in the generator project, measures the two checks that can turn a call site away:
+the selector's shape read from syntax, and the call resolved through the semantic model.
+`ObservableAsPropertyDiscoveryBenchmarks` compares finding `[ObservableAsProperty]` properties with
+`ForAttributeWithMetadataName` against a syntax filter followed by a semantic check.
+
+```sh
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Benchmarks -- --filter '*ToPropertyBenchmark*' '*ToPropertyContentionBenchmark*' '*ToPropertyUnsafeBenchmark*'
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI -- --filter '*ReactiveUIToPropertyBenchmark*'
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Generator.Benchmarks -- --filter '*ToPropertyExtractionBenchmarks*' '*ObservableAsPropertyDiscoveryBenchmarks*'
+```
+
 ## Unsafe paths
 
 `UnsafeFallbackBenchmark` declares no NativeAOT job. Those overloads carry `RequiresUnreferencedCode` because

@@ -62,8 +62,11 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         var invocationOp = (IInvocationOperation)context.Operation;
 
         var methodSymbol = invocationOp.TargetMethod;
+
+        // ToProperty only reads a name from its selector, so the path checks do not apply; ToPropertyAnalyzer covers it.
         if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol)
-            || methodSymbol.Name.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal))
+            || methodSymbol.Name.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal)
+            || methodSymbol.Name == Constants.ToPropertyMethodName)
         {
             return;
         }

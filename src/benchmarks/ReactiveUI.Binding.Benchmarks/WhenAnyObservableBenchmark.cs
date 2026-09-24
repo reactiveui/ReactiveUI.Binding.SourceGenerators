@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated WhenAnyObservable benchmarks, which switch to whichever stream a property holds.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class WhenAnyObservableBenchmark
 {
     /// <summary>How many values each benchmark pushes through the observed stream.</summary>

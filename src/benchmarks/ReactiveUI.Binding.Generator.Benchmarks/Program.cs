@@ -15,7 +15,7 @@ internal static class Program
     [STAThread]
     internal static void Main(string[] args)
     {
-        var count = BenchmarkRunValidation.CountVerified(BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args));
+        var count = BenchmarkRunValidation.CountVerified(BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new ProfilerConfig()));
         BenchmarkRunValidation.RequireMeasurements(count, args);
     }
 }

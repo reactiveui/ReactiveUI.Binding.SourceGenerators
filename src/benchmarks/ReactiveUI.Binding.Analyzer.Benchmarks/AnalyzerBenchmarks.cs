@@ -8,7 +8,6 @@ using BenchmarkDotNet.Loggers;
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.Analyzer.Analyzers;
 using ReactiveUI.Binding.Analyzer.Benchmarks.Support;
-using ReactiveUI.Binding.Benchmarks.Configs;
 
 namespace ReactiveUI.Binding.Analyzer.Benchmarks;
 
@@ -21,8 +20,6 @@ namespace ReactiveUI.Binding.Analyzer.Benchmarks;
 /// overloads whose first type argument is not the observed object. Each measurement starts a fresh
 /// <c>CompilationWithAnalyzers</c>, which is the state a host build starts an analysis with.
 /// </remarks>
-[Config(typeof(ProfilerConfig))]
-[MemoryDiagnoser]
 public class AnalyzerBenchmarks
 {
     /// <summary>The analyzer for path checks, private members and the observed-path notification check.</summary>

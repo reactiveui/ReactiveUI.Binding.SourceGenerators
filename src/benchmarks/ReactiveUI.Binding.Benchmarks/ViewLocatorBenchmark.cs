@@ -14,7 +14,6 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// Each benchmark registers its own lookups, and BenchmarkDotNet runs each benchmark in its own process, so
 /// the registrations never meet. Lookups are consulted from the most recently registered to the first.
 /// </remarks>
-[MemoryDiagnoser]
 public class ViewLocatorBenchmark
 {
     /// <summary>How many resolutions each benchmark performs per invocation.</summary>

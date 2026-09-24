@@ -13,6 +13,27 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// <summary>Provides syntax-level helpers for extracting property paths from lambda expressions.</summary>
 internal static class SyntaxHelpers
 {
+    /// <summary>Gets the line the compiler passes to a <c>CallerLineNumber</c> parameter of an invocation.</summary>
+    /// <param name="invocation">The invocation.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The one-based line number.</returns>
+    /// <remarks>
+    /// The compiler reports the line of the invoked member's name, not the line the invocation starts on. The two
+    /// differ for a chained call written across lines, where the invocation of <c>.ToProperty(...)</c> on its own
+    /// line starts back at the receiver on an earlier line.
+    /// </remarks>
+    internal static int CallerLineNumber(InvocationExpressionSyntax invocation, CancellationToken ct)
+    {
+        var anchor = invocation.Expression switch
+        {
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Span,
+            MemberBindingExpressionSyntax memberBinding => memberBinding.Name.Span,
+            _ => invocation.Span,
+        };
+
+        return invocation.SyntaxTree.GetLineSpan(anchor, ct).StartLinePosition.Line + 1;
+    }
+
     /// <summary>Extracts the property path from a lambda expression.</summary>
     /// <param name="expression">The expression syntax.</param>
     /// <param name="semanticModel">The semantic model.</param>

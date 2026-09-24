@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated WhenChanging benchmarks, which observe before the value is replaced.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class WhenChangingBenchmark
 {
     /// <summary>How many property changes each benchmark drives through one subscription.</summary>

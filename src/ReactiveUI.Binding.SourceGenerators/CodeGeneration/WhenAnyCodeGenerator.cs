@@ -272,7 +272,7 @@ internal static class WhenAnyCodeGenerator
             {
                 Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
                     group.Invocations,
-                    static x => string.Join("|", x.ExpressionTexts)),
+                    static x => x.ExpressionTexts),
             }
             : group;
 
@@ -397,7 +397,7 @@ internal static class WhenAnyCodeGenerator
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
-                string.Join("|", inv.ExpressionTexts));
+                inv.ExpressionTexts);
             _ = sb.AppendLine("            {").Append("                return __WhenAny_").Append(methodSuffix)
                 .AppendLine("(objectToMonitor, selector);").AppendLine("            }");
         }
@@ -412,5 +412,5 @@ internal static class WhenAnyCodeGenerator
             inv.SourceTypeFullName,
             inv.CallerFilePath,
             inv.CallerLineNumber,
-            string.Join("|", inv.ExpressionTexts));
+            inv.ExpressionTexts);
 }

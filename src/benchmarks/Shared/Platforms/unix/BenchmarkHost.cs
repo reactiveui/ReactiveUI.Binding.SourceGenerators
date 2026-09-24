@@ -17,7 +17,7 @@ public static class BenchmarkHost
     {
         var switcher = BenchmarkSwitcher.FromAssembly(assembly);
         var count = BenchmarkRunValidation.CountVerified(switcher.Run(args, new BenchmarkConfig()));
-        count += BenchmarkRunValidation.CountVerified(switcher.Run(args, new NativeAotTimingConfig()));
+        count += BenchmarkRunValidation.CountVerified(switcher.Run(args, new NativeAotMemoryConfig()));
         BenchmarkRunValidation.RequireMeasurements(count, args);
     }
 }

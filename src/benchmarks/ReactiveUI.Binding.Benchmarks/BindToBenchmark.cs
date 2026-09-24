@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated BindTo benchmarks, which write a stream's values into a target property.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindToBenchmark
 {
     /// <summary>How many values each benchmark pushes through one binding.</summary>

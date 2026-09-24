@@ -1048,7 +1048,7 @@ internal static class ObservationCodeGenerator
             inv.SourceTypeFullName,
             string.Empty,
             0,
-            string.Join("|", inv.ExpressionTexts));
+            inv.ExpressionTexts);
 
     /// <summary>Generates the concrete overload and per-invocation observation methods for a single type group.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -1271,7 +1271,7 @@ internal static class ObservationCodeGenerator
         // the same expression(s) collapse to one branch (duplicates would be identical and unreachable).
         // CallerFilePath dispatch keeps one branch per call site (distinct file/line) but routes to the
         // same expression-keyed worker. 'branchIndex' tracks emitted branches so the first uses "if".
-        var emittedConditions = new HashSet<string>();
+        var emittedConditions = new HashSet<EquatableArray<string>>();
         var branchIndex = 0;
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -1280,7 +1280,7 @@ internal static class ObservationCodeGenerator
 
             if (supportsCallerArgExpr)
             {
-                if (!emittedConditions.Add(string.Join("|", inv.ExpressionTexts)))
+                if (!emittedConditions.Add(inv.ExpressionTexts))
                 {
                     continue;
                 }
@@ -1290,9 +1290,10 @@ internal static class ObservationCodeGenerator
             else
             {
                 var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = sb.Append("            ").Append(keyword).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber)
-                    .Append(" && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix)).Append("\",")
-                    .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
+                _ = CodeGeneratorHelpers.AppendCallerFilePathTest(
+                        sb.Append("            ").Append(keyword).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).Append(" && "),
+                        suffix)
+                    .AppendLine(")");
             }
 
             branchIndex++;

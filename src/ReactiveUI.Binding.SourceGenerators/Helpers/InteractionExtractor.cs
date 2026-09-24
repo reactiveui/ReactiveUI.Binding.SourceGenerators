@@ -72,7 +72,7 @@ internal static class InteractionExtractor
             "view model type display name");
 
         var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1;
+        var lineNumber = SyntaxHelpers.CallerLineNumber(invocation, ct);
         var expressionText = propertyNameArg.ToString();
 
         return new(

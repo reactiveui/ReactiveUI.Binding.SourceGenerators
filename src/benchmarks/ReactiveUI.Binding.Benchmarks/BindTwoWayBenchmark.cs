@@ -4,14 +4,12 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated BindTwoWay benchmarks with and without scheduler.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindTwoWayBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
