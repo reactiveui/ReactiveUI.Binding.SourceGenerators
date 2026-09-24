@@ -5,14 +5,11 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Measures generated command binding setup separately from command replacement on the view.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
-[MemoryDiagnoser]
 public class BindCommandBenchmark
 {
     /// <summary>The command replacements in a measured batch.</summary>

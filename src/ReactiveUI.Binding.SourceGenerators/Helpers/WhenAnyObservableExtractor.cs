@@ -66,7 +66,7 @@ internal static class WhenAnyObservableExtractor
                 "inner observable types");
 
         var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1;
+        var lineNumber = SyntaxHelpers.CallerLineNumber(invocation, ct);
 
         return new(
             filePath,

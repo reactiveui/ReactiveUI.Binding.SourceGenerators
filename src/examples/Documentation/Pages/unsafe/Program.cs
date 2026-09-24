@@ -437,3 +437,5 @@ ExpressionEngineExamples.ReadEveryValueAlongAPath();
 ExpressionEngineExamples.WriteTheValueAtTheEndOfAPath();
 
 ExpressionEngineExamples.WriteTheValueAtTheEndOfAPathWithoutThrowing();
+
+UnsafeToPropertyExamples.BackAPropertyOnATypeThatIsNotPartial();

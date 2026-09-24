@@ -4,14 +4,11 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Measures generated interaction binding registration and handler migration between interactions.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
-[MemoryDiagnoser]
 public class BindInteractionBenchmark
 {
     /// <summary>The replacements in a measured batch.</summary>

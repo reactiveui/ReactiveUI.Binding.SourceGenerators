@@ -5,7 +5,6 @@
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Primitives;
 using ReactiveUI.Primitives.Advanced;
@@ -13,10 +12,7 @@ using ReactiveUI.Primitives.Advanced;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Compares complete construction, subscription, and disposal for each supported CombineLatest arity.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
-[MemoryDiagnoser]
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
-[CategoriesColumn]
 public class CombineLatestArityBenchmark
 {
     /// <summary>The two-source overload.</summary>

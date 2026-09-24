@@ -186,4 +186,16 @@ internal static class RoslynHelpers
         {
             Name.Identifier.Text: Constants.InvokeCommandMethodName
         };
+
+    /// <summary>Pipeline B predicate: detects ToProperty invocations (observable backing a read-only property).</summary>
+    /// <param name="node">The syntax node to check.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>true if the node is a ToProperty invocation; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsToPropertyInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
+        {
+            Name.Identifier.Text: Constants.ToPropertyMethodName
+        };
 }

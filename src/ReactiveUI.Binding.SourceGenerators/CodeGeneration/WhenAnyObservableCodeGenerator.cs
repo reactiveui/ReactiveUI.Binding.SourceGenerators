@@ -315,7 +315,7 @@ internal static class WhenAnyObservableCodeGenerator
             {
                 Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
                     group.Invocations,
-                    static x => string.Join("|", x.ExpressionTexts)),
+                    static x => x.ExpressionTexts),
             }
             : group;
 
@@ -501,7 +501,7 @@ internal static class WhenAnyObservableCodeGenerator
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
-                string.Join("|", inv.ExpressionTexts));
+                inv.ExpressionTexts);
             _ = sb.Append("                return __WhenAnyObservable_").Append(methodSuffix).Append("(objectToMonitor").Append(selectorArg)
                 .AppendLine(");").AppendLine("            }");
         }
@@ -516,7 +516,7 @@ internal static class WhenAnyObservableCodeGenerator
             inv.SourceTypeFullName,
             inv.CallerFilePath,
             inv.CallerLineNumber,
-            string.Join("|", inv.ExpressionTexts));
+            inv.ExpressionTexts);
 
     /// <summary>Groups invocations by source type and observable type signature for overload generation.</summary>
     /// <param name="First">The first invocation in the group, used for type information.</param>

@@ -203,6 +203,12 @@ src/
 │   │   └── ViewThread/                          # The invoker a generated binding carries for its target
 │   │       ├── ViewThreadPluginRegistry.cs      # Matches a target's type to its platform's invoker
 │   │       └── Wpf/WinForms/MauiViewThreadPlugin.cs # One plugin per platform
+│   │   └── PropertyRaise/                       # How ToProperty raises the source type's notifications
+│   │       ├── PropertyRaisePluginRegistry.cs   # First plugin that can raise, strongest first
+│   │       ├── ReactiveObjectRaisePlugin.cs     # ReactiveUI's public RaisePropertyChanged extension (ExactType, 10)
+│   │       ├── RaiseMethodRaisePlugin.cs        # A raise method callable from the consumer assembly (Explicit, 5)
+│   │       ├── PartialTypeRaisePlugin.cs        # An accessor added to a partial type (Fallback, 1)
+│   │       └── RaiseMembers.cs                  # Finds raise methods and field-like events
 │   ├── Generators/                              # Whole-compilation outputs
 │   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
 │   │   ├── ViewThreadInvokerGenerator.cs        # Declares the WPF/WinForms/MAUI invoker classes, once per compilation
@@ -213,7 +219,8 @@ src/
 │   │   ├── BindOneWayInvocationGenerator.cs     # One-way binding
 │   │   ├── BindTwoWayInvocationGenerator.cs     # Two-way binding
 │   │   ├── WhenAnyValueInvocationGenerator.cs   # WhenAnyValue compat shim
-│   │   └── InvokeCommandInvocationGenerator.cs  # Stream-driven command execution
+│   │   ├── InvokeCommandInvocationGenerator.cs  # Stream-driven command execution
+│   │   └── ToPropertyInvocationGenerator.cs     # Observable-backed read-only property
 │   ├── Helpers/                                 # Extraction and validation helpers
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
@@ -230,6 +237,8 @@ src/
 │   └── Analyzers/
 │       ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
 │       ├── DispatchReachAnalyzer.cs              # RXUIBIND009
+│       ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
+│       ├── ToPropertyInitialValueAnalyzer.cs     # RXUIBIND014
 │       └── TypeAnalyzer.cs                       # RXUIBIND002
 │
 ├── benchmarks/
@@ -270,9 +279,9 @@ invocations is the single largest allocation in a generation pass (extension-met
 generic type inference dominate the `GcVerbose` trace), so a second semantic pass over the same call sites is
 not affordable. A type from a *referenced* assembly follows the same extraction path as a source type.
 
-**Pipeline B (Invocation Detection)** scans calls to 13 APIs: `WhenChanged`, `WhenChanging`, `WhenAnyValue`,
+**Pipeline B (Invocation Detection)** scans calls to 14 APIs: `WhenChanged`, `WhenChanging`, `WhenAnyValue`,
 `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, `BindCommand`,
-`BindInteraction` and `InvokeCommand`. It reads the property paths from each call's lambdas. It writes one method
+`BindInteraction`, `InvokeCommand` and `ToProperty`. It reads the property paths from each call's lambdas. It writes one method
 per call site. [API Pattern](#api-pattern) shows how a call site reaches that method.
 
 **Pipeline C (View Dispatch)** scans classes that implement `IViewFor<T>`. For each view it records:
@@ -349,6 +358,20 @@ public static IObservable<string> WhenChanged(this MyViewModel obj, Expression<F
     throw new InvalidOperationException("No generated binding found. ...");
 }
 ```
+
+**File-and-line dispatch matches what the compiler passes.** Two rules keep the condition in step with the
+compiler:
+
+- `CallerFilePath` holds the path as the compiler saw it: backslashes on Windows, and possibly mixed separators
+  after a path map. The generator keys on the file's last two segments, and
+  `CodeGeneratorHelpers.AppendCallerFilePathTest` tests them with a forward slash and with a backslash. Every
+  file-and-line condition goes through that helper.
+- `CallerLineNumber` holds the line of the invoked member's name, not the line the invocation starts on. A chained
+  call written across lines starts at its receiver, several lines up. Every extractor reads the line through
+  `SyntaxHelpers.CallerLineNumber`, which follows the compiler's rule.
+
+The generator tests use an empty file path, so snapshots never show the separator test.
+`CallerFilePathSeparatorTests` gives the file a Windows path and runs a chained call below C# 10.
 
 ### Where the Dispatch Overloads Live
 
@@ -579,6 +602,92 @@ fuses:
 count, so a swap that trades one object for four is a regression however much code it removes. Measure before
 assuming a replacement is free.
 
+### ToProperty and the Helper Behind It
+
+`ToProperty` backs a read-only property with an observable. The generated worker calls
+`ObservableAsPropertyHelper<T>.Create`, passing the owning object and two lambdas that take it as an argument.
+The lambdas capture nothing, so the compiler caches each as one static delegate. The property name is a literal.
+
+**How the generator raises the owner's notifications.** A type can only raise its own events. The
+`PropertyRaise` plugins each name a member generated code can reach, strongest first, and the first that applies
+wins:
+
+| Plugin | Applies when | Generated call |
+|--------|--------------|----------------|
+| `ReactiveObjectRaisePlugin` (10) | The type implements `ReactiveUI.IReactiveObject` | `IReactiveObjectExtensions.RaisePropertyChanged(owner, "Name")` |
+| `RaiseMethodRaisePlugin` (5) | A raise method is accessible from the consumer assembly | `owner.RaisePropertyChanged(args)` |
+| `PartialTypeRaisePlugin` (1) | The type and every type around it are partial | `owner.__ToPropertyRaiseChanged_Name()`, an accessor added to the type |
+
+- The ReactiveUI plugin goes through the public extension, not `IReactiveObject.RaisePropertyChanged(args)`. Only
+  the extension honours suppressed and delayed notifications and feeds `Changed`. The extension class is taken
+  from the assembly that declares the object's ReactiveUI base, because each flavour keeps its own state.
+- A raise method that takes event args wins over one that takes a name. Generated code passes one static
+  `PropertyChangedEventArgs` per property, so raising allocates nothing.
+- The partial accessor is an `internal` member on the consumer's own type. It is the only code the generator adds
+  to a consumer type for `ToProperty`. It declares no type, so `InternalsVisibleTo` friends see no duplicate.
+- The plugins are symbol-only, so `ToPropertyAnalyzer` links them and reports RXUIBIND012 exactly when the
+  generator declines a call.
+
+**The selector is a `Func`, not an expression tree.** The generated code never reads the selector. It only needs
+the property name, which the generator reads from the lambda's syntax. A non-capturing lambda converted to a
+delegate is a compiler-cached static, so a call allocates nothing for it. A lambda converts to `Func` and to
+`Expression<Func>` with equal rank, so the generated concrete overload still beats the generic stub.
+
+**A string name is dispatched by its value.** The overloads that take the property name as a `string` have no
+caller-information parameters. The generated overload compares the name itself, as in `if (property == "Name")`,
+and call sites that pass the same name collapse to one branch. A string name carries everything the body needs, so
+the call site does not matter.
+
+**A selector overload with an initial value has priority.** The selector overloads carry
+`[CallerArgumentExpression]` string parameters. For a `string` property, a string initial value could bind to the
+initial-value overload or to the expression parameter of the overload without one, and the call is ambiguous
+(CS0121). The initial-value overloads carry `[OverloadResolutionPriority(1)]` to settle it. The runtime declares an
+internal copy of the attribute below .NET 9. Generated overloads carry it when `LanguageFeatures.SupportsOverloadResolutionPriority`
+is set: C# 13 or later, and the attribute is accessible. Below C# 13 the compiler ignores the attribute, so such a
+call names its argument: `initialValue: "..."`.
+
+RXUIBIND014 turns that ambiguity into an error that names the argument to write. `ToPropertyInitialValueAnalyzer`
+reads the language version and the method name from syntax, so it asks the model only about `ToProperty` calls
+below C# 13. The compiler reports CS0121 as an overload resolution failure with the candidates attached. The
+analyzer reports when one candidate takes a positional argument as `initialValue` and another takes it as an
+optional `string` parameter.
+
+**`ToPropertyUnsafe` finds the raise member by reflection.** It mirrors every `ToProperty` shape, with an
+`Expression` selector or any string name, and carries `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]`.
+`RuntimePropertyRaiser` tries the members the plugins try, in the same order: ReactiveUI's raise extensions, then a
+raise method, then the field behind a field-like event. Reflection reaches a protected or private raise method and
+a non-partial type's event field, which generated code cannot; SES1406 is suppressed on those two lookups.
+
+The members are cached per type. Each raiser binds a raise method to its owner once, with `CreateDelegate`, which
+closes an instance method over its target and a static extension over its first argument. The raiser is the
+helper's owner, so the helper's callbacks capture nothing. A raise method that returns a value cannot bind to
+`Action<T>`, so it is called through `MethodInfo.Invoke` instead.
+
+**The helper keeps its state in a private core.** `ObservableAsPropertyHelper<T>` is the public face. Its private
+nested `Core` holds the state and implements `IObserver<T>`, so the helper exposes no observer that others could
+push values through. The source subscribes to the core, so the helper's constructor never hands out `this`.
+
+- The gate is an `int` taken with one `Interlocked.CompareExchange`, so the helper allocates no lock object. Each
+  critical section is a few field reads and writes, and no callback runs inside one. A waiter backs off with
+  `SpinWait` and never sleeps: on .NET Core it calls `SpinOnce(-1)`, because a one-millisecond sleep outlasts the
+  holder's critical section many times over. .NET Framework has no such overload and keeps the default backoff.
+- Delivery with no scheduler is serialized. A value produced while another is being delivered, from a callback or
+  from another thread, is queued and delivered next by the thread already delivering. The queue is created the
+  first time a value has to wait.
+- The distinct gate is seeded with the initial value, including after deferred activation, so a source that
+  opens by repeating the initial value raises nothing.
+- `ThrownExceptions` observers live in a `Broadcaster<Exception>`, which is safe to change from any thread, so
+  adding one takes no gate.
+
+**The extractor reads syntax before it asks the model.** Resolving a call runs overload resolution and generic
+inference, which is the most expensive thing an extractor does. A selector that is not `x => x.Property` can never
+generate, so its syntax turns it away first.
+
+**`[ObservableAsProperty]` only applies to a partial property.** The attribute is a runtime type. The generator
+writes the property's body and a `_{name}Helper` field, and the consumer assigns the field with `ToProperty`. The
+consumer declares the property, so every generator in the build sees it. A property written from a field would
+exist only in generated code, which no other generator can observe or bind, so that form is not offered.
+
 ### One Body Per Reachable Branch
 
 The two dispatch mechanisms differ in what they can tell apart, and the emitted bodies follow. File-and-line
@@ -687,6 +796,9 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |
 | RXUIBIND010 | Warning | Observed path passes through a type that raises no notification |
 | RXUIBIND011 | Warning | Binding call resolved to ReactiveUI's own mixin |
+| RXUIBIND012 | Warning | ToProperty source raises no notification generated code can reach |
+| RXUIBIND013 | Warning | ToProperty property must be named directly |
+| RXUIBIND014 | Error | ToProperty initial value must be named below C# 13 |
 
 ## Code Style & Quality Requirements
 
@@ -764,6 +876,7 @@ If a rule genuinely cannot be fixed without changing behavior or public API, **S
 | **SST2309** (optional parameters) | Only the CallerInfo dispatch stubs (e.g. `ReactiveSchedulerExtensions`) where converting to overloads would exceed the parameter-count limit (SST1472). | part of the CallerInfo dispatch contract; overloads would exceed the parameter limit |
 | **CA1040** (empty interfaces) | Only interfaces that are intentional **marker interfaces** (e.g. `IActivatableView`). | intentional marker interface |
 | **SST1711** (extension block member never reads its receiver) | Only the CallerInfo dispatch stubs declared in extension blocks (e.g. `ReactiveSchedulerExtensions`). A genuine member that ignores its receiver moves to a static helper class instead. | part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws |
+| **SES1406** (reflection with `BindingFlags.NonPublic`) | The **offending member only**, in reflection-based runtime code whose job requires reaching a non-public member and has no public route - e.g. `RuntimePropertyRaiser` invoking a protected raise method or a field-like event's backing field. Never where a public member would do, or where ReactiveUI's own lookup is public-only. | reflection-based API that must reach a non-public member; there is no public route |
 | **CA1005** (too many generic type parameters) | Only arity-expanded public types whose type parameters are the values they carry (e.g. `PropertyValues<T1..T16>`). | one arity-expanded emission per observed-property count; the type parameters are the observed properties |
 
 Anything **not** in this table — including (non-exhaustively) CA1019, CA1508, SST1175, SST1473, SST2337 — must be **fixed**, or **discussed and approved before any suppression is added**.

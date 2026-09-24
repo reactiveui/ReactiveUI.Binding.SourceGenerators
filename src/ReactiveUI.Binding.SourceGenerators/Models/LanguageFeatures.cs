@@ -76,6 +76,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Whether the compilation has to declare <c>ModuleInitializerAttribute</c> itself, because no accessible one
 /// is in reach. Frameworks from .NET 5 ship it; older ones do not.
 /// </param>
+/// <param name="SupportsOverloadResolutionPriority">
+/// Whether generated overloads can carry <c>OverloadResolutionPriorityAttribute</c>: the consumer compiles as C# 13
+/// or later and can reach the attribute, which frameworks from .NET 9 ship.
+/// </param>
 internal readonly record struct LanguageFeatures(
     bool SupportsCallerArgExpr,
     bool SupportsNullable,
@@ -88,7 +92,8 @@ internal readonly record struct LanguageFeatures(
     EquatableArray<string> PrimitivesNamespaceMembers = default,
     bool SupportsInterceptors = false,
     bool SupportsModuleInitializer = false,
-    bool DeclaresModuleInitializerAttribute = false)
+    bool DeclaresModuleInitializerAttribute = false,
+    bool SupportsOverloadResolutionPriority = false)
 {
     /// <summary>Gets a value indicating whether call sites a dispatch cannot tell apart collapse to one.</summary>
     /// <remarks>

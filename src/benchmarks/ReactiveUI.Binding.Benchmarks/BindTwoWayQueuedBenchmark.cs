@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated BindTwoWay benchmarks through a sequencer that queues every write, from sides that start equal.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindTwoWayQueuedBenchmark
 {
     /// <summary>The value both sides start with.</summary>

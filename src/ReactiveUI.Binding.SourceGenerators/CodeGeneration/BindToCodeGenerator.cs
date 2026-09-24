@@ -237,9 +237,11 @@ internal static class BindToCodeGenerator
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix)).Append("\", ")
-                .Append(OrdinalIgnoreCase).AppendLine("))").AppendLine(GeneratedSyntax.StatementBlockOpen);
+            _ = CodeGeneratorHelpers.AppendCallerFilePathTest(
+                    sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
+                        .Append("                && "),
+                    pathSuffix)
+                .AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen);
             AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), extraArguments);
             _ = sb.AppendLine("            }");
         }

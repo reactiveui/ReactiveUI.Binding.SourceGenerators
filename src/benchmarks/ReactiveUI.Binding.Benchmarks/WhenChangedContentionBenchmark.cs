@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>WhenChanged with two threads changing the observed property at the same time.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class WhenChangedContentionBenchmark
 {
     /// <summary>How many property changes each writer drives.</summary>

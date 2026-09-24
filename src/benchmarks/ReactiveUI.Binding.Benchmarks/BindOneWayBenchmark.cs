@@ -3,14 +3,12 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated BindOneWay benchmarks with and without scheduler.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindOneWayBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>

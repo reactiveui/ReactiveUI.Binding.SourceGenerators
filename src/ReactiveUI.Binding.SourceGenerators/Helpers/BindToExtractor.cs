@@ -81,7 +81,7 @@ internal static class BindToExtractor
 
         return new(
             invocation.SyntaxTree.FilePath,
-            invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
+            SyntaxHelpers.CallerLineNumber(invocation, ct),
             sourceValueTypeFullName,
             targetTypeName,
             new(targetPropertyPath),

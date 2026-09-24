@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Measures generated native wiring separately from platform rendering and interop costs.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class NativeAdapterBenchmark : IObserver<int>
 {
     /// <summary>The number of native updates in each invocation.</summary>

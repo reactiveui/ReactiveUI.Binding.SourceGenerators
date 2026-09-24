@@ -4,14 +4,11 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Separates competing setter latency from the time a slow subscriber occupies the delivery thread.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
-[MemoryDiagnoser]
 public class ObservationContentionBenchmark : IDisposable
 {
     /// <summary>The competing changes supplied during one slow subscriber call.</summary>

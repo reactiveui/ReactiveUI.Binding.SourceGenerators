@@ -52,10 +52,10 @@ internal static class CodeGeneratorHelpers
     /// <summary>Extra buffer capacity for the escaping a string literal adds.</summary>
     private const int EscapeOverheadCapacity = 4;
 
-    /// <summary>The initial seed value for the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.</summary>
+    /// <summary>The initial seed value for the polynomial hash used by <see cref="ComputeStableMethodSuffix(string, string, int, string)"/>.</summary>
     private const long HashSeed = 17L;
 
-    /// <summary>The multiplier applied at each step of the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.</summary>
+    /// <summary>The multiplier applied at each step of the polynomial hash used by <see cref="ComputeStableMethodSuffix(string, string, int, string)"/>.</summary>
     private const long HashMultiplier = 31L;
 
     /// <summary>The FNV-1a 32-bit offset basis used by <see cref="StableStringHash"/>.</summary>
@@ -439,6 +439,35 @@ internal static class CodeGeneratorHelpers
         }
     }
 
+    /// <summary>
+    /// Computes the same stable method suffix as <see cref="ComputeStableMethodSuffix(string, string, int, string)"/>
+    /// would for a discriminator built by joining <paramref name="discriminatorParts"/> with <c>'|'</c>, without
+    /// allocating that joined string first. Callers such as <c>WhenAnyCodeGenerator</c> hash a call site's
+    /// expression texts once per invocation and would otherwise pay for a throwaway <c>string.Join</c> only to
+    /// re-walk its characters inside <see cref="StableStringHash"/>.
+    /// </summary>
+    /// <param name="sourceType">The fully qualified source type name.</param>
+    /// <param name="callerFilePath">The caller file path.</param>
+    /// <param name="callerLineNumber">The caller line number.</param>
+    /// <param name="discriminatorParts">The discriminator's parts, hashed as if joined with <c>'|'</c>.</param>
+    /// <returns>A 16-character uppercase hex string suitable for use as a method name suffix.</returns>
+    internal static string ComputeStableMethodSuffix(
+        string sourceType,
+        string callerFilePath,
+        int callerLineNumber,
+        EquatableArray<string> discriminatorParts)
+    {
+        unchecked
+        {
+            var hash = HashSeed;
+            hash = (hash * HashMultiplier) + StableStringHash(sourceType);
+            hash = (hash * HashMultiplier) + StableStringHash(callerFilePath);
+            hash = (hash * HashMultiplier) + callerLineNumber;
+            hash = (hash * HashMultiplier) + StableJoinedStringHash(discriminatorParts, '|');
+            return (hash & long.MaxValue).ToString("X16");
+        }
+    }
+
     /// <summary>Finds a <see cref="ClassBindingInfo"/> by fully qualified type name.</summary>
     /// <param name="allClasses">All detected class binding infos.</param>
     /// <param name="fullyQualifiedName">The fully qualified name to match.</param>
@@ -530,6 +559,38 @@ internal static class CodeGeneratorHelpers
         }
 
         var seen = new HashSet<string>(StringComparer.Ordinal);
+        var kept = new List<T>(invocations.Length);
+
+        for (var i = 0; i < invocations.Length; i++)
+        {
+            if (seen.Add(dispatchKey(invocations[i])))
+            {
+                kept.Add(invocations[i]);
+            }
+        }
+
+        return kept.Count == invocations.Length ? invocations : [.. kept];
+    }
+
+    /// <summary>
+    /// Collapses a group to one call site per distinct dispatch key, the same way as
+    /// <see cref="CollapseIndistinguishableCallSites{T}(T[], Func{T, string})"/>, but for callers whose key is
+    /// already an <see cref="EquatableArray{T}"/> of strings - typically a call site's expression texts. Comparing
+    /// the array's cached structural hash and equality avoids building a joined string per call site solely to
+    /// dedupe it.
+    /// </summary>
+    /// <typeparam name="T">The invocation type being collapsed.</typeparam>
+    /// <param name="invocations">The call sites sharing an overload.</param>
+    /// <param name="dispatchKey">Projects a call site to the expression texts its dispatch condition compares.</param>
+    /// <returns>The distinct call sites, in original order, or <paramref name="invocations"/> unchanged when none collapse.</returns>
+    internal static T[] CollapseIndistinguishableCallSites<T>(T[] invocations, Func<T, EquatableArray<string>> dispatchKey)
+    {
+        if (invocations.Length < 2)
+        {
+            return invocations;
+        }
+
+        var seen = new HashSet<EquatableArray<string>>();
         var kept = new List<T>(invocations.Length);
 
         for (var i = 0; i < invocations.Length; i++)
@@ -666,9 +727,11 @@ internal static class CodeGeneratorHelpers
         string condition,
         int callerLineNumber,
         string pathSuffix) =>
-        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber).AppendLine()
-            .Append("                && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix))
-            .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))")
+        AppendCallerFilePathTest(
+                sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber).AppendLine()
+                    .Append("                && "),
+                pathSuffix)
+            .AppendLine(")")
             .AppendLine(GeneratedSyntax.StatementBlockOpen);
 
     /// <summary>Appends the call a matched branch hands the binding to, and closes the branch.</summary>
@@ -720,9 +783,31 @@ internal static class CodeGeneratorHelpers
         string condition,
         int callerLineNumber,
         string pathSuffix) =>
-        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber)
-            .Append(" && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix)).Append("\",")
-            .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
+        AppendCallerFilePathTest(
+                sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber).Append(" && "),
+                pathSuffix)
+            .AppendLine(")");
+
+    /// <summary>Appends the test that the caller's file ends with a path suffix, whichever separator the path uses.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="pathSuffix">The last two segments of the call site's path, joined with a forward slash.</param>
+    /// <returns>The builder, for chaining.</returns>
+    /// <remarks>
+    /// <c>callerFilePath</c> holds the path exactly as the compiler saw it: backslashes on Windows, and after a path map
+    /// possibly a forward-slash root with backslashes below it. Only the one separator inside the two-segment suffix
+    /// can differ, so the suffix is tested with each; comparing both spellings allocates nothing at run time, where
+    /// normalising <c>callerFilePath</c> would allocate on every call.
+    /// </remarks>
+    internal static StringBuilder AppendCallerFilePathTest(StringBuilder sb, string pathSuffix)
+    {
+        var escaped = EscapeString(pathSuffix);
+        var separator = escaped.IndexOf('/');
+        return separator < 0
+            ? sb.Append("callerFilePath.EndsWith(\"").Append(escaped).Append("\", global::System.StringComparison.OrdinalIgnoreCase)")
+            : sb.Append("(callerFilePath.EndsWith(\"").Append(escaped).Append("\", global::System.StringComparison.OrdinalIgnoreCase)")
+                .Append(" || callerFilePath.EndsWith(\"").Append(escaped, 0, separator).Append(@"\\").Append(escaped, separator + 1, escaped.Length - separator - 1)
+                .Append("\", global::System.StringComparison.OrdinalIgnoreCase))");
+    }
 
     /// <summary>Appends the throw that closes a binding dispatch overload when no call site matched.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -731,4 +816,35 @@ internal static class CodeGeneratorHelpers
         sb.AppendLine("            throw new global::System.InvalidOperationException(")
             .AppendLine("                \"No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.\");")
             .AppendLine(GeneratedSyntax.MemberBodyClose);
+
+    /// <summary>
+    /// Computes the FNV-1a hash <see cref="StableStringHash(string)"/> would produce for <c>string.Join(separator, parts)</c>,
+    /// by streaming each part's characters (and the separator between parts) through the same hash accumulator,
+    /// so no joined string is ever allocated.
+    /// </summary>
+    /// <param name="parts">The strings that would have been joined.</param>
+    /// <param name="separator">The separator that would have sat between them.</param>
+    /// <returns>The same 32-bit hash <see cref="StableStringHash(string)"/> would return for the joined text.</returns>
+    private static int StableJoinedStringHash(EquatableArray<string> parts, char separator)
+    {
+        unchecked
+        {
+            var hash = (int)FnvOffsetBasis;
+            for (var i = 0; i < parts.Length; i++)
+            {
+                if (i > 0)
+                {
+                    hash = (hash ^ separator) * FnvPrime;
+                }
+
+                var part = parts[i];
+                for (var j = 0; j < part.Length; j++)
+                {
+                    hash = (hash ^ part[j]) * FnvPrime;
+                }
+            }
+
+            return hash;
+        }
+    }
 }

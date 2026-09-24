@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Measures value delivery through generated nullable and numeric formatting conversions.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
 public class TypedAdapterBenchmark
 {
     /// <summary>The number of values delivered in each measured batch.</summary>

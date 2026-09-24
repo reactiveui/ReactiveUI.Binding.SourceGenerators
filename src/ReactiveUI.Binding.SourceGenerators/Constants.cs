@@ -19,6 +19,28 @@ internal static class Constants
     /// <summary>Metadata name for ReactiveUI's <c>IReactiveObject</c> interface.</summary>
     internal const string IReactiveObjectMetadataName = "ReactiveUI.IReactiveObject";
 
+    /// <summary>Metadata name for the class declaring ReactiveUI's public <c>RaisePropertyChanged</c> extension.</summary>
+    internal const string IReactiveObjectExtensionsMetadataName = "ReactiveUI.IReactiveObjectExtensions";
+
+    /// <summary>Metadata name for the same class in ReactiveUI's System.Reactive flavour.</summary>
+    internal const string ReactiveIReactiveObjectExtensionsMetadataName = "ReactiveUI.Reactive.IReactiveObjectExtensions";
+
+    /// <summary>Metadata name for the attribute that ranks one applicable overload above another (C# 13).</summary>
+    internal const string OverloadResolutionPriorityAttributeMetadataName =
+        "System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute";
+
+    /// <summary>Metadata name for <see cref="System.ComponentModel.PropertyChangedEventArgs"/>.</summary>
+    internal const string PropertyChangedEventArgsMetadataName = "System.ComponentModel.PropertyChangedEventArgs";
+
+    /// <summary>Metadata name for <see cref="System.ComponentModel.PropertyChangingEventArgs"/>.</summary>
+    internal const string PropertyChangingEventArgsMetadataName = "System.ComponentModel.PropertyChangingEventArgs";
+
+    /// <summary>Metadata name for <see cref="System.ComponentModel.PropertyChangedEventHandler"/>.</summary>
+    internal const string PropertyChangedEventHandlerMetadataName = "System.ComponentModel.PropertyChangedEventHandler";
+
+    /// <summary>Metadata name for <see cref="System.ComponentModel.PropertyChangingEventHandler"/>.</summary>
+    internal const string PropertyChangingEventHandlerMetadataName = "System.ComponentModel.PropertyChangingEventHandler";
+
     /// <summary>Metadata name for WPF's <c>DependencyObject</c> base class.</summary>
     internal const string WpfDependencyObjectMetadataName = "System.Windows.DependencyObject";
 
@@ -135,6 +157,9 @@ internal static class Constants
 
     /// <summary>Method name for executing a command with each value a stream produces (<c>InvokeCommand</c>).</summary>
     internal const string InvokeCommandMethodName = "InvokeCommand";
+
+    /// <summary>Method name for backing a read-only property with an observable (<c>ToProperty</c>).</summary>
+    internal const string ToPropertyMethodName = "ToProperty";
 
     /// <summary>Metadata name for the open generic <c>IViewFor&lt;T&gt;</c> interface used for view resolution.</summary>
     internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";

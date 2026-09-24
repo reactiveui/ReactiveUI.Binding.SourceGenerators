@@ -75,7 +75,7 @@ internal static class CommandExtractor
 
         return new(
             invocation.SyntaxTree.FilePath,
-            invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
+            SyntaxHelpers.CallerLineNumber(invocation, ct),
             sides.ViewTypeFullName,
             sides.ViewModelTypeFullName,
             new(commandPropertyPath),

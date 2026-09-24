@@ -6,13 +6,11 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Generator.Benchmarks.Support;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
 
 /// <summary>Measures generation for native observations, commands, collection setters and typed conversions.</summary>
-[Config(typeof(ProfilerConfig))]
 public class AdapterGenerationBenchmarks
 {
     /// <summary>The number of native command bindings in the command corpus.</summary>

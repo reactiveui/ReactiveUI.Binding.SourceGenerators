@@ -59,6 +59,36 @@ internal static class DiagnosticWarnings
         true,
         MixinShadowsGeneratedBindingDescription);
 
+    /// <summary>RXUIBIND012: ToProperty targets a type whose change notifications generated code cannot raise.</summary>
+    internal static readonly DiagnosticDescriptor UnraisableToPropertySource = new(
+        "RXUIBIND012",
+        "ToProperty source raises no notification generated code can reach",
+        "Generated code cannot raise change notifications for '{0}', so this ToProperty call generates nothing and throws when it runs",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        UnraisableToPropertySourceDescription);
+
+    /// <summary>RXUIBIND013: ToProperty names its property in a form the generator cannot read.</summary>
+    internal static readonly DiagnosticDescriptor UnreadableToPropertyName = new(
+        "RXUIBIND013",
+        "ToProperty property must be named directly",
+        "Name the property as 'x => x.Property' or as a constant such as nameof(Property); this call generates nothing and throws when it runs",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        UnreadableToPropertyNameDescription);
+
+    /// <summary>RXUIBIND014: below C# 13, a ToProperty initial value passed by position makes the call ambiguous.</summary>
+    internal static readonly DiagnosticDescriptor UnnamedToPropertyInitialValue = new(
+        "RXUIBIND014",
+        "Name the ToProperty initial value below C# 13",
+        "Below C# 13 this initial value also fits a caller-information parameter, so the call is ambiguous; write it as 'initialValue: {0}'",
+        UsageCategory,
+        DiagnosticSeverity.Error,
+        true,
+        UnnamedToPropertyInitialValueDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -192,6 +222,24 @@ internal static class DiagnosticWarnings
         + "that a generated binding exists to avoid. Nothing else reports this, because the call was never "
         + "recognised as one to generate for. Import 'ReactiveUI.Binding' in the file to restore the generated "
         + "overload, which lookup prefers over the generic one.";
+
+    /// <summary>The string description of the unraisable ToProperty source warning.</summary>
+    private const string UnraisableToPropertySourceDescription =
+        "A type can only raise its own events, so generated code needs a member that does it. Any one of these works: "
+        + "derive from ReactiveUI's ReactiveObject or implement IReactiveObject; expose a public or internal "
+        + "RaisePropertyChanged or OnPropertyChanged method; or declare the type, and every type it is nested in, "
+        + "as partial, so the generator can add a member that raises the type's own event.";
+
+    /// <summary>The string description of the unnamed ToProperty initial value error.</summary>
+    private const string UnnamedToPropertyInitialValueDescription =
+        "The selector overloads of ToProperty take optional caller-information string parameters. For a string property, "
+        + "an initial value passed by position fits both the overload with an initial value and the overload without one. "
+        + "C# 13 and later prefer the initial-value overload; earlier versions need the argument named initialValue.";
+
+    /// <summary>The string description of the unreadable ToProperty name warning.</summary>
+    private const string UnreadableToPropertyNameDescription =
+        "The generator reads the property's name from the call. A selector has to read one member straight off its "
+        + "parameter, as in x => x.Property, and a string has to be a compile-time constant.";
 
     /// <summary>The string description of the silent path link warning.</summary>
     private const string SilentPathLinkDescription =

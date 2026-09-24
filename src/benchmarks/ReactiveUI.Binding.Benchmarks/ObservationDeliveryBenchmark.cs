@@ -4,14 +4,11 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Separates observation construction and subscription from delivery through a live subscription.</summary>
-[Config(typeof(NativeAotBenchmarkConfig))]
-[MemoryDiagnoser]
 public class ObservationDeliveryBenchmark
 {
     /// <summary>The changes delivered by one measured invocation.</summary>
