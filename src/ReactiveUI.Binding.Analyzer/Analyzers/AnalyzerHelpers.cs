@@ -2,6 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +15,25 @@ internal static class AnalyzerHelpers
 {
     /// <summary>The index <see cref="ObservedTypeArgumentIndex"/> returns for an API that observes none of its type arguments.</summary>
     internal const int NoObservedTypeArgument = -1;
+
+    /// <summary>The API names this package generates bindings for.</summary>
+    internal static readonly ImmutableHashSet<string> GeneratedApiNames = new[]
+    {
+        SourceGenerators.Constants.WhenChangedMethodName,
+        SourceGenerators.Constants.WhenChangingMethodName,
+        SourceGenerators.Constants.WhenAnyMethodName,
+        SourceGenerators.Constants.WhenAnyValueMethodName,
+        SourceGenerators.Constants.WhenAnyObservableMethodName,
+        SourceGenerators.Constants.BindOneWayMethodName,
+        SourceGenerators.Constants.BindTwoWayMethodName,
+        SourceGenerators.Constants.OneWayBindMethodName,
+        SourceGenerators.Constants.BindMethodName,
+        SourceGenerators.Constants.BindToMethodName,
+        SourceGenerators.Constants.BindCommandMethodName,
+        SourceGenerators.Constants.BindInteractionMethodName,
+        SourceGenerators.Constants.InvokeCommandMethodName,
+        SourceGenerators.Constants.ToPropertyMethodName,
+    }.ToImmutableHashSet(StringComparer.Ordinal);
 
     /// <summary>The suffix that marks the runtime-reflection twin of an API.</summary>
     private const string UnsafeMethodSuffix = "Unsafe";

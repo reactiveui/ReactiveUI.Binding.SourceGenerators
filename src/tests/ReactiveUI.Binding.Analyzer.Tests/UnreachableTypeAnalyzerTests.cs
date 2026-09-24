@@ -31,6 +31,12 @@ public class UnreachableTypeAnalyzerTests
                                                 where TObj : class
                                                 => throw new InvalidOperationException();
 
+                                            public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
+                                                this TSender sender,
+                                                Expression property,
+                                                Func<object, TRet> selector)
+                                                => throw new InvalidOperationException();
+
                                             public static IObservable<TReturn> WhenChangedUnsafe<TObj, TReturn>(
                                                 this TObj objectToMonitor,
                                                 Expression<Func<TObj, TReturn>> property)
@@ -218,6 +224,29 @@ public class UnreachableTypeAnalyzerTests
                                                  {
                                                      public event PropertyChangedEventHandler PropertyChanged;
                                                      public string Name { get; set; }
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await GetDiagnosticsAsync(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>A runtime-only API such as WhenAnyDynamic generates nothing either way, so it is not reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RuntimeOnlyApi_NotReported()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public static class Outer
+                                             {
+                                                 public static void Run(Expression path) => new Vm().WhenAnyDynamic(path, static x => x);
+
+                                                 private sealed class Vm
+                                                 {
                                                  }
                                              }
                                          }

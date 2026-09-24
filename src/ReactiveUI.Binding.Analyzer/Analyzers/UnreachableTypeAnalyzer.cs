@@ -49,7 +49,7 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
         var invocation = (IInvocationOperation)context.Operation;
         var method = invocation.TargetMethod;
 
-        if (!AnalyzerHelpers.IsBindingExtensionMethod(method) || AnalyzerHelpers.IsUnsafeBindingMethod(method))
+        if (!AnalyzerHelpers.IsBindingExtensionMethod(method) || AnalyzerHelpers.IsUnsafeBindingMethod(method) || !IsGeneratedMethodName(method.Name))
         {
             return;
         }
@@ -114,6 +114,12 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
 
         return null;
     }
+
+    /// <summary>Determines whether the generator produces code for calls to a binding method of this name.</summary>
+    /// <param name="name">The method name.</param>
+    /// <returns><see langword="true"/> for a generated entry point; runtime-only APIs such as WhenAnyDynamic are not.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsGeneratedMethodName(string name) => AnalyzerHelpers.GeneratedApiNames.Contains(name);
 
     /// <summary>Determines whether generated code in the consumer's assembly can name a type.</summary>
     /// <param name="type">The type.</param>
