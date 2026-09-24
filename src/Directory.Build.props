@@ -30,9 +30,13 @@
     <BindingMauiTargets>$(BindingMauiTargets);net10.0;net11.0;$(BindingAndroidTargets)</BindingMauiTargets>
     <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
 
-    <!-- Windows-only targets (Framework + Windows-specific) -->
+    <!-- Plain desktop targets (windows7.0) for the WPF and WinForms packages. A net*-windows app cannot consume a
+         -windows10.0.19041.0 asset, so without these it falls back to the .NET Framework asset via AssetTargetFallback. -->
+    <BindingDesktopTargets>net8.0-windows;net9.0-windows;net10.0-windows;net11.0-windows</BindingDesktopTargets>
+
+    <!-- Windows-only targets (Framework + desktop + Windows-specific) -->
     <BindingWindowsOnlyTargets>$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
-    <BindingWindowsOnlyTargets>$(BindingLegacyTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
+    <BindingWindowsOnlyTargets>$(BindingLegacyTargets);$(BindingDesktopTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
 
     <!-- Test targets -->
     <BindingTestTargets>net10.0;net11.0</BindingTestTargets>
