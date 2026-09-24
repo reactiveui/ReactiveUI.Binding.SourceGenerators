@@ -79,15 +79,29 @@ internal static class ExtractorValidation
     /// <summary>Determines whether generated code in the consumer's assembly can name a type.</summary>
     /// <param name="type">The type, which may be null.</param>
     /// <param name="compilation">The consumer compilation.</param>
-    /// <returns><see langword="true"/> when the type is accessible from outside every type that declares it.</returns>
+    /// <returns><see langword="true"/> when the type is closed and accessible from outside every type that declares it.</returns>
     /// <remarks>
     /// Generated overloads and interceptors are declared in a class of their own, so a private or protected
-    /// nested type - or a generic closed over one - is out of their reach. Naming one anyway fails the
-    /// consumer's whole build over generated code they cannot edit.
+    /// nested type - or a generic closed over one - is out of their reach, and so is a type parameter of the
+    /// calling code, alone or as a type argument of another type. Naming one anyway fails the consumer's whole
+    /// build over generated code they cannot edit.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsReachableFromGeneratedCode(ITypeSymbol? type, Compilation compilation) =>
-        type is not null && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+        type is not null && !ContainsTypeParameter(type) && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+
+    /// <summary>Determines whether a type is, or is built from, a type parameter.</summary>
+    /// <param name="type">The type.</param>
+    /// <returns><see langword="true"/> when a type parameter appears anywhere in the type.</returns>
+    internal static bool ContainsTypeParameter(ITypeSymbol type) =>
+        type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => ContainsTypeParameter(array.ElementType),
+            INamedTypeSymbol named => AnyContainsTypeParameter(named.TypeArguments)
+                || (named.ContainingType is { } containing && ContainsTypeParameter(containing)),
+            _ => false,
+        };
 
     /// <summary>Determines whether generated code can name every type an invoked binding method is closed over.</summary>
     /// <param name="method">The resolved binding method.</param>
@@ -200,4 +214,20 @@ internal static class ExtractorValidation
     /// </remarks>
     private static bool IsExtensionGroupingType(INamedTypeSymbol type) =>
         type.Name.Length == 0 || type.Name[0] == '<';
+
+    /// <summary>Determines whether any of a list of types is, or is built from, a type parameter.</summary>
+    /// <param name="types">The types.</param>
+    /// <returns><see langword="true"/> when a type parameter appears in any of them.</returns>
+    private static bool AnyContainsTypeParameter(ImmutableArray<ITypeSymbol> types)
+    {
+        for (var i = 0; i < types.Length; i++)
+        {
+            if (ContainsTypeParameter(types[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

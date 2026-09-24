@@ -183,6 +183,36 @@ public class UnreachableTypeAnalyzerTests
         await Assert.That(diagnostics[0].GetMessage()).Contains("Host.Inner");
     }
 
+    /// <summary>A call whose observed type is built from a type parameter reports RXUIBIND016.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TypeClosedOverTypeParameter_ReportsTypeParameterCall()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public sealed class Box<T> : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler PropertyChanged;
+                                                 public T Value { get; set; }
+                                             }
+
+                                             public static class Outer
+                                             {
+                                                 public static void Run<T>() => new Box<T>().WhenChanged(x => x.Value);
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<UnreachableTypeAnalyzer>(Source);
+        var typeParameterCalls = diagnostics.Where(static d => d.Id == "RXUIBIND016").ToArray();
+        using (Assert.Multiple())
+        {
+            await Assert.That(typeParameterCalls.Length).IsEqualTo(1);
+            await Assert.That(diagnostics.Count(static d => d.Id == UnreachableId)).IsEqualTo(0);
+        }
+    }
+
     /// <summary>An internal nested type is reachable, so nothing is reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

@@ -99,6 +99,16 @@ internal static class DiagnosticWarnings
         true,
         UnreachableTypeDescription);
 
+    /// <summary>RXUIBIND016: a binding call names a type parameter of the calling code.</summary>
+    internal static readonly DiagnosticDescriptor TypeParameterCall = new(
+        "RXUIBIND016",
+        "Binding call is made through a type parameter",
+        "'{0}' is built from a type parameter, so generated code cannot name it; this call generates nothing and throws when it runs",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        TypeParameterCallDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -252,6 +262,12 @@ internal static class DiagnosticWarnings
     private const string UnreadableToPropertyNameDescription =
         "The generator reads the property's name from the call. A selector has to read one member straight off its "
         + "parameter, as in x => x.Property, and a string has to be a compile-time constant.";
+
+    /// <summary>The string description of the type parameter call warning.</summary>
+    private const string TypeParameterCallDescription =
+        "Generated overloads and interceptors name the closed types a call is made with. A call inside a generic "
+        + "method or type whose types come from its type parameters names none that generated code can write, so "
+        + "the call stays on the runtime stub. Call the Unsafe overload, which resolves the path at run time.";
 
     /// <summary>The string description of the unreachable type warning.</summary>
     private const string UnreachableTypeDescription =
