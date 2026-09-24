@@ -35,6 +35,28 @@ internal static class InterceptorEmitter
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     internal delegate void ParameterListWriter(StringBuilder builder, InvocationInfo first, in LanguageFeatures features);
 
+    /// <summary>Writes the attribute for every call site one generated method claims, then opens that method.</summary>
+    /// <typeparam name="T">The per-call-site model this API extracts.</typeparam>
+    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="callSites">The call sites the method claims.</param>
+    /// <param name="locationOf">Reads where a call site is.</param>
+    /// <param name="declarationOpen">The method's declaration up to its name suffix, e.g. its modifiers, return type and name prefix.</param>
+    /// <param name="suffix">The suffix naming the body the call sites reach.</param>
+    internal static void AppendClaimingMethodOpen<T>(
+        StringBuilder builder,
+        List<T> callSites,
+        Func<T, InterceptorLocation> locationOf,
+        string declarationOpen,
+        string suffix)
+    {
+        for (var i = 0; i < callSites.Count; i++)
+        {
+            AppendAttribute(builder, locationOf(callSites[i]), MemberIndent);
+        }
+
+        _ = builder.Append(declarationOpen).Append(suffix).AppendLine("(");
+    }
+
     /// <summary>Writes the attribute that binds a generated method to one call site.</summary>
     /// <param name="builder">The builder receiving the attribute line.</param>
     /// <param name="location">The call site the compiler described.</param>

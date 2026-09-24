@@ -105,50 +105,24 @@ internal static class BindToCodeGenerator
     /// </summary>
     /// <param name="invocations">The collection of <c>BindTo</c> invocation details to be grouped.</param>
     /// <returns>A list of grouped invocations, where each group shares the same overload signature.</returns>
-    internal static List<BindToTypeGroup> GroupByTypeSignature(ImmutableArray<BindToInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindToInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static List<BindToTypeGroup> GroupByTypeSignature(ImmutableArray<BindToInvocationInfo> invocations) =>
+        SignatureGrouping.Group(
+            invocations,
+            static (key, inv) => _ = key
                 .Append(inv.SourceValueTypeFullName).Append('|')
                 .Append(inv.TargetTypeFullName).Append('|')
                 .Append(inv.TargetPropertyTypeFullName).Append('|')
                 .Append(inv.HasConversionHint).Append('|')
-                .Append(inv.HasConverterOverride);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindToTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
+                .Append(inv.HasConverterOverride),
+            static (first, members) => new BindToTypeGroup(
                 first.SourceValueTypeFullName,
                 first.TargetTypeFullName,
                 first.TargetPropertyTypeFullName,
                 first.TargetPropertyIsReferenceType,
                 first.HasConversionHint,
                 first.HasConverterOverride,
-                [.. kvp.Value]));
-        }
-
-        return result;
-    }
+                members));
 
     /// <summary>
     /// Generates the concrete typed <c>BindTo</c> overload for a group, choosing the dispatch strategy

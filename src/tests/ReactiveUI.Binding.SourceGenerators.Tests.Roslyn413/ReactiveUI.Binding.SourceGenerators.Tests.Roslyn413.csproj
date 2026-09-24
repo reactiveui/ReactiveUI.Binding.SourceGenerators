@@ -15,6 +15,7 @@
     <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net472"/>
     <PackageReference Include="ReactiveUI"/>
   </ItemGroup>
 

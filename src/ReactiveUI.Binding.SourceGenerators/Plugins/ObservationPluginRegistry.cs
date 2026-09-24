@@ -16,15 +16,15 @@ internal static class ObservationPluginRegistry
     private static readonly IObservationPlugin[] Plugins =
     [
         new KVOObservationPlugin(), // Affinity 15 - Apple NSObject KVO
-        new UIKitObservationPlugin(),
-        new UIKitValueObservationPlugin(),
-        new AppKitObservationPlugin(),
+        UIKitObservation.Plugin,
+        UIKitValueObservation.Plugin,
+        AppKitObservation.Plugin,
         new ReactiveObjectObservationPlugin(), // Affinity 10 - IReactiveObject
-        new WinFormsObservationPlugin(), // Affinity  8 - WinForms Component
-        new WinUIObservationPlugin(), // Affinity  6 - WinUI DependencyObject
-        new UnoObservationPlugin(),
+        WinFormsObservation.Plugin, // Affinity  8 - WinForms Component
+        WinUIObservation.Plugin, // Affinity  6 - WinUI DependencyObject
+        UnoObservation.Plugin,
         new INPCObservationPlugin(), // Affinity  5 - INotifyPropertyChanged
-        new AndroidObservationPlugin(), // Affinity  5 - Android View
+        AndroidObservation.Plugin, // Affinity  5 - Android View
         new WpfObservationPlugin(), // Affinity  4 - WPF DependencyObject
         new PocoObservationPlugin()
     ];

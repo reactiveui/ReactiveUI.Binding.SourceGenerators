@@ -45,7 +45,6 @@ internal static class ChainRegistrationEmitter
         string opening = TernaryOpening,
         string argumentIndent = TernaryArgumentIndent)
     {
-        var declaringType = segment.DeclaringTypeFullName;
         var valueType = segment.PropertyTypeFullName;
         var registration = $"__registration_{sourceExpression}";
 
@@ -54,14 +53,40 @@ internal static class ChainRegistrationEmitter
             .Append(generatedAffinity).Append(", ").Append(isBeforeChange ? "true" : "false")
             .Append(") is global::ReactiveUI.Binding.ICreatesObservableForProperty ").Append(registration).AppendLine()
             .Append(argumentIndent).Append("? (global::System.IObservable<").Append(valueType)
-            .Append(">)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<").Append(valueType).AppendLine(">(")
-            .Append(argumentIndent).Append(registration).AppendLine(",")
+            .Append(">)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<").Append(valueType).AppendLine(">(");
+        _ = AppendPluginObservableArguments(sb, argumentIndent, registration, sourceExpression, segment, valueType, isBeforeChange)
+            .AppendLine(", false)")
+            .Append(argumentIndent).Append(": (global::System.IObservable<").Append(valueType).AppendLine(">)");
+    }
+
+    /// <summary>
+    /// Appends the arguments that hand one link to a registration: the registration, the source, the member, its
+    /// name, its accessor and the notification timing. The caller writes what follows the timing.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="argumentIndent">The indent each argument is written at.</param>
+    /// <param name="registration">The expression naming the registration that won the link.</param>
+    /// <param name="sourceExpression">The expression naming the object the property is read from.</param>
+    /// <param name="segment">The property path segment being observed.</param>
+    /// <param name="valueType">The type the link's values are observed as.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <returns>The same builder, for chaining.</returns>
+    internal static StringBuilder AppendPluginObservableArguments(
+        StringBuilder sb,
+        string argumentIndent,
+        string registration,
+        string sourceExpression,
+        PropertyPathSegment segment,
+        string valueType,
+        bool isBeforeChange)
+    {
+        var declaringType = segment.DeclaringTypeFullName;
+        return sb.Append(argumentIndent).Append(registration).AppendLine(",")
             .Append(argumentIndent).Append(sourceExpression).AppendLine(",")
             .Append(argumentIndent).Append("((global::System.Linq.Expressions.Expression<global::System.Func<").Append(declaringType).Append(", ")
             .Append(valueType).Append(">>)(__e => __e.").Append(segment.PropertyName).AppendLine(")).Body,")
             .Append(argumentIndent).Append('"').Append(segment.PropertyName).AppendLine("\",")
             .Append(argumentIndent).Append("(object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",")
-            .Append(argumentIndent).Append(isBeforeChange ? "true" : "false").AppendLine(", false)")
-            .Append(argumentIndent).Append(": (global::System.IObservable<").Append(valueType).AppendLine(">)");
+            .Append(argumentIndent).Append(isBeforeChange ? "true" : "false");
     }
 }

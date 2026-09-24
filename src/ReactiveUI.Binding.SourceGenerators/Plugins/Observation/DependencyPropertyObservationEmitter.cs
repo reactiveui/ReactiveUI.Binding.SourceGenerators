@@ -12,6 +12,17 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// <summary>Shares WinUI-compatible dependency-property symbol checks and callback-token emission.</summary>
 internal static class DependencyPropertyObservationEmitter
 {
+    /// <summary>Creates the plugin for one framework's dependency objects.</summary>
+    /// <param name="kind">The platform mechanism identity.</param>
+    /// <param name="frameworkNamespace">The namespace declaring native dependency objects.</param>
+    /// <returns>The plugin that observes that framework's dependency properties.</returns>
+    internal static NativeObservationPlugin CreatePlugin(string kind, string frameworkNamespace) =>
+        new(
+            kind,
+            BindingAffinity.WinUiDependencyObject,
+            (owner, property) => Inspect(owner, property, kind, frameworkNamespace),
+            AppendSubscription);
+
     /// <summary>Offers a native candidate only for a property with a concrete dependency-property member.</summary>
     /// <param name="owner">The concrete property owner.</param>
     /// <param name="property">The observed CLR property.</param>

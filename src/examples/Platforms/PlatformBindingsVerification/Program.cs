@@ -19,11 +19,11 @@ if (args.Length == 0 || args[0] != "--verify")
 var failures = 0;
 
 #if PLATFORM_WINDOWS
-Run("WPF: ToProperty helper fed by a background thread, delivered to a TextBlock through the dispatcher invoker", static () => OnStaThread(WpfVerification.Verify));
+failures += Run("WPF: ToProperty helper fed by a background thread, delivered to a TextBlock through the dispatcher invoker", static () => OnStaThread(WpfVerification.Verify));
 
-Run("WinForms: ToProperty helper fed by a background thread, delivered to a Label through the control invoker", static () => OnStaThread(WinFormsVerification.Verify));
+failures += Run("WinForms: ToProperty helper fed by a background thread, delivered to a Label through the control invoker", static () => OnStaThread(WinFormsVerification.Verify));
 #elif PLATFORM_MAUI
-Run("MAUI: ToProperty helper fed by a background thread, delivered to a Label inline (no application dispatcher)", MauiVerification.Verify);
+failures += Run("MAUI: ToProperty helper fed by a background thread, delivered to a Label inline (no application dispatcher)", MauiVerification.Verify);
 #endif
 
 Console.WriteLine();
@@ -57,24 +57,23 @@ static bool OnStaThread(Func<bool> scenario)
 }
 #endif
 
-void Run(string name, Func<bool> scenario)
+static int Run(string name, Func<bool> scenario)
 {
     try
     {
         if (scenario())
         {
             Console.WriteLine($"PASS: {name}");
+            return 0;
         }
-        else
-        {
-            failures++;
-            Console.WriteLine($"FAIL: {name}");
-        }
+
+        Console.WriteLine($"FAIL: {name}");
+        return 1;
     }
     catch (Exception ex)
     {
-        failures++;
         Console.WriteLine($"FAIL: {name}");
         Console.WriteLine($"      {ex}");
+        return 1;
     }
 }

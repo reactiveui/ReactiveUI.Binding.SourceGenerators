@@ -5,7 +5,6 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventCommandBindingEmitter;
 
@@ -81,35 +80,6 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
         AppendParameterisedDisposableReturn(sb);
     }
 
-    /// <summary>Emits command execution using the selected parameter property.</summary>
-    /// <param name="sb">The output builder.</param>
-    /// <param name="inv">The extracted binding call.</param>
-    /// <param name="controlAccess">The control's typed access expression.</param>
-    /// <param name="eventArgsType">The framework event argument type.</param>
-    /// <param name="paramAccess">The typed command parameter access.</param>
-    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
-    internal static void EmitWithExpressionParameter(
-        StringBuilder sb,
-        BindCommandInvocationInfo inv,
-        string controlAccess,
-        string eventArgsType,
-        string paramAccess,
-        bool supportsNullable)
-    {
-        _ = sb.AppendLine();
-        AppendCommandSubscription(sb);
-        AppendCommandMissingExit(sb, controlAccess);
-        AppendEnabledSynchronization(sb, controlAccess, paramAccess, paramAccess);
-        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
-
-        _ = sb.Append("                    var param = ").Append(paramAccess).AppendLine(";");
-
-        AppendHandlerExecution(sb, "param");
-        AppendHandlerAttachment(sb, inv, controlAccess);
-
-        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
-    }
-
     /// <summary>Emits command execution without a parameter.</summary>
     /// <param name="sb">The output builder.</param>
     /// <param name="inv">The extracted binding call.</param>
@@ -127,11 +97,9 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
         AppendCommandSubscription(sb);
         AppendCommandMissingExit(sb, controlAccess);
         AppendEnabledSynchronization(sb, controlAccess, "null", "null");
-        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
-        AppendHandlerExecution(sb, "null");
+        AppendHandler(sb, eventArgsType, supportsNullable, null);
         AppendHandlerAttachment(sb, inv, controlAccess);
-
-        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+        AppendCommandOnlyReturn(sb);
     }
 
     /// <summary>Checks if a control type has a settable <c>Enabled</c> property (bool). Walks the type hierarchy.</summary>

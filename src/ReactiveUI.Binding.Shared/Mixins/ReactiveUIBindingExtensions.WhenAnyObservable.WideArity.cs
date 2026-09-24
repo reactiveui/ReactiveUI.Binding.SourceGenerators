@@ -19,7 +19,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <summary>Reported when no generated dispatch claimed a WhenAnyObservable call site.</summary>
     private const string NoWhenAnyObservableDispatchMessage =
         "No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.";
-#if NET8_0_OR_GREATER
+
     /// <summary>Observes 1 observable property and emits the values of the observable it holds, switching when the property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -37,28 +37,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 1 observable property and emits the values of the observable it holds, switching when the property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable the property held.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 2 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -80,30 +62,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 2 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 3 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -130,32 +92,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 3 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 4 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -186,34 +126,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 4 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 5 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -248,37 +164,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 5 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 6 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -318,39 +207,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 6 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 7 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -394,41 +254,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 7 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 8 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -476,43 +305,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 8 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        Expression<Func<TSender, IObservable<TRet>?>> obs8,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 9 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -564,45 +360,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 9 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
-    /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        Expression<Func<TSender, IObservable<TRet>?>> obs8,
-        Expression<Func<TSender, IObservable<TRet>?>> obs9,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 10 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -658,47 +419,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 10 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
-    /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
-    /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        Expression<Func<TSender, IObservable<TRet>?>> obs8,
-        Expression<Func<TSender, IObservable<TRet>?>> obs9,
-        Expression<Func<TSender, IObservable<TRet>?>> obs10,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 11 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -758,49 +482,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 11 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
-    /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
-    /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
-    /// <param name="obs11">An expression that selects observable property 11 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        Expression<Func<TSender, IObservable<TRet>?>> obs8,
-        Expression<Func<TSender, IObservable<TRet>?>> obs9,
-        Expression<Func<TSender, IObservable<TRet>?>> obs10,
-        Expression<Func<TSender, IObservable<TRet>?>> obs11,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Observes 12 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
@@ -864,51 +549,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>Observes 12 observable properties and merges the values of the observables they hold, switching each when its property changes; a null value emits nothing.</summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The element type of the observed observables.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="obs3">An expression that selects observable property 3 to observe.</param>
-    /// <param name="obs4">An expression that selects observable property 4 to observe.</param>
-    /// <param name="obs5">An expression that selects observable property 5 to observe.</param>
-    /// <param name="obs6">An expression that selects observable property 6 to observe.</param>
-    /// <param name="obs7">An expression that selects observable property 7 to observe.</param>
-    /// <param name="obs8">An expression that selects observable property 8 to observe.</param>
-    /// <param name="obs9">An expression that selects observable property 9 to observe.</param>
-    /// <param name="obs10">An expression that selects observable property 10 to observe.</param>
-    /// <param name="obs11">An expression that selects observable property 11 to observe.</param>
-    /// <param name="obs12">An expression that selects observable property 12 to observe.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the values of the latest observable each property held, merged into one sequence.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<TRet>?>> obs1,
-        Expression<Func<TSender, IObservable<TRet>?>> obs2,
-        Expression<Func<TSender, IObservable<TRet>?>> obs3,
-        Expression<Func<TSender, IObservable<TRet>?>> obs4,
-        Expression<Func<TSender, IObservable<TRet>?>> obs5,
-        Expression<Func<TSender, IObservable<TRet>?>> obs6,
-        Expression<Func<TSender, IObservable<TRet>?>> obs7,
-        Expression<Func<TSender, IObservable<TRet>?>> obs8,
-        Expression<Func<TSender, IObservable<TRet>?>> obs9,
-        Expression<Func<TSender, IObservable<TRet>?>> obs10,
-        Expression<Func<TSender, IObservable<TRet>?>> obs11,
-        Expression<Func<TSender, IObservable<TRet>?>> obs12,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>
     /// Observes 2 observable properties of different element types and emits the selector applied to the latest value of each, once every observable has produced a value.
     /// </summary>
@@ -937,31 +581,6 @@ public static partial class ReactiveUIBindingExtensions
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
-#else
-    /// <summary>
-    /// Observes 2 observable properties of different element types and emits the selector applied to the latest value of each, once every observable has produced a value.
-    /// </summary>
-    /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
-    /// <typeparam name="TRet">The return type of the selector.</typeparam>
-    /// <typeparam name="T1">The element type of observable property 1.</typeparam>
-    /// <typeparam name="T2">The element type of observable property 2.</typeparam>
-    /// <param name="sender">The sender instance to observe for property changes.</param>
-    /// <param name="obs1">An expression that selects observable property 1 to observe.</param>
-    /// <param name="obs2">An expression that selects observable property 2 to observe.</param>
-    /// <param name="selector">A function that combines the latest values from all observables.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable that emits the selector result each time one of the observables produces a value, once every observable has produced one.</returns>
-    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
-    public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2>(
-        this TSender sender,
-        Expression<Func<TSender, IObservable<T1>?>> obs1,
-        Expression<Func<TSender, IObservable<T2>?>> obs2,
-        Func<T1?, T2?, TRet> selector,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TSender : class
-#endif
     {
         throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }

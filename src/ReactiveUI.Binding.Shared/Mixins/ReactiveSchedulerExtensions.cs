@@ -21,7 +21,6 @@ public static partial class ReactiveSchedulerExtensions
     extension<TSource>(TSource source)
         where TSource : class
     {
-#if NET8_0_OR_GREATER
         /// <summary>Creates a one-way binding from a source property to a target property with a specified scheduler.</summary>
         /// <typeparam name="TTarget">The type of the target object.</typeparam>
         /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -51,36 +50,10 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TTarget : class
-#else
-        /// <summary>Creates a one-way binding from a source property to a target property with a specified scheduler.</summary>
-        /// <typeparam name="TTarget">The type of the target object.</typeparam>
-        /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
-        /// <param name="target">The target object whose property will be updated.</param>
-        /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
-        /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IDisposable BindOneWay<TTarget, TProperty>(
-            TTarget target,
-            Expression<Func<TSource, TProperty>> sourceProperty,
-            Expression<Func<TTarget, TProperty>> targetProperty,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>Creates a one-way binding from a source property to a target property with a conversion function and a specified scheduler.</summary>
         /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
         /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -113,34 +86,6 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TTarget : class
-#else
-        /// <summary>Creates a one-way binding from a source property to a target property with a conversion function and a specified scheduler.</summary>
-        /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
-        /// <typeparam name="TTarget">The type of the target object.</typeparam>
-        /// <typeparam name="TTargetProp">The type of the target property.</typeparam>
-        /// <param name="target">The target object whose property will be updated.</param>
-        /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
-        /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="conversionFunc">A function that converts the source property value to the target property type.</param>
-        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
-            TTarget target,
-            Expression<Func<TSource, TSourceProp>> sourceProperty,
-            Expression<Func<TTarget, TTargetProp>> targetProperty,
-            Func<TSourceProp, TTargetProp> conversionFunc,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
@@ -181,7 +126,6 @@ public static partial class ReactiveSchedulerExtensions
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>Creates a two-way binding between a source property and a target property with a specified scheduler.</summary>
         /// <typeparam name="TTarget">The type of the target object.</typeparam>
         /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -211,36 +155,10 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TTarget : class
-#else
-        /// <summary>Creates a two-way binding between a source property and a target property with a specified scheduler.</summary>
-        /// <typeparam name="TTarget">The type of the target object.</typeparam>
-        /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
-        /// <param name="target">The target object whose property will be updated.</param>
-        /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
-        /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IDisposable BindTwoWay<TTarget, TProperty>(
-            TTarget target,
-            Expression<Func<TSource, TProperty>> sourceProperty,
-            Expression<Func<TTarget, TProperty>> targetProperty,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>Creates a two-way binding between a source property and a target property with conversion functions and a specified scheduler.</summary>
         /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
         /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -275,36 +193,6 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TTarget : class
-#else
-        /// <summary>Creates a two-way binding between a source property and a target property with conversion functions and a specified scheduler.</summary>
-        /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
-        /// <typeparam name="TTarget">The type of the target object.</typeparam>
-        /// <typeparam name="TTargetProp">The type of the target property.</typeparam>
-        /// <param name="target">The target object whose property will be updated.</param>
-        /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
-        /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="sourceToTargetConv">A function that converts the source property value to the target property type.</param>
-        /// <param name="targetToSourceConv">A function that converts the target property value back to the source property type.</param>
-        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
-            TTarget target,
-            Expression<Func<TSource, TSourceProp>> sourceProperty,
-            Expression<Func<TTarget, TTargetProp>> targetProperty,
-            Func<TSourceProp, TTargetProp> sourceToTargetConv,
-            Func<TTargetProp, TSourceProp> targetToSourceConv,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
@@ -355,7 +243,6 @@ public static partial class ReactiveSchedulerExtensions
     extension<TView>(TView view)
         where TView : class, IViewFor
     {
-#if NET8_0_OR_GREATER
         /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector and scheduler.</summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <typeparam name="TProp">The type of the view model property.</typeparam>
@@ -388,34 +275,6 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TViewModel : class
-#else
-        /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector and scheduler.</summary>
-        /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-        /// <typeparam name="TProp">The type of the view model property.</typeparam>
-        /// <typeparam name="TOut">The type of the view property.</typeparam>
-        /// <param name="viewModel">The view model to observe.</param>
-        /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
-        /// <param name="viewProperty">An expression that selects the view property to update.</param>
-        /// <param name="selector">A function that converts the view model property value to the view property type.</param>
-        /// <param name="scheduler">The scheduler the write to the view is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
-            TViewModel viewModel,
-            Expression<Func<TViewModel, TProp>> viewModelProperty,
-            Expression<Func<TView, TOut>> viewProperty,
-            Func<TProp, TOut> selector,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TViewModel : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
@@ -456,7 +315,6 @@ public static partial class ReactiveSchedulerExtensions
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions and a specified scheduler.</summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -491,36 +349,6 @@ public static partial class ReactiveSchedulerExtensions
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
             where TViewModel : class
-#else
-        /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions and a specified scheduler.</summary>
-        /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-        /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
-        /// <typeparam name="TVProp">The type of the view property.</typeparam>
-        /// <param name="viewModel">The view model to observe.</param>
-        /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
-        /// <param name="viewProperty">An expression that selects the view property to update.</param>
-        /// <param name="viewModelToViewConverter">A function that converts the view model property value to the view property type.</param>
-        /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
-        /// <param name="scheduler">The scheduler each write is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
-        /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-        /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-        /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
-        [SuppressMessage(
-            "Extensions",
-            "SST1711:Extension block members should use the block's receiver",
-            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
-        public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
-            TViewModel viewModel,
-            Expression<Func<TViewModel, TVMProp>> viewModelProperty,
-            Expression<Func<TView, TVProp>> viewProperty,
-            Func<TVMProp, TVProp> viewModelToViewConverter,
-            Func<TVProp, TVMProp> viewToViewModelConverter,
-            ISequencer? scheduler,
-            [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
-            where TViewModel : class
-#endif
         {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
         }

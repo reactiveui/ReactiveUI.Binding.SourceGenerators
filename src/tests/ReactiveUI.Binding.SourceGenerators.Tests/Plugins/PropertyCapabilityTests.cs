@@ -30,7 +30,7 @@ public class PropertyCapabilityTests
     [Test]
     public async Task AndroidPlugin_ReachesOnlyThePropertiesAWidgetReports()
     {
-        var plugin = new AndroidObservationPlugin();
+        var plugin = AndroidObservation.Plugin;
         var classInfo = NativeObservationTestModels.CreateSegment(plugin, ReportedWidgetPropertyName, "string").DeclaringTypeInfo!;
 
         await Assert.That(plugin.CanObserveProperty(classInfo, ReportedWidgetPropertyName)).IsTrue();
@@ -50,7 +50,7 @@ public class PropertyCapabilityTests
             properties: new EquatableArray<ObservablePropertyInfo>(
                 [ModelFactory.CreateObservablePropertyInfo(ReportedWidgetPropertyName)]));
 
-        await Assert.That(new AndroidObservationPlugin().CanObserveProperty(classInfo, ReportedWidgetPropertyName))
+        await Assert.That(AndroidObservation.Plugin.CanObserveProperty(classInfo, ReportedWidgetPropertyName))
             .IsFalse();
     }
 
@@ -93,7 +93,7 @@ public class PropertyCapabilityTests
         var classInfo = ModelFactory.CreateClassBindingInfo(inheritsWpfDependencyObject: true, properties: new([property]));
 
         await Assert.That(new WpfObservationPlugin().CanObserveProperty(classInfo, PropertyName)).IsFalse();
-        await Assert.That(new WinUIObservationPlugin().CanObserveProperty(classInfo, PropertyName)).IsFalse();
+        await Assert.That(WinUIObservation.Plugin.CanObserveProperty(classInfo, PropertyName)).IsFalse();
     }
 
     /// <summary>A declared property with no companion change event is out of the component mechanism's reach.</summary>
@@ -106,7 +106,7 @@ public class PropertyCapabilityTests
             properties: new EquatableArray<ObservablePropertyInfo>(
                 [ModelFactory.CreateObservablePropertyInfo(PropertyName)]));
 
-        await Assert.That(new WinFormsObservationPlugin().CanObserveProperty(classInfo, PropertyName)).IsFalse();
+        await Assert.That(WinFormsObservation.Plugin.CanObserveProperty(classInfo, PropertyName)).IsFalse();
     }
 
     /// <summary>A declared property with a companion change event is within the component mechanism's reach.</summary>
@@ -114,7 +114,7 @@ public class PropertyCapabilityTests
     [Test]
     public async Task ComponentPlugin_ReachesAPropertyWithAChangeEvent()
     {
-        var plugin = new WinFormsObservationPlugin();
+        var plugin = WinFormsObservation.Plugin;
         var classInfo = NativeObservationTestModels.CreateSegment(plugin, PropertyName, "string").DeclaringTypeInfo!;
         await Assert.That(plugin.CanObserveProperty(classInfo, PropertyName)).IsTrue();
     }

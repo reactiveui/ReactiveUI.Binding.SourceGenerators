@@ -15,7 +15,6 @@ public static partial class ReactiveUIBindingExtensions
     private const string NoBindInteractionDispatchMessage =
         "No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.";
 
-#if NET8_0_OR_GREATER
     /// <summary>Registers a task-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
@@ -41,35 +40,10 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class
         where TView : class, IViewFor
-#else
-    /// <summary>Registers a task-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
-    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-    /// <typeparam name="TView">The type of the view.</typeparam>
-    /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
-    /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
-    /// <param name="view">The view that provides the handler.</param>
-    /// <param name="viewModel">The view model that exposes the interaction; null registers nothing.</param>
-    /// <param name="propertyName">An expression that selects the interaction property on the view model.</param>
-    /// <param name="handler">A task-based handler for the interaction.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, unregisters the handler and stops observing the property.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
-        this TView view,
-        TViewModel? viewModel,
-        Expression<Func<TViewModel, IInteraction<TInput, TOutput>>> propertyName,
-        Func<IInteractionContext<TInput, TOutput>, Task> handler,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TViewModel : class
-        where TView : class, IViewFor
-#endif
     {
         throw new InvalidOperationException(NoBindInteractionDispatchMessage);
     }
 
-#if NET8_0_OR_GREATER
     /// <summary>Registers an observable-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
@@ -96,31 +70,6 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class
         where TView : class, IViewFor
-#else
-    /// <summary>Registers an observable-based handler on the interaction a view model property holds, moving it to the new interaction when the property changes.</summary>
-    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-    /// <typeparam name="TView">The type of the view.</typeparam>
-    /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
-    /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
-    /// <typeparam name="TDontCare">The signal type of the observable handler.</typeparam>
-    /// <param name="view">The view that provides the handler.</param>
-    /// <param name="viewModel">The view model that exposes the interaction; null registers nothing.</param>
-    /// <param name="propertyName">An expression that selects the interaction property on the view model.</param>
-    /// <param name="handler">An observable-based handler for the interaction.</param>
-    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
-    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>A disposable that, when disposed, unregisters the handler and stops observing the property.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
-    public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput, TDontCare>(
-        this TView view,
-        TViewModel? viewModel,
-        Expression<Func<TViewModel, IInteraction<TInput, TOutput>>> propertyName,
-        Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler,
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
-        where TViewModel : class
-        where TView : class, IViewFor
-#endif
     {
         throw new InvalidOperationException(NoBindInteractionDispatchMessage);
     }

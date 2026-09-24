@@ -734,6 +734,26 @@ internal static class CodeGeneratorHelpers
             .AppendLine(")")
             .AppendLine(GeneratedSyntax.StatementBlockOpen);
 
+    /// <summary>Appends a whole branch that matches a call site by its file and line and hands the binding to its worker.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="index">The branch's position in the overload, which decides whether it opens with <c>if</c> or <c>else if</c>.</param>
+    /// <param name="callerLineNumber">The line the call site sits on.</param>
+    /// <param name="callerFilePath">The file the call site sits in.</param>
+    /// <param name="workerName">The generated method the branch dispatches to.</param>
+    /// <param name="arguments">The argument list to forward, in the worker's own parameter order.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCallerInfoDispatchBranch(
+        StringBuilder sb,
+        int index,
+        int callerLineNumber,
+        string callerFilePath,
+        string workerName,
+        string arguments)
+    {
+        AppendCallerInfoDispatchCondition(sb, ConditionKeyword(index), callerLineNumber, ComputePathSuffix(callerFilePath));
+        AppendDispatchReturn(sb, workerName, arguments);
+    }
+
     /// <summary>Appends the call a matched branch hands the binding to, and closes the branch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="workerName">The generated method the branch dispatches to.</param>

@@ -441,46 +441,9 @@ internal static class ObservationCodeGenerator
     /// </summary>
     /// <param name="invocations">All detected invocations.</param>
     /// <returns>A list of type groups, each containing invocations with the same signature.</returns>
-    internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<InvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<InvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
-            .Append(inv.SourceTypeFullName).Append('|')
-            .Append(inv.ReturnTypeFullName).Append('|')
-            .Append(inv.PropertyPaths.Length).Append('|')
-            .Append(inv.HasSelector);
-            for (var p = 0; p < inv.PropertyPaths.Length; p++)
-            {
-                var path = inv.PropertyPaths[p];
-                _ = keySb.Append('|').Append(path[path.Length - 1].PropertyTypeFullName);
-            }
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<TypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            result.Add(new(kvp.Value[0], [.. kvp.Value]));
-        }
-
-        return result;
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<InvocationInfo> invocations) =>
+        SignatureGrouping.Group(invocations, AppendSignatureKey, static (first, members) => new TypeGroup(first, members));
 
     /// <summary>Generates a concrete typed extension method overload with its dispatch table.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -705,6 +668,23 @@ internal static class ObservationCodeGenerator
         return owner is null ? null : ObservationPluginRegistry.GetBestPlugin(owner, segment.PropertyName, isBeforeChange);
     }
 
+    /// <summary>Writes the parts of a call site that decide its overload: the types and each observed leaf's type.</summary>
+    /// <param name="key">The key being built.</param>
+    /// <param name="inv">The call site.</param>
+    private static void AppendSignatureKey(PooledStringBuilder key, InvocationInfo inv)
+    {
+        _ = key
+            .Append(inv.SourceTypeFullName).Append('|')
+            .Append(inv.ReturnTypeFullName).Append('|')
+            .Append(inv.PropertyPaths.Length).Append('|')
+            .Append(inv.HasSelector);
+        for (var p = 0; p < inv.PropertyPaths.Length; p++)
+        {
+            var path = inv.PropertyPaths[p];
+            _ = key.Append('|').Append(path[path.Length - 1].PropertyTypeFullName);
+        }
+    }
+
     /// <summary>Renders a flag as the generated output spells it.</summary>
     /// <param name="value">The flag to render.</param>
     /// <returns>The literal a generated argument carries.</returns>
@@ -742,7 +722,6 @@ internal static class ObservationCodeGenerator
         in PluginChoiceLayout layout,
         string? valueTypeOverride = null)
     {
-        var declaringType = segment.DeclaringTypeFullName;
         var valueType = valueTypeOverride ?? segment.PropertyTypeFullName;
         var pluginVariable = layout.VariableName + RegistrationVariableSuffix;
         var argumentIndent = $"{layout.ContinuationIndent}    ";
@@ -754,14 +733,9 @@ internal static class ObservationCodeGenerator
             .Append(layout.DeclarationPrefix).Append(layout.VariableName).Append(" = ").Append(pluginVariable).AppendLine(" == null")
             .Append(layout.ContinuationIndent).Append(observableOpen).Append(valueType).Append(">)").AppendLine(layout.MechanismVariable)
             .Append(layout.ContinuationIndent).Append(": (global::System.IObservable<").Append(valueType).Append(">)new ")
-            .Append(PluginPropertyObservable).Append('<').Append(valueType).AppendLine(">(")
-            .Append(argumentIndent).Append(pluginVariable).AppendLine(",")
-            .Append(argumentIndent).Append(rootVar).AppendLine(",")
-            .Append(argumentIndent).Append("((global::System.Linq.Expressions.Expression<global::System.Func<").Append(declaringType).Append(", ")
-            .Append(valueType).Append(">>)(__e => __e.").Append(segment.PropertyName).AppendLine(")).Body,")
-            .Append(argumentIndent).Append('"').Append(segment.PropertyName).AppendLine("\",")
-            .Append(argumentIndent).Append("(object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",")
-            .Append(argumentIndent).Append(BooleanLiteral(isBeforeChange)).AppendLine(",")
+            .Append(PluginPropertyObservable).Append('<').Append(valueType).AppendLine(">(");
+        _ = ChainRegistrationEmitter.AppendPluginObservableArguments(sb, argumentIndent, pluginVariable, rootVar, segment, valueType, isBeforeChange)
+            .AppendLine(",")
             .Append(argumentIndent).Append("true);");
     }
 
@@ -861,49 +835,7 @@ internal static class ObservationCodeGenerator
     {
         for (var s = 1; s < path.Length; s++)
         {
-            var seg = path[s];
-            var prevVar = $"__obs{s - 1}";
-            var curVar = $"__obs{s}";
-            var lambdaParam = $"__parent{s}";
-            var segType = seg.PropertyTypeFullName;
-            var segInfo = seg.DeclaringTypeInfo;
-            var beforeLeaf = isBeforeChange && s == path.Length - 1;
-            var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
-
-            // Only the leaf suppresses. Inner segments keep pushing the null downstream so the
-            // stage below re-parents onto null and drops its subscription on the detached subtree.
-            var nullParentBehavior = s == path.Length - 1
-                ? NullParentObservationBehavior.SuppressEmission
-                : NullParentObservationBehavior.EmitDefault;
-            var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-
-            if (segPlugin is not null)
-            {
-                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, beforeLeaf, nullParentBehavior);
-            }
-            else if (IsINPChanging(segInfo) && isBeforeChange)
-            {
-                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
-                    .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-                    .Append(ObservableTrueBranchOpen).Append(segType)
-                    .Append(ChangingObservableOpen).Append(segType).AppendLine(">(")
-                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging)").Append(lambdaParam).AppendLine(",")
-                    .Append("                    \"").Append(seg.PropertyName).AppendLine("\",")
-                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(seg.DeclaringTypeFullName)
-                    .Append(GeneratedSyntax.ObserverCastClose).Append(seg.PropertyName).AppendLine(")").Append(ObservableFalseBranchOpen).Append(segType)
-                    .Append(">)").Append(nullParentObservable).AppendLine(");");
-            }
-            else
-            {
-                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
-                    .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-                    .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
-                    .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
-                    .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
-                    .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-            }
+            EmitInnerSegment(sb, path[s], new($"__obs{s - 1}", $"__obs{s}", $"__parent{s}"), s == path.Length - 1, isBeforeChange);
         }
     }
 
@@ -927,48 +859,53 @@ internal static class ObservationCodeGenerator
     {
         for (var s = 1; s < path.Length; s++)
         {
-            var seg = path[s];
-            var prevObsVar = $"{varName}_s{s - 1}";
-            var curObsVar = $"{varName}_s{s}";
-            var lambdaParam = $"{varName}_p{s}";
-            var segType = seg.PropertyTypeFullName;
-            var segInfo = seg.DeclaringTypeInfo;
-            var beforeLeaf = isBeforeChange && s == path.Length - 1;
-            var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
-
-            var nullParentBehavior = s == path.Length - 1
-                ? NullParentObservationBehavior.SuppressEmission
-                : NullParentObservationBehavior.EmitDefault;
-            var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-
-            if (segPlugin is not null)
-            {
-                segPlugin.EmitDeepChainInnerSegment(sb, new(prevObsVar, curObsVar, lambdaParam), seg, beforeLeaf, nullParentBehavior);
-            }
-            else if (IsINPChanging(segInfo) && isBeforeChange)
-            {
-                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curObsVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevObsVar))
-                    .AppendLine().Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-                    .Append(ObservableTrueBranchOpen).Append(segType)
-                    .Append(ChangingObservableOpen).Append(segType).AppendLine(">(")
-                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging)").Append(lambdaParam).AppendLine(",")
-                    .Append("                    \"").Append(seg.PropertyName).AppendLine("\",")
-                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(seg.DeclaringTypeFullName)
-                    .Append(GeneratedSyntax.ObserverCastClose).Append(seg.PropertyName).AppendLine(")").Append(ObservableFalseBranchOpen).Append(segType)
-                    .Append(">)").Append(nullParentObservable).AppendLine(");");
-            }
-            else
-            {
-                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curObsVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevObsVar))
-                    .AppendLine().Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-                    .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
-                    .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
-                    .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
-                    .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-            }
+            EmitInnerSegment(sb, path[s], new($"{varName}_s{s - 1}", $"{varName}_s{s}", $"{varName}_p{s}"), s == path.Length - 1, isBeforeChange);
         }
+    }
+
+    /// <summary>Emits the stage that switches one segment after the root onto its parent's latest value.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="seg">The segment the stage observes.</param>
+    /// <param name="variables">The names of the parent stage, this stage and the lambda's parent parameter.</param>
+    /// <param name="isLeaf">Whether the segment is the last in the path.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <remarks>
+    /// Only the leaf suppresses. Inner segments keep pushing the null downstream so the stage below re-parents onto
+    /// null and drops its subscription on the detached subtree.
+    /// </remarks>
+    private static void EmitInnerSegment(
+        StringBuilder sb,
+        PropertyPathSegment seg,
+        ChainStageVariables variables,
+        bool isLeaf,
+        bool isBeforeChange)
+    {
+        var segType = seg.PropertyTypeFullName;
+        var beforeLeaf = isBeforeChange && isLeaf;
+        var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
+        var nullParentBehavior = isLeaf
+            ? NullParentObservationBehavior.SuppressEmission
+            : NullParentObservationBehavior.EmitDefault;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
+
+        if (segPlugin is not null)
+        {
+            segPlugin.EmitDeepChainInnerSegment(sb, variables, seg, beforeLeaf, nullParentBehavior);
+            return;
+        }
+
+        // Every known type resolves a plugin, the POCO fallback at worst, so only a segment whose declaring type
+        // is unknown reaches here. Nothing about such a type says it notifies, so the stage reads the value once.
+        var lambdaParam = variables.ParentParameter;
+        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(variables.CurrentObservable).Append(" = ")
+            .Append(OpenChainSwitchMap(seg, segType, variables.PreviousObservable)).AppendLine()
+            .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+            .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
+            .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
+            .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
+            .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 
     /// <summary>

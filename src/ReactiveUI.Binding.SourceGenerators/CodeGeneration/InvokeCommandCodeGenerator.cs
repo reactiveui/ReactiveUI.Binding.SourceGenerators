@@ -51,43 +51,14 @@ internal static class InvokeCommandCodeGenerator
     /// <summary>Groups invocations by the types their overload declares.</summary>
     /// <param name="invocations">The <c>InvokeCommand</c> invocations to group.</param>
     /// <returns>A list of groups, each sharing one overload signature.</returns>
+    /// <remarks>The selector is typed as the stub's ICommand whatever the property declares, so the command type is not part of the key.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<InvokeCommandTypeGroup> GroupByTypeSignature(
-        ImmutableArray<InvokeCommandInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<InvokeCommandInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-
-            // The selector is typed as the stub's ICommand whatever the property declares, so the command type is not part of the key.
-            _ = keySb.Clear()
-                .Append(inv.SourceValueTypeFullName).Append('|')
-                .Append(inv.TargetTypeFullName);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<InvokeCommandTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(first.SourceValueTypeFullName, first.TargetTypeFullName, [.. kvp.Value]));
-        }
-
-        return result;
-    }
+        ImmutableArray<InvokeCommandInvocationInfo> invocations) =>
+        SignatureGrouping.Group(
+            invocations,
+            static (key, inv) => _ = key.Append(inv.SourceValueTypeFullName).Append('|').Append(inv.TargetTypeFullName),
+            static (first, members) => new InvokeCommandTypeGroup(first.SourceValueTypeFullName, first.TargetTypeFullName, members));
 
     /// <summary>Emits one group: the way its call sites are reached, and one worker per distinct command path.</summary>
     /// <param name="sb">The string builder to append to.</param>
