@@ -181,7 +181,7 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         [CallerArgumentExpression("viewModelProperty")]
@@ -215,7 +215,7 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TProp>> viewModelProperty,
         Expression<Func<TView, TOut>> viewProperty,
         Func<TProp, TOut> selector,
@@ -249,7 +249,7 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         [CallerArgumentExpression("viewModelProperty")]
@@ -284,7 +284,7 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         Func<TVMProp, TVProp> viewModelToViewConverter,

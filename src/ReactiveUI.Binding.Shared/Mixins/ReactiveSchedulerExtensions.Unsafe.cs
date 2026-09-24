@@ -288,7 +288,7 @@ public static partial class ReactiveSchedulerExtensions
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, TOut> OneWayBindUnsafe<TView, TViewModel, TProp, TOut>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TProp>> viewModelProperty,
         Expression<Func<TView, TOut>> viewProperty,
         Func<TProp, TOut> selector,
@@ -327,7 +327,7 @@ public static partial class ReactiveSchedulerExtensions
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, TVProp> OneWayBindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         IBindingTypeConverter converter,
@@ -374,7 +374,7 @@ public static partial class ReactiveSchedulerExtensions
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         Func<TVMProp, TVProp> viewModelToViewConverter,
@@ -415,7 +415,7 @@ public static partial class ReactiveSchedulerExtensions
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TView, TViewModel, TVMProp, TVProp>(
         this TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         IBindingTypeConverter viewModelToViewConverter,

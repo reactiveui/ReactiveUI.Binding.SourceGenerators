@@ -28,7 +28,7 @@ public static partial class RuntimeBindingFallback
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp, TDontCare>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         IObservable<TDontCare>? signalViewUpdate,
@@ -54,7 +54,7 @@ public static partial class RuntimeBindingFallback
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp, TDontCare>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         TwoWayConverterPair<TVMProp, TVProp> conversions,
@@ -86,7 +86,7 @@ public static partial class RuntimeBindingFallback
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
     private static ReactiveBinding<TView, BindingChange> CreateTriggeredBinding<TViewModel, TView, TVMProp, TVProp, TDontCare>(
         TView view,
-        TViewModel viewModel,
+        TViewModel? viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
         Expression<Func<TView, TVProp>> viewProperty,
         TwoWayConverterPair<TVMProp, TVProp>? conversions,
@@ -96,17 +96,22 @@ public static partial class RuntimeBindingFallback
         where TView : class, IViewFor
     {
         ArgumentExceptionHelper.ThrowIfNull(view);
-        ArgumentExceptionHelper.ThrowIfNull(viewModel);
         ArgumentExceptionHelper.ThrowIfNull(viewModelProperty);
         ArgumentExceptionHelper.ThrowIfNull(viewProperty);
 
-        var modelSignals = new MapSignal<TVMProp, bool>(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), static _ => true);
+        var modelSignals = new MapSignal<TVMProp, bool>(ObserveViewModel(view, viewModel, viewModelProperty), static _ => true);
         var viewSignals = new MapSignal<TVProp, bool>(RuntimeObservationFallback.WhenChanged(view, viewProperty), static _ => false);
         var source = CreateTriggerSource(modelSignals, viewSignals, signalViewUpdate, triggerUpdate);
+
+        // The model side is read and written through the view's own view model when the view holds one of this
+        // type, the same root the observation above follows.
+        var (modelRoot, modelPath) = view is IViewFor<TViewModel>
+            ? ((object)view, RootAtViewModel(viewModelProperty).Body)
+            : ((object)viewModel!, viewModelProperty.Body);
         var plan = new TriggeredBindingPlan<TVMProp, TVProp>(
-            viewModel,
+            modelRoot,
             view,
-            new List<Expression>(Reflection.Rewrite(viewModelProperty.Body).GetExpressionChain()),
+            new List<Expression>(Reflection.Rewrite(modelPath).GetExpressionChain()),
             new List<Expression>(Reflection.Rewrite(viewProperty.Body).GetExpressionChain()),
             conversions);
         var values = BindingSchedulers.ObserveOnViewThread(new InitialBindingSignal(source), view).Choose(plan.Project);
