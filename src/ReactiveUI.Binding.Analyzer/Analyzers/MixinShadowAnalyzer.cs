@@ -72,7 +72,9 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
     {
         var method = ((IInvocationOperation)context.Operation).TargetMethod;
 
-        if (!AnalyzerHelpers.GeneratedApiNames.Contains(method.Name) || AnalyzerHelpers.IsBindingExtensionMethod(method))
+        if (!AnalyzerHelpers.GeneratedApiNames.Contains(method.Name)
+            || AnalyzerHelpers.IsBindingExtensionMethod(method)
+            || !TakesAnExpression(method))
         {
             return;
         }
@@ -90,6 +92,29 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
             context.Operation.Syntax.GetLocation(),
             method.Name,
             declaringType.Name));
+    }
+
+    /// <summary>Determines whether a method takes an expression, as a binding selector is written.</summary>
+    /// <param name="method">The invoked method.</param>
+    /// <returns><see langword="true"/> when any parameter is a <c>System.Linq.Expressions.Expression&lt;T&gt;</c>.</returns>
+    /// <remarks>
+    /// ReactiveUI's binding mixins name their properties with expression selectors. A ReactiveUI method that only
+    /// shares a binding API's name - binding a collection source to a table view, say - takes none, and is a
+    /// different API rather than a binding the generator could have claimed.
+    /// </remarks>
+    private static bool TakesAnExpression(IMethodSymbol method)
+    {
+        var parameters = method.Parameters;
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].Type is INamedTypeSymbol { Name: "Expression", IsGenericType: true } expression
+                && expression.ContainingNamespace.ToDisplayString() == "System.Linq.Expressions")
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Walks out of any nested or synthesized type to the type the consumer wrote.</summary>
