@@ -46,7 +46,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(propertyName.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(propertyName.Body));
 
         return RuntimeCommandBindingFallback.BindCommand(
             view,
@@ -87,7 +87,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(propertyName.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(propertyName.Body));
 
         return RuntimeCommandBindingFallback.BindCommand(
             view,
@@ -128,7 +128,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(propertyName.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(propertyName.Body));
 
         // The parameter property lives on the same view model, so it is only observable once there is one.
         var parameters = viewModel is null

@@ -15,8 +15,9 @@ namespace ReactiveUI.Binding.Fallback;
 /// </summary>
 /// <remarks>
 /// An explicit converter override wins; otherwise <see cref="BindingConverters.Current"/> resolves the best
-/// converter for the declared source and target types. When no converter can produce a value, the conversion
-/// fails and the generated binding skips the assignment for that emission.
+/// converter for the declared source and target types. With no converter registered for the pair, a value whose
+/// declared type is assignable to the target passes through unchanged. When no converter can produce a value, the
+/// conversion fails and the generated binding skips the assignment for that emission.
 /// </remarks>
 public static class RuntimeBindingConverter
 {
@@ -59,6 +60,14 @@ public static class RuntimeBindingConverter
 
             result = default!;
             return false;
+        }
+
+        // Nothing is registered for the pair: a value that already has the target type passes through unchanged,
+        // as it does in the generated bindings.
+        if (resolved is null && typeof(TTo).IsAssignableFrom(fromType))
+        {
+            result = (TTo)boxed!;
+            return true;
         }
 
         if (BindingTypeConverterDispatch.TryConvertAny(resolved, fromType, boxed, toType, conversionHint, out converted)

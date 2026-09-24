@@ -20,6 +20,20 @@ public class RuntimeBindingConverterTests
     /// <summary>The value a successful conversion produces.</summary>
     private const int ConvertedValue = 41;
 
+    /// <summary>With nothing registered for the pair, a value already of the target type passes through unchanged.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryConvert_SameTypeWithNothingRegistered_PassesTheValueThrough()
+    {
+        var converted = RuntimeBindingConverter.TryConvert<int, int>(ConvertedValue, null, null, out var result);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(converted).IsTrue();
+            await Assert.That(result).IsEqualTo(ConvertedValue);
+        }
+    }
+
     /// <summary>An explicit converter takes precedence over the registry.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

@@ -39,7 +39,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(propertyName.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(propertyName.Body));
 
         return RuntimeInteractionFallback.BindInteraction(
             viewModel,
@@ -69,7 +69,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(propertyName.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(propertyName.Body));
 
         return RuntimeInteractionFallback.BindInteraction(
             viewModel,

@@ -123,7 +123,7 @@ public static partial class RuntimeBindingFallback
                 plan.Write(change);
                 changes.OnNext(change);
             },
-            Reflection.ExpressionToPropertyNames(viewModelProperty.Body));
+            Reflection.ExpressionToPropertyNames(Reflection.Rewrite(viewModelProperty.Body)));
         return new(view, changes, BindingDirection.TwoWay, new MultipleDisposable(subscription, new ActionDisposable(changes.OnCompleted)));
     }
 

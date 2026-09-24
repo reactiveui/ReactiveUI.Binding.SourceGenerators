@@ -39,7 +39,7 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TTarget, TTargetValue?>> property)
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(property.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(property.Body));
 
         return RuntimeBindingFallback.BindTo(
             source,
@@ -76,7 +76,7 @@ public static partial class ReactiveUIBindingExtensions
         object? conversionHint)
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(property.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(property.Body));
 
         return RuntimeBindingFallback.BindTo(
             source,
@@ -113,7 +113,7 @@ public static partial class ReactiveUIBindingExtensions
         IBindingTypeConverter? converterOverride)
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(property.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(property.Body));
 
         return RuntimeBindingFallback.BindTo(
             source,
@@ -153,7 +153,7 @@ public static partial class ReactiveUIBindingExtensions
         IBindingTypeConverter? converterOverride)
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(property.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(property.Body));
 
         return RuntimeBindingFallback.BindTo(
             source,
