@@ -57,7 +57,7 @@ public static class AnalyzerPatternExamples
         // Buy birthday present for Sam
     }
 
-    /// <summary>Follows a path made only of properties; an indexer, a field or a method call has no notification to follow.</summary>
+    /// <summary>Follows a path made of properties and instance fields; an indexer or a method call has no notification to follow.</summary>
     /// <returns>A task that completes when the items are loaded.</returns>
     public static async Task ObservePathOfProperties()
     {

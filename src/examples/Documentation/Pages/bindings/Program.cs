@@ -21,6 +21,10 @@ await OneWayBindingExamples.BindBalanceToLabelWithCurrencyFormat();
 
 await OneWayBindingExamples.OneWayBindFilterTextToBox();
 
+await OneWayBindingExamples.OneWayBindIntoNamedControl();
+
+await OneWayBindingExamples.OneWayBindKeepsViewWhilePathIsBroken();
+
 await OneWayBindingExamples.OneWayBindUploadPercentToProgressBar();
 
 await OneWayBindingExamples.OneWayBindAvailableBalanceWithSelector();
@@ -70,6 +74,8 @@ TwoWayBindingExamples.BindTransferAmountWithConverterObjectsAndHint();
 TwoWayBindingExamples.BindTransferAmountWithConverterObjectsOnSequencer();
 
 TwoWayBindingExamples.BindTransferAmountUnsafeWithConverterObjects();
+
+await TwoWayBindingExamples.BindFilterToPickerSelection();
 
 await TwoWayBindingExamples.BindTodoFilterInView();
 

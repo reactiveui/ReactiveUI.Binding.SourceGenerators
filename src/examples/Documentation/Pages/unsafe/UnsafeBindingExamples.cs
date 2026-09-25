@@ -24,6 +24,9 @@ public static class UnsafeBindingExamples
     /// <summary>The text of a filter.</summary>
     private const string FilterQuery = "car";
 
+    /// <summary>The new title the first to-do item is given.</summary>
+    private const string RenamedTitle = "Renew registration online";
+
     /// <summary>The amount of a transfer, as the view shows it.</summary>
     private const string AmountText = "125.50";
 
@@ -145,6 +148,29 @@ public static class UnsafeBindingExamples
 
         // Output:
         // 3 left
+    }
+
+    /// <summary>Binds through an indexer, a path the generator leaves to the runtime, written view first.</summary>
+    /// <returns>A task that completes when the view model has loaded.</returns>
+    public static async Task OneWayBindThroughIndexer()
+    {
+        var viewModel = await LoadTodoAsync();
+        TodoView view = new() { ViewModel = viewModel };
+        Expression<Func<TodoListViewModel, string>> source = x => x.Items[0].Title;
+        Expression<Func<TodoView, string>> target = v => v.SelectedTitleTextBox.Text;
+
+        using (view.OneWayBindUnsafe(viewModel, source, target))
+        {
+            Console.WriteLine(view.SelectedTitleTextBox.Text);
+
+            // The binding observes the item the indexer returns, so renaming it updates the box.
+            viewModel.Items[0].Title = RenamedTitle;
+            Console.WriteLine(view.SelectedTitleTextBox.Text);
+        }
+
+        // Output:
+        // Renew car registration
+        // Renew registration online
     }
 
     /// <summary>Carries a property both ways, written view first.</summary>

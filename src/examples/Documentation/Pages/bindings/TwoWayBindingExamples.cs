@@ -18,6 +18,9 @@ public static class TwoWayBindingExamples
     /// <summary>The text the user types to narrow the to-do list to one item.</summary>
     private const string DentistFilter = "dentist";
 
+    /// <summary>The tag the user picks to narrow the to-do list.</summary>
+    private const string HealthTag = "health";
+
     /// <summary>The text a view model sets to narrow the to-do list to one item.</summary>
     private const string CarFilter = "car";
 
@@ -300,6 +303,28 @@ public static class TwoWayBindingExamples
         // Output:
         // 1200.00
         // 85.50
+    }
+
+    /// <summary>Binds a string to a picker's selection, which the picker holds as an object, with the view-first <c>Bind</c>.</summary>
+    /// <returns>A task that completes when the example finishes.</returns>
+    public static async Task BindFilterToPickerSelection()
+    {
+        var list = await OpenTodoListAsync();
+        TodoTagFilterView view = new() { ViewModel = list };
+
+        // No converter is registered from object to string; a string in SelectedItem passes through as it is.
+        using (view.Bind(list, x => x.FilterText, v => v.TagPicker.SelectedItem))
+        {
+            view.TagPicker.SelectedItem = HealthTag;
+            Console.WriteLine(list.FilterText);
+
+            list.FilterText = CarFilter;
+            Console.WriteLine(view.TagPicker.SelectedItem);
+        }
+
+        // Output:
+        // health
+        // car
     }
 
     /// <summary>Binds the view's filter box with the view-first <c>Bind</c>, and reads each change from the returned binding.</summary>

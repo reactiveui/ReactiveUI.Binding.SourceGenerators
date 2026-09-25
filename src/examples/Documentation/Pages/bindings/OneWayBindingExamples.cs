@@ -205,6 +205,54 @@ public static class OneWayBindingExamples
         // car
     }
 
+    /// <summary>Binds into a named control, which markup declares as a field, with the view-first <c>OneWayBind</c>.</summary>
+    /// <returns>A task that completes when the example finishes.</returns>
+    public static async Task OneWayBindIntoNamedControl()
+    {
+        var list = await OpenTodoListAsync();
+        TodoHeadingView view = new() { ViewModel = list };
+
+        // TitleLabel is a field, like every x:Name control; the path runs through it.
+        using (view.OneWayBind(list, x => x.SelectedItem!.Title, v => v.TitleLabel.Text))
+        {
+            list.SelectedItem = list.Items[0];
+            Console.WriteLine(view.TitleLabel.Text);
+
+            list.SelectedItem = list.Items[1];
+            Console.WriteLine(view.TitleLabel.Text);
+        }
+
+        // Output:
+        // Renew car registration
+        // Book dentist appointment
+    }
+
+    /// <summary>Keeps the label as it is while the path to the bound property passes through a null.</summary>
+    /// <returns>A task that completes when the example finishes.</returns>
+    public static async Task OneWayBindKeepsViewWhilePathIsBroken()
+    {
+        var list = await OpenTodoListAsync();
+        TodoHeadingView view = new() { ViewModel = list };
+
+        using (view.OneWayBind(list, x => x.SelectedItem!.Title, v => v.TitleLabel.Text))
+        {
+            // Nothing is selected yet, so there is no title to write and the label is left alone.
+            Console.WriteLine(view.TitleLabel.Text ?? NothingSelectedText);
+
+            list.SelectedItem = list.Items[0];
+            Console.WriteLine(view.TitleLabel.Text);
+
+            // Clearing the selection breaks the path again; the label keeps the last title it was given.
+            list.SelectedItem = null;
+            Console.WriteLine(view.TitleLabel.Text);
+        }
+
+        // Output:
+        // nothing selected
+        // Renew car registration
+        // Renew car registration
+    }
+
     /// <summary>Fills a progress bar from the upload percentage with a selector that turns a percentage into the fraction the bar shows.</summary>
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindUploadPercentToProgressBar()

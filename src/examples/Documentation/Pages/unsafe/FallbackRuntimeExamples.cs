@@ -22,6 +22,9 @@ public static class FallbackRuntimeExamples
     /// <summary>The title of the first seeded item.</summary>
     private const string OriginalTitle = "Renew car registration";
 
+    /// <summary>The status a draft item shows, held as an object the way a picker holds its selection.</summary>
+    private const string DraftStatus = "Draft";
+
     /// <summary>The text of a filter.</summary>
     private const string FilterQuery = "car";
 
@@ -405,6 +408,22 @@ public static class FallbackRuntimeExamples
         // Output:
         // False
         // 0
+    }
+
+    /// <summary>Passes a value through when nothing is registered for the two types and the value already is the target type.</summary>
+    public static void ConvertValueThatAlreadyHasTheTargetType()
+    {
+        object status = DraftStatus;
+
+        // Nothing converts object to string, but the value is a string, so it passes through as it is.
+        var converted = RuntimeBindingConverter.TryConvert<object, string>(status, null, null, out var text);
+
+        Console.WriteLine(converted);
+        Console.WriteLine(text);
+
+        // Output:
+        // True
+        // Draft
     }
 
     /// <summary>Pairs a forward and a reverse conversion with <see cref="TwoWayConverters.Create"/>, which infers both types.</summary>
