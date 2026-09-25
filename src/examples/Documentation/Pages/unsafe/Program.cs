@@ -282,6 +282,8 @@ await UnsafeBindingExamples.OneWayBindChosenAtRunTime();
 
 await UnsafeBindingExamples.OneWayBindWithSelectorChosenAtRunTime();
 
+await UnsafeBindingExamples.OneWayBindThroughIndexer();
+
 await UnsafeBindingExamples.BindChosenAtRunTime();
 
 UnsafeBindingExamples.BindWithConversionsChosenAtRunTime();
@@ -393,6 +395,8 @@ FallbackRuntimeExamples.ConvertWithConversionHint();
 FallbackRuntimeExamples.ConvertWithConverterOverride();
 
 FallbackRuntimeExamples.ConvertWithoutConverterFails();
+
+FallbackRuntimeExamples.ConvertValueThatAlreadyHasTheTargetType();
 
 FallbackRuntimeExamples.CreateConverterPairWithFactory();
 

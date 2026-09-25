@@ -21,6 +21,8 @@ var failures = 0;
 #if PLATFORM_WINDOWS
 failures += Run("WPF: ToProperty helper fed by a background thread, delivered to a TextBlock through the dispatcher invoker", static () => OnStaThread(WpfVerification.Verify));
 
+failures += Run("WPF: BindCommand on a plain view writes a command replaced on a background thread through the button's dispatcher", static () => OnStaThread(WpfCommandVerification.Verify));
+
 failures += Run("WinForms: ToProperty helper fed by a background thread, delivered to a Label through the control invoker", static () => OnStaThread(WinFormsVerification.Verify));
 #elif PLATFORM_MAUI
 failures += Run("MAUI: ToProperty helper fed by a background thread, delivered to a Label inline (no application dispatcher)", MauiVerification.Verify);

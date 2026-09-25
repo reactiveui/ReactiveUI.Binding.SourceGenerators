@@ -16,6 +16,8 @@ ViewForExamples.RecognizeActivatableViews();
 
 await ViewForExamples.BindTodoView();
 
+await ViewForExamples.BindBeforeViewModelArrives();
+
 await ViewForExamples.BindAccountsView();
 
 ViewLocatorExamples.RequireLocatorBeforeRegistration();

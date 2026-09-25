@@ -16,6 +16,9 @@ public static class ViewForExamples
     /// <summary>The title the user types into the new item box.</summary>
     private const string NewItemTitle = "Book vet appointment";
 
+    /// <summary>The text shown while the screen has no view model.</summary>
+    private const string NoViewModelText = "no view model yet";
+
     /// <summary>Gives a screen its view model through the typed interface, as a navigation service does.</summary>
     /// <typeparam name="TViewModel">The view model type the screen shows.</typeparam>
     /// <param name="view">The screen.</param>
@@ -139,7 +142,7 @@ public static class ViewForExamples
         TodoView view = new();
         await viewModel.LoadAsync();
 
-        // The bindings follow view.ViewModel, so the screen has to show the view model first.
+        // The bindings follow view.ViewModel, so the screen shows the view model they read.
         _ = Present(view, viewModel);
 
         using (view.OneWayBind(viewModel, x => x.RemainingCount, v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture)))
@@ -155,6 +158,37 @@ public static class ViewForExamples
         // Output:
         // 3
         // Book vet appointment
+    }
+
+    /// <summary>Binds before the screen has a view model; the binding waits for one and moves to a replacement.</summary>
+    /// <returns>A task that completes when both lists are loaded and shown.</returns>
+    public static async Task BindBeforeViewModelArrives()
+    {
+        TodoListViewModel household = new(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel shared = new(InMemoryTodoStore.CreateSeeded());
+        await household.LoadAsync();
+        await shared.LoadAsync();
+        shared.SelectedItem = shared.Items[0];
+        await shared.CompleteAsync();
+        TodoView view = new();
+
+        // The binding follows view.ViewModel, which is still empty, so the label is left alone.
+        using (view.OneWayBind(household, x => x.RemainingCount, v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture)))
+        {
+            Console.WriteLine(view.RemainingLabel.Text ?? NoViewModelText);
+
+            view.ViewModel = household;
+            Console.WriteLine(view.RemainingLabel.Text);
+
+            // Replacing the view model moves the binding to the new one.
+            view.ViewModel = shared;
+            Console.WriteLine(view.RemainingLabel.Text);
+        }
+
+        // Output:
+        // no view model yet
+        // 3
+        // 2
     }
 
     /// <summary>Reads the labels of a banking screen from its view model through <see cref="IViewFor{T}"/>.</summary>
