@@ -25,6 +25,7 @@ namespace ReactiveUI.Binding.Reactive.Wpf
     public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.Reactive.IViewThreadInvoker
     {
         public DispatcherViewThreadInvoker() { }
+        public static ReactiveUI.Binding.Reactive.Wpf.DispatcherViewThreadInvoker Instance { get; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool CheckAccess(object target) { }
         public bool Claims(object target) { }

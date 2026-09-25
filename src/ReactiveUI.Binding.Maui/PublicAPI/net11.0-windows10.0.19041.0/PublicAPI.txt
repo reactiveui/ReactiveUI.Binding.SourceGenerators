@@ -34,6 +34,7 @@ namespace ReactiveUI.Binding.Maui
     public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.IViewThreadInvoker
     {
         public DispatcherViewThreadInvoker() { }
+        public static ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker Instance { get; }
         public bool CheckAccess(object target) { }
         public bool Claims(object target) { }
         public void Post(object target, System.Action<object?> callback, object? state) { }

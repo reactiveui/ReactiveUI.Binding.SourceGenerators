@@ -5,6 +5,7 @@ namespace ReactiveUI.Binding.Reactive.WinForms
     public sealed class ControlViewThreadInvoker : ReactiveUI.Binding.Reactive.IViewThreadInvoker
     {
         public ControlViewThreadInvoker() { }
+        public static ReactiveUI.Binding.Reactive.WinForms.ControlViewThreadInvoker Instance { get; }
         public bool CheckAccess(object target) { }
         public bool Claims(object target) { }
         public void Post(object target, System.Action<object?> callback, object? state) { }
