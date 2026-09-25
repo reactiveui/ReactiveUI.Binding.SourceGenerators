@@ -297,4 +297,112 @@ public class SyntaxHelpersTests
 
         await Assert.That(path).IsNull();
     }
+
+    /// <summary>A link that is a method, an event, a static or constant field, or a read-only field at the leaf is not a path.</summary>
+    /// <param name="selector">The selector over <c>MyViewModel</c>. A parameter named after its type reads static members legally.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("x => x.Compute")]
+    [Arguments("x => x.Changed")]
+    [Arguments("MyViewModel => MyViewModel.StaticField")]
+    [Arguments("MyViewModel => MyViewModel.ConstantField")]
+    [Arguments("x => x.ReadOnlyField")]
+    public async Task ExtractPropertyPathFromLambda_UnreadableLink_ReturnsNull(string selector)
+    {
+        var (model, lambda) = LambdaIn($"public static void Test() => Take({selector});");
+
+        await Assert.That(SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, model, default)).IsNull();
+    }
+
+    /// <summary>A path read off a type parameter is owned by the member's declaring type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractPropertyPathFromLambda_TypeParameterReceiver_UsesDeclaringType()
+    {
+        var (model, lambda) = LambdaIn(
+            "public static void Test<T>() where T : MyViewModel => TakeFrom<T>(x => x.Name);");
+
+        var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, model, default);
+
+        await Assert.That(path).IsNotNull();
+        await Assert.That(path![0].DeclaringTypeFullName).IsEqualTo("global::TestApp.MyViewModel");
+    }
+
+    /// <summary>A conditional call reports the line of the member binding.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CallerLineNumber_ConditionalCall_ReportsMemberLine()
+    {
+        const int ExpectedLine = 2;
+        var invocation = InvocationIn("value\n    ?.Call()");
+
+        await Assert.That(SyntaxHelpers.CallerLineNumber(invocation, default)).IsEqualTo(ExpectedLine);
+    }
+
+    /// <summary>A call through a plain name reports the line the call starts on.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CallerLineNumber_PlainCall_ReportsInvocationLine()
+    {
+        var invocation = InvocationIn("Call()");
+
+        await Assert.That(SyntaxHelpers.CallerLineNumber(invocation, default)).IsEqualTo(1);
+    }
+
+    /// <summary>Parses an expression and returns the outermost invocation in it.</summary>
+    /// <param name="expression">The expression text.</param>
+    /// <returns>The invocation.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static InvocationExpressionSyntax InvocationIn(string expression) =>
+        Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseExpression(expression)
+            .DescendantNodesAndSelf()
+            .OfType<InvocationExpressionSyntax>()
+            .First();
+
+    /// <summary>Compiles a usage method over <c>MyViewModel</c> and returns its first lambda with the semantic model.</summary>
+    /// <param name="usage">The usage member, calling <c>Take</c> or <c>TakeFrom</c>.</param>
+    /// <returns>The semantic model and the lambda.</returns>
+    private static (Microsoft.CodeAnalysis.SemanticModel Model, LambdaExpressionSyntax Lambda) LambdaIn(string usage)
+    {
+        var compilation = TestHelper.CreateCompilation(
+            $$"""
+              using System;
+              using System.ComponentModel;
+              using System.Linq.Expressions;
+
+              namespace TestApp
+              {
+                  public class MyViewModel : INotifyPropertyChanged
+                  {
+                      public const string ConstantField = "";
+                      public static string StaticField = "";
+                      public readonly string ReadOnlyField = "";
+
+                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                      public event EventHandler? Changed;
+
+                      public string Name { get; set; } = "";
+
+                      public string Compute() => Name;
+                  }
+
+                  public static class Usage
+                  {
+                      public static void Take(Expression<Func<MyViewModel, object?>> selector)
+                      {
+                      }
+
+                      public static void TakeFrom<T>(Expression<Func<T, object?>> selector)
+                      {
+                      }
+
+                      {{usage}}
+                  }
+              }
+              """);
+        var tree = compilation.SyntaxTrees.First();
+        var lambda = tree.GetRoot().DescendantNodes().OfType<LambdaExpressionSyntax>().First();
+        return (compilation.GetSemanticModel(tree), lambda);
+    }
 }

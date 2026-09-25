@@ -360,6 +360,25 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
+    /// <summary>A compiler-synthesized top-level type has no enclosing class to be recognized by.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_SynthesizedTopLevelType_ReturnsFalse()
+    {
+        var synthesized = CompiledType(
+            """
+            public static class Holder
+            {
+                public static readonly byte[] Data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            }
+            """,
+            "<PrivateImplementationDetails>");
+
+        var result = ExtractorValidation.IsRecognizedExtensionClass(synthesized);
+
+        await Assert.That(result).IsFalse();
+    }
+
     /// <summary>A type with no type arguments and no element type, such as <c>dynamic</c>, contains no type parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -408,9 +427,10 @@ public class ExtractorValidationTests
     /// compiler synthesizes exist only in the emitted assembly, not in the declaring compilation's symbols.
     /// </summary>
     /// <param name="source">The source declaring a single top-level type.</param>
+    /// <param name="metadataName">The type to read back, or null for the type the source declares.</param>
     /// <returns>The named type symbol as a consumer sees it.</returns>
     /// <exception cref="InvalidOperationException">The source did not compile, or the type was not emitted.</exception>
-    private static INamedTypeSymbol CompiledType(string source)
+    private static INamedTypeSymbol CompiledType(string source, string? metadataName = null)
     {
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
 
@@ -430,7 +450,7 @@ public class ExtractorValidationTests
         var reference = MetadataReference.CreateFromImage(image.ToArray());
         var consumer = TestHelper.CreateCompilation(string.Empty, LanguageVersion.CSharp10, false, "Consumer", [reference]);
 
-        var typeName = compilation.GetSymbolsWithName(
+        var typeName = metadataName ?? compilation.GetSymbolsWithName(
             static _ => true,
             SymbolFilter.Type).OfType<INamedTypeSymbol>().First().Name;
 

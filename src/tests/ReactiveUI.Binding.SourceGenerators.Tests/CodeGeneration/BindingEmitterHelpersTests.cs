@@ -27,6 +27,12 @@ public class BindingEmitterHelpersTests
     /// <summary>The generated name of the view model a binding was handed.</summary>
     private const string ViewModelVariableName = "viewModel";
 
+    /// <summary>The attribute that marks a selector's text parameter for expression-text dispatch.</summary>
+    private const string CallerArgumentExpressionAttribute = "CallerArgumentExpression";
+
+    /// <summary>The prefix every generated interceptor method's name starts with.</summary>
+    private const string InterceptorMethodPrefix = "__Intercept_";
+
     /// <summary>A view exposing its view model as the concrete type is observed through it, unnarrowed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -142,6 +148,59 @@ public class BindingEmitterHelpersTests
         await Assert.That(api.WorkerArguments).IsEqualTo($"{ViewModelVariableName}, view");
     }
 
+    /// <summary>An interceptor for a compiler without caller-argument expressions declares no expression-text parameters.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateInterceptors_WithoutCallerArgumentExpressions_DeclaresNoExpressionTextParameters()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.GenerateInterceptors(
+            sb,
+            InterceptedGroup(false),
+            OneWayBindCodeGenerator.DispatchApi,
+            new(SupportsCallerArgExpr: false, SupportsNullable: true, EmitGeneratedCodeMarkers: false, SupportsInterceptors: true));
+
+        var output = sb.ToString();
+        await Assert.That(output).Contains(InterceptorMethodPrefix);
+        await Assert.That(output).DoesNotContain(CallerArgumentExpressionAttribute);
+    }
+
+    /// <summary>An interceptor for a call site that passes a converter object declares no expression-text parameters.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateInterceptors_WithConverterOverride_DeclaresNoExpressionTextParameters()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.GenerateInterceptors(
+            sb,
+            InterceptedGroup(true),
+            OneWayBindCodeGenerator.DispatchApi,
+            new(SupportsCallerArgExpr: true, SupportsNullable: true, EmitGeneratedCodeMarkers: false, SupportsInterceptors: true));
+
+        var output = sb.ToString();
+        await Assert.That(output).Contains(InterceptorMethodPrefix);
+        await Assert.That(output).DoesNotContain(CallerArgumentExpressionAttribute);
+    }
+
+    /// <summary>A two-way stage on an API that names only one converter hands that converter to both directions.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitDualStreamStages_ApiWithOnlyAForwardConverter_ConvertsBothDirectionsWithIt()
+    {
+        var api = OneWayBindCodeGenerator.DispatchApi;
+        var sb = new StringBuilder();
+
+        var observables = BindingEmitterHelpers.EmitDualStreamStages(
+            sb,
+            api,
+            ModelFactory.CreateBindingInvocationInfo(sourcePropertyTypeFullName: IntTypeName, isTwoWay: true, hasConverterOverride: true));
+
+        await Assert.That(observables.TargetVar).IsNotEqualTo(api.TargetObservableName);
+        await Assert.That(sb.ToString()).Contains(api.OverrideForwardName);
+    }
+
     /// <summary>Resolves the observation for a view declaring its view model as the given type.</summary>
     /// <param name="declaredType">The type the view declares its view model property as.</param>
     /// <returns>The resolved observation.</returns>
@@ -172,4 +231,18 @@ public class BindingEmitterHelpersTests
             hasConversion,
             false,
             [ModelFactory.CreateBindingInvocationInfo()]);
+
+    /// <summary>Builds a group whose one call site the compiler can intercept.</summary>
+    /// <param name="hasConverterOverride">Whether the call site passed a converter object.</param>
+    /// <returns>The binding type group.</returns>
+    private static BindingTypeGroup InterceptedGroup(bool hasConverterOverride) =>
+        new(
+            "global::TestApp.MyViewModel",
+            "global::TestApp.MyView",
+            IntTypeName,
+            IntTypeName,
+            false,
+            false,
+            [ModelFactory.CreateBindingInvocationInfo(hasConverterOverride: hasConverterOverride) with { Interceptor = new(1, "location") }])
+        { HasConverterOverride = hasConverterOverride };
 }

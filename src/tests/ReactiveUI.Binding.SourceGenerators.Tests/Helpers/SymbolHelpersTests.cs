@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
+using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -15,6 +16,43 @@ public class SymbolHelpersTests
 {
     /// <summary>The interaction property selected in symbol tests.</summary>
     private const string InteractionPropertyName = "Confirm";
+
+    /// <summary>Members of <c>MyVm</c> that hold an observable, or something that is not one.</summary>
+    private const string ObservableMembersSource = """
+                                                           public IObservable<int> ObservableField = null!;
+                                                           public IObservable<int>[] ObservableArray { get; set; } = null!;
+                                                           public string Name { get; set; } = "";
+                                                           public IObservable<int> Method() => null!;
+                                                   """;
+
+    /// <summary>Types that resemble <c>IInteraction&lt;TInput, TOutput&gt;</c> without being it.</summary>
+    private const string InteractionLookalikeSource = """
+                                                      using System;
+                                                      namespace Elsewhere
+                                                      {
+                                                          public interface IInteraction<TInput, TOutput>
+                                                          {
+                                                          }
+                                                      }
+
+                                                      namespace TestApp
+                                                      {
+                                                          public class MyVm
+                                                          {
+                                                              public Elsewhere.IInteraction<string, bool> Lookalike { get; set; }
+                                                              public Tuple<string, bool> OtherPair { get; set; }
+                                                              public Tuple<string> Single { get; set; }
+                                                          }
+                                                      }
+                                                      """;
+
+    /// <summary>A leaf segment whose type is returned when the observable cannot be unwrapped.</summary>
+    private static readonly PropertyPathSegment FallbackSegment = new(
+        "Leaf",
+        "global::System.IObservable<int>",
+        "global::TestApp.MyVm",
+        true,
+        null);
 
     /// <summary>Verifies GetWellKnownSymbols resolves INPC symbol from a compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -424,6 +462,132 @@ public class SymbolHelpersTests
         var result = SymbolHelpers.ResolveNamedType(semanticModel, (ExpressionSyntax)lambda.Body, default);
 
         await Assert.That(result).IsNull();
+    }
+
+    /// <summary>An observable held in a field is unwrapped like one held in a property.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractInnerObservableType_Field_ReturnsInnerType()
+    {
+        var (model, lambda) = LambdaIn(ObservableMembersSource, "x => x.ObservableField");
+
+        var innerType = SymbolHelpers.ExtractInnerObservableType(FallbackSegment, model, lambda, default);
+
+        await Assert.That(innerType).IsEqualTo("int");
+    }
+
+    /// <summary>A leaf that is not a property or field, or whose type is not a named observable, falls back to the leaf type.</summary>
+    /// <param name="selector">The selector.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("x => x.Method")]
+    [Arguments("x => x.ObservableArray")]
+    [Arguments("x => x.Name")]
+    [Arguments("x => x.Name!")]
+    [Arguments("x => null")]
+    [Arguments("x => { return null; }")]
+    public async Task ExtractInnerObservableType_NoObservableLeaf_ReturnsFallbackType(string selector)
+    {
+        var (model, lambda) = LambdaIn(ObservableMembersSource, selector);
+
+        var innerType = SymbolHelpers.ExtractInnerObservableType(FallbackSegment, model, lambda, default);
+
+        await Assert.That(innerType).IsEqualTo(FallbackSegment.PropertyTypeFullName);
+    }
+
+    /// <summary>A leaf field of a named type resolves to that type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveNamedType_Field_ReturnsFieldType()
+    {
+        var (model, lambda) = LambdaIn(ObservableMembersSource, "x => x.ObservableField");
+
+        var result = SymbolHelpers.ResolveNamedType(model, lambda, default);
+
+        await Assert.That(result?.Name).IsEqualTo("IObservable");
+    }
+
+    /// <summary>A leaf that is not a member access, or not a named-type property or field, resolves to nothing.</summary>
+    /// <param name="selector">The selector.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("x => null")]
+    [Arguments("x => x.Method")]
+    [Arguments("x => x.ObservableArray")]
+    public async Task ResolveNamedType_NoNamedLeaf_ReturnsNull(string selector)
+    {
+        var (model, lambda) = LambdaIn(ObservableMembersSource, selector);
+
+        var result = SymbolHelpers.ResolveNamedType(model, lambda, default);
+
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>A generic type that only resembles <c>IInteraction&lt;,&gt;</c> is not an interaction type.</summary>
+    /// <param name="propertyName">The property whose type is checked.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("Lookalike")]
+    [Arguments("OtherPair")]
+    [Arguments("Single")]
+    public async Task IsInteractionType_Lookalike_ReturnsFalse(string propertyName)
+    {
+        var compilation = TestHelper.CreateCompilation(InteractionLookalikeSource, LanguageVersion.CSharp10);
+        var prop = GetNamedTypeSymbol(compilation, "MyVm").GetMembers(propertyName).OfType<IPropertySymbol>().First();
+
+        var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
+
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>A type that is not a named type carries no interaction type arguments.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractInteractionTypeArguments_ArrayType_ReturnsFalse()
+    {
+        var compilation = TestHelper.CreateCompilation(string.Empty);
+        var arrayType = compilation.CreateArrayTypeSymbol(compilation.GetSpecialType(SpecialType.System_Int32));
+
+        var result = SymbolHelpers.ExtractInteractionTypeArguments(arrayType, out var inputType, out var outputType);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsFalse();
+            await Assert.That(inputType).IsEqualTo(string.Empty);
+            await Assert.That(outputType).IsEqualTo(string.Empty);
+        }
+    }
+
+    /// <summary>Compiles a lambda over <c>MyVm</c> and returns it with its semantic model.</summary>
+    /// <param name="members">The members of <c>MyVm</c>.</param>
+    /// <param name="selector">The lambda text.</param>
+    /// <returns>The semantic model and the lambda.</returns>
+    private static (SemanticModel Model, LambdaExpressionSyntax Lambda) LambdaIn(string members, string selector)
+    {
+        var compilation = TestHelper.CreateCompilation(
+            $$"""
+              using System;
+              namespace TestApp
+              {
+                  public class MyVm
+                  {
+              {{members}}
+                  }
+
+                  public static class Usage
+                  {
+                      public static void Take<T>(Func<MyVm, T> selector)
+                      {
+                      }
+
+                      public static void Test() => Take<object>({{selector}});
+                  }
+              }
+              """,
+            LanguageVersion.CSharp10);
+        var tree = compilation.SyntaxTrees.First();
+        var lambda = tree.GetRoot().DescendantNodes().OfType<LambdaExpressionSyntax>().First();
+        return (compilation.GetSemanticModel(tree), lambda);
     }
 
     /// <summary>Gets a named type symbol from a compilation.</summary>

@@ -457,25 +457,6 @@ internal static class BindingEmitterHelpers
         !inv.HasConversion
         && (inv.ForwardConversion is not null || !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal));
 
-    /// <summary>Emits a stage that converts observed values to the type the other side declares.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="sourceVar">The variable holding the values to convert.</param>
-    /// <param name="resultVar">The name to give the converted observable.</param>
-    /// <param name="fromTypeFullName">The type the values arrive as.</param>
-    /// <param name="toTypeFullName">The type the assignment needs.</param>
-    /// <remarks>
-    /// Converting once here rather than at the write keeps the binding's own change stream typed as the stub
-    /// declares it, and pays for the conversion once per value rather than twice.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void EmitRegistryConversion(
-        StringBuilder sb,
-        string sourceVar,
-        string resultVar,
-        string fromTypeFullName,
-        string toTypeFullName) =>
-        ConversionEmitter.EmitStage(sb, sourceVar, resultVar, fromTypeFullName, toTypeFullName, null);
-
     /// <summary>Emits the stage that delivers a write on the owning thread of the object it lands on.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
