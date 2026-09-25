@@ -35,14 +35,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTwoWay_000002183E718F43(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView target)
         {
             // BindTwoWay: Count <-> DisplayCount
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                source,
-                target,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = source;
+            var __hookTarget = target;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = source;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -54,7 +57,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = target;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -64,8 +67,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
-        {
-            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            {
+                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            }
         }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(source, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel)__o).Count, true);
         var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);

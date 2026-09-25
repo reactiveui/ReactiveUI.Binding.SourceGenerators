@@ -38,14 +38,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::NullableSchedulerProbe.ProbeView, global::ReactiveUI.Binding.BindingChange> __Bind_000037E47803D304(global::NullableSchedulerProbe.ProbeViewModel viewModel, global::NullableSchedulerProbe.ProbeView view, global::System.Func<string, string> viewModelToViewConverter, global::System.Func<string, string> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // Bind: Name <-> DisplayName (with conversion) (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                viewModel,
-                view,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = viewModel;
+            var __hookTarget = view;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = viewModel;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -57,7 +60,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = view;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -67,8 +70,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
-        {
-            return null;
+            {
+                return null;
+            }
         }
             var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::NullableSchedulerProbe.ProbeViewModel)__o).Name, true);
         var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Name", 5, false);

@@ -35,14 +35,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC09455D2B53(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
         {
             // Bind: Name <-> NameText
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                viewModel,
-                view,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = viewModel;
+            var __hookTarget = view;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = viewModel;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -54,7 +57,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = view;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -64,8 +67,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
-        {
-            return null;
+            {
+                return null;
+            }
         }
             var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.MultipleBindings.MyViewModel)__o).Name, true);
         var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Name", 5, false);
@@ -243,14 +247,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC08E70C3FF3(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
         {
             // Bind: Age <-> AgeText
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                viewModel,
-                view,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = viewModel;
+            var __hookTarget = view;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = viewModel;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -262,7 +269,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = view;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -272,8 +279,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.TwoWay))
-        {
-            return null;
+            {
+                return null;
+            }
         }
             var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(viewModel, "Age", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.MultipleBindings.MyViewModel)__o).Age, true);
         var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Age", 5, false);
