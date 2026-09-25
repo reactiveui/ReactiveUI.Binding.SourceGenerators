@@ -41,14 +41,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_000037E4E3FFA944(global::NullableSchedulerProbe.ProbeViewModel source, global::NullableSchedulerProbe.ProbeView target, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Name -> DisplayName (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                source,
-                target,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = source;
+            var __hookTarget = target;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = source;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -60,7 +63,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = target;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -70,8 +73,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.OneWay))
-        {
-            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            {
+                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            }
         }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(source, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::NullableSchedulerProbe.ProbeViewModel)__o).Name, true);
         var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Name", 5, false);
@@ -142,14 +146,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_000037E4A84099CD(global::NullableSchedulerProbe.ProbeViewModel source, global::NullableSchedulerProbe.ProbeView target, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Nickname -> DisplayNickname (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                source,
-                target,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = source;
+            var __hookTarget = target;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = source;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -161,7 +168,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = target;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -171,8 +178,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.OneWay))
-        {
-            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            {
+                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            }
         }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(source, "Nickname", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::NullableSchedulerProbe.ProbeViewModel)__o).Nickname, true);
         var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Nickname", 5, false);
@@ -268,14 +276,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_000037E4E3FFAA99(global::NullableSchedulerProbe.ProbeViewModel source, global::NullableSchedulerProbe.ProbeView target, global::System.Func<string, string> conversionFunc, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Name -> DisplayName (with conversion) (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                source,
-                target,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = source;
+            var __hookTarget = target;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = source;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -287,7 +298,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = target;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -297,8 +308,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.OneWay))
-        {
-            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            {
+                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            }
         }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(source, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::NullableSchedulerProbe.ProbeViewModel)__o).Name, true);
         var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Name", 5, false);

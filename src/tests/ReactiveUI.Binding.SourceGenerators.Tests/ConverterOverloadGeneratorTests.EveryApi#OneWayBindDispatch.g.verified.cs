@@ -36,14 +36,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::TestApp.PersonView, string> __OneWayBind_7FFFFFB804424785(global::TestApp.Person viewModel, global::TestApp.PersonView view, global::ReactiveUI.Binding.IBindingTypeConverter converter, object conversionHint, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // OneWayBind: Count -> Text (with converter) (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                viewModel,
-                view,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = viewModel;
+            var __hookTarget = view;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = viewModel;
+                    var __hookOwner0 = __hookSource;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -55,7 +58,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = view;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -65,8 +68,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.OneWay))
-        {
-            return null;
+            {
+                return null;
+            }
         }
             var __sourceObs_s0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::TestApp.Person>(view, "ViewModel", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.PersonView)__o).ViewModel, false);
             var __sourceObs_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "ViewModel", 5, false);

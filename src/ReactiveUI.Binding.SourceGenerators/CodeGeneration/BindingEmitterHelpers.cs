@@ -43,6 +43,9 @@ internal static class BindingEmitterHelpers
     /// <summary>What a converter overload calls the hint it hands its converters.</summary>
     private const string ConversionHintName = "conversionHint";
 
+    /// <summary>Declares a local one block deeper than an inline emitter's own locals.</summary>
+    private const string NestedLocalDeclaration = "            var ";
+
     /// <summary>Emits a whole binding dispatch file, claiming its call sites through one API's dispatch.</summary>
     /// <param name="invocations">The detected call sites for this API.</param>
     /// <param name="allClasses">All detected class binding info.</param>
@@ -147,7 +150,10 @@ internal static class BindingEmitterHelpers
     /// <param name="earlyReturn">What the generated method returns when a hook refuses.</param>
     /// <remarks>
     /// The <c>Any</c> test comes first so the closures are only built once a hook is registered. Each reader
-    /// walks its path when requested, returning the changes reached before a null intermediate.
+    /// walks its path when requested, returning the changes reached before a null intermediate. The readers
+    /// capture copies declared inside the guard's block rather than the method's parameters: a captured parameter
+    /// shares its closure with every other lambda in the method, so the binding's subscription would keep the
+    /// source object alive for as long as the target lives.
     /// </remarks>
     internal static void EmitBindingHookGuard(
         StringBuilder sb,
@@ -158,17 +164,23 @@ internal static class BindingEmitterHelpers
         string direction,
         string earlyReturn)
     {
-        _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any").Append("            && !")
-            .Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(").Append("                ").Append(sourceVar).AppendLine(",")
-            .Append("                ").Append(targetVar).AppendLine(",");
+        const string HookSource = "__hookSource";
+        const string HookTarget = "__hookTarget";
 
-        AppendHookPropertyReader(sb, sourceVar, sourcePath);
+        _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any)").AppendLine("        {")
+            .Append(NestedLocalDeclaration).Append(HookSource).Append(" = ").Append(sourceVar).AppendLine(";")
+            .Append(NestedLocalDeclaration).Append(HookTarget).Append(" = ").Append(targetVar).AppendLine(";")
+            .Append("            if (!").Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(")
+            .Append("                ").Append(HookSource).AppendLine(",")
+            .Append("                ").Append(HookTarget).AppendLine(",");
+
+        AppendHookPropertyReader(sb, HookSource, sourcePath);
         _ = sb.AppendLine(",");
-        AppendHookPropertyReader(sb, targetVar, targetPath);
+        AppendHookPropertyReader(sb, HookTarget, targetPath);
 
         _ = sb.AppendLine(",").Append("                ").Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction)
-            .AppendLine("))").AppendLine("        {").Append("            return ").Append(earlyReturn)
-            .AppendLine(";").AppendLine("        }");
+            .AppendLine("))").AppendLine("            {").Append("                return ").Append(earlyReturn)
+            .AppendLine(";").AppendLine("            }").AppendLine("        }");
     }
 
     /// <summary>Emits a lazy reader whose changes retain each segment's owner, expression and value.</summary>
@@ -484,13 +496,13 @@ internal static class BindingEmitterHelpers
         // site that passes null or leaves it out leaves the write to the thread that owns the target.
         if (inv.HasScheduler)
         {
-            _ = AppendViewThreadCall(sb.Append("            var ").Append(resultVar).Append(" = scheduler == null ? "), sourceVar, targetVar, invoker)
+            _ = AppendViewThreadCall(sb.Append(NestedLocalDeclaration).Append(resultVar).Append(" = scheduler == null ? "), sourceVar, targetVar, invoker)
                 .Append(" : ").Append(sourceVar).AppendLine(";");
 
             return resultVar;
         }
 
-        _ = AppendViewThreadCall(sb.Append("            var ").Append(resultVar).Append(" = "), sourceVar, targetVar, invoker).AppendLine(";");
+        _ = AppendViewThreadCall(sb.Append(NestedLocalDeclaration).Append(resultVar).Append(" = "), sourceVar, targetVar, invoker).AppendLine(";");
 
         return resultVar;
     }

@@ -32,15 +32,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTo_000016A7FA446B38(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
-        if (global::ReactiveUI.Binding.BindingHooks.Any
-            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                source,
-                target,
+        if (global::ReactiveUI.Binding.BindingHooks.Any)
+        {
+            var __hookSource = source;
+            var __hookTarget = target;
+            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                __hookSource,
+                __hookTarget,
                 () => global::System.Array.Empty<global::ReactiveUI.Binding.IObservedChange<object, object>>(),
                 () =>
                 {
                     var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = target;
+                    var __hookOwner0 = __hookTarget;
                     if (__hookOwner0 is null)
                     {
                         return __hookChanges.ToArray();
@@ -50,8 +53,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return __hookChanges.ToArray();
                 },
                 global::ReactiveUI.Binding.BindingDirection.OneWay))
-        {
-            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            {
+                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+            }
         }
 
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
