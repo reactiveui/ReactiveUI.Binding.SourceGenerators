@@ -31,7 +31,7 @@ public class DefaultViewLocatorTests
     {
         var locator = new DefaultViewLocator();
 
-        var result = locator.ResolveView<TestViewModel>(null!);
+        var result = locator.ResolveView<TestViewModel>(null!, null);
 
         await Assert.That(result).IsNull();
     }

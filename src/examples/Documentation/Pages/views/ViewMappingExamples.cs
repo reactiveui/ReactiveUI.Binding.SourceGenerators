@@ -166,6 +166,52 @@ public static class ViewMappingExamples
         // True
     }
 
+    /// <summary>Resolves a screen from the view model type alone, before there is a view model to show.</summary>
+    public static void ResolveViewByType()
+    {
+        DefaultViewLocator locator = new();
+        locator.Map<TodoItem, TodoItemPreviewView>();
+        locator.Map<TodoItem, TodoItemDetailView>(DetailContract);
+
+        var preview = locator.ResolveView<TodoItem>();
+        var detail = locator.ResolveView<TodoItem>(DetailContract);
+
+        Console.WriteLine(preview?.GetType().Name);
+        Console.WriteLine(detail?.GetType().Name);
+        Console.WriteLine(preview?.ViewModel is null);
+
+        // Output:
+        // TodoItemPreviewView
+        // TodoItemDetailView
+        // True
+    }
+
+    /// <summary>Maps a view model to a screen the service locator builds, so the container decides how it is created.</summary>
+    public static void MapViewFromServiceLocator()
+    {
+        var item = CreateItem();
+        DefaultViewLocator locator = new();
+        AppLocator.CurrentMutable.Register(static () => new TodoItemDetailView());
+
+        try
+        {
+            _ = locator.CreateMappingBuilder().MapFromServiceLocator<TodoItem, TodoItemDetailView>();
+
+            var view = locator.ResolveView(item);
+
+            Console.WriteLine(view?.GetType().Name);
+            Console.WriteLine(ReferenceEquals(view?.ViewModel, item));
+        }
+        finally
+        {
+            AppLocator.CurrentMutable.UnregisterAll<TodoItemDetailView>();
+        }
+
+        // Output:
+        // TodoItemDetailView
+        // True
+    }
+
     /// <summary>Registers the mappings while the application starts, before the locator is first used.</summary>
     public static void ConfigureViewLocatorInBuilder()
     {

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
@@ -181,6 +182,53 @@ public sealed class DefaultViewLocator : IViewLocator
 
         SetViewModelOnView(view, viewModel);
         return view;
+    }
+
+    /// <summary>Resolves a view for a view model type under the default contract, without a view model instance.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <returns>The resolved view, or <see langword="null"/> when nothing maps or registers one.</returns>
+    /// <remarks>
+    /// The generated lookups dispatch on a view model instance, so without one this asks the explicit mappings and
+    /// then the service locator. The view's <c>ViewModel</c> is left unset: there is no instance to give it.
+    /// </remarks>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the view model type.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IViewFor<TViewModel>? ResolveView<TViewModel>()
+        where TViewModel : class => ResolveView<TViewModel>(null);
+
+    /// <summary>Resolves a view for a view model type under a contract, without a view model instance.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <param name="contract">The contract to resolve under, or null for the default view.</param>
+    /// <returns>The resolved view, or <see langword="null"/> when nothing maps or registers one.</returns>
+    /// <remarks>
+    /// The generated lookups dispatch on a view model instance, so without one this asks the explicit mappings and
+    /// then the service locator. A mapping whose view does not implement <see cref="IViewFor{T}"/> for the type is
+    /// skipped. The view's <c>ViewModel</c> is left unset: there is no instance to give it.
+    /// </remarks>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the view model type.")]
+    public IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract)
+        where TViewModel : class
+    {
+        var normalizedContract = contract ?? string.Empty;
+
+        if (TryResolveFromMappings(typeof(TViewModel), normalizedContract) is IViewFor<TViewModel> mapped)
+        {
+            this.Log().Debug(CultureInfo.InvariantCulture, "Resolved IViewFor<{0}> from an explicit mapping", typeof(TViewModel).Name);
+            return mapped;
+        }
+
+        var view = AppLocator.Current.GetService<IViewFor<TViewModel>>(normalizedContract.Length == 0 ? null : normalizedContract);
+        if (view is not null)
+        {
+            this.Log().Debug(CultureInfo.InvariantCulture, "Resolved IViewFor<{0}> from the service locator", typeof(TViewModel).Name);
+            return view;
+        }
+
+        this.Log().Warn(
+            CultureInfo.InvariantCulture,
+            "Failed to resolve a view for {0}. Map it on the locator or register IViewFor<{0}> in the service locator.",
+            typeof(TViewModel).Name);
+        return null;
     }
 
     /// <inheritdoc/>

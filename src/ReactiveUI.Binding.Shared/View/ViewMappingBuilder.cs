@@ -68,4 +68,36 @@ public sealed class ViewMappingBuilder
         _locator.Map<TViewModel>(factory, contract);
         return this;
     }
+
+    /// <summary>Maps a view model type to a view the service locator creates, replacing an existing mapping for the same view model type.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type, as registered in the service locator.</typeparam>
+    /// <returns>This builder for chaining.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>()
+        where TViewModel : class
+        where TView : class, IViewFor => MapFromServiceLocator<TViewModel, TView>(null);
+
+    /// <summary>Maps a view model type and contract to a view the service locator creates, replacing an existing mapping for the same pair.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type, as registered in the service locator.</typeparam>
+    /// <param name="contract">The contract the mapping is registered under; null registers the default mapping.</param>
+    /// <returns>This builder for chaining.</returns>
+    /// <remarks>
+    /// The view is asked for each time the mapping resolves, so the service locator's lifetime for it applies. A view
+    /// that is not registered throws <see cref="InvalidOperationException"/> when the mapping resolves, rather than
+    /// resolving to nothing.
+    /// </remarks>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    public ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract)
+        where TViewModel : class
+        where TView : class, IViewFor
+    {
+        _locator.Map<TViewModel>(
+            static () => AppLocator.Current.GetService<TView>()
+                ?? throw new InvalidOperationException($"View {typeof(TView).Name} is not registered in the service locator."),
+            contract);
+        return this;
+    }
 }

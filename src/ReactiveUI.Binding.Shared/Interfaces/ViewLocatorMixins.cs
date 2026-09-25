@@ -2,6 +2,8 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -27,6 +29,34 @@ public static class ViewLocatorMixins
         {
             ArgumentExceptionHelper.ThrowIfNull(locator);
             return locator.ResolveView(viewModel, null);
+        }
+
+        /// <summary>Resolves a view for a view model type under the default contract, without a view model instance.</summary>
+        /// <typeparam name="TViewModel">The view model type.</typeparam>
+        /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
+        [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the view model type.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IViewFor<TViewModel>? ResolveView<TViewModel>()
+            where TViewModel : class => locator.ResolveView<TViewModel>(contract: null);
+
+        /// <summary>Resolves a view for a view model type under a contract, without a view model instance.</summary>
+        /// <typeparam name="TViewModel">The view model type.</typeparam>
+        /// <param name="contract">The contract to resolve under, or null for the default view.</param>
+        /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
+        /// <remarks>
+        /// The default locator asks its explicit mappings and then the service locator. Any other locator has no
+        /// type-only lookup of its own, so this asks the service locator for <see cref="IViewFor{T}"/> directly.
+        /// Pass the contract by name, <c>contract: null</c>, when it is a literal null: a bare <c>null</c> could
+        /// also be the view model of <c>ResolveView&lt;TViewModel&gt;(TViewModel)</c>.
+        /// </remarks>
+        [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the view model type.")]
+        public IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract)
+            where TViewModel : class
+        {
+            ArgumentExceptionHelper.ThrowIfNull(locator);
+            return locator is DefaultViewLocator defaultLocator
+                ? defaultLocator.ResolveView<TViewModel>(contract)
+                : AppLocator.Current.GetService<IViewFor<TViewModel>>(string.IsNullOrEmpty(contract) ? null : contract);
         }
 
         /// <summary>Resolves a view for the specified view model instance using the default contract.</summary>

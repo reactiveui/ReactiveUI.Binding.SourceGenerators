@@ -76,6 +76,10 @@ ViewMappingExamples.MapViewsWithFluentBuilder();
 
 ViewMappingExamples.MapFactoryWithFluentBuilder();
 
+ViewMappingExamples.ResolveViewByType();
+
+ViewMappingExamples.MapViewFromServiceLocator();
+
 ViewMappingExamples.ResolveInOrder();
 
 ViewMappingExamples.ConfigureViewLocatorInBuilder();
