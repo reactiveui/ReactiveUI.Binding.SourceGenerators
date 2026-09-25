@@ -29,7 +29,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             object instance, string contract)
         {
             // global::TestApp.Person -> global::TestApp.PersonView
-            if (instance is global::TestApp.Person)
+            if (instance is global::TestApp.Person && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }

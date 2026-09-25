@@ -622,8 +622,9 @@ var full = ViewLocator.GetCurrent().ResolveView(vm);
 2. A mapping you added at run time with `Map<TViewModel, TView>()`.
 3. The service locator, `Splat.AppLocator.Current`.
 
-In the generated lookup, a view registered under the requested contract comes before the default view. The view
-instance comes from the first of these that has one.
+In the generated lookup, a view registered under the requested contract comes before the default view. The default
+view answers only a request with no contract. A request under a contract that no view claims moves on to your
+mappings and the service locator. The view instance comes from the first of these that has one.
 
 1. The service locator.
 2. The cached instance, when the view is marked `[SingleInstanceView]`. The first resolution creates it.

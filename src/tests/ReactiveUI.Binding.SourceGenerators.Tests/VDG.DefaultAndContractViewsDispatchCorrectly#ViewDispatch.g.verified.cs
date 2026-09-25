@@ -35,7 +35,10 @@ namespace ReactiveUI.Binding
                     return __ResolveView_1(contract);
                 }
                 // -> global::TestApp.DashboardView (default)
-                return __ResolveView_0(contract);
+                if (contract.Length == 0)
+                {
+                    return __ResolveView_0(contract);
+                }
             }
 
             // No compile-time mapping found; fall back to runtime resolution.

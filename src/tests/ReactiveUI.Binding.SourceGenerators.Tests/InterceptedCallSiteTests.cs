@@ -238,6 +238,38 @@ public class InterceptedCallSiteTests
                                                    }
                                                    """;
 
+    /// <summary>Observations that combine a path generated code can read with one through a private property.</summary>
+    private const string PrivatePathScenario = """
+                                               using System;
+                                               using System.Collections.Generic;
+                                               using System.ComponentModel;
+                                               using ReactiveUI.Binding;
+
+                                               namespace TestApp
+                                               {
+                                                   public class ItemsViewModel : INotifyPropertyChanged
+                                                   {
+                                                       public event PropertyChangedEventHandler PropertyChanged;
+
+                                                       public string FilterText { get; set; }
+
+                                                       public IObservable<string> Filters { get; set; }
+
+                                                       private IReadOnlyList<string> AllItems { get; set; }
+
+                                                       private IObservable<string> Hidden { get; set; }
+
+                                                       public void Observe()
+                                                       {
+                                                           var counts = this.WhenAnyValue(x => x.AllItems, x => x.FilterText, (items, filter) => items.Count);
+                                                           var latest = this.WhenAnyObservable(x => x.Hidden, x => x.Filters);
+                                                           GC.KeepAlive(counts);
+                                                           GC.KeepAlive(latest);
+                                                       }
+                                                   }
+                                               }
+                                               """;
+
     /// <summary>The dispatch file each generated binding API emits, excluding the view locator's, which claims no call site.</summary>
     private static readonly string[] ApiDispatchFiles =
     [
@@ -389,6 +421,32 @@ public class InterceptedCallSiteTests
         await Assert.That(result.CompilationErrors).IsEmpty();
         await result.DoesNotHaveGeneratedSource(BindToDispatchFileName);
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchFileName);
+    }
+
+    /// <summary>
+    /// A call site with one path through a private property is left to the stub whole. Claiming it with the paths
+    /// that remain would declare fewer parameters than the call, which the compiler rejects.
+    /// </summary>
+    /// <param name="languageVersion">The consumer's language version.</param>
+    /// <param name="optIn">Whether the build lists the generated namespace for interception.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments(LanguageVersion.CSharp11, true)]
+    [Arguments(LanguageVersion.CSharp10, false)]
+    public async Task CallSiteWithAPrivatePath_IsLeftToTheStub(LanguageVersion languageVersion, bool optIn)
+    {
+        var result = Generate(PrivatePathScenario, languageVersion, optIn, RootNamespace);
+
+        // The compiler checks an interceptor's signature against its call only when it emits.
+        var emitErrors = result.OutputCompilation.Emit(Stream.Null).Diagnostics
+            .Where(static d => d.Severity == DiagnosticSeverity.Error)
+            .Select(static d => d.Id)
+            .ToArray();
+
+        await Assert.That(result.CompilationErrors).IsEmpty();
+        await Assert.That(emitErrors).IsEmpty();
+        await result.DoesNotHaveGeneratedSource("WhenAnyValueDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource("WhenAnyObservableDispatch.g.cs");
     }
 
     /// <summary>The generated namespace sits below the one the opt-in names, and belongs to this assembly alone.</summary>

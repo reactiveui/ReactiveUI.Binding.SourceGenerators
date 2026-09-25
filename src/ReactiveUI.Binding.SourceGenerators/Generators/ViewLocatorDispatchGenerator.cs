@@ -24,6 +24,12 @@ internal static class ViewLocatorDispatchGenerator
     /// <summary>Closes a call that passes the requested contract through to a resolver.</summary>
     private const string ContractResolverCall = "(contract);";
 
+    /// <summary>
+    /// The test that limits a view with no contract to a request with no contract. A request under a contract no
+    /// generated view claims falls through, so the locator tries its mappings and the service locator with that contract.
+    /// </summary>
+    private const string DefaultContractTest = "contract.Length == 0";
+
     /// <summary>The identifier prefix used for the per-view resolver methods emitted in the generated source.</summary>
     private const string ResolverMethodNamePrefix = "__ResolveView_";
 
@@ -302,7 +308,7 @@ internal static class ViewLocatorDispatchGenerator
         else
         {
             _ = sb.EndLine()
-                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).CloseCondition();
+                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).Append(" && ").Append(DefaultContractTest).CloseCondition();
             AppendResolverReturn(sb, index);
         }
 
@@ -353,8 +359,10 @@ internal static class ViewLocatorDispatchGenerator
                 continue;
             }
 
-            _ = sb.BeginComment().Append("-> ").Append(reg.ViewFullyQualifiedName).Line(" (default)");
+            _ = sb.BeginComment().Append("-> ").Append(reg.ViewFullyQualifiedName).Line(" (default)")
+                .If(DefaultContractTest);
             AppendResolverReturn(sb, idx);
+            _ = sb.CloseBlock();
             break; // Only one default per VM (deduplicated earlier)
         }
 

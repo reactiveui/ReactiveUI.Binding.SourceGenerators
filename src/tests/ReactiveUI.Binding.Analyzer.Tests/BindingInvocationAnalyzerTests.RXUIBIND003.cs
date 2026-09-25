@@ -40,6 +40,52 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
+    /// <summary>Verifies RXUIBIND003 is reported for the private path of a WhenAnyValue call that also observes a public one.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_WhenAnyValue_PrivatePathBesideAPublicOne_ReportsDiagnostic()
+    {
+        const string Source = """
+                              using System;
+                              using System.Collections.Generic;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
+                              using ReactiveUI.Binding;
+
+                              namespace ReactiveUI.Binding
+                              {
+                                  public static class __ReactiveUIGeneratedBindings
+                                  {
+                                      public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, TRet>(
+                                          this TSender sender,
+                                          Expression<Func<TSender, T1>> property1,
+                                          Expression<Func<TSender, T2>> property2,
+                                          Func<T1, T2, TRet> selector)
+                                          => throw new NotImplementedException();
+                                  }
+                              }
+
+                              namespace TestApp
+                              {
+                                  public class ItemsViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public string FilterText { get; set; } = "";
+
+                                      private IReadOnlyList<string> AllItems { get; set; } = [];
+
+                                      public IObservable<int> Counts() =>
+                                          this.WhenAnyValue(x => x.AllItems, x => x.FilterText, (items, filter) => items.Count);
+                                  }
+                              }
+                              """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(1);
+    }
+
     /// <summary>Verifies RXUIBIND003 is reported when accessing a protected property in a lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
