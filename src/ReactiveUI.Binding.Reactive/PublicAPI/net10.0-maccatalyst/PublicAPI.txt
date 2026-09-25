@@ -300,9 +300,7 @@ namespace ReactiveUI.Binding.Reactive
     }
     public interface ICreatesCommandBinding
     {
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
         System.IDisposable? BindCommandToObject<T>(System.Windows.Input.ICommand? command, T? target, System.IObservable<object?> commandParameter) where T : class { }
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
         System.IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, System.IObservable<object?> commandParameter, string eventName) where T : class { }
         System.IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, System.IObservable<object?> commandParameter, System.Action<System.EventHandler<TEventArgs>> addHandler, System.Action<System.EventHandler<TEventArgs>> removeHandler) where T : class where TEventArgs : System.EventArgs { }
         int GetAffinityForObject<T>(bool hasEventTarget) { }

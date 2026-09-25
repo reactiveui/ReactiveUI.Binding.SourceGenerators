@@ -51,9 +51,7 @@ public sealed class SetMethodBindingConverterRegistry
     /// when none reports a positive affinity.
     /// </returns>
     public ISetMethodBindingConverter? TryGetConverter(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type? fromType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type? toType)
     {
         var snap = Volatile.Read(ref _snapshot);

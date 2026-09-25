@@ -61,6 +61,9 @@ internal static class Program
         ValidateOneWayBind();
         ValidateBind();
         ValidateInvokeCommand();
+        ValidateBindCommand();
+        ValidateBindCommandWithParameter();
+        ValidateBindCommandToNamedEvent();
         ValidateWhenAny();
         ValidateWhenAnyObservable();
 
@@ -189,6 +192,43 @@ internal static class Program
         viewModel.Name = ReplacementName;
         AssertEqual("InvokeCommand after set", ExpectedTwoExecutions, command.ExecuteCount);
         AssertEqual("InvokeCommand parameter after set", ReplacementName, command.LastParameter as string);
+    }
+
+    /// <summary>BindCommand executes the view model's command when the control raises its Click event.</summary>
+    private static void ValidateBindCommand()
+    {
+        var command = new AotCommand();
+        var viewModel = new AotViewModel { Save = command };
+        var view = new AotView { ViewModel = viewModel };
+
+        using var binding = view.BindCommand(viewModel, x => x.Save, v => v.SaveButton);
+        view.SaveButton.PerformClick();
+        AssertEqual("BindCommand click", 1, command.ExecuteCount);
+    }
+
+    /// <summary>BindCommand passes the latest value of a parameter observable to the command.</summary>
+    private static void ValidateBindCommandWithParameter()
+    {
+        var command = new AotCommand();
+        var viewModel = new AotViewModel { Save = command };
+        var view = new AotView { ViewModel = viewModel, DisplayName = InitialName };
+
+        using var binding = view.BindCommand(viewModel, x => x.Save, v => v.SaveButton, view.WhenChanged(v => v.DisplayName));
+        view.SaveButton.PerformClick();
+        AssertEqual("BindCommand parameter", InitialName, command.LastParameter as string);
+    }
+
+    /// <summary>BindCommand binds to the event the call names instead of Click.</summary>
+    private static void ValidateBindCommandToNamedEvent()
+    {
+        var command = new AotCommand();
+        var viewModel = new AotViewModel { Save = command };
+        var view = new AotView { ViewModel = viewModel };
+
+        using var binding = view.BindCommand(viewModel, x => x.Save, v => v.SaveButton, nameof(AotButton.Pressed));
+        view.SaveButton.PerformClick();
+        view.SaveButton.PerformPress();
+        AssertEqual("BindCommand named event", 1, command.ExecuteCount);
     }
 
     /// <summary>WhenAny reports the observed change, and its selector projects it.</summary>

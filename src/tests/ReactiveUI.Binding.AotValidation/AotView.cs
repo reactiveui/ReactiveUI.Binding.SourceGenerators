@@ -35,6 +35,9 @@ public class AotView : INotifyPropertyChanged, IViewFor<AotViewModel>
         set => ViewModel = (AotViewModel?)value;
     }
 
+    /// <summary>Gets the button a command binds to.</summary>
+    public AotButton SaveButton { get; } = new();
+
     /// <summary>Gets or sets the display name.</summary>
     public string DisplayName
     {

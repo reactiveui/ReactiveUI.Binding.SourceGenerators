@@ -39,10 +39,6 @@ public static class RuntimeCommandBindingFallback
         TView,
         TViewModel,
         TProp,
-        [DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicProperties
-            | DynamicallyAccessedMemberTypes.PublicEvents
-            | DynamicallyAccessedMemberTypes.NonPublicEvents)]
         TControl>(
         TView view,
         TViewModel? viewModel,
@@ -88,14 +84,7 @@ public static class RuntimeCommandBindingFallback
     /// <param name="commandParameter">The values offered as the command parameter.</param>
     /// <param name="toEvent">The control event that executes the command, or null for the control's default.</param>
     /// <returns>The binding, or an empty disposable when there is nothing to bind.</returns>
-    [RequiresUnreferencedCode("Runtime command binding resolves the control's event by reflection.")]
-    private static IDisposable Bind<
-        TProp,
-        [DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicProperties
-            | DynamicallyAccessedMemberTypes.PublicEvents
-            | DynamicallyAccessedMemberTypes.NonPublicEvents)]
-        TControl>(
+    private static IDisposable Bind<TProp, TControl>(
         TProp? command,
         TControl? control,
         IObservable<object?> commandParameter,

@@ -45,9 +45,7 @@ public sealed class ConverterService
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
     /// </exception>
     public object? ResolveConverter(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType)
     {
         ArgumentExceptionHelper.ThrowIfNull(fromType);
@@ -64,8 +62,6 @@ public sealed class ConverterService
     /// <returns>The converter with the highest positive affinity, or <see langword="null"/> when none applies.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ISetMethodBindingConverter? ResolveSetMethodConverter(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type? fromType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type? toType) => SetMethodConverters.TryGetConverter(fromType, toType);
 }

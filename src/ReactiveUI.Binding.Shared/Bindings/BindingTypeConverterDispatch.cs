@@ -71,10 +71,8 @@ public static class BindingTypeConverterDispatch
     /// <returns><see langword="true"/> if conversion succeeded; otherwise, <see langword="false"/>.</returns>
     public static bool TryConvertFallback(
         IBindingFallbackConverter converter,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
         object from,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType,
         object? conversionHint,
         out object? result)
@@ -111,10 +109,8 @@ public static class BindingTypeConverterDispatch
     /// </remarks>
     public static bool TryConvertAny(
         object? converter,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
         object? from,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType,
         object? conversionHint,
         out object? result)
