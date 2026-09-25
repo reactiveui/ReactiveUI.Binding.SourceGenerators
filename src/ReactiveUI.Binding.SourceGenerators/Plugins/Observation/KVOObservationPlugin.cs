@@ -5,6 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -100,7 +101,7 @@ internal sealed class KVOObservationPlugin : IPlatformObservationPlugin
     {
         for (var current = owner; current is not null; current = current.BaseType)
         {
-            if (current.ToDisplayString() == "Foundation.NSObject")
+            if (NativeTypeIdentity.Matches(current, "Foundation.NSObject"))
             {
                 return SymbolEqualityComparer.Default.Equals(property.ContainingAssembly, current.ContainingAssembly);
             }
@@ -116,7 +117,7 @@ internal sealed class KVOObservationPlugin : IPlatformObservationPlugin
     {
         foreach (var attribute in symbol.GetAttributes())
         {
-            if (attribute.AttributeClass?.ToDisplayString() == "Foundation.ExportAttribute"
+            if (NativeTypeIdentity.Matches(attribute.AttributeClass, "Foundation.ExportAttribute")
                 && !attribute.ConstructorArguments.IsEmpty
                 && attribute.ConstructorArguments[0].Value is string selector
                 && selector.Length > 0 && selector.IndexOf(':') < 0)

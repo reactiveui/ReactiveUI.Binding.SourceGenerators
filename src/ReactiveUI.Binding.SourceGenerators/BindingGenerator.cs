@@ -503,12 +503,7 @@ public class BindingGenerator : IIncrementalGenerator
     {
         foreach (var attribute in compilation.Assembly.GetAttributes())
         {
-            var attributeClass = attribute.AttributeClass;
-            if (attributeClass is not null
-                && string.Equals(
-                    attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                    Constants.InternalsVisibleToAttributeFullName,
-                    System.StringComparison.Ordinal))
+            if (NativeTypeIdentity.Matches(attribute.AttributeClass, Constants.InternalsVisibleToAttributeName))
             {
                 return true;
             }

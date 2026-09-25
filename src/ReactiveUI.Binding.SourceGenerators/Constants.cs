@@ -91,9 +91,8 @@ internal static class Constants
     /// <summary>The build property a consumer's compiler reads the interception opt-in from.</summary>
     internal const string InterceptorsNamespacesFeature = "InterceptorsNamespaces";
 
-    /// <summary>Fully qualified name of the attribute that exposes an assembly's internals to another.</summary>
-    internal const string InternalsVisibleToAttributeFullName =
-        "global::System.Runtime.CompilerServices.InternalsVisibleToAttribute";
+    /// <summary>Metadata name of the attribute that exposes an assembly's internals to another.</summary>
+    internal const string InternalsVisibleToAttributeName = "System.Runtime.CompilerServices.InternalsVisibleToAttribute";
 
     /// <summary>The namespace the System.Reactive flavour of the runtime library lives in.</summary>
     internal const string ReactiveRuntimeNamespace = "ReactiveUI.Binding.Reactive";

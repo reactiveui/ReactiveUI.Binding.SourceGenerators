@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
@@ -35,7 +36,7 @@ internal static class VisibilityConversion
         var enumType = forward ? target : source;
         return (!forward && target.SpecialType != SpecialType.System_Boolean)
             || enumType.TypeKind != TypeKind.Enum
-            || enumType.ToDisplayString() != metadataName
+            || !NativeTypeIdentity.Matches(enumType, metadataName)
             || enumType.GetMembers("Visible").IsEmpty
             || enumType.GetMembers(hidden).IsEmpty
             ? null

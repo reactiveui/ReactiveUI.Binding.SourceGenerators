@@ -2,8 +2,10 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
@@ -19,8 +21,8 @@ internal sealed class AppleConversionPlugin : IConversionPlugin
     {
         var from = UnwrapNullable(source);
         var to = UnwrapNullable(target);
-        var fromNative = from.ToDisplayString() == "Foundation.NSDate";
-        var toNative = to.ToDisplayString() == "Foundation.NSDate";
+        var fromNative = NativeTypeIdentity.Matches(from, "Foundation.NSDate");
+        var toNative = NativeTypeIdentity.Matches(to, "Foundation.NSDate");
         if (fromNative == toNative)
         {
             return null;
@@ -78,16 +80,16 @@ internal sealed class AppleConversionPlugin : IConversionPlugin
     /// <summary>Identifies the managed date types covered by the Foundation converters.</summary>
     /// <param name="type">The unwrapped value type.</param>
     /// <returns>True for a supported managed date.</returns>
-    private static bool IsManagedDate(ITypeSymbol type) => type.ToDisplayString() is "System.DateTime" or "System.DateTimeOffset";
+    private static bool IsManagedDate(ITypeSymbol type) =>
+        type.SpecialType == SpecialType.System_DateTime || NativeTypeIdentity.Matches(type, "System.DateTimeOffset");
 
     /// <summary>Verifies the concrete native cast against the consumer's symbols.</summary>
     /// <param name="source">The operator input.</param>
     /// <param name="target">The operator output.</param>
     /// <param name="compilation">The consumer compilation.</param>
     /// <returns>True when the native operator exists.</returns>
-    private static bool HasOperator(ITypeSymbol source, ITypeSymbol target, Compilation compilation)
-    {
-        var conversion = ((CSharpCompilation)compilation).ClassifyConversion(source, target);
-        return conversion.IsUserDefined && conversion.Exists;
-    }
+    /// <remarks>A user-defined conversion always exists; a missing or ambiguous one classifies as no conversion.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool HasOperator(ITypeSymbol source, ITypeSymbol target, Compilation compilation) =>
+        ((CSharpCompilation)compilation).ClassifyConversion(source, target).IsUserDefined;
 }

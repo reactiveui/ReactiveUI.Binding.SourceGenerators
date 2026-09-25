@@ -83,7 +83,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IDisposable __BindCommandCore_7FFFD92E6F4502B6(global::TestApp.CommandButton __control, global::System.IObservable<global::System.Windows.Input.ICommand> commandObs)
         {
-            commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(commandObs, __control, __WpfViewThreadInvoker.Instance);
+            commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(commandObs, __control, global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker.Instance);
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
                 .HasHigherAffinityPlugin<global::TestApp.CommandButton>(5, false))

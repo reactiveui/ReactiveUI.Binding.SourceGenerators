@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
@@ -107,8 +108,7 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
         var parameters = method.Parameters;
         for (var i = 0; i < parameters.Length; i++)
         {
-            if (parameters[i].Type is INamedTypeSymbol { Name: "Expression", IsGenericType: true } expression
-                && expression.ContainingNamespace.ToDisplayString() == "System.Linq.Expressions")
+            if (NativeTypeIdentity.Matches(parameters[i].Type, "System.Linq.Expressions.Expression`1"))
             {
                 return true;
             }
