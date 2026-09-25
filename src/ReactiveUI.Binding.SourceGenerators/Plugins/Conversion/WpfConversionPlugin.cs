@@ -11,8 +11,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
 /// <summary>Adapts Wpf visibility to typed boolean bindings.</summary>
 internal sealed class WpfConversionPlugin : IConversionPlugin
 {
+    /// <summary>WPF's visibility enum, with ReactiveUI's hint and this library's WPF hint.</summary>
+    private static readonly VisibilityPlatform Platform = new("System.Windows.Visibility", "Collapsed", true, "ReactiveUI", "Wpf");
+
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ConversionInfo? Select(ITypeSymbol source, ITypeSymbol target, Compilation compilation) =>
-        VisibilityConversion.Select(source, target, "System.Windows.Visibility", "Collapsed", compilation, true, "ReactiveUI");
+        VisibilityConversion.Select(source, target, Platform, compilation);
 }
