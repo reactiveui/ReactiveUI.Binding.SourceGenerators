@@ -79,7 +79,9 @@ internal static class SyntaxHelpers
             current = UnwrapNullForgiving(memberAccess.Expression);
         }
 
-        if (segments.Count == 0)
+        // The chain has to end at the lambda's own parameter. Anything else - an indexer, a method call, a local -
+        // is a link the loop could not read, and generating the part after it would observe the wrong path.
+        if (segments.Count == 0 || !IsLambdaParameter(current, lambda))
         {
             return null;
         }
@@ -97,23 +99,33 @@ internal static class SyntaxHelpers
         lambda.Body as ExpressionSyntax;
 
     /// <summary>
-    /// Unwraps null-forgiving operators (!) from an expression.
+    /// Unwraps null-forgiving operators (!) and parentheses from an expression.
     /// For example, <c>x.Child!</c> is a <see cref="PostfixUnaryExpressionSyntax"/>
-    /// wrapping the <see cref="MemberAccessExpressionSyntax"/> for <c>x.Child</c>.
-    /// This method strips those wrappers so the path extraction loop can proceed.
+    /// wrapping the <see cref="MemberAccessExpressionSyntax"/> for <c>x.Child</c>, and <c>(x.Child)</c> a
+    /// <see cref="ParenthesizedExpressionSyntax"/> around it. Neither changes which member is named, so this
+    /// method strips both wrappers so the path extraction loop can proceed.
     /// </summary>
     /// <param name="expression">The expression to unwrap.</param>
     /// <returns>The unwrapped expression.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ExpressionSyntax UnwrapNullForgiving(ExpressionSyntax expression)
     {
-        while (expression is PostfixUnaryExpressionSyntax postfix
-               && postfix.IsKind(SyntaxKind.SuppressNullableWarningExpression))
+        while (true)
         {
-            expression = postfix.Operand;
-        }
+            var inner = expression switch
+            {
+                PostfixUnaryExpressionSyntax postfix when postfix.IsKind(SyntaxKind.SuppressNullableWarningExpression) => postfix.Operand,
+                ParenthesizedExpressionSyntax parenthesized => parenthesized.Expression,
+                _ => null,
+            };
 
-        return expression;
+            if (inner is null)
+            {
+                return expression;
+            }
+
+            expression = inner;
+        }
     }
 
     /// <summary>Reads one link of an observed property path.</summary>
@@ -182,4 +194,22 @@ internal static class SyntaxHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsReadableFieldLink(IFieldSymbol field, bool isLeaf) =>
         !field.IsStatic && !field.IsConst && (!isLeaf || !field.IsReadOnly);
+
+    /// <summary>Determines whether an expression is the single parameter of a lambda.</summary>
+    /// <param name="expression">The expression the member access chain ended at.</param>
+    /// <param name="lambda">The lambda the chain was read from.</param>
+    /// <returns><see langword="true"/> when the expression names the lambda's parameter.</returns>
+    private static bool IsLambdaParameter(ExpressionSyntax expression, LambdaExpressionSyntax lambda)
+    {
+        var parameter = lambda switch
+        {
+            SimpleLambdaExpressionSyntax simple => simple.Parameter,
+            ParenthesizedLambdaExpressionSyntax { ParameterList.Parameters.Count: 1 } parenthesized => parenthesized.ParameterList.Parameters[0],
+            _ => null,
+        };
+
+        return parameter is not null
+            && expression is IdentifierNameSyntax identifier
+            && identifier.Identifier.ValueText == parameter.Identifier.ValueText;
+    }
 }
