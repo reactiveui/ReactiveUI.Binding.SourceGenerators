@@ -96,6 +96,29 @@ public class NativeCommandParityTests
             public class NSMenuItem : ActionHost {}
             public class NSToolbarItem : ActionHost {}
         }
+        namespace ReactiveUI.Binding.CommandBinding
+        {
+            public sealed class AppKitCommandTarget : Foundation.NSObject
+            {
+                private readonly ICommand _command;
+                private readonly Func<object> _parameter;
+                public AppKitCommandTarget(ICommand command, Func<object> parameter)
+                {
+                    _command = command;
+                    _parameter = parameter;
+                    IsEnabled = command.CanExecute(null);
+                }
+                public bool IsEnabled { get; set; }
+                [Foundation.Export("theAction:")]
+                public void Execute(Foundation.NSObject sender)
+                {
+                    var parameter = _parameter();
+                    if (_command.CanExecute(parameter)) _command.Execute(parameter);
+                }
+                [Foundation.Export("validateMenuItem:")]
+                public bool ValidateMenuItem(AppKit.NSMenuItem item) => IsEnabled;
+            }
+        }
         public class Command : ICommand
         {
             public event EventHandler CanExecuteChanged;
@@ -180,7 +203,9 @@ public class NativeCommandParityTests
     [Arguments("AppKit.NSControl")]
     public async Task BindCommand_ReactiveRuntimeExecutesNativeContract(string type)
     {
-        var source = Scenario(type).Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal);
+        var source = Scenario(type)
+            .Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal)
+            .Replace("namespace ReactiveUI.Binding.CommandBinding", "namespace ReactiveUI.Binding.Reactive.CommandBinding", StringComparison.Ordinal);
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, null, true);
         await result.CompilationSucceeds();
         await AssertRuns(result);

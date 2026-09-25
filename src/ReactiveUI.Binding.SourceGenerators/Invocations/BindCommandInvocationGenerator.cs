@@ -2,9 +2,9 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
-using ReactiveUI.Binding.SourceGenerators.Generators;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -16,19 +16,15 @@ internal static class BindCommandInvocationGenerator
     /// <param name="context">The generator initialization context.</param>
     /// <param name="invocations">The detected invocations of this API.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void Register(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<BindCommandInvocationInfo> invocations,
-        IncrementalValueProvider<LanguageFeatures> languageFeatures)
-    {
+        IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
         InvocationPipeline.Register(
             context,
             invocations,
             languageFeatures,
             "BindCommandDispatch.g.cs",
             static (invocations, classes, features) => BindCommandCodeGenerator.Generate(invocations, classes, features));
-        context.RegisterSourceOutput(
-            invocations.Collect().Combine(languageFeatures),
-            static (ctx, data) => CommandBindingHelperGenerator.Generate(ctx, data.Left, data.Right));
-    }
 }

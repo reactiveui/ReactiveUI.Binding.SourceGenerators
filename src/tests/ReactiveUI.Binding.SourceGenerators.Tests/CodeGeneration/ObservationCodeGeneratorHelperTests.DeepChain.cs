@@ -156,10 +156,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>Verifies EmitInlineObservation with single property and no INPC generates ImmediateReturnSignal.</summary>
+    /// <summary>Verifies EmitInlineObservation with single property and no INPC reads through the runtime's deferred observable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesTheUnchangingValue()
+    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesTheDeferredValue()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
@@ -176,7 +176,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(SourceObsDeclaration);
-        await Assert.That(result).Contains(UnchangingPropertyObservableName);
+        await Assert.That(result).Contains(DeferredPropertyObservableName);
     }
 
     /// <summary>Verifies EmitInlineObservation with a deep chain generates a switch-map stage.</summary>

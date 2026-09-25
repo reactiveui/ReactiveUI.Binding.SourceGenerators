@@ -60,7 +60,7 @@ public class ViewThreadInvokerGeneratorTests
                                         }
                                     }
 
-                                    """;
+                                    """ + RuntimeInvokerStandIns.Wpf;
 
     /// <summary>The WinForms types the generated invoker calls.</summary>
     private const string WinFormsStubs = """
@@ -75,7 +75,7 @@ public class ViewThreadInvokerGeneratorTests
                                              }
                                          }
 
-                                         """;
+                                         """ + RuntimeInvokerStandIns.WinForms;
 
     /// <summary>The MAUI types the generated invoker calls.</summary>
     private const string MauiStubs = """
@@ -98,7 +98,7 @@ public class ViewThreadInvokerGeneratorTests
                                          }
                                      }
 
-                                     """;
+                                     """ + RuntimeInvokerStandIns.Maui;
 
     /// <summary>The imports every test source starts with.</summary>
     private const string Imports = """
@@ -335,7 +335,9 @@ public class ViewThreadInvokerGeneratorTests
                              """;
 
         var source = (Imports + usage + ViewModelSource + WpfStubs + WinFormsStubs + MauiStubs)
-            .Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal);
+            .Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal)
+            .Replace("namespace ReactiveUI.Binding.", "namespace ReactiveUI.Binding.Reactive.", StringComparison.Ordinal)
+            .Replace("global::ReactiveUI.Binding.IViewThreadInvoker", "global::ReactiveUI.Binding.Reactive.IViewThreadInvoker", StringComparison.Ordinal);
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, null, true);
 
         await result.CompilationSucceeds();

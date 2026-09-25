@@ -30,10 +30,33 @@ internal static class SymbolHelpers
                 IReactiveObject = c.GetTypeByMetadataName(Constants.IReactiveObjectMetadataName),
                 WpfDependencyObject = c.GetTypeByMetadataName(Constants.WpfDependencyObjectMetadataName),
                 WinUIDependencyObject = c.GetTypeByMetadataName(Constants.WinUIDependencyObjectMetadataName),
-                NSObject = c.GetTypeByMetadataName(Constants.NSObjectMetadataName),
+                NSObject = ResolveKvoOwner(c),
                 WinFormsComponent = c.GetTypeByMetadataName(Constants.WinFormsComponentMetadataName),
                 AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName),
             });
+
+    /// <summary>Resolves <c>NSObject</c> when the runtime's key-value observing observable is in reach.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns>The <c>NSObject</c> symbol, or null when either it or the runtime's KVO support is missing.</returns>
+    /// <remarks>
+    /// Key-value observing runs through the runtime's Apple heads. Without them there is nothing for a generated
+    /// observation to reference, so no type is treated as observable through KVO.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static INamedTypeSymbol? ResolveKvoOwner(Compilation compilation) =>
+        ResolvesEither(compilation, CodeGeneration.GeneratedTypeNames.KvoPropertyObservableMetadataName, CodeGeneration.GeneratedTypeNames.ReactiveKvoPropertyObservableMetadataName)
+            ? compilation.GetTypeByMetadataName(Constants.NSObjectMetadataName)
+            : null;
+
+    /// <summary>Determines whether a compilation resolves a runtime type in either the lean or the System.Reactive flavour.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="leanMetadataName">The type's metadata name in the lean runtime.</param>
+    /// <param name="reactiveMetadataName">The type's metadata name in the System.Reactive runtime.</param>
+    /// <returns><see langword="true"/> when either flavour declares the type.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool ResolvesEither(Compilation compilation, string leanMetadataName, string reactiveMetadataName) =>
+        compilation.GetTypeByMetadataName(leanMetadataName) is not null
+        || compilation.GetTypeByMetadataName(reactiveMetadataName) is not null;
 
     /// <summary>
     /// Extracts the inner type T from a property whose type is IObservable&lt;T&gt; or IObservable&lt;T&gt;?.

@@ -107,7 +107,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
-    /// <summary>Verifies GenerateSinglePropertyObservation generates Observable.Return fallback.</summary>
+    /// <summary>Verifies GenerateSinglePropertyObservation reads a plain property through the runtime's deferred observable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateSinglePropertyObservation_NoInterface_GeneratesObservableReturn()
@@ -125,7 +125,7 @@ public partial class ObservationCodeGeneratorHelperTests
             false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(UnchangingPropertyObservableName);
+        await Assert.That(result).Contains(DeferredPropertyObservableName);
     }
 
     /// <summary>Verifies GenerateShallowPathObservation for single segment delegates to single property logic.</summary>
@@ -180,7 +180,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
-    /// <summary>Verifies GenerateShallowObservableVariable generates Observable.Return fallback.</summary>
+    /// <summary>Verifies GenerateShallowObservableVariable reads a plain property through the runtime's deferred observable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_NoInterface_GeneratesObservableReturn()
@@ -194,7 +194,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(PropObs0Declaration);
-        await Assert.That(result).Contains(UnchangingPropertyObservableName);
+        await Assert.That(result).Contains(DeferredPropertyObservableName);
     }
 
     /// <summary>Verifies GenerateShallowPathObservation for before-change produces PropertyChanging code.</summary>
@@ -258,7 +258,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(sb.ToString()).Contains($"{InheritedPropertyName}Property");
     }
 
-    /// <summary>Verifies GenerateShallowPathObservation with no interface generates Observable.Return.</summary>
+    /// <summary>Verifies GenerateShallowPathObservation with no interface reads through the runtime's deferred observable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowPathObservation_NoInterface_GeneratesObservableReturn()
@@ -271,7 +271,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(UnchangingPropertyObservableName);
+        await Assert.That(result).Contains(DeferredPropertyObservableName);
     }
 
     /// <summary>

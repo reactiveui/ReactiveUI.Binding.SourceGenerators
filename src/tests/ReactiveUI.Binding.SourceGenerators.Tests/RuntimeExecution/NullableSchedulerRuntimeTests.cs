@@ -266,7 +266,7 @@ public class NullableSchedulerRuntimeTests
     [Arguments("BindConverterObjects", "n5|dispatched")]
     public async Task ExplicitNullScheduler_WritesOnTheThreadThatOwnsTheTarget(string scenario, string expected)
     {
-        var result = TestHelper.RunGenerator(ScenarioSource, LanguageVersion.CSharp10);
+        var result = TestHelper.RunGenerator(ScenarioSource + RuntimeInvokerStandIns.WinForms, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoCompilationWarnings();

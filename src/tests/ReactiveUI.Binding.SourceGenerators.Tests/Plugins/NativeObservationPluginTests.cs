@@ -53,7 +53,6 @@ public class NativeObservationPluginTests
         await Assert.That(Probe.ObservationKind).IsEqualTo(ProbeKind);
         await Assert.That(Probe.Affinity).IsEqualTo(ProbeAffinity);
         await Assert.That(Probe.SupportsBeforeChanged).IsFalse();
-        await Assert.That(Probe.RequiresHelperClasses).IsTrue();
     }
 
     /// <summary>A property the mechanism verified scores the mechanism's affinity after a change and nothing before one.</summary>
@@ -69,21 +68,7 @@ public class NativeObservationPluginTests
         await Assert.That(Probe.GetAffinityForProperty(classInfo, "Other", false)).IsEqualTo(0);
     }
 
-    /// <summary>The generated helper carries the mechanism's identity in its name.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitHelperClasses_NamesTheHelperAfterTheKind()
-    {
-        var expected = new StringBuilder();
-        NativeObservableEmitter.EmitHelper(expected, $"__{ProbeKind}Observable");
-        var actual = new StringBuilder();
-
-        Probe.EmitHelperClasses(actual);
-
-        await Assert.That(actual.ToString()).IsEqualTo(expected.ToString());
-    }
-
-    /// <summary>An after-change observation wraps the mechanism's own subscription in the kind's helper.</summary>
+    /// <summary>An after-change observation wraps the mechanism's own subscription in the runtime's callback observable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EmitObservation_AfterChange_WrapsTheMechanismsSubscription()
@@ -94,7 +79,7 @@ public class NativeObservationPluginTests
         Probe.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
         var result = sb.ToString();
-        await Assert.That(result).Contains($"new __{ProbeKind}Observable<");
+        await Assert.That(result).Contains("new global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<");
         await Assert.That(result).Contains(ProbeSubscription);
     }
 

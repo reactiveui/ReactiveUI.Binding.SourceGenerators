@@ -63,20 +63,6 @@ public class BindingGenerator : IIncrementalGenerator
         var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
         var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation);
         var toProperty = Detect(in context, RoslynHelpers.IsToPropertyInvocation, ToPropertyExtractor.ExtractToPropertyInvocation);
-        var helpers = InvocationHelperRequirements.Select(whenChanged);
-        helpers = InvocationHelperRequirements.Combine(helpers, whenChanging);
-        helpers = InvocationHelperRequirements.Combine(helpers, whenAnyValue);
-        helpers = InvocationHelperRequirements.Combine(helpers, whenAny);
-        helpers = InvocationHelperRequirements.Combine(helpers, whenAnyObservable);
-        helpers = InvocationHelperRequirements.Combine(helpers, bindOneWay);
-        helpers = InvocationHelperRequirements.Combine(helpers, bindTwoWay);
-        helpers = InvocationHelperRequirements.Combine(helpers, oneWayBind);
-        helpers = InvocationHelperRequirements.Combine(helpers, bind);
-        helpers = InvocationHelperRequirements.Combine(helpers, bindCommand);
-        helpers = InvocationHelperRequirements.Combine(helpers, bindInteraction);
-        helpers = InvocationHelperRequirements.Combine(helpers, bindTo);
-        helpers = InvocationHelperRequirements.Combine(helpers, invokeCommand);
-        RegisterHelperOutput(in context, helpers, languageFeatures);
 
         // Each invocation generator receives the language-feature snapshot to control dispatch/output
         WhenChangedInvocationGenerator.Register(context, whenChanged, languageFeatures);
@@ -173,23 +159,140 @@ public class BindingGenerator : IIncrementalGenerator
         return usesReactiveRuntime ? reactiveStub : leanStub;
     }
 
-    /// <summary>Declares only the helpers selected by extracted binding and observation calls.</summary>
-    /// <param name="context">The generator initialization context.</param>
-    /// <param name="helpers">The distinct helper requirements across the invocation pipelines.</param>
-    /// <param name="languageFeatures">The consumer's language-feature snapshot, which names the namespace.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RegisterHelperOutput(
-        in IncrementalGeneratorInitializationContext context,
-        IncrementalValueProvider<InvocationHelperRequirements.Selection> helpers,
-        IncrementalValueProvider<LanguageFeatures> languageFeatures)
+    /// <summary>Picks the namespace and class the generated code is emitted into.</summary>
+    /// <param name="configOptions">The analyzer config options, which carry the consumer's root namespace.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="supportsInterceptors">Whether the generated code intercepts its call sites.</param>
+    /// <param name="supportsGlobalUsings">Whether the consumer can scope a namespace import to its compilation.</param>
+    /// <param name="sharedNamespace">The runtime library's own namespace, which every consumer imports.</param>
+    /// <returns>The namespace and the class name.</returns>
+    /// <remarks>
+    /// Every assembly's generated type has a fully qualified name of its own, so an assembly granted
+    /// <c>InternalsVisibleTo</c> never sees two types by one name. Interceptors sit in a per-assembly namespace below
+    /// the one the consumer opts into interception. Otherwise the overloads have to be reached by lookup: from C# 10
+    /// in the consumer's root namespace or a per-assembly one, and before that in a namespace other assemblies may
+    /// share. Wherever the namespace is not the assembly's own, the class name carries the assembly instead.
+    /// </remarks>
+    private static (string Namespace, string ClassName) SelectGeneratedPlacement(
+        AnalyzerConfigOptionsProvider configOptions,
+        Compilation compilation,
+        bool supportsInterceptors,
+        bool supportsGlobalUsings,
+        string sharedNamespace)
     {
-        context.RegisterSourceOutput(
-            helpers.Select(static (selection, _) => selection.ObservationKinds).Combine(languageFeatures),
-            static (ctx, data) => ObservationHelperGenerator.Generate(ctx, data.Left, data.Right));
+        var assemblySegments = ToNamespaceSegments(compilation.AssemblyName);
+        if (supportsInterceptors)
+        {
+            return ($"{Constants.InterceptorNamespace}.{assemblySegments}", Constants.GeneratedExtensionClassName);
+        }
 
-        context.RegisterSourceOutput(
-            helpers.Select(static (selection, _) => selection.ViewThreadInvokers).Combine(languageFeatures),
-            static (ctx, data) => ViewThreadInvokerGenerator.Generate(ctx, data.Left, data.Right));
+        var perAssemblyNamespace = $"{Constants.GeneratedNamespaceRoot}.{assemblySegments}";
+        var generatedNamespace = supportsGlobalUsings
+            ? SelectGeneratedNamespace(configOptions, compilation, perAssemblyNamespace)
+            : SelectSharedTierNamespace(configOptions, compilation, sharedNamespace);
+        return (
+            generatedNamespace,
+            string.Equals(generatedNamespace, perAssemblyNamespace, StringComparison.Ordinal)
+                ? Constants.GeneratedExtensionClassName
+                : $"{Constants.GeneratedExtensionClassName}_{assemblySegments.Replace('.', '_')}");
+    }
+
+    /// <summary>
+    /// Picks the namespace the dispatch overloads are emitted into: the consumer's own root namespace when the
+    /// build exposes one, and a namespace derived from the assembly name when it does not.
+    /// </summary>
+    /// <param name="configOptions">The analyzer config options, which carry the consumer's root namespace.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="perAssemblyNamespace">The namespace derived from the assembly name.</param>
+    /// <returns>The namespace to emit the dispatch overloads into.</returns>
+    /// <remarks>
+    /// <para>
+    /// Extension-method lookup walks the enclosing namespaces of the call site from the inside out and stops at
+    /// the first level that yields any candidate. The runtime stub lives in <c>ReactiveUI.Binding</c>, so a
+    /// consumer whose own code sits under that namespace reaches the stub at an enclosing level and the lookup
+    /// stops there - a namespace brought in by a <c>global using</c> is only ever consulted at the outermost
+    /// level, so the generated overload would never be considered and the call would fall through to the stub's
+    /// runtime throw. Emitting into the consumer's root namespace puts the overload at a level at or inside
+    /// their own code, so it is reached first whatever they have named their namespaces.
+    /// </para>
+    /// <para>
+    /// The <c>global using</c> is still emitted, and still carries files whose namespace sits outside the root
+    /// namespace. Both routes land the concrete overload in the same candidate set as the generic stub, where
+    /// it wins outright: a non-generic candidate is preferred over a generic one.
+    /// </para>
+    /// <para>
+    /// Two assemblies sharing a root namespace would land in the same place, and if one also exposes its
+    /// internals to the other, both would answer the same call (CS0121). That is detectable - the other
+    /// assembly's dispatch class is already there to be found - so this steps aside to the per-assembly
+    /// namespace when it sees one, at the cost of the reach a root namespace buys. The class in a root namespace
+    /// carries the assembly's name, so the type names never collide either way.
+    /// </para>
+    /// </remarks>
+    private static string SelectGeneratedNamespace(
+        AnalyzerConfigOptionsProvider configOptions,
+        Compilation compilation,
+        string perAssemblyNamespace)
+    {
+        var hasRootNamespace = configOptions.GlobalOptions.TryGetValue(
+                "build_property.RootNamespace",
+                out var rootNamespace)
+            && !string.IsNullOrWhiteSpace(rootNamespace);
+
+        if (!hasRootNamespace)
+        {
+            return perAssemblyNamespace;
+        }
+
+        // Another assembly that shares this root namespace and exposes its internals here has already put its
+        // dispatch class where this one would go, and both would then answer the same call. Nothing rules that
+        // out at the language level, so ask whether it has actually happened and step aside when it has.
+        var candidate = ToNamespaceSegments(rootNamespace);
+        return HasGeneratedClassIn(compilation, candidate) ? perAssemblyNamespace : candidate;
+    }
+
+    /// <summary>Determines whether a referenced assembly already declares a generated class in a namespace.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="namespaceName">The namespace to look in.</param>
+    /// <returns><see langword="true"/> when a type named for this generator is already there.</returns>
+    private static bool HasGeneratedClassIn(Compilation compilation, string namespaceName)
+    {
+        var current = compilation.GlobalNamespace;
+        foreach (var segment in namespaceName.Split('.'))
+        {
+            if (FindChildNamespace(current, segment) is not { } child)
+            {
+                return false;
+            }
+
+            current = child;
+        }
+
+        foreach (var type in current.GetTypeMembers())
+        {
+            if (type.Name.StartsWith(Constants.GeneratedExtensionClassName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Finds a namespace's child namespace by name.</summary>
+    /// <param name="parent">The namespace to look in.</param>
+    /// <param name="name">The child namespace's name.</param>
+    /// <returns>The child namespace, or null when there is none.</returns>
+    private static INamespaceSymbol? FindChildNamespace(INamespaceSymbol parent, string name)
+    {
+        foreach (var child in parent.GetNamespaceMembers())
+        {
+            if (string.Equals(child.Name, name, StringComparison.Ordinal))
+            {
+                return child;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Runs one syntax scan and keeps the call sites it could extract.</summary>
@@ -244,16 +347,8 @@ public class BindingGenerator : IIncrementalGenerator
                 _ = sb.Append("namespace ")
                     .Append(features.GeneratedNamespace)
                     .Append("\n{\n    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\n    internal static partial class ")
-                    .Append(Constants.GeneratedExtensionClassName)
+                    .Append(features.GeneratedClassName)
                     .Append("\n    {\n    }\n}\n");
-
-                if (features.SupportsInterceptors)
-                {
-                    // No framework declares the interception attribute, so the compilation that carries the
-                    // interceptors has to. Once for all of them: each dispatch file is another part of the
-                    // same class, but the attribute is a type of its own and would collide with itself.
-                    _ = sb.Append('\n').Append(CodeGeneration.InterceptorEmitter.BuildAttributeDeclaration());
-                }
 
                 CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
                     ctx,
@@ -284,7 +379,12 @@ public class BindingGenerator : IIncrementalGenerator
 
                 var languageVersion = ReadLanguageVersion(parseOptions);
                 var callerArgExprAvailable = HasAccessibleExpressionAttribute(compilation);
-                var supportsModuleInitializer = languageVersion >= LanguageVersion.CSharp9;
+
+                // A framework that predates ModuleInitializerAttribute gets a file-local declaration, which needs
+                // C# 11; below that such a consumer registers its views from a static constructor instead.
+                var hasModuleInitializerAttribute = HasAccessibleAttribute(compilation, Constants.ModuleInitializerAttributeMetadataName);
+                var supportsModuleInitializer = languageVersion >= LanguageVersion.CSharp9
+                    && (hasModuleInitializerAttribute || languageVersion >= LanguageVersion.CSharp11);
 
                 // Generated-file markers (// <auto-generated/> + #pragma warning disable) are emitted by default
                 // (the shipping convention); consumers opt out with ReactiveUIBindingEmitGeneratedCodeMarkers=false
@@ -323,16 +423,13 @@ public class BindingGenerator : IIncrementalGenerator
                     ? Constants.ReactiveRuntimeNamespace
                     : Constants.SharedGeneratedNamespace;
 
-                // An interceptor claims its call site outright, so where one can be emitted none of the
-                // placement below applies: there is no namespace for lookup to reach and no import to scope.
-                var supportsInterceptors = InterceptableLocationReader.IsInterceptionEnabled(parseOptions);
-
-                var dispatchNamespace = supportsGlobalUsings
-                    ? SelectGeneratedNamespace(configOptions, compilation)
-                    : SelectSharedTierNamespace(configOptions, compilation, sharedNamespace);
-                var generatedNamespace = supportsInterceptors
-                    ? Constants.InterceptorNamespace
-                    : dispatchNamespace;
+                // An interceptor claims its call site outright, so where one can be emitted there is no namespace
+                // for lookup to reach and no import to scope. Each intercepting file declares its own file-local
+                // interception attribute, which needs C# 11.
+                var supportsInterceptors = InterceptableLocationReader.IsInterceptionEnabled(parseOptions)
+                    && languageVersion >= LanguageVersion.CSharp11;
+                var (generatedNamespace, generatedClassName) =
+                    SelectGeneratedPlacement(configOptions, compilation, supportsInterceptors, supportsGlobalUsings, sharedNamespace);
 
                 return new LanguageFeatures(
                     supportsCallerArgExpr,
@@ -346,10 +443,10 @@ public class BindingGenerator : IIncrementalGenerator
                     primitivesNamespaceMembers,
                     supportsInterceptors,
                     supportsModuleInitializer,
-                    supportsModuleInitializer
-                        && !HasAccessibleAttribute(compilation, Constants.ModuleInitializerAttributeMetadataName),
+                    supportsModuleInitializer && !hasModuleInitializerAttribute,
                     languageVersion > LanguageVersion.CSharp12
-                        && HasAccessibleAttribute(compilation, Constants.OverloadResolutionPriorityAttributeMetadataName));
+                        && HasAccessibleAttribute(compilation, Constants.OverloadResolutionPriorityAttributeMetadataName),
+                    generatedClassName);
             });
 
     /// <summary>
@@ -478,60 +575,6 @@ public class BindingGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Picks the namespace the dispatch overloads are emitted into: the consumer's own root namespace when the
-    /// build exposes one, and a namespace derived from the assembly name when it does not.
-    /// </summary>
-    /// <param name="configOptions">The analyzer config options, which carry the consumer's root namespace.</param>
-    /// <param name="compilation">The consumer compilation.</param>
-    /// <returns>The namespace to emit the dispatch overloads into.</returns>
-    /// <remarks>
-    /// <para>
-    /// Extension-method lookup walks the enclosing namespaces of the call site from the inside out and stops at
-    /// the first level that yields any candidate. The runtime stub lives in <c>ReactiveUI.Binding</c>, so a
-    /// consumer whose own code sits under that namespace reaches the stub at an enclosing level and the lookup
-    /// stops there - a namespace brought in by a <c>global using</c> is only ever consulted at the outermost
-    /// level, so the generated overload would never be considered and the call would fall through to the stub's
-    /// runtime throw. Emitting into the consumer's root namespace puts the overload at a level at or inside
-    /// their own code, so it is reached first whatever they have named their namespaces.
-    /// </para>
-    /// <para>
-    /// The <c>global using</c> is still emitted, and still carries files whose namespace sits outside the root
-    /// namespace. Both routes land the concrete overload in the same candidate set as the generic stub, where
-    /// it wins outright: a non-generic candidate is preferred over a generic one.
-    /// </para>
-    /// <para>
-    /// Two assemblies sharing a root namespace would land in the same place, and if one also exposes its
-    /// internals to the other, both would answer the same call (CS0121). That is detectable - the other
-    /// assembly's dispatch class is already there to be found - so this steps aside to the per-assembly
-    /// namespace when it sees one, at the cost of the reach a root namespace buys.
-    /// </para>
-    /// </remarks>
-    private static string SelectGeneratedNamespace(AnalyzerConfigOptionsProvider configOptions, Compilation compilation)
-    {
-        var perAssemblyNamespace =
-            $"{Constants.GeneratedNamespaceRoot}.{ToNamespaceSegments(compilation.AssemblyName)}";
-
-        var hasRootNamespace = configOptions.GlobalOptions.TryGetValue(
-                "build_property.RootNamespace",
-                out var rootNamespace)
-            && !string.IsNullOrWhiteSpace(rootNamespace);
-
-        if (!hasRootNamespace)
-        {
-            return perAssemblyNamespace;
-        }
-
-        // Another assembly that shares this root namespace and exposes its internals here has already put its
-        // dispatch class where this one would go, and both would then answer the same call. Nothing rules that
-        // out at the language level, so ask whether it has actually happened and step aside when it has.
-        var candidate = ToNamespaceSegments(rootNamespace);
-        var occupied = compilation.GetTypeByMetadataName(
-            $"{candidate}.{Constants.GeneratedExtensionClassName}") is not null;
-
-        return occupied ? perAssemblyNamespace : candidate;
-    }
-
-    /// <summary>
     /// Renders a root namespace or assembly name as namespace segments, so the generated namespace is one the
     /// consumer's own code sits under and is still a legal namespace.
     /// </summary>
@@ -565,8 +608,8 @@ public class BindingGenerator : IIncrementalGenerator
     {
         var builder = new CodeGeneration.PooledStringBuilder(segment.Length + 1);
 
-        // An identifier cannot be empty or start with a digit, so lead with an underscore where needed.
-        if (segment.Length == 0 || (!char.IsLetter(segment[0]) && segment[0] != '_'))
+        // An identifier cannot be empty, start with a digit or be a keyword, so lead with an underscore where needed.
+        if (segment.Length == 0 || (!char.IsLetter(segment[0]) && segment[0] != '_') || SyntaxFacts.GetKeywordKind(segment) != SyntaxKind.None)
         {
             _ = builder.Append('_');
         }

@@ -47,9 +47,6 @@ internal sealed class KVOObservationPlugin : IPlatformObservationPlugin
     public bool SupportsBeforeChanged => true;
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => true;
-
-    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
         IsAMatch(classInfo) && CanObserveProperty(classInfo, propertyName) ? Affinity : 0;
@@ -89,10 +86,6 @@ internal sealed class KVOObservationPlugin : IPlatformObservationPlugin
 
         return selector is null ? null : new(ObservationKind, Affinity, default, null, null, selector);
     }
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitHelperClasses(StringBuilder sb) => KvoObservationEmitter.EmitHelperClasses(sb);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

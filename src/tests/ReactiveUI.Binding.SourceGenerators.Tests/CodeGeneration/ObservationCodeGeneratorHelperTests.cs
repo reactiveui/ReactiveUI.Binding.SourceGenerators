@@ -52,8 +52,11 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>ImmutableEmptySignal</c> name the leaf of a chain emits for a missing parent.</summary>
     private const string ImmutableEmptySignalName = "ImmutableEmptySignal";
 
-    /// <summary>The observation a property with no mechanism behind it gets: one value, without completing.</summary>
+    /// <summary>The observation a property with no mechanism for the asked timing gets: one value, without completing.</summary>
     private const string UnchangingPropertyObservableName = "UnchangingPropertyObservable";
+
+    /// <summary>The observation a plain property gets: its value when a subscriber arrives, without completing.</summary>
+    private const string DeferredPropertyObservableName = "global::ReactiveUI.Binding.Observables.DeferredPropertyObservable<";
 
     /// <summary>A property the bound type inherits rather than declares.</summary>
     private const string InheritedPropertyName = "Caption";

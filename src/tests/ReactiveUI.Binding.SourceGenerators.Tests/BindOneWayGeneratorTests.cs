@@ -343,6 +343,6 @@ public class BindOneWayGeneratorTests
             await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.GeneratedSourceContains(ApplePlatformSource.HelperHintName, "__KVOObservable<T>");
+        await result.GeneratedSourceContains("BindOneWayDispatch.g.cs", ApplePlatformSource.KvoObservable);
     }
 }

@@ -320,7 +320,8 @@ internal static class CodeGeneratorHelpers
     /// <param name="features">The consumer compilation's snapshot, naming the flavour.</param>
     /// <remarks>
     /// Every generated file goes out through here so no emitter can forget the retargeting, which would only
-    /// show up as generated code that does not compile for consumers of the System.Reactive flavour.
+    /// show up as generated code that does not compile for consumers of the System.Reactive flavour. A file that
+    /// intercepts call sites also gets its own file-local declaration of the interception attribute here.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AddGeneratedSource(
@@ -328,7 +329,9 @@ internal static class CodeGeneratorHelpers
         string hintName,
         string source,
         in LanguageFeatures features) =>
-        context.AddSource(hintName, RuntimeFlavourRewriter.Retarget(source, features));
+        context.AddSource(
+            hintName,
+            RuntimeFlavourRewriter.Retarget(features.SupportsInterceptors ? InterceptorEmitter.AppendAttributeDeclaration(source) : source, features));
 
     /// <summary>
     /// Appends one optional expression parameter to a generated overload's parameter list, mirroring the one the
@@ -380,7 +383,7 @@ internal static class CodeGeneratorHelpers
         _ = sb.Append("\nusing System;\n\nnamespace ")
             .Append(features.GeneratedNamespace)
             .Append("\n{\n    internal static partial class ")
-            .Append(Constants.GeneratedExtensionClassName)
+            .Append(features.GeneratedClassName)
             .Append("\n    {");
     }
 

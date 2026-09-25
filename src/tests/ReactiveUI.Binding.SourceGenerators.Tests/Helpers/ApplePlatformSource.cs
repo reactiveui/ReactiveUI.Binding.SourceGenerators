@@ -5,19 +5,19 @@
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 /// <summary>
-/// Builds compilation sources for the Apple key-value-observing path. The KVO observation code the
-/// generator emits instantiates helper classes that are themselves generated, so a scenario only proves
-/// anything if it compiles - which needs enough of <c>Foundation</c> present for those helpers to bind.
-/// A stub stands in for the real framework so the scenarios run on every target, not just Apple ones.
+/// Builds compilation sources for the Apple key-value-observing path. The KVO observation code the generator
+/// emits instantiates the runtime's key-value observing observable, which only the runtime's Apple heads declare,
+/// so a scenario declares a stand-in for it alongside enough of <c>Foundation</c> for it to bind. A stub stands in
+/// for the real framework so the scenarios run on every target, not just Apple ones.
 /// </summary>
 internal static class ApplePlatformSource
 {
-    /// <summary>The generated file that declares the observation helper classes.</summary>
-    internal const string HelperHintName = "ObservationHelpers.g.cs";
+    /// <summary>The runtime observable generated KVO observation instantiates.</summary>
+    internal const string KvoObservable = "global::ReactiveUI.Binding.Observables.KvoPropertyObservable<";
 
     /// <summary>
-    /// The members of <c>Foundation</c> the generated KVO helpers bind against: the observer callback they
-    /// override and the add/remove observer pair they subscribe through.
+    /// The members of <c>Foundation</c> key-value observing binds against: the observer callback it overrides and the
+    /// add/remove observer pair it subscribes through, with a stand-in for the runtime's Apple-head observable.
     /// </summary>
     private const string FoundationStub = """
                                           namespace Foundation
@@ -39,6 +39,27 @@ internal static class ApplePlatformSource
                                                   public virtual void ObserveValue(NSString keyPath, NSObject ofObject, NSDictionary change, IntPtr context) {}
                                                   public void AddObserver(NSObject observer, NSString keyPath, NSKeyValueObservingOptions options, IntPtr context) {}
                                                   public void RemoveObserver(NSObject observer, NSString keyPath) {}
+                                              }
+                                          }
+
+                                          namespace ReactiveUI.Binding.Observables
+                                          {
+                                              public sealed class KvoPropertyObservable<T> : IObservable<T>
+                                              {
+                                                  private readonly Foundation.NSObject _source;
+                                                  private readonly Func<Foundation.NSObject, T> _getter;
+
+                                                  public KvoPropertyObservable(Foundation.NSObject source, string keyPath, Func<Foundation.NSObject, T> getter, bool distinct, bool beforeChange)
+                                                  {
+                                                      _source = source;
+                                                      _getter = getter;
+                                                  }
+
+                                                  public IDisposable Subscribe(IObserver<T> observer)
+                                                  {
+                                                      observer.OnNext(_getter(_source));
+                                                      return ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                                                  }
                                               }
                                           }
                                           """;

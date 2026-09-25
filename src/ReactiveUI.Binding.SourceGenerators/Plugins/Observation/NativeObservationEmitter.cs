@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -29,7 +30,7 @@ internal static class NativeObservationEmitter
             return;
         }
 
-        _ = sb.Append("new __").Append(kind).Append("Observable<").Append(observation.SourceType).Append(", ")
+        _ = sb.Append(GeneratedTypeNames.OpenCallbackProperty).Append(observation.SourceType).Append(", ")
             .Append(segment.PropertyTypeFullName).Append(">((").Append(observation.SourceType).Append(')').Append(observation.Source)
             .AppendLine(", (__source, __notify) =>").AppendLine("                    {");
         emitSubscription(sb, segment, info);

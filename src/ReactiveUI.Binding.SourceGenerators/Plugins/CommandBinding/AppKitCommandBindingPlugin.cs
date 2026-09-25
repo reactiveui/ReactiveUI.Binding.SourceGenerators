@@ -10,7 +10,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 /// <summary>Binds Cocoa controls through their concrete Target, Action and optional Enabled properties.</summary>
-internal sealed class AppKitCommandBindingPlugin : IPlatformCommandBindingPlugin, ICommandBindingHelperPlugin
+internal sealed class AppKitCommandBindingPlugin : IPlatformCommandBindingPlugin
 {
     /// <summary>The native Cocoa target/action score.</summary>
     private const int TargetActionAffinity = 4;
@@ -38,8 +38,4 @@ internal sealed class AppKitCommandBindingPlugin : IPlatformCommandBindingPlugin
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
         AppKitCommandEmitter.EmitBinding(sb, inv, controlAccess);
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitHelper(StringBuilder sb) => AppKitCommandEmitter.EmitHelper(sb);
 }

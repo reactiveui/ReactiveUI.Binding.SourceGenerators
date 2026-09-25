@@ -7,7 +7,7 @@ using System;
 
 namespace ReactiveUI.Binding
 {
-    internal static partial class __ReactiveUIGeneratedBindings
+    internal static partial class __ReactiveUIGeneratedBindings_TestAssembly
     {
         /// <summary>
         /// Concrete typed overload for BindInteraction on global::SharedScenarios.BindInteraction.NonINPCViewModel.MyView.
@@ -43,7 +43,7 @@ namespace ReactiveUI.Binding
         {
             return serial;
         }
-            var interactionObsMechanism = new __UnchangingPropertyObservable<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(viewModel, __source => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__source).Confirm);
+            var interactionObsMechanism = new global::ReactiveUI.Binding.Observables.DeferredPropertyObservable<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(viewModel, __source => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__source).Confirm);
         var interactionObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Confirm", 1, false);
         var interactionObs = interactionObsRegistration == null
             ? (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)interactionObsMechanism

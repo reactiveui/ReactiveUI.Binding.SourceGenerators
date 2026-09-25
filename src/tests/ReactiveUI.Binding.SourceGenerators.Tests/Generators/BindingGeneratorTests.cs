@@ -95,14 +95,17 @@ public class BindingGeneratorTests
         await result.CompilationSucceeds();
     }
 
-    /// <summary>Native properties from referenced assemblies get their selected helper, including chain links.</summary>
+    /// <summary>
+    /// Native properties from referenced assemblies are observed through the runtime's callback observable, including
+    /// chain links, and no helper is declared in the consumer.
+    /// </summary>
     /// <param name="sourceType">The type the observation starts from.</param>
     /// <param name="propertyPath">The observed access chain.</param>
     /// <returns>A task representing the asynchronous test.</returns>
     [Test]
     [Arguments("Framework.Control", "x => x.Native")]
     [Arguments("Parent", "x => x.Child.Native")]
-    public async Task Initialize_ReferencedNativeProperty_EmitsCompilingHelper(string sourceType, string propertyPath)
+    public async Task Initialize_ReferencedNativeProperty_ObservesThroughTheRuntime(string sourceType, string propertyPath)
     {
         var framework = TestHelper.CreateCompilation(WinUISource, LanguageVersion.CSharp10)
             .WithAssemblyName("NativeFramework");
@@ -122,7 +125,8 @@ public class BindingGeneratorTests
             .AddReferences(framework.ToMetadataReference());
         var result = TestHelper.RunGenerator(compilation, LanguageVersion.CSharp10, null, false);
 
-        await Assert.That(result.GeneratedSources.ContainsKey(ObservationHelpersFile)).IsTrue();
+        await Assert.That(result.GeneratedSources.ContainsKey(ObservationHelpersFile)).IsFalse();
+        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<");
         await result.CompilationSucceeds();
     }
 }

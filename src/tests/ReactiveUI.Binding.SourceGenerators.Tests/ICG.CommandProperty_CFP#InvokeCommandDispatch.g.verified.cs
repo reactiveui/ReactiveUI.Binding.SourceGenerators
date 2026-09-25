@@ -6,7 +6,7 @@ using System;
 
 namespace ReactiveUI.Binding
 {
-    internal static partial class __ReactiveUIGeneratedBindings
+    internal static partial class __ReactiveUIGeneratedBindings_TestAssembly
     {
         /// <summary>
         /// Concrete typed overload for InvokeCommand from global::System.IObservable<string> to global::SharedScenarios.InvokeCommand.CommandProperty.MyViewModel.

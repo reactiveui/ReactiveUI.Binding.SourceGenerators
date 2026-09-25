@@ -27,13 +27,6 @@ internal interface IObservationPlugin
     /// <summary>Gets a value indicating whether this plugin supports before-change (PropertyChanging) observation.</summary>
     bool SupportsBeforeChanged { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether this plugin requires helper class definitions
-    /// to be emitted in the generated output file. When <see langword="true"/>,
-    /// <see cref="EmitHelperClasses"/> will be called once per generated file.
-    /// </summary>
-    bool RequiresHelperClasses { get; }
-
     /// <summary>Determines whether this plugin can handle the given type based on ClassBindingInfo flags.</summary>
     /// <param name="classInfo">The type-level binding info.</param>
     /// <returns>True if this plugin can generate observation code for this type.</returns>
@@ -58,14 +51,6 @@ internal interface IObservationPlugin
     /// <param name="isBeforeChange">Whether the caller requests before-change notifications.</param>
     /// <returns>The eligible mechanism's score, or zero.</returns>
     int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange);
-
-    /// <summary>
-    /// Emits any helper class definitions needed by this plugin's generated code.
-    /// Called at most once per generated output file, inside the
-    /// <c>__ReactiveUIGeneratedBindings</c> partial class.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    void EmitHelperClasses(StringBuilder sb);
 
     /// <summary>Emits a direct typed expression for this mechanism.</summary>
     /// <param name="sb">The output builder.</param>

@@ -123,7 +123,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedForward, view, __WpfViewThreadInvoker.Instance);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedForward, view, global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker.Instance);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {

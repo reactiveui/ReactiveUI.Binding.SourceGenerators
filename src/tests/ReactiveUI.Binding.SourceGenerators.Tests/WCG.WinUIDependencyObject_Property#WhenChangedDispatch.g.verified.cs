@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyWinUIControl)__o).Text,
                 false, false)
                 : (global::System.IObservable<string>)
-                new __WinUIDPObservable<global::TestApp.MyWinUIControl, string>((global::TestApp.MyWinUIControl)obj, (__source, __notify) =>
+                new global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<global::TestApp.MyWinUIControl, string>((global::TestApp.MyWinUIControl)obj, (__source, __notify) =>
                     {
                         var __token = __source.RegisterPropertyChangedCallback(global::TestApp.MyWinUIControl.TextProperty, (__sender, __property) => __notify());
                         return new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>

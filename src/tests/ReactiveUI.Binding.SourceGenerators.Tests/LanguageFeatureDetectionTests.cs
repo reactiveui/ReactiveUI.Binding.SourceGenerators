@@ -258,7 +258,7 @@ public class LanguageFeatureDetectionTests
                 public static IObservable<string> Observe(Model model) => model.WhenAnyValue(x => x.Name, "", 0);
             }
             """;
-        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10);
+        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp11);
         var compilation = TestHelper.CreateCompilation(source, parseOptions, false, "TestAssembly", []);
         var result = TestHelper.RunGenerator(compilation, parseOptions, ProbeName, true);
 

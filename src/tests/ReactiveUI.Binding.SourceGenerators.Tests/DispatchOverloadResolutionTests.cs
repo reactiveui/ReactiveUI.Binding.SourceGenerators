@@ -59,7 +59,7 @@ public class DispatchOverloadResolutionTests
         var symbol = await CallSiteResolution.ResolveAsync(result, Constants.WhenChangedMethodName);
 
         await Assert.That(symbol).IsNotNull();
-        await Assert.That(symbol!.ContainingType.Name).IsEqualTo(Constants.GeneratedExtensionClassName);
+        await Assert.That(symbol!.ContainingType.Name).IsEqualTo($"{Constants.GeneratedExtensionClassName}_TestAssembly");
     }
 
     /// <summary>

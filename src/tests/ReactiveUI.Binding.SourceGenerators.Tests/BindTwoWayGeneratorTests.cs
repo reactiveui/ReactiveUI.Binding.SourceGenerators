@@ -162,6 +162,6 @@ public class BindTwoWayGeneratorTests
             await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.GeneratedSourceContains(ApplePlatformSource.HelperHintName, "__KVOObservable<T>");
+        await result.GeneratedSourceContains("BindTwoWayDispatch.g.cs", ApplePlatformSource.KvoObservable);
     }
 }

@@ -70,7 +70,7 @@ public partial class RepeatedCallSiteDispatchTests
     /// </remarks>
     private static async Task AssertEveryCallSiteIsClaimed(string source, string dispatchFileName)
     {
-        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10);
+        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp11);
         var compilation = TestHelper.CreateCompilation(source, parseOptions, false, "TestAssembly", []);
         var result = TestHelper.RunGenerator(compilation, parseOptions, ProbeRootNamespace, true);
 

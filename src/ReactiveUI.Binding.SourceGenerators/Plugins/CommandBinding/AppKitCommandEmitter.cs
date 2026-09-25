@@ -2,8 +2,8 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -39,7 +39,7 @@ internal static class AppKitCommandEmitter
         }
 
         _ = sb.AppendLine("                    return;").AppendLine("                }")
-            .Append("                var __target = new __AppKitCommandTarget(cmd, () => ").Append(parameter).AppendLine(");");
+            .Append("                var __target = new ").Append(GeneratedTypeNames.AppKitCommandTarget).Append("(cmd, () => ").Append(parameter).AppendLine(");");
         if (native.HasAction)
         {
             _ = sb.AppendLine("                var __selector = new global::ObjCRuntime.Selector(\"theAction:\");")
@@ -51,39 +51,6 @@ internal static class AppKitCommandEmitter
         AppendDetach(sb, native, controlAccess);
         NativeCommandEmitter.AppendReturn(sb, inv);
     }
-
-    /// <summary>Declares the NSObject bridge required by the native selector contract.</summary>
-    /// <param name="sb">The output builder.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void EmitHelper(StringBuilder sb) =>
-        sb.AppendLine("""
-                private sealed class __AppKitCommandTarget : global::Foundation.NSObject
-                {
-                    private readonly global::System.Windows.Input.ICommand _command;
-                    private readonly global::System.Func<object> _parameter;
-                    internal __AppKitCommandTarget(global::System.Windows.Input.ICommand command, global::System.Func<object> parameter)
-                    {
-                        _command = command;
-                        _parameter = parameter;
-                        IsEnabled = command.CanExecute(null);
-                    }
-                    internal bool IsEnabled { get; set; }
-                    [global::Foundation.Export("theAction:")]
-                    public void Execute(global::Foundation.NSObject sender)
-                    {
-                        var parameter = _parameter();
-                        if (_command.CanExecute(parameter))
-                        {
-                            _command.Execute(parameter);
-                        }
-                    }
-                    [global::Foundation.Export("validateMenuItem:")]
-                    public bool ValidateMenuItem(global::AppKit.NSMenuItem item)
-                    {
-                        return IsEnabled;
-                    }
-                }
-        """);
 
     /// <summary>Synchronizes the native enabled property and menu-validation result.</summary>
     /// <param name="sb">The output builder.</param>

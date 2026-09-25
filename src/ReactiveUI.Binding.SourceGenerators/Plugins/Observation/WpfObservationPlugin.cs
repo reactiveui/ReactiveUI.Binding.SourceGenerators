@@ -22,9 +22,6 @@ internal sealed class WpfObservationPlugin : IPlatformObservationPlugin
     public string ObservationKind => "WpfDP";
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => false;
-
-    /// <inheritdoc/>
     public bool SupportsBeforeChanged => false;
 
     /// <inheritdoc/>
@@ -50,12 +47,6 @@ internal sealed class WpfObservationPlugin : IPlatformObservationPlugin
         && PlatformSymbols.HasDependencyProperty(owner, property.Name, "System.Windows.DependencyProperty")
             ? new(ObservationKind, Affinity, default, null, "global::System.Windows.DependencyObject", null)
             : null;
-
-    /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb)
-    {
-        // No helper classes needed — uses EventObservable<T> from runtime library.
-    }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

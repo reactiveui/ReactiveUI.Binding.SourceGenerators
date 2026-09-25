@@ -16,11 +16,8 @@ public class ObservationPluginTests
     /// <summary>The <c>EventObservable</c> name these tests generate against.</summary>
     private const string EventObservableName = "EventObservable";
 
-    /// <summary>The typed WinForms observation helper.</summary>
-    private const string WinFormsObservableName = "__WinFormsObservable";
-
-    /// <summary>The typed Android observation helper.</summary>
-    private const string AndroidObservableName = "__AndroidObservable";
+    /// <summary>The runtime observable every native after-change mechanism is wrapped in.</summary>
+    private const string CallbackObservableName = "global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<";
 
     /// <summary>The <c>false)</c> fragment these tests expect in the generated source.</summary>
     private const string FalseFragment = "false)";
@@ -43,8 +40,8 @@ public class ObservationPluginTests
     /// <summary>The fully qualified name of the <c>MyView</c> type used by these tests.</summary>
     private const string MyViewTypeName = "global::TestApp.MyView";
 
-    /// <summary>The <c>__KVOObservable</c> local the generated code is expected to emit.</summary>
-    private const string KVOObservableLocal = "__KVOObservable";
+    /// <summary>The runtime key-value observing observable the generated code is expected to emit.</summary>
+    private const string KVOObservableLocal = "global::ReactiveUI.Binding.Observables.KvoPropertyObservable<";
 
     /// <summary>The <c>__obs0</c> local the generated code is expected to emit.</summary>
     private const string Obs0Local = "__obs0";
@@ -93,9 +90,6 @@ public class ObservationPluginTests
 
     /// <summary>The <c>var sourceObs</c> local the generated code is expected to emit.</summary>
     private const string SourceObsDeclaration = "var sourceObs";
-
-    /// <summary>The <c>__WinUIDPObservable</c> local the generated code is expected to emit.</summary>
-    private const string WinUIDPObservableLocal = "__WinUIDPObservable";
 
     // ========== WpfObservationPlugin ==========
     /// <summary>Verifies WPF plugin shallow observation emits EventObservable with DependencyPropertyDescriptor.</summary>
@@ -262,19 +256,6 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
-    /// <summary>Verifies WPF plugin EmitHelperClasses is a no-op.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task WpfPlugin_EmitHelperClasses_IsNoOp()
-    {
-        var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        await Assert.That(sb.Length).IsEqualTo(0);
-    }
-
     /// <summary>Verifies WPF plugin properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -286,7 +267,6 @@ public class ObservationPluginTests
         await Assert.That(plugin.Affinity).IsEqualTo(ExpectedPluginAffinity);
         await Assert.That(plugin.ObservationKind).IsEqualTo("WpfDP");
         await Assert.That(plugin.SupportsBeforeChanged).IsFalse();
-        await Assert.That(plugin.RequiresHelperClasses).IsFalse();
     }
 
     /// <summary>Verifies WPF plugin matches WPF DependencyObject types.</summary>
@@ -313,7 +293,7 @@ public class ObservationPluginTests
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinFormsObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(TextChangedName);
     }
 
@@ -357,7 +337,7 @@ public class ObservationPluginTests
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinFormsObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(TextChangedName);
     }
 
@@ -387,7 +367,7 @@ public class ObservationPluginTests
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinFormsObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(SwitchName);
     }
 
@@ -433,21 +413,8 @@ public class ObservationPluginTests
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyTextBoxTypeName, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinFormsObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(TextChangedName);
-    }
-
-    /// <summary>Verifies WinForms declares its typed subscription helper.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task WinFormsPlugin_EmitHelperClasses_DeclaresTypedSubscription()
-    {
-        var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        await Assert.That(sb.ToString()).Contains(WinFormsObservableName);
     }
 
     // ========== WinUIObservation ==========
@@ -477,7 +444,7 @@ public class ObservationPluginTests
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinUIDPObservableLocal);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
@@ -506,7 +473,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(WinUIDPObservableLocal);
+        await Assert.That(sb.ToString()).Contains(CallbackObservableName);
     }
 
     /// <summary>Verifies WinUI plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
@@ -535,7 +502,7 @@ public class ObservationPluginTests
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinUIDPObservableLocal);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(SwitchName);
     }
 
@@ -581,23 +548,8 @@ public class ObservationPluginTests
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyControlTypeName, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(WinUIDPObservableLocal);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(SourceObsDeclaration);
-    }
-
-    /// <summary>Verifies WinUI plugin emits helper classes with __WinUIDPObservable.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task WinUIPlugin_EmitHelperClasses_EmitsWinUIDPObservable()
-    {
-        var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains(WinUIDPObservableLocal);
-        await Assert.That(result).Contains("global::System.IObservable<TValue>");
     }
 
     // ========== KVOObservationPlugin ==========
@@ -771,22 +723,6 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains("\"\"");
     }
 
-    /// <summary>Verifies KVO plugin emits helper classes with __KVOObserver and __KVOObservable.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task KVOPlugin_EmitHelperClasses_EmitsKVOClasses()
-    {
-        var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains("__KVOObserver");
-        await Assert.That(result).Contains(KVOObservableLocal);
-        await Assert.That(result).Contains("AddObserver");
-    }
-
     /// <summary>Verifies KVO plugin shallow observation emits both before/after change variants correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -932,19 +868,6 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
-    /// <summary>Verifies Android declares its typed subscription helper.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task AndroidPlugin_EmitHelperClasses_DeclaresTypedSubscription()
-    {
-        var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        await Assert.That(sb.ToString()).Contains(AndroidObservableName);
-    }
-
     /// <summary>Verifies Android plugin properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -956,7 +879,6 @@ public class ObservationPluginTests
         await Assert.That(plugin.Affinity).IsEqualTo(ExpectedPluginAffinity);
         await Assert.That(plugin.ObservationKind).IsEqualTo("Android");
         await Assert.That(plugin.SupportsBeforeChanged).IsFalse();
-        await Assert.That(plugin.RequiresHelperClasses).IsTrue();
     }
 
     // ========== Shallow observation with includeStartWith=false ==========
@@ -1056,7 +978,7 @@ public class ObservationPluginTests
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(AndroidObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).Contains(TextChangedEventName);
     }
 
@@ -1089,7 +1011,7 @@ public class ObservationPluginTests
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(AndroidObservableName);
+        await Assert.That(result).Contains(CallbackObservableName);
         await Assert.That(result).EndsWith(", false)");
     }
 
@@ -1108,33 +1030,7 @@ public class ObservationPluginTests
     }
 
     // ========== INPCObservationPlugin ==========
-    /// <summary>Verifies INPC plugin EmitHelperClasses is a no-op.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task INPCPlugin_EmitHelperClasses_IsNoOp()
-    {
-        var plugin = new INPCObservationPlugin();
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        await Assert.That(sb.Length).IsEqualTo(0);
-    }
-
     // ========== ReactiveObjectObservationPlugin ==========
-    /// <summary>Verifies ReactiveObject plugin EmitHelperClasses is a no-op.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task ReactiveObjectPlugin_EmitHelperClasses_IsNoOp()
-    {
-        var plugin = new ReactiveObjectObservationPlugin();
-        var sb = new StringBuilder();
-
-        plugin.EmitHelperClasses(sb);
-
-        await Assert.That(sb.Length).IsEqualTo(0);
-    }
-
     // ========== ObservationPluginRegistry ==========
     /// <summary>Verifies GetPlugin returns the correct plugin by index.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>

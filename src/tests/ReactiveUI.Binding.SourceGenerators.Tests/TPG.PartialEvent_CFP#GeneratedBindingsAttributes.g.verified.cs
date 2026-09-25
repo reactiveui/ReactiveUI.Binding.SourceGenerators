@@ -4,7 +4,7 @@
 namespace ReactiveUI.Binding
 {
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal static partial class __ReactiveUIGeneratedBindings
+    internal static partial class __ReactiveUIGeneratedBindings_TestAssembly
     {
     }
 }

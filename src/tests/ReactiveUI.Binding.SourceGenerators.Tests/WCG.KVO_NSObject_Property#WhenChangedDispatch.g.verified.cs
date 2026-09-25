@@ -28,7 +28,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenChanged_000018C06482B4BD(global::TestApp.MyAppleView obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Text", 15, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Text", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
                 __registration_obj,
                 obj,
@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyAppleView)__o).Text,
                 false, false)
                 : (global::System.IObservable<string>)
-                new __KVOObservable<string>((global::Foundation.NSObject)obj, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false));
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAppleView)__o).Text, true));
         }
 
     }
