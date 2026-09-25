@@ -258,4 +258,43 @@ public class SyntaxHelpersTests
         await Assert.That(path!.Length).IsEqualTo(1);
         await Assert.That(path[0].PropertyName).IsEqualTo("Name");
     }
+
+    /// <summary>Verifies ExtractPropertyPathFromLambda declines a lambda with more than one parameter.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractPropertyPathFromLambda_TwoParameters_ReturnsNull()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
+
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyViewModel, MyViewModel, string>> expr = (x, y) => x.Name;
+                                      }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var semanticModel = compilation.GetSemanticModel(tree);
+
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
+
+        var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
+
+        await Assert.That(path).IsNull();
+    }
 }

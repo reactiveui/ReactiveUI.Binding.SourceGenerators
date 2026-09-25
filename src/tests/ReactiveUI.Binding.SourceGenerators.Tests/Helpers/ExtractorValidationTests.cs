@@ -360,6 +360,16 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
+    /// <summary>A type with no type arguments and no element type, such as <c>dynamic</c>, contains no type parameter.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ContainsTypeParameter_DynamicType_ReturnsFalse()
+    {
+        var dynamicType = TestHelper.CreateCompilation(string.Empty).DynamicType;
+
+        await Assert.That(ExtractorValidation.ContainsTypeParameter(dynamicType)).IsFalse();
+    }
+
     /// <summary>
     /// Compiles a static class holding a closure and returns the display class the compiler synthesized inside
     /// it, which carries the same shape as the grouping type an extension block declares its members in: a name
