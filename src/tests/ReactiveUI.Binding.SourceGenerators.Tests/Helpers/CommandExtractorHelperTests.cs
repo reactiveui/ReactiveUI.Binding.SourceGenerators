@@ -4,6 +4,7 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
+using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -409,6 +410,48 @@ public class CommandExtractorHelperTests
         await Assert.That(sides!.Value.ViewModelTypeFullName).IsEqualTo("global::TestApp.Vm");
     }
 
+    /// <summary>Verifies that a receiver a generated overload cannot declare, such as a static class, resolves no sides.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveBindCommandSides_StaticReceiver_ReturnsNull()
+    {
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Vm { }
+                                  public static class Helper { public static void Method(Vm vm) { } }
+
+                                  public class Caller
+                                  {
+                                      public void Go() => Helper.Method(new Vm());
+                                  }
+                              }
+                              """;
+
+        await Assert.That(await ResolveSidesAsync(source)).IsNull();
+    }
+
+    /// <summary>Verifies that a first argument with no type, such as a bare <c>null</c>, resolves no sides.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveBindCommandSides_UntypedFirstArgument_ReturnsNull()
+    {
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Vm { }
+                                  public class View { public void Method(Vm vm) { } }
+
+                                  public class Caller
+                                  {
+                                      public void Go() => new View().Method(null);
+                                  }
+                              }
+                              """;
+
+        await Assert.That(await ResolveSidesAsync(source)).IsNull();
+    }
+
     /// <summary>Verifies that the control binding resolves the explicit event, its args type and the capabilities.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -623,6 +666,24 @@ public class CommandExtractorHelperTests
             .GetMembers(propertyName)
             .OfType<Microsoft.CodeAnalysis.IPropertySymbol>()
             .First();
+    }
+
+    /// <summary>Resolves the BindCommand sides of the first member-access invocation in the source.</summary>
+    /// <param name="source">The source to compile.</param>
+    /// <returns>The resolved sides, or null.</returns>
+    private static async Task<BindCommandSides?> ResolveSidesAsync(string source)
+    {
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var invocation = await FirstInvocationAsync(tree);
+        var memberAccess = (Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax)invocation.Expression;
+
+        return CommandExtractor.ResolveBindCommandSides(
+            memberAccess,
+            invocation.ArgumentList.Arguments,
+            model,
+            CancellationToken.None);
     }
 
     /// <summary>Returns the first invocation expression in a syntax tree.</summary>
