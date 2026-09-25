@@ -107,28 +107,6 @@ internal static class OneWayBindCodeGenerator
             .AppendLine("        }").AppendLine();
     }
 
-    /// <summary>Emits the stage that converts the observed values to the target property's type.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <param name="sourceVar">The variable holding the values to convert.</param>
-    /// <returns>The name of the variable holding the converted values.</returns>
-    internal static string EmitRegistryConversionStage(
-        StringBuilder sb,
-        BindingInvocationInfo inv,
-        string sourceVar)
-    {
-        const string convertedVar = "convertedObs";
-
-        BindingEmitterHelpers.EmitRegistryConversion(
-            sb,
-            sourceVar,
-            convertedVar,
-            inv.SourcePropertyTypeFullName,
-            inv.TargetPropertyTypeFullName);
-
-        return convertedVar;
-    }
-
     /// <summary>Appends extra parameters (selector, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>

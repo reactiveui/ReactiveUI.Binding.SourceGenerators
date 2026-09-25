@@ -44,9 +44,6 @@ internal static class ObservationCodeGenerator
     /// <summary>Opens the observation a property that never notifies is read through.</summary>
     private const string UnchangingObservableOpen = ")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
 
-    /// <summary>Opens a before-change observation cast to the interface the chain stage expects.</summary>
-    private const string ChangingObservableOpen = ">)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<";
-
     /// <summary>The indent an argument takes when the choice is written in an expression position.</summary>
     private const string ExpressionChoiceArgumentIndent = "                ";
 
@@ -422,7 +419,7 @@ internal static class ObservationCodeGenerator
         var obs0Var = $"{varName}_s0";
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
-        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, false, obs0Var);
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, obs0Var);
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
@@ -581,7 +578,7 @@ internal static class ObservationCodeGenerator
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         // First segment: observe root object for first property
-        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, false, "__obs0");
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, "__obs0");
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
@@ -747,12 +744,12 @@ internal static class ObservationCodeGenerator
     /// <param name="seg0">The first segment of the path.</param>
     /// <param name="classInfo">The root type's binding info, when known.</param>
     /// <param name="rootPlugin">The plugin for the root type, when one matched.</param>
-    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="obsVar">The local the link's observation is assigned to.</param>
     /// <remarks>
     /// The first link is offered to a registration on the same terms as every later one. Without this the root
     /// of a chain was the one link a registered plugin could not take, which made the honouring depend on where
-    /// in a path the property sat.
+    /// in a path the property sat. The first link of a chain is never its leaf, so it is always observed after
+    /// the change, even for a before-change observation.
     /// </remarks>
     private static void EmitChainRootWithChoice(
         StringBuilder sb,
@@ -760,24 +757,13 @@ internal static class ObservationCodeGenerator
         PropertyPathSegment seg0,
         ClassBindingInfo? classInfo,
         IObservationPlugin? rootPlugin,
-        bool isBeforeChange,
         string obsVar)
     {
         var mechanismVariable = obsVar + MechanismVariableSuffix;
 
         if (rootPlugin is not null)
         {
-            rootPlugin.EmitDeepChainRootSegment(sb, rootVar, seg0, GetTypeCastName(classInfo), isBeforeChange, mechanismVariable);
-        }
-        else if (IsINPChanging(classInfo) && isBeforeChange)
-        {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable)
-                .Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
-                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
-                .Append(ChangingSourceArgumentFor(rootVar)).Append(GeneratedSyntax.QuotedArgumentOpen)
-                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
-                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose)
-                .Append(seg0.PropertyName).AppendLine(");");
+            rootPlugin.EmitDeepChainRootSegment(sb, rootVar, seg0, GetTypeCastName(classInfo), false, mechanismVariable);
         }
         else
         {
@@ -792,16 +778,9 @@ internal static class ObservationCodeGenerator
             rootVar,
             seg0,
             rootPlugin?.Affinity ?? 0,
-            isBeforeChange,
+            false,
             new(GeneratedSyntax.BodyLocalDeclaration, "                ", mechanismVariable, obsVar));
     }
-
-    /// <summary>Renders the before-change observable's source argument for a given root.</summary>
-    /// <param name="rootVar">The variable holding the observed object.</param>
-    /// <returns>The argument line the before-change observable takes.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string ChangingSourceArgumentFor(string rootVar) =>
-        $"                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},\n";
 
     /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
     /// <param name="segment">The chain segment, which carries how its declaring type notifies.</param>
@@ -937,7 +916,7 @@ internal static class ObservationCodeGenerator
     {
         var seg0 = propertyPath[0];
 
-        EmitChainRootWithChoice(sb, rootVar, seg0, classInfo, plugin, false, $"__{variableName}_s0");
+        EmitChainRootWithChoice(sb, rootVar, seg0, classInfo, plugin, $"__{variableName}_s0");
 
         for (var s = 1; s < propertyPath.Length; s++)
         {

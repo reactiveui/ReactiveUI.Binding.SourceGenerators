@@ -164,8 +164,9 @@ internal static class SyntaxHelpers
             return null;
         }
 
-        // A field raises no notification, so it carries no mechanism and is read once, like any other link
-        // whose owner cannot notify.
+        // A field raises no notification, so it resolves no mechanism and is read once, like any other link whose
+        // owner cannot notify. It still carries its owner, which is how a call site whose first path starts at a
+        // field learns how the observed type notifies.
         return member is IPropertySymbol propertySymbol
             ? new(
                 propertySymbol.Name,
@@ -178,7 +179,7 @@ internal static class SyntaxHelpers
                 memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 memberType.IsReferenceType,
-                null,
+                TypeDetectionExtractor.CreateTypeInfo(owner, semanticModel.Compilation, new([]), ct),
                 IsField: true);
     }
 
