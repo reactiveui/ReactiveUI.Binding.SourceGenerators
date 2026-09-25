@@ -141,6 +141,29 @@ public class ViewThreadPluginRegistryTests
             .IsNull();
     }
 
+    /// <summary>A platform type whose runtime invoker is out of reach names the package that ships it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MissingPackageFor_WhenTheRuntimeInvokerIsMissing_NamesThePackage()
+    {
+        var compilation = TestHelper.CreateCompilation(PlatformWithoutRuntimeSource);
+
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation))
+            .IsEqualTo("ReactiveUI.Binding.Wpf");
+    }
+
+    /// <summary>Nothing is missing for a platform whose invoker resolves, for a type from no platform, or for no type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MissingPackageFor_WhenNothingIsMissing_ReturnsNull()
+    {
+        var compilation = TestHelper.CreateCompilation(PlatformSource);
+
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation)).IsNull();
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(PlainViewModel), compilation)).IsNull();
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(null, compilation)).IsNull();
+    }
+
     /// <summary>A platform type whose runtime invoker is out of reach carries no invoker.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

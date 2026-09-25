@@ -20,4 +20,7 @@ internal interface IViewThreadPlugin
 
     /// <summary>Gets the metadata name of the invoker in the System.Reactive runtime's platform package.</summary>
     string ReactiveInvokerMetadataName { get; }
+
+    /// <summary>Gets the name of the lean platform package that ships the invoker.</summary>
+    string PackageName { get; }
 }

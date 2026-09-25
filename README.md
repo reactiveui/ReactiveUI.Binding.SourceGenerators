@@ -797,6 +797,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND014 | Error | Below C# 13, a `string` initial value passed by position makes a `ToProperty` call ambiguous. Write it as `initialValue: ...`. |
 | RXUIBIND015 | Warning | The call names a private or protected nested type, which generated code cannot reach, so nothing is generated and the call throws. Make the type `internal` or `public`, or call the `Unsafe` overload. |
 | RXUIBIND016 | Warning | The call is made through a type parameter of the calling code, so generated code cannot name its types and the call throws. Call the `Unsafe` overload. |
+| RXUIBIND017 | Warning | The binding writes to a WPF, WinForms or MAUI object, but the matching `ReactiveUI.Binding.Wpf`, `.WinForms` or `.Maui` package is not referenced, so writes from another thread are not marshalled onto the object's thread. Reference the platform package. |
 
 The package's build targets report one error of their own.
 

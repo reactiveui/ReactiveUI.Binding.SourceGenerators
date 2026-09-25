@@ -28,7 +28,26 @@ internal static class ViewThreadPluginRegistry
     /// The fully qualified runtime invoker, or null when the type belongs to no supported platform or the compilation
     /// does not reference that platform's runtime package.
     /// </returns>
-    internal static string? InvokerFor(ITypeSymbol? type, Compilation compilation)
+    internal static string? InvokerFor(ITypeSymbol? type, Compilation compilation) =>
+        FindPlatform(type, compilation) is { } index ? GetOwners(compilation).Invokers[index] : null;
+
+    /// <summary>Finds the platform package a target type needs but the compilation does not reference.</summary>
+    /// <param name="type">The target's type, or null when the model could not name it.</param>
+    /// <param name="compilation">The compilation the type belongs to.</param>
+    /// <returns>
+    /// The package that ships the platform's invoker, or null when the type belongs to no supported platform or the
+    /// compilation already references that platform's invoker.
+    /// </returns>
+    internal static string? MissingPackageFor(ITypeSymbol? type, Compilation compilation) =>
+        FindPlatform(type, compilation) is { } index && GetOwners(compilation).Invokers[index] is null
+            ? Plugins[index].PackageName
+            : null;
+
+    /// <summary>Finds which platform a type belongs to, directly or through a base class.</summary>
+    /// <param name="type">The type, or null.</param>
+    /// <param name="compilation">The compilation the type belongs to.</param>
+    /// <returns>The plugin index, or null when the type belongs to no supported platform.</returns>
+    private static int? FindPlatform(ITypeSymbol? type, Compilation compilation)
     {
         var owners = GetOwners(compilation);
         if (type is null || !owners.AnyResolved)
@@ -42,7 +61,7 @@ internal static class ViewThreadPluginRegistry
             {
                 if (SymbolEqualityComparer.Default.Equals(current, owners.Types[i]))
                 {
-                    return owners.Invokers[i];
+                    return i;
                 }
             }
         }
@@ -57,15 +76,15 @@ internal static class ViewThreadPluginRegistry
     private static OwnerTypes GetOwners(Compilation compilation) =>
         OwnerCache.GetValue(compilation, static c => new(c));
 
-    /// <summary>The platform types one compilation resolves, in plugin order.</summary>
+    /// <summary>The platform types one compilation resolves, and their invokers, in plugin order.</summary>
     private sealed class OwnerTypes
     {
         /// <summary>Initializes a new instance of the <see cref="OwnerTypes"/> class.</summary>
         /// <param name="compilation">The compilation to resolve the types in.</param>
         /// <remarks>
-        /// A platform counts only when both its owner type and one flavour of its runtime invoker resolve: without
-        /// the invoker there is nothing for generated code to name. The invoker is named by the flavour that
-        /// resolved, because the platform packages are separate assemblies that retargeting cannot see into.
+        /// The invoker is named by the flavour that resolved, because the platform packages are separate assemblies
+        /// that retargeting cannot see into. A platform whose owner resolves without an invoker is still recorded, so
+        /// a binding onto it can be reported rather than silently left unmarshalled.
         /// </remarks>
         public OwnerTypes(Compilation compilation)
         {
@@ -74,9 +93,8 @@ internal static class ViewThreadPluginRegistry
             for (var i = 0; i < Plugins.Length; i++)
             {
                 var plugin = Plugins[i];
-                var invoker = ResolveInvoker(compilation, plugin);
-                Types[i] = invoker is null ? null : compilation.GetTypeByMetadataName(plugin.OwnerMetadataName);
-                Invokers[i] = Types[i] is null ? null : $"global::{invoker}";
+                Types[i] = compilation.GetTypeByMetadataName(plugin.OwnerMetadataName);
+                Invokers[i] = Types[i] is not null && ResolveInvoker(compilation, plugin) is { } invoker ? $"global::{invoker}" : null;
                 AnyResolved |= Types[i] is not null;
             }
         }
@@ -84,7 +102,7 @@ internal static class ViewThreadPluginRegistry
         /// <summary>Gets the resolved types; an entry is null when the compilation does not reference that platform.</summary>
         public INamedTypeSymbol?[] Types { get; }
 
-        /// <summary>Gets the fully qualified invoker each resolved platform routes through, in plugin order.</summary>
+        /// <summary>Gets the fully qualified invoker each platform routes through, or null where none resolves.</summary>
         public string?[] Invokers { get; }
 
         /// <summary>Gets a value indicating whether the compilation references any supported platform.</summary>

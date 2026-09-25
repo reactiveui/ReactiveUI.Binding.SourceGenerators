@@ -15,4 +15,7 @@ internal sealed class MauiViewThreadPlugin : IViewThreadPlugin
 
     /// <inheritdoc/>
     public string ReactiveInvokerMetadataName => "ReactiveUI.Binding.Reactive.Maui.DispatcherViewThreadInvoker";
+
+    /// <inheritdoc/>
+    public string PackageName => "ReactiveUI.Binding.Maui";
 }

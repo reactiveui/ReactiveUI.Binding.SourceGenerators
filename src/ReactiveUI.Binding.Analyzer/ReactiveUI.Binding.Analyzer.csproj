@@ -37,6 +37,7 @@
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\AppKitCommandSymbols.cs" Link="Helpers\AppKitCommandSymbols.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\UIKitCommandSymbols.cs" Link="Helpers\UIKitCommandSymbols.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\PropertyRaise\*.cs" Link="Plugins\PropertyRaise\%(Filename)%(Extension)"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\ViewThread\*.cs" Link="Plugins\ViewThread\%(Filename)%(Extension)"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseInfo.cs" Link="Models\PropertyRaiseInfo.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseCall.cs" Link="Models\PropertyRaiseCall.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\PropertyRaiseCallKind.cs" Link="Models\PropertyRaiseCallKind.cs"/>

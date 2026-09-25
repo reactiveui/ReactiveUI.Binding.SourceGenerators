@@ -612,13 +612,15 @@ never sees a write to an unclaimed object.
 - `ViewThreadPluginRegistry` checks the target's type during extraction. It matches
   `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control` and
   `Microsoft.Maui.Controls.BindableObject`.
-- The invocation model stores the matching invoker's class name. `BindTo`, `BindOneWay`, `OneWayBind` and `Bind`
-  store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view.
-- The emitter passes `__WpfViewThreadInvoker.Instance`, or the WinForms or MAUI class, as the fallback.
-- `ViewThreadInvokerGenerator` declares those classes in `ViewThreadInvokers.g.cs`, once per compilation.
+- The invocation model stores the matching runtime invoker's full name. `BindTo`, `BindOneWay`, `OneWayBind` and
+  `Bind` store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view, and
+  for the control when the view has none.
+- The emitter passes the platform package's invoker, such as
+  `global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker.Instance`, in the flavour the compilation references.
+- An invoker is named only when its type resolves. Without the platform package the binding carries none, and
+  RXUIBIND017 reports the binding.
 
-The generator declares a class when its platform type resolves in the compilation. It does not look at call
-sites. A call site can only name an invoker for a type that resolves. So every reference has a declaration.
+The generator never declares an invoker itself: the invokers are public types in the platform packages.
 
 An `Unsafe` binding only has the registered invokers. It routes writes only when the platform module is registered.
 
@@ -884,6 +886,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND014 | Error | ToProperty initial value must be named below C# 13 |
 | RXUIBIND015 | Warning | Binding call names a type generated code cannot reach |
 | RXUIBIND016 | Warning | Binding call is made through a type parameter |
+| RXUIBIND017 | Warning | Binding writes to a UI object without its platform package |
 
 ## Code Style & Quality Requirements
 
@@ -979,17 +982,23 @@ All pipeline models are `sealed record` types with value equality. NEVER include
 - `#pragma warning disable` at top of generated files
 - All generated types use `[Microsoft.CodeAnalysis.Embedded]` attribute
 
-### Where the Observation Helper Classes Are Declared
+### Generated Code Declares No Shared Types
 
-Some plugins (`KVOObservationPlugin`, `WinUIObservation.Plugin`) emit observation code that instantiates helper
-classes by bare name — `__KVOObservable<T>`, `__KVOObserver`, `__WinUIDPObservable<TSource, TValue>`. Every dispatch file is
-another part of the same `__ReactiveUIGeneratedBindings` class, so one part declaring them is enough for all of
-them, and two parts declaring them is a duplicate-member error.
+The generator never emits the same static code into every consumer, and never declares a type whose fully
+qualified name another assembly could also declare. An assembly granted `InternalsVisibleTo` would otherwise see two
+types by one name.
 
-`ObservationHelperGenerator` owns these declarations in `ObservationHelpers.g.cs`.
-`InvocationHelperRequirements` collects the selected mechanisms from every extracted invocation and chain
-link. Observation and view-thread helpers are emitted only when a binding uses them. Every invocation pipeline
-must contribute its requirements through this collector, using the same property selection as its emitter.
+- Observation helpers are public runtime types: `DeferredPropertyObservable<TSource, TValue>` for a plain property,
+  `CallbackPropertyObservable<TSource, TValue>` for every native mechanism (UIKit, AppKit, WinForms, WinUI, Uno,
+  Android), and `KvoPropertyObservable<T>` on the core package's Apple heads.
+- AppKit command binding installs the runtime's `AppKitCommandTarget`, on the macOS head.
+- KVO and AppKit routes are only taken when the runtime type resolves; otherwise the next mechanism wins.
+- The `InterceptsLocationAttribute` and `ModuleInitializerAttribute` polyfills are `file`-local to the generated file
+  that needs them, so interception and the polyfilled module initializer need C# 11.
+- The dispatch class sits in a per-assembly namespace, `ReactiveUI.Binding.Generated.<Assembly>` or
+  `ReactiveUI.Binding.Generated.Interceptors.<Assembly>`. Where it has to sit in a namespace other assemblies can
+  share (a consumer's root namespace, or the runtime's own below C# 10), its class name carries the assembly:
+  `__ReactiveUIGeneratedBindings_<Assembly>`.
 
 ### Two-Layer Language Version Constraint
 

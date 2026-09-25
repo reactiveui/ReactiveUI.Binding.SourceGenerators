@@ -15,4 +15,7 @@ internal sealed class WinFormsViewThreadPlugin : IViewThreadPlugin
 
     /// <inheritdoc/>
     public string ReactiveInvokerMetadataName => "ReactiveUI.Binding.Reactive.WinForms.ControlViewThreadInvoker";
+
+    /// <inheritdoc/>
+    public string PackageName => "ReactiveUI.Binding.WinForms";
 }

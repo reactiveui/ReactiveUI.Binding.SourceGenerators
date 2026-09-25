@@ -18,3 +18,4 @@
  RXUIBIND014 | Usage    | Error    | Name the ToProperty initial value below C# 13
  RXUIBIND015 | Usage    | Warning  | Binding call names a type generated code cannot reach
  RXUIBIND016 | Usage    | Warning  | Binding call is made through a type parameter
+ RXUIBIND017 | Usage    | Warning  | Binding writes to a UI object without its platform package

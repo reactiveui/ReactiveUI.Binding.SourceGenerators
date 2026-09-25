@@ -15,4 +15,7 @@ internal sealed class WpfViewThreadPlugin : IViewThreadPlugin
 
     /// <inheritdoc/>
     public string ReactiveInvokerMetadataName => "ReactiveUI.Binding.Reactive.Wpf.DispatcherViewThreadInvoker";
+
+    /// <inheritdoc/>
+    public string PackageName => "ReactiveUI.Binding.Wpf";
 }
