@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
-using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -43,9 +41,6 @@ internal static class OneWayBindCodeGenerator
         FormatExtraArguments = FormatExtraArgs,
     };
 
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                    ";
-
     /// <summary>What this API calls the projection argument in its generated signatures.</summary>
     private const string ConversionParameterName = "selector";
 
@@ -59,7 +54,7 @@ internal static class OneWayBindCodeGenerator
     /// <param name="targetClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateOneWayBindMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo,
@@ -86,25 +81,26 @@ internal static class OneWayBindCodeGenerator
         if (inv.SetMethod is { } setMethod)
         {
             CollectionSetMethodEmitter.EmitSubscription(sb, new("view", inv.TargetPropertyPath, inv.SourcePropertyTypeFullName, setMethod, inv.TargetExpressionText, true), currentVar);
-            _ = sb.Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
-                .Append(inv.TargetPropertyTypeFullName).AppendLine(">(view, __setChanges, global::ReactiveUI.Binding.BindingDirection.OneWay,")
-                .AppendLine("                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__setSubscription, __setChanges));")
-                .AppendLine(GeneratedSyntax.MemberBodyClose);
+            _ = sb.BeginReturn().Append($"new {GeneratedTypeNames.ReactiveBinding}<").Append(inv.TargetTypeFullName).Append(", ")
+                .Append(inv.TargetPropertyTypeFullName).Line($">(view, __setChanges, {GeneratedTypeNames.BindingDirection}.OneWay,")
+                .Indent()
+                .Line($"new {GeneratedTypeNames.MultipleDisposable}(__setSubscription, __setChanges));")
+                .Outdent()
+                .CloseBlock();
             return;
         }
 
-        var viewAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "view",
-            inv.TargetPropertyPath,
-            "value",
-            SubscriptionBodyIndent);
-        _ = sb.AppendLine().Append("            var sub = ").Append(BindingErrors).Append(".Subscribe(").Append(currentVar).AppendLine(", value =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewAssignment).AppendLine().Append("            }, \"")
-            .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine()
-            .Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
-            .Append(inv.TargetPropertyTypeFullName).AppendLine(">(").AppendLine("                view,").Append("                ").Append(currentVar)
-            .AppendLine(",").AppendLine("                global::ReactiveUI.Binding.BindingDirection.OneWay,").AppendLine("                sub);")
-            .AppendLine("        }").AppendLine();
+        BindingEmitterHelpers.AppendWriteSubscription(sb.BlankLine().BeginVar("sub"), currentVar, "view", inv.TargetPropertyPath, inv.TargetExpressionText);
+        _ = sb.BlankLine()
+            .BeginReturn().Append($"new {GeneratedTypeNames.ReactiveBinding}<").Append(inv.TargetTypeFullName).Append(", ")
+            .Append(inv.TargetPropertyTypeFullName).Append(">(").OpenContinuation()
+            .Line("view,")
+            .Append(currentVar).Line(",")
+            .Line($"{GeneratedTypeNames.BindingDirection}.OneWay,")
+            .Line("sub);")
+            .Outdent()
+            .CloseBlock()
+            .BlankLine();
     }
 
     /// <summary>Appends extra parameters (selector, scheduler) to the concrete overload signature.</summary>
@@ -112,7 +108,7 @@ internal static class OneWayBindCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+    internal static void AppendExtraParameters(SourceWriter sb, BindingTypeGroup group, bool supportsNullable) =>
         BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName, supportsNullable);
 
     /// <summary>Formats extra arguments (selector, scheduler) for forwarding to the binding method.</summary>
@@ -137,11 +133,11 @@ internal static class OneWayBindCodeGenerator
     /// converter was supplied only agrees with the stub while the two sides happen to match.
     /// </remarks>
     internal static string FormatReturnType(BindingTypeGroup group) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>";
+        $"{GeneratedTypeNames.IReactiveBinding}<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>";
 
     /// <summary>Formats the return type for a private OneWayBind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The fully qualified return type string.</returns>
     internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {inv.TargetPropertyTypeFullName}>";
+        $"{GeneratedTypeNames.IReactiveBinding}<{inv.TargetTypeFullName}, {inv.TargetPropertyTypeFullName}>";
 }

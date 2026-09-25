@@ -30,12 +30,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableName", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, string>>)(__e => __e.NullableName)).Body,
-                "NullableName",
-                (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, string>>)(__e => __e.NullableName)).Body,
+                    "NullableName",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName,
+                    false, false)
                 : (global::System.IObservable<string>)
                 new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName, true));
         }
@@ -61,12 +61,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableAge", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<int?>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int?>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, int?>>)(__e => __e.NullableAge)).Body,
-                "NullableAge",
-                (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, int?>>)(__e => __e.NullableAge)).Body,
+                    "NullableAge",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge,
+                    false, false)
                 : (global::System.IObservable<int?>)
                 new global::ReactiveUI.Binding.Observables.PropertyObservable<int?>(obj, "NullableAge", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge, true));
         }

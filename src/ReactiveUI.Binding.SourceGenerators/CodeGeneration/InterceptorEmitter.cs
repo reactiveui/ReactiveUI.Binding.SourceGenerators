@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -20,30 +19,27 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </remarks>
 internal static class InterceptorEmitter
 {
-    /// <summary>The indentation a member of the generated class is written at.</summary>
-    internal const string MemberIndent = "        ";
-
     /// <summary>The attribute a generated method carries to claim a call site.</summary>
     private const string AttributeName = "global::System.Runtime.CompilerServices.InterceptsLocation";
 
-    /// <summary>Room for the declaration, which is a fixed block of text.</summary>
+    /// <summary>Room for the attribute declaration, which is a fixed block of text.</summary>
     private const int DeclarationCapacity = 640;
 
     /// <summary>Writes the parameter list one API's members declare, closing it.</summary>
-    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="builder">The writer, inside the parameter list.</param>
     /// <param name="first">The invocation whose types the parameters are written from.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
-    internal delegate void ParameterListWriter(StringBuilder builder, InvocationInfo first, in LanguageFeatures features);
+    internal delegate void ParameterListWriter(SourceWriter builder, InvocationInfo first, in LanguageFeatures features);
 
-    /// <summary>Writes the attribute for every call site one generated method claims, then opens that method.</summary>
+    /// <summary>Writes the attribute for every call site one generated method claims, then opens that method's parameter list.</summary>
     /// <typeparam name="T">The per-call-site model this API extracts.</typeparam>
-    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="builder">The writer, at the class's member level; left inside the parameter list.</param>
     /// <param name="callSites">The call sites the method claims.</param>
     /// <param name="locationOf">Reads where a call site is.</param>
     /// <param name="declarationOpen">The method's declaration up to its name suffix, e.g. its modifiers, return type and name prefix.</param>
     /// <param name="suffix">The suffix naming the body the call sites reach.</param>
     internal static void AppendClaimingMethodOpen<T>(
-        StringBuilder builder,
+        SourceWriter builder,
         List<T> callSites,
         Func<T, InterceptorLocation> locationOf,
         string declarationOpen,
@@ -51,25 +47,23 @@ internal static class InterceptorEmitter
     {
         for (var i = 0; i < callSites.Count; i++)
         {
-            AppendAttribute(builder, locationOf(callSites[i]), MemberIndent);
+            AppendAttribute(builder, locationOf(callSites[i]));
         }
 
-        _ = builder.Append(declarationOpen).Append(suffix).AppendLine("(");
+        _ = builder.Append(declarationOpen).Append(suffix).OpenParameterList();
     }
 
     /// <summary>Writes the attribute that binds a generated method to one call site.</summary>
-    /// <param name="builder">The builder receiving the attribute line.</param>
+    /// <param name="builder">The writer, at the class's member level.</param>
     /// <param name="location">The call site the compiler described.</param>
-    /// <param name="indent">The indentation the enclosing class is written at.</param>
-    internal static void AppendAttribute(StringBuilder builder, in InterceptorLocation location, string indent) =>
-        _ = builder.Append(indent)
-            .Append('[')
+    internal static void AppendAttribute(SourceWriter builder, in InterceptorLocation location) =>
+        _ = builder.Append('[')
             .Append(AttributeName)
             .Append('(')
             .Append(location.Version)
             .Append(", \"")
             .Append(location.Data)
-            .AppendLine("\")]");
+            .Line("\")]");
 
     /// <summary>Appends the interception attribute's declaration to a generated file that applies it.</summary>
     /// <param name="source">The generated file.</param>
@@ -86,32 +80,28 @@ internal static class InterceptorEmitter
 
     /// <summary>Builds the file-local declaration of the interception attribute.</summary>
     /// <returns>The source declaring the attribute.</returns>
-    internal static string BuildAttributeDeclaration()
-    {
-        var builder = PooledBuilder.Rent(DeclarationCapacity);
-
-        _ = builder.AppendLine("namespace System.Runtime.CompilerServices")
-            .AppendLine("{")
-            .AppendLine("    /// <summary>Binds a generated method to the call site it replaces.</summary>")
-            .AppendLine("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]")
-            .AppendLine("    file sealed class InterceptsLocationAttribute : global::System.Attribute")
-            .AppendLine("    {")
-            .AppendLine("        /// <summary>Initializes a new instance of the <see cref=\"InterceptsLocationAttribute\"/> class.</summary>")
-            .AppendLine("        /// <param name=\"version\">The encoding of <paramref name=\"data\"/>.</param>")
-            .AppendLine("        /// <param name=\"data\">The call site being replaced.</param>")
-            .AppendLine("        public InterceptsLocationAttribute(int version, string data)")
-            .AppendLine("        {")
-            .AppendLine("            _ = version;")
-            .AppendLine("            _ = data;")
-            .AppendLine("        }")
-            .AppendLine("    }")
-            .AppendLine("}");
-
-        return PooledBuilder.ToStringAndReturn(builder);
-    }
+    /// <remarks>Written to the rules the oldest intercepting consumer parses: no file-scoped namespace.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string BuildAttributeDeclaration() =>
+        SourceWriter.Rent(DeclarationCapacity)
+            .OpenNamespace("System.Runtime.CompilerServices")
+            .Summary("Binds a generated method to the call site it replaces.")
+            .Attribute($"{GeneratedTypeNames.AttributeUsage}({GeneratedTypeNames.AttributeTargets}.Method, AllowMultiple = true)")
+            .OpenType($"file sealed class InterceptsLocationAttribute : {GeneratedTypeNames.Attribute}")
+            .Summary("Initializes a new instance of the <see cref=\"InterceptsLocationAttribute\"/> class.")
+            .DocLine("<param name=\"version\">The encoding of <paramref name=\"data\"/>.</param>")
+            .DocLine("<param name=\"data\">The call site being replaced.</param>")
+            .Line("public InterceptsLocationAttribute(int version, string data)")
+            .OpenBlock()
+            .Line("_ = version;")
+            .Line("_ = data;")
+            .CloseBlock()
+            .CloseBlock()
+            .CloseBlock()
+            .ToStringAndReturn();
 
     /// <summary>Emits one interceptor per generated body, claiming every call site that reaches it.</summary>
-    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="builder">The writer, at the class's member level.</param>
     /// <param name="group">The type group whose call sites are being claimed.</param>
     /// <param name="methodPrefix">The method name prefix the generated bodies carry.</param>
     /// <param name="suffixOf">Names the body a call site reaches.</param>
@@ -127,7 +117,7 @@ internal static class InterceptorEmitter
     /// </para>
     /// </remarks>
     internal static void GenerateInterceptors(
-        StringBuilder builder,
+        SourceWriter builder,
         ObservationCodeGenerator.TypeGroup group,
         string methodPrefix,
         Func<InvocationInfo, string> suffixOf,
@@ -140,16 +130,19 @@ internal static class InterceptorEmitter
 
             foreach (var callSite in entry.Value)
             {
-                AppendAttribute(builder, callSite.Interceptor, MemberIndent);
+                AppendAttribute(builder, callSite.Interceptor);
             }
 
-            _ = builder.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
-                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).AppendLine("(");
+            _ = builder.Append($"internal static {GeneratedTypeNames.IObservable}<").Append(first.ReturnTypeFullName)
+                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).OpenParameterList();
 
             appendParameterList(builder, first, in features);
 
-            _ = builder.Append("            => __").Append(methodPrefix).Append('_').Append(entry.Key)
-                .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();
+            _ = builder.Indent()
+                .Append("=> __").Append(methodPrefix).Append('_').Append(entry.Key)
+                .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).Line(");")
+                .Outdent()
+                .BlankLine();
         }
     }
 

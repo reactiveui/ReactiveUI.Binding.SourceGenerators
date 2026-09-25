@@ -35,66 +35,66 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_000011908961B668(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
         {
             // Bind: Name <-> NameText
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = viewModel;
-            var __hookTarget = view;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Name;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string>>)(__property => __property.Name)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.NameText;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, string>>)(__property => __property.NameText)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return null;
+                var __hookSource = viewModel;
+                var __hookTarget = view;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Name;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string>>)(__property => __property.Name)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.NameText;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, string>>)(__property => __property.NameText)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.TwoWay))
+                {
+                    return null;
+                }
             }
-        }
             var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel)__o).Name, true);
-        var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Name", 5, false);
-        var vmObs = vmObsRegistration == null
-            ? (global::System.IObservable<string>)vmObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                vmObsRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string>>)(__e => __e.Name)).Body,
-                "Name",
-                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel)__o).Name,
-                false,
-                true);
+            var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Name", 5, false);
+            var vmObs = vmObsRegistration == null
+                ? (global::System.IObservable<string>)vmObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    vmObsRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string>>)(__e => __e.Name)).Body,
+                    "Name",
+                    (object __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel)__o).Name,
+                    false,
+                    true);
             var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(view, "NameText", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyView)__o).NameText, true);
-        var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "NameText", 5, false);
-        var viewObs = viewObsRegistration == null
-            ? (global::System.IObservable<string>)viewObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                viewObsRegistration,
-                view,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, string>>)(__e => __e.NameText)).Body,
-                "NameText",
-                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyView)__o).NameText,
-                false,
-                true);
+            var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "NameText", 5, false);
+            var viewObs = viewObsRegistration == null
+                ? (global::System.IObservable<string>)viewObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    viewObsRegistration,
+                    view,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, string>>)(__e => __e.NameText)).Body,
+                    "NameText",
+                    (object __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyView)__o).NameText,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
             if (__convertedForwardConverter == null)
             {
@@ -188,11 +188,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 {
                     var value = __change.Item2;
                     if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
-                {
-                    return;
-                }
+                    {
+                        return;
+                    }
 
-                view.NameText = value;
+                    view.NameText = value;
                     if (changed.HasObservers)
                     {
                         changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, true));
@@ -202,11 +202,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 {
                     var value = __change.Item3;
                     if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.Name, value))
-                {
-                    return;
-                }
+                    {
+                        return;
+                    }
 
-                viewModel.Name = value;
+                    viewModel.Name = value;
                     if (changed.HasObservers)
                     {
                         changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, false));

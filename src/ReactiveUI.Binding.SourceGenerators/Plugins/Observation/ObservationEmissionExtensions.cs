@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -25,7 +24,7 @@ internal static class ObservationEmissionExtensions
         /// <param name="includeStartWith">Whether equal consecutive values are suppressed.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void EmitShallowObservation(
-            StringBuilder sb,
+            SourceWriter sb,
             string rootVar,
             PropertyPathSegment segment,
             string castTypeName,
@@ -41,16 +40,16 @@ internal static class ObservationEmissionExtensions
         /// <param name="isBeforeChange">Whether to observe before the change.</param>
         /// <param name="varName">The resulting observable local.</param>
         internal void EmitShallowObservationVariable(
-            StringBuilder sb,
+            SourceWriter sb,
             string rootVar,
             PropertyPathSegment segment,
             string castTypeName,
             bool isBeforeChange,
             string varName)
         {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = ");
+            _ = sb.BeginVar(varName);
             plugin.EmitShallowObservation(sb, rootVar, segment, castTypeName, isBeforeChange, true);
-            _ = sb.AppendLine(";");
+            _ = sb.EndStatement();
         }
 
         /// <summary>Emits the root observation that owns a property chain.</summary>
@@ -61,16 +60,16 @@ internal static class ObservationEmissionExtensions
         /// <param name="isBeforeChange">Whether to observe before the change.</param>
         /// <param name="obsVarName">The resulting observable local.</param>
         internal void EmitDeepChainRootSegment(
-            StringBuilder sb,
+            SourceWriter sb,
             string rootVar,
             PropertyPathSegment segment,
             string castTypeName,
             bool isBeforeChange,
             string obsVarName)
         {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(obsVarName).Append(" = ");
+            _ = sb.BeginVar(obsVarName);
             plugin.EmitShallowObservation(sb, rootVar, segment, castTypeName, isBeforeChange, false);
-            _ = sb.AppendLine(";");
+            _ = sb.EndStatement();
         }
 
         /// <summary>Emits an after-change observation used by a binding.</summary>
@@ -81,7 +80,7 @@ internal static class ObservationEmissionExtensions
         /// <param name="varName">The resulting observable local.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void EmitInlineObservationVariable(
-            StringBuilder sb,
+            SourceWriter sb,
             string rootVar,
             PropertyPathSegment segment,
             string castTypeName,
@@ -95,30 +94,18 @@ internal static class ObservationEmissionExtensions
         /// <param name="isBeforeChange">Whether to observe before the change.</param>
         /// <param name="nullParentBehavior">The delivery behavior while the parent is null.</param>
         internal void EmitDeepChainInnerSegment(
-            StringBuilder sb,
+            SourceWriter sb,
             ChainStageVariables stage,
             PropertyPathSegment segment,
             bool isBeforeChange,
             NullParentObservationBehavior nullParentBehavior)
         {
             var valueType = segment.PropertyTypeFullName;
-            _ = sb.AppendLine().Append(GeneratedSyntax.BodyLocalDeclaration).Append(stage.CurrentObservable).Append(" = ")
-                .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, valueType, stage.PreviousObservable)).AppendLine()
-                .Append("                ").Append(stage.ParentParameter).Append(" => ").Append(stage.ParentParameter).AppendLine(" != null");
+            ChainRegistrationEmitter.AppendStageOpen(sb, stage, segment, valueType);
             ChainRegistrationEmitter.AppendChoiceOpen(sb, stage.ParentParameter, segment, plugin.Affinity, isBeforeChange);
             plugin.EmitShallowObservation(sb, stage.ParentParameter, segment, segment.DeclaringTypeFullName, isBeforeChange, false);
-            _ = sb.AppendLine(")").Append("                : (global::System.IObservable<").Append(valueType).Append(">)");
-            if (nullParentBehavior == NullParentObservationBehavior.EmitDefault)
-            {
-                _ = sb.Append("new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(valueType)
-                    .Append(">(default(").Append(valueType).Append("))");
-            }
-            else
-            {
-                _ = sb.Append("global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<").Append(valueType).Append(">.Instance");
-            }
-
-            _ = sb.AppendLine(");");
+            _ = ChainRegistrationEmitter.AppendChoiceClose(sb).EndLine();
+            ChainRegistrationEmitter.AppendStageClose(sb, valueType, nullParentBehavior);
         }
     }
 }

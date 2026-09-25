@@ -30,12 +30,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Text", 6, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyWinUIControl, string>>)(__e => __e.Text)).Body,
-                "Text",
-                (object __o) => ((global::TestApp.MyWinUIControl)__o).Text,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyWinUIControl, string>>)(__e => __e.Text)).Body,
+                    "Text",
+                    (object __o) => ((global::TestApp.MyWinUIControl)__o).Text,
+                    false, false)
                 : (global::System.IObservable<string>)
                 new global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<global::TestApp.MyWinUIControl, string>((global::TestApp.MyWinUIControl)obj, (__source, __notify) =>
                     {

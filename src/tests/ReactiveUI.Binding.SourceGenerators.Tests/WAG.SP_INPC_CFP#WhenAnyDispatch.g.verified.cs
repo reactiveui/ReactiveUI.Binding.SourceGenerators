@@ -30,7 +30,6 @@ namespace ReactiveUI.Binding
         private static global::System.IObservable<string> __WhenAny_00002E2F49F124B9(global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>, string> selector)
         {
             var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel)__o).Name, true);
-
             var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false);
             var __propObs0 = __propObs0Registration == null
                 ? (global::System.IObservable<string>)__propObs0Mechanism

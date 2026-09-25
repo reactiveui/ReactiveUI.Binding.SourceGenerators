@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -32,7 +32,7 @@ public class NativeObservationPluginTests
         ProbeKind,
         ProbeAffinity,
         static (_, _) => null,
-        static (sb, _, _) => _ = sb.AppendLine(ProbeSubscription));
+        static (sb, _, _) => _ = sb.Line(ProbeSubscription));
 
     /// <summary>The plugin offers exactly the candidate the mechanism's own inspection returns.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -74,7 +74,7 @@ public class NativeObservationPluginTests
     public async Task EmitObservation_AfterChange_WrapsTheMechanismsSubscription()
     {
         var segment = NativeObservationTestModels.CreateSegment(Probe, PropertyName, PropertyType);
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         Probe.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
@@ -89,7 +89,7 @@ public class NativeObservationPluginTests
     public async Task EmitObservation_BeforeChange_LeavesTheSubscriptionOut()
     {
         var segment = NativeObservationTestModels.CreateSegment(Probe, PropertyName, PropertyType);
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         Probe.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", true, "__obs0");
 

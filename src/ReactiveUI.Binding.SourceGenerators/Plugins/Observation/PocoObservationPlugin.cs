@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -35,7 +34,7 @@ internal sealed class PocoObservationPlugin : IObservationPlugin
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+    public void EmitObservation(SourceWriter sb, in ObservationExpression observation) =>
         sb.Append(GeneratedTypeNames.OpenDeferredProperty).Append(observation.SourceType).Append(", ")
             .Append(observation.Segment.PropertyTypeFullName).Append(">(").Append(observation.Source)
             .Append(", __source => ").Append(GeneratedTypeNames.ReadProperty(observation.Segment, observation.SourceType, "__source"))

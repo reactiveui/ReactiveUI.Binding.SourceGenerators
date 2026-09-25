@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -20,7 +19,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -36,7 +35,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerFilePath_GeneratesFilePathDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -52,7 +51,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateRuntimeFallback_CallsTheStubTheOverloadDisplaces()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
 
         ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangedName, inv.PropertyPaths.Length, false);
@@ -68,7 +67,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateRuntimeFallback_WhenChanging_NamesTheWhenChangingStub()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
 
         ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangingName, inv.PropertyPaths.Length, false);
@@ -81,7 +80,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateRuntimeFallback_WithSelector_StatesTheProjectedTypeLastAndForwardsIt()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
 
         ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangedName, inv.PropertyPaths.Length, true);
@@ -96,7 +95,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateObservationMethod_DeepChainWithSelector_GeneratesSwitchPattern()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
@@ -122,7 +121,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateObservationMethod_SinglePropertyWithSelector_GeneratesMapSignal()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(
             returnTypeFullName: Int32TypeName,
             hasSelector: true);
@@ -140,7 +139,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateObservationMethod_NullClassInfo_GeneratesCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
 
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, null, "DEADBEEF", false, WhenChangedName);
@@ -154,7 +153,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateObservationMethod_SinglePropertyNoSelector_GeneratesDirectReturn()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
@@ -233,7 +232,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_MultipleInvocationsInGroup_GeneratesElseIf()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv1 = ModelFactory.CreateInvocationInfo(callerLineNumber: 10, expressionTexts: new EquatableArray<string>([
             NameSelector
         ]));
@@ -254,7 +253,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_WithSelector_GeneratesSelectorParameter()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(returnTypeFullName: Int32TypeName, hasSelector: true);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -270,7 +269,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_MultiProperty_GeneratesMultipleExpressionChecks()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -299,7 +298,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateObservationMethod_SingleProperty_GeneratesMethodSignature()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
@@ -322,7 +321,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_RegistrationOutranksTheMechanism_ObservesThroughTheRegistration()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, ModelFactory.CreateClassBindingInfo(implementsINPC: true), false, ObservedPropertyVariable);
@@ -338,7 +337,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_RegistrationOutranksTheMechanism_ReadsThroughAnEmittedAccessor()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, ModelFactory.CreateClassBindingInfo(implementsINPC: true), false, ObservedPropertyVariable);
@@ -354,7 +353,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_RegistrationOutranksTheMechanism_HandsItACompiledExpression()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, ModelFactory.CreateClassBindingInfo(implementsINPC: true), false, ObservedPropertyVariable);
@@ -367,7 +366,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_BeforeChange_AsksTheRegistrationForBeforeChange()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, ModelFactory.CreateClassBindingInfo(implementsINPChanging: true), true, ObservedPropertyVariable);
@@ -380,7 +379,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_ShallowPath_ReadsThroughTheRegistrationChoice()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, StringTypeName, ModelFactory.CreateClassBindingInfo(implementsINPC: true), "sourceObs");
@@ -398,7 +397,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_Always_LeavesTheRegistrationToTheObservation()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 

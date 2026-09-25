@@ -33,7 +33,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF44F563AC(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
             var __obsPropertyMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(obj, "Command1", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command1, true);
-
             var __obsPropertyRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Command1", 5, false);
             var __obsProperty = __obsPropertyRegistration == null
                 ? (global::System.IObservable<global::System.IObservable<string>>)__obsPropertyMechanism
@@ -53,7 +52,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56865(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
             var __obsPropertyMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(obj, "Command2", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command2, true);
-
             var __obsPropertyRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Command2", 5, false);
             var __obsProperty = __obsPropertyRegistration == null
                 ? (global::System.IObservable<global::System.IObservable<string>>)__obsPropertyMechanism

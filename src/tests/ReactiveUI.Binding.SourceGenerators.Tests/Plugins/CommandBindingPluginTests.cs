@@ -86,6 +86,16 @@ public class CommandBindingPluginTests
         await Assert.That(plugin.RequiresCustomBinderFallback).IsFalse();
     }
 
+    /// <summary>The native platform plugins leave a registered custom binder able to take over the control.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NativePlatformPlugins_RequireCustomBinderFallback()
+    {
+        await Assert.That(new AndroidCommandBindingPlugin().RequiresCustomBinderFallback).IsTrue();
+        await Assert.That(new UIKitCommandBindingPlugin().RequiresCustomBinderFallback).IsTrue();
+        await Assert.That(new UIKitControlCommandBindingPlugin().RequiresCustomBinderFallback).IsTrue();
+    }
+
     /// <summary>Verifies EventEnabledBindingPlugin.RequiresCustomBinderFallback is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

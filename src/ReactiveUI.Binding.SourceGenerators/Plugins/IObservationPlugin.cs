@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins;
@@ -55,5 +55,5 @@ internal interface IObservationPlugin
     /// <summary>Emits a direct typed expression for this mechanism.</summary>
     /// <param name="sb">The output builder.</param>
     /// <param name="observation">The concrete property and notification timing.</param>
-    void EmitObservation(StringBuilder sb, in ObservationExpression observation);
+    void EmitObservation(SourceWriter sb, in ObservationExpression observation);
 }

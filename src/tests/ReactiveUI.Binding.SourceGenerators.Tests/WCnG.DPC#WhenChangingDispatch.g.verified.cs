@@ -42,17 +42,17 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel, string>(__obs0,
                 __parent1 => __parent1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent1.GetType(), "Name", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___parent1
-                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                    __registration___parent1,
-                    __parent1,
-                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel, string>>)(__e => __e.Name)).Body,
-                    "Name",
-                    (object __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name,
-                    true, false)
-                    : (global::System.IObservable<string>)
-new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)__parent1, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name))
-                : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
+                    ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent1.GetType(), "Name", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___parent1
+                        ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                            __registration___parent1,
+                            __parent1,
+                            ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel, string>>)(__e => __e.Name)).Body,
+                            "Name",
+                            (object __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name,
+                            true, false)
+                        : (global::System.IObservable<string>)
+                        new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)__parent1, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name))
+                    : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             return new global::ReactiveUI.Primitives.Advanced.UniqueSignal<string>(__obs1, global::System.Collections.Generic.EqualityComparer<string>.Default);
         }
 

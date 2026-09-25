@@ -40,54 +40,54 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F35E572C8(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
         {
             // OneWayBind: FirstName -> FirstNameText
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = viewModel;
-            var __hookTarget = view;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.FirstName;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.FirstName)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.FirstNameText;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>>)(__property => __property.FirstNameText)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.OneWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return null;
+                var __hookSource = viewModel;
+                var __hookTarget = view;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.FirstName;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.FirstName)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.FirstNameText;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>>)(__property => __property.FirstNameText)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.OneWay))
+                {
+                    return null;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "FirstName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).FirstName, true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "FirstName", 5, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<string>)sourceObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                sourceObsRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__e => __e.FirstName)).Body,
-                "FirstName",
-                (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).FirstName,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "FirstName", 5, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<string>)sourceObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    sourceObsRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__e => __e.FirstName)).Body,
+                    "FirstName",
+                    (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).FirstName,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
             if (__convertedForwardConverter == null)
             {
@@ -133,11 +133,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.FirstNameText, value))
-                    {
-                        return;
-                    }
+                {
+                    return;
+                }
 
-                    view.FirstNameText = value;
+                view.FirstNameText = value;
             }, "x => x.FirstNameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>(
@@ -150,54 +150,54 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F041A1920(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
         {
             // OneWayBind: LastName -> LastNameText
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = viewModel;
-            var __hookTarget = view;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.LastName;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.LastName)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.LastNameText;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>>)(__property => __property.LastNameText)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.OneWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return null;
+                var __hookSource = viewModel;
+                var __hookTarget = view;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.LastName;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__property => __property.LastName)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.LastNameText;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>>)(__property => __property.LastNameText)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.OneWay))
+                {
+                    return null;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "LastName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).LastName, true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "LastName", 5, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<string>)sourceObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                sourceObsRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__e => __e.LastName)).Body,
-                "LastName",
-                (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).LastName,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "LastName", 5, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<string>)sourceObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    sourceObsRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string>>)(__e => __e.LastName)).Body,
+                    "LastName",
+                    (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).LastName,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
             if (__convertedForwardConverter == null)
             {
@@ -243,11 +243,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.LastNameText, value))
-                    {
-                        return;
-                    }
+                {
+                    return;
+                }
 
-                    view.LastNameText = value;
+                view.LastNameText = value;
             }, "x => x.LastNameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>(

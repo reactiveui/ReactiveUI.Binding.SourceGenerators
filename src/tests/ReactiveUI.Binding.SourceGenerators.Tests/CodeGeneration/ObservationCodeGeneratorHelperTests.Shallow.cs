@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -20,7 +19,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_ReactiveObjectAfterChange_GeneratesPropertyChangedHandler()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
@@ -46,7 +45,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_ReactiveObjectBeforeChange_GeneratesPropertyChangingHandler()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
@@ -68,7 +67,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_INPCAfterChange_GeneratesPropertyChangedHandler()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
@@ -90,7 +89,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_INPChangingBeforeChange_GeneratesPropertyChangingHandler()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
@@ -112,7 +111,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_NoInterface_GeneratesObservableReturn()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
@@ -133,7 +132,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_SingleSegment_GeneratesInlineObservation()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
@@ -150,7 +149,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_INPCAfterChange_GeneratesVariableDeclaration()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
@@ -167,7 +166,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_INPChangingBeforeChange_GeneratesVariableDeclaration()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
@@ -185,7 +184,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_NoInterface_GeneratesObservableReturn()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
@@ -202,7 +201,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_BeforeChange_GeneratesPropertyChangingCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
@@ -223,7 +222,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_InheritedPlainProperty_DoesNotTakeTheDependencyPropertyPath()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var declaringType = ModelFactory.CreateClassBindingInfo(
             inheritsWpfDependencyObject: true,
             properties: new EquatableArray<ObservablePropertyInfo>(
@@ -244,7 +243,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_InheritedDependencyProperty_TakesTheDependencyPropertyPath()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var declaringType = ModelFactory.CreateClassBindingInfo(
             inheritsWpfDependencyObject: true,
             properties: new EquatableArray<ObservablePropertyInfo>(
@@ -263,7 +262,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_NoInterface_GeneratesObservableReturn()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
@@ -282,7 +281,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_NullClassInfo_GeneratesObservableReturn()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
 
@@ -300,7 +299,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
@@ -316,7 +315,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
@@ -332,7 +331,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_NullClassInfo_GeneratesTheUnchangingValue()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
 
@@ -347,7 +346,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
@@ -363,7 +362,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);

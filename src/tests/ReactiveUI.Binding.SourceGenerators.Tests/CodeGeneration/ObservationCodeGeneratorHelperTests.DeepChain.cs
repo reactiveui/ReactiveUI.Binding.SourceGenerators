@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -17,7 +16,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainObservation_TwoLevelChain_GeneratesSwitchMapStages()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
@@ -46,7 +45,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainObservation_BeforeChange_SuppressesRepeatedValues()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var leafInfo = ModelFactory.CreateClassBindingInfo(fullyQualifiedName: AddressTypeName, implementsINPChanging: true);
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
@@ -72,7 +71,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainVariable_TwoLevelChain_GeneratesVariableDeclarations()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
@@ -97,7 +96,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainVariable_ThreeLevelChain_OnlyTheLeafSuppressesAMissingParent()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("Country", CountryTypeName, AddressTypeName),
@@ -118,7 +117,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainVariable_BeforeChange_GeneratesPropertyChangingCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var leafInfo = ModelFactory.CreateClassBindingInfo(fullyQualifiedName: AddressTypeName, implementsINPChanging: true);
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
@@ -138,7 +137,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_SingleProperty_INPC_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
@@ -161,7 +160,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesTheDeferredValue()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
@@ -184,7 +183,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_DeepChain_GeneratesSwitchMapStage()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
@@ -210,7 +209,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainVariable_NullClassInfo_GeneratesAfterChangeCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
@@ -228,7 +227,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainVariable_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
@@ -247,7 +246,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainObservation_NullClassInfo_GeneratesCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
@@ -270,7 +269,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateDeepChainObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
@@ -294,7 +293,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_NullClassInfo_SingleProperty_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
 
@@ -309,7 +308,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_ReactiveObject_SingleProperty_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
@@ -331,7 +330,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_ReactiveObject_DeepChain_GeneratesSwitchPattern()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
@@ -356,7 +355,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_DeepChain_NullClassInfo_GeneratesImmediateReturnSignal()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
             ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)

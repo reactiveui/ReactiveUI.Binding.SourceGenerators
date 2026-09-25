@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Generators;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -332,8 +332,8 @@ public class BindingGenerator : IIncrementalGenerator
             languageFeatures,
             static (ctx, features) =>
             {
-                var sb = CodeGeneration.PooledBuilder.Rent(AttributeFileCapacity);
-                CodeGeneration.CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
+                var sb = SourceWriter.Rent(AttributeFileCapacity)
+                    .FileHeader(features.EmitGeneratedCodeMarkers, enableNullable: false);
 
                 if (features.EmitGeneratedNamespaceImport)
                 {
@@ -341,19 +341,19 @@ public class BindingGenerator : IIncrementalGenerator
                     // sees these overloads - which is what keeps two generator-running assemblies apart.
                     _ = sb.Append("global using global::")
                         .Append(features.GeneratedNamespace)
-                        .Append(";\n\n");
+                        .Line(";")
+                        .BlankLine();
                 }
 
-                _ = sb.Append("namespace ")
-                    .Append(features.GeneratedNamespace)
-                    .Append("\n{\n    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]\n    internal static partial class ")
-                    .Append(features.GeneratedClassName)
-                    .Append("\n    {\n    }\n}\n");
+                CodeGeneratorHelpers.OpenGeneratedClass(
+                    sb.OpenNamespace(features.GeneratedNamespace).Attribute("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage"),
+                    features);
+                _ = sb.CloseBlock().CloseBlock();
 
-                CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
+                CodeGeneratorHelpers.AddGeneratedSource(
                     ctx,
                     "GeneratedBindingsAttributes.g.cs",
-                    CodeGeneration.PooledBuilder.ToStringAndReturn(sb),
+                    sb.ToStringAndReturn(),
                     features);
             });
 
@@ -601,7 +601,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// <returns>A legal C# identifier.</returns>
     private static string ToIdentifier(string segment)
     {
-        var builder = new CodeGeneration.PooledStringBuilder(segment.Length + 1);
+        var builder = new PooledStringBuilder(segment.Length + 1);
 
         // An identifier cannot be empty, start with a digit or be a keyword, so lead with an underscore where needed.
         if (segment.Length == 0 || (!char.IsLetter(segment[0]) && segment[0] != '_') || SyntaxFacts.GetKeywordKind(segment) != SyntaxKind.None)

@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -75,7 +74,7 @@ internal static class BindInteractionCodeGenerator
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateConcreteOverload(StringBuilder sb, BindInteractionTypeGroup group, in LanguageFeatures features) =>
+    internal static void GenerateConcreteOverload(SourceWriter sb, BindInteractionTypeGroup group, in LanguageFeatures features) =>
         GenerateConcreteOverload(sb, group, features.SupportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
 
     /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
@@ -85,7 +84,7 @@ internal static class BindInteractionCodeGenerator
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         bool supportsCallerArgExpr,
         bool supportsNullable,
@@ -106,22 +105,21 @@ internal static class BindInteractionCodeGenerator
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerArgExprOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         bool supportsNullable)
     {
-        AppendOverloadSummary(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
+        AppendOverloadSummary(sb, group, "Uses CallerArgumentExpression for dispatch.");
         AppendParameterList(sb, group, true, supportsNullable, true);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
 
-            _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(CodeGeneratorHelpers.ConditionKeyword(i))
-                .Append(" (propertyNameExpression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionText)).AppendLine("\")")
-                .AppendLine(GeneratedSyntax.StatementBlockOpen);
+            _ = CodeGeneratorHelpers.AppendExpressionTextTest(sb.BeginBranch(i), "propertyNameExpression", inv.ExpressionText)
+                .CloseCondition();
             CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments);
         }
 
@@ -129,20 +127,20 @@ internal static class BindInteractionCodeGenerator
     }
 
     /// <summary>Generates the CallerFilePath-based overload for BindInteraction dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
-        AppendOverloadSummary(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
+        AppendOverloadSummary(sb, group, "Uses CallerFilePath + CallerLineNumber for dispatch.");
         AppendParameterList(sb, group, false, supportsNullable, stubHasExpressionParameters);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -160,57 +158,66 @@ internal static class BindInteractionCodeGenerator
     }
 
     /// <summary>Generates a private BindInteraction method for a specific invocation.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="inv">The BindInteraction invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
     /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateBindInteractionMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
         ClassBindingInfo? viewClassInfo,
         string suffix)
     {
         var handlerType = inv.IsTaskHandler
-            ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
-            : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, global::System.IObservable<{inv.DontCareTypeFullName}>>";
+            ? $"{Func}<{IInteractionContext}<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, {GeneratedTypeNames.Task}>"
+            : $"{Func}<{IInteractionContext}<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, {IObservable}<{inv.DontCareTypeFullName}>>";
 
         var interactionType =
-            $"global::ReactiveUI.Binding.IInteraction<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>";
-        var pathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.InteractionPropertyPath);
+            $"{IInteraction}<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>";
 
-        _ = sb.Append("        private static global::System.IDisposable __BindInteraction_").Append(suffix).AppendLine("(").Append("            ")
-            .Append(inv.ViewTypeFullName).AppendLine(ViewParameterSuffix).Append("            ")
-            .Append(inv.ViewModelTypeFullName).AppendLine(ViewModelParameterSuffix).Append("            ").Append(handlerType).AppendLine(" handler)")
-            .AppendLine("        {").Append("            // BindInteraction: ").Append(pathComment).AppendLine()
-            .AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();").AppendLine();
+        _ = sb.Append($"private static {GeneratedTypeNames.IDisposable} __BindInteraction_").Append(suffix).OpenParameterList()
+            .Append(inv.ViewTypeFullName).Line(ViewParameterSuffix)
+            .Append(inv.ViewModelTypeFullName).Line(ViewModelParameterSuffix)
+            .Append(handlerType).Line(" handler)")
+            .Outdent()
+            .OpenBlock()
+            .BeginComment().Append("BindInteraction: ");
+        _ = CodeGeneratorHelpers.AppendPropertyPath(sb, inv.InteractionPropertyPath).EndLine()
+            .Var("serial", $"new {SwapDisposable}()")
+            .BlankLine();
 
         EmitInteractionObservation(sb, inv, viewModelClassInfo, viewClassInfo, interactionType);
 
         // Subscribe to the interaction observable and register the handler
-        const string registerCall = "interaction.RegisterHandler(handler)";
-
-        _ = sb.AppendLine()
-            .AppendLine("            var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen).AppendLine("                serial.Disposable = interaction != null").Append("                    ? ")
-            .Append(registerCall).AppendLine().AppendLine("                    : global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
-            .AppendLine("            });").AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(sub, serial);")
-            .AppendLine("        }").AppendLine();
+        _ = sb.BlankLine()
+            .Line($"var sub = {Subscribe}(interactionObs, interaction =>")
+            .OpenBlock()
+            .Append("serial.Disposable = interaction != null").OpenContinuation()
+            .Line("? interaction.RegisterHandler(handler)")
+            .Line($": {EmptyDisposableInstance};")
+            .Outdent()
+            .CloseBlock(");")
+            .Return($"new {MultipleDisposable}(sub, serial)")
+            .CloseBlock()
+            .BlankLine();
     }
 
-    /// <summary>Appends the signature both dispatch overloads declare, up to the parameters that identify a call site.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the summary and signature both dispatch overloads declare, opening the parameter list.</summary>
+    /// <param name="sb">The writer, at the class's member level; left inside the parameter list.</param>
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="dispatchSummaryLine">The documentation line naming what the overload matches a call site on.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendOverloadSummary(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         string dispatchSummaryLine) =>
-        sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
-            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine(dispatchSummaryLine)
-            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(");
+        sb.OpenSummary()
+            .BeginDocLine().Append("Concrete typed overload for BindInteraction on ").Append(group.ViewTypeFullName).Line(".")
+            .DocLine(dispatchSummaryLine)
+            .CloseSummary()
+            .Append($"public static {GeneratedTypeNames.IDisposable} BindInteraction").OpenParameterList();
 
     /// <summary>Writes the parameters a BindInteraction member declares, closing the list.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -225,37 +232,36 @@ internal static class BindInteractionCodeGenerator
     /// declared nullable, as the stub declares it: a view is bound before it has been given one.
     /// </remarks>
     private static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         bool dispatchesOnExpressionText,
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
         var handlerType = group.IsTaskHandler
-            ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
-            : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
+            ? $"{Func}<{IInteractionContext}<{group.InputTypeFullName}, {group.OutputTypeFullName}>, {GeneratedTypeNames.Task}>"
+            : $"{Func}<{IInteractionContext}<{group.InputTypeFullName}, {group.OutputTypeFullName}>, {IObservable}<{group.DontCareTypeFullName}>>";
 
-        _ = sb.Append("            this ").Append(group.ViewTypeFullName)
-            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent)
-            .Append(CodeGeneratorHelpers.NullableSelectorType(group.ViewModelTypeFullName, true, supportsNullable))
-            .AppendLine(ViewModelParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(Expression).Append('<').Append(Func).Append('<')
+        _ = sb.Append("this ").Append(group.ViewTypeFullName).Line(ViewParameterSuffix)
+            .Append(CodeGeneratorHelpers.NullableSelectorType(group.ViewModelTypeFullName, true, supportsNullable)).Line(ViewModelParameterSuffix)
+            .Append(Expression).Append('<').Append(Func).Append('<')
             .Append(group.ViewModelTypeFullName).Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ")
-            .Append(group.OutputTypeFullName).AppendLine(">>> propertyName,").Append(CodeGeneratorHelpers.ParameterIndent).Append(handlerType)
-            .AppendLine(" handler,");
+            .Append(group.OutputTypeFullName).Line(">>> propertyName,")
+            .Append(handlerType).Line(" handler,");
 
         if (dispatchesOnExpressionText || stubHasExpressionParameters)
         {
             CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", dispatchesOnExpressionText);
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
     /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group of call sites being claimed.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
-    private static void GenerateInterceptors(StringBuilder sb, BindInteractionTypeGroup group, in LanguageFeatures features)
+    private static void GenerateInterceptors(SourceWriter sb, BindInteractionTypeGroup group, in LanguageFeatures features)
     {
         var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
         var supportsNullable = features.SupportsNullable;
@@ -267,12 +273,14 @@ internal static class BindInteractionCodeGenerator
                 sb,
                 entry.Value,
                 static x => x.Interceptor,
-                "        internal static global::System.IDisposable __Intercept_BindInteraction_",
+                $"internal static {GeneratedTypeNames.IDisposable} __Intercept_BindInteraction_",
                 entry.Key);
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-            _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
-                .AppendLine(");").AppendLine();
+            _ = sb.Indent()
+                .Append("=> ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments).Line(");")
+                .Outdent()
+                .BlankLine();
         }
     }
 
@@ -282,7 +290,7 @@ internal static class BindInteractionCodeGenerator
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     private static void EmitGroup(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionTypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
@@ -305,7 +313,7 @@ internal static class BindInteractionCodeGenerator
             GenerateConcreteOverload(sb, collapsed, in features);
         }
 
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
 
         for (var i = 0; i < collapsed.Invocations.Length; i++)
         {
@@ -330,7 +338,7 @@ internal static class BindInteractionCodeGenerator
     /// to a registered plugin on the same terms as a deeper one and as every other binding API.
     /// </remarks>
     private static void EmitInteractionObservation(
-        StringBuilder sb,
+        SourceWriter sb,
         BindInteractionInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
         ClassBindingInfo? viewClassInfo,
@@ -357,16 +365,11 @@ internal static class BindInteractionCodeGenerator
             "interactionObs");
     }
 
-    /// <summary>Appends the guard that leaves the binding inert until the view is given a view model.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the guard that leaves the binding inert until the view is given a view model.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendViewModelGuard(StringBuilder sb) =>
-        sb.AppendLine("""
-                              if (viewModel == null)
-                              {
-                                  return serial;
-                              }
-                      """);
+    private static void AppendViewModelGuard(SourceWriter sb) =>
+        sb.If("viewModel == null").Return("serial").CloseBlock();
 
     /// <summary>Names the generated worker a call site dispatches to.</summary>
     /// <param name="inv">The call site.</param>

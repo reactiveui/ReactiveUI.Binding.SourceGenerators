@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -214,7 +213,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
         var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
@@ -237,7 +236,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task GenerateOneWayBindMethod_StandardInvocation_GeneratesReactiveBinding()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 

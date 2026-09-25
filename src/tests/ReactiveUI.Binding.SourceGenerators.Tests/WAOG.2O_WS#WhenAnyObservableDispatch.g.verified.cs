@@ -32,7 +32,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C40DF(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
         {
             var __obsProperty0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Count, true);
-
             var __obsProperty0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Count", 5, false);
             var __obsProperty0 = __obsProperty0Registration == null
                 ? (global::System.IObservable<global::System.IObservable<int>>)__obsProperty0Mechanism
@@ -49,7 +48,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<int>.Instance);
 
             var __obsProperty1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(obj, "Message", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Message, true);
-
             var __obsProperty1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Message", 5, false);
             var __obsProperty1 = __obsProperty1Registration == null
                 ? (global::System.IObservable<global::System.IObservable<string>>)__obsProperty1Mechanism

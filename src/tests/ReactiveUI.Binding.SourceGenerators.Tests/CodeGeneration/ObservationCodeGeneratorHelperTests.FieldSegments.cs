@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
@@ -31,7 +30,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowPathObservation_FieldOnBeforeChangeType_UsesPropertyChanging()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([LabelField()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
@@ -45,7 +44,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateShallowObservableVariable_FieldOnBeforeChangeType_UsesPropertyChanging()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var path = new EquatableArray<PropertyPathSegment>([LabelField()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
@@ -61,7 +60,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateSinglePropertyObservation_FieldOnBeforeChangeType_UsesPropertyChanging()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: new EquatableArray<EquatableArray<PropertyPathSegment>>([new([LabelField()])]),
             isBeforeChange: true,
@@ -81,7 +80,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task EmitInlineObservation_FieldsAlongAChain_EmitDefaultThenFollowTheLeafBehavior()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var root = ModelFactory.CreatePropertyPathSegment(
             AddressName,
             AddressTypeName,

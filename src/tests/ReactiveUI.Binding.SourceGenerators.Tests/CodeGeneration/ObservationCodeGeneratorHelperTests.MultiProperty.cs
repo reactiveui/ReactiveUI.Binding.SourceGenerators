@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -17,7 +16,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_MultiplePaths_GeneratesCombineLatest()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -46,7 +45,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_WithDeepChainPath_GeneratesDeepChainVariables()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -78,7 +77,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_BeforeChange_GeneratesPropertyChangingCode()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -109,7 +108,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_BeforeChange_WithDeepChain_GeneratesPropertyChangingVariables()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -140,7 +139,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -168,7 +167,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_NullClassInfo_GeneratesImmediateReturnSignal()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()
@@ -194,7 +193,7 @@ public partial class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GenerateMultiPropertyObservation_NoSelector_GathersValuesIntoOneEmission()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()

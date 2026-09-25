@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -28,9 +27,6 @@ internal static class InvokeCommandCodeGenerator
 
     /// <summary>The declaration of the parameter a worker takes its values from.</summary>
     private const string SourceParameter = " source,";
-
-    /// <summary>The indentation and arrow an interceptor forwards to its worker behind.</summary>
-    private const string ForwardingBodyPrefix = "            => ";
 
     /// <summary>Generates concrete typed overloads and workers for <c>InvokeCommand</c> invocations.</summary>
     /// <param name="invocations">All detected <c>InvokeCommand</c> invocations.</param>
@@ -66,7 +62,7 @@ internal static class InvokeCommandCodeGenerator
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     private static void EmitGroup(
-        StringBuilder sb,
+        SourceWriter sb,
         InvokeCommandTypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
@@ -90,7 +86,7 @@ internal static class InvokeCommandCodeGenerator
             GenerateConcreteOverload(sb, emitted, in features);
         }
 
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
 
         // Call sites spelling the same selector against the same type share one worker.
         var emittedWorkers = new HashSet<string>(StringComparer.Ordinal);
@@ -108,11 +104,11 @@ internal static class InvokeCommandCodeGenerator
     }
 
     /// <summary>Emits the concrete overload the call sites of one group resolve to.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group being emitted.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     private static void GenerateConcreteOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         InvokeCommandTypeGroup group,
         in LanguageFeatures features)
     {
@@ -125,30 +121,27 @@ internal static class InvokeCommandCodeGenerator
             group.TargetTypeFullName,
             dispatchesOnExpressionText);
 
-        _ = sb.Append("        public static ").Append(GeneratedTypeNames.IDisposable).Append(' ')
-            .Append(Constants.InvokeCommandMethodName).AppendLine("(");
+        _ = sb.Append("public static ").Append(GeneratedTypeNames.IDisposable).Append(' ')
+            .Append(Constants.InvokeCommandMethodName).OpenParameterList();
 
         AppendParameterList(sb, group, dispatchesOnExpressionText, features.SupportsNullable, features.StubHasExpressionParameters);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
             if (dispatchesOnExpressionText)
             {
-                _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(condition).Append(" (")
-                    .Append(CommandExpressionParameter).Append(" == \"")
-                    .Append(CodeGeneratorHelpers.EscapeString(inv.CommandExpressionText)).AppendLine("\")")
-                    .AppendLine(GeneratedSyntax.StatementBlockOpen);
+                _ = CodeGeneratorHelpers.AppendExpressionTextTest(sb.BeginBranch(i), CommandExpressionParameter, inv.CommandExpressionText)
+                    .CloseCondition();
             }
             else
             {
                 CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
                     sb,
-                    condition,
+                    i,
                     inv.CallerLineNumber,
                     CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
             }
@@ -160,11 +153,11 @@ internal static class InvokeCommandCodeGenerator
     }
 
     /// <summary>Emits one interceptor per worker, claiming every call site that reaches it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group whose call sites are being claimed.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     private static void GenerateInterceptors(
-        StringBuilder sb,
+        SourceWriter sb,
         InvokeCommandTypeGroup group,
         in LanguageFeatures features)
     {
@@ -176,27 +169,29 @@ internal static class InvokeCommandCodeGenerator
         {
             foreach (var callSite in entry.Value)
             {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor);
             }
 
-            _ = sb.Append("        internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_")
-                .Append(Constants.InvokeCommandMethodName).Append('_').Append(entry.Key).AppendLine("(");
+            _ = sb.Append("internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_")
+                .Append(Constants.InvokeCommandMethodName).Append('_').Append(entry.Key).OpenParameterList();
 
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-            _ = sb.Append(ForwardingBodyPrefix).Append(WorkerMethodPrefix).Append(entry.Key)
-                .Append('(').Append(WorkerArguments).AppendLine(");").AppendLine();
+            _ = sb.Indent()
+                .Append("=> ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments).Line(");")
+                .Outdent()
+                .BlankLine();
         }
     }
 
     /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
     private static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         InvokeCommandTypeGroup group,
         bool dispatchesOnExpressionText,
         bool supportsNullable,
@@ -205,10 +200,9 @@ internal static class InvokeCommandCodeGenerator
         // The stub's ICommand, whatever the command property is declared as.
         var commandType = supportsNullable ? $"{ICommand}?" : ICommand;
 
-        _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName)).AppendLine(SourceParameter)
-            .Append(CodeGeneratorHelpers.ParameterIndent).Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).AppendLine(" target,")
-            .Append(CodeGeneratorHelpers.ParameterIndent)
-            .Append(PropertyExpression(group.TargetTypeFullName, commandType)).AppendLine(" commandProperty,");
+        _ = sb.Append("this ").Append(ObservableOf(group.SourceValueTypeFullName)).Line(SourceParameter)
+            .Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).Line(" target,")
+            .Append(PropertyExpression(group.TargetTypeFullName, commandType)).Line(" commandProperty,");
 
         if (dispatchesOnExpressionText || stubHasExpressionParameters)
         {
@@ -219,16 +213,16 @@ internal static class InvokeCommandCodeGenerator
                 dispatchesOnExpressionText);
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
     /// <summary>Emits the worker that observes the command and offers it each value.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="inv">The call site being emitted.</param>
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="suffix">The stable method-name suffix for this worker.</param>
     private static void GenerateWorker(
-        StringBuilder sb,
+        SourceWriter sb,
         InvokeCommandInvocationInfo inv,
         ImmutableArray<ClassBindingInfo> allClasses,
         string suffix)
@@ -238,17 +232,17 @@ internal static class InvokeCommandCodeGenerator
             inv.TargetTypeFullName,
             inv.CommandPropertyPath);
 
-        _ = sb.Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(' ').Append(WorkerMethodPrefix).Append(suffix).AppendLine("(")
-            .Append(CodeGeneratorHelpers.ParameterIndent).Append(ObservableOf(inv.SourceValueTypeFullName)).AppendLine(SourceParameter)
-            .Append(CodeGeneratorHelpers.ParameterIndent).Append(inv.TargetTypeFullName).AppendLine(" target)")
-            .AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .Append("            // InvokeCommand: values -> ")
-            .AppendLine(CodeGeneratorHelpers.BuildPropertyPathString(inv.CommandPropertyPath))
-            .AppendLine("            if (target == null)")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .Append("                return ").Append(EmptyDisposable).AppendLine(".Instance;")
-            .AppendLine(GeneratedSyntax.StatementBlockClose)
-            .AppendLine();
+        _ = sb.Append("private static ").Append(GeneratedTypeNames.IDisposable).Append(' ').Append(WorkerMethodPrefix).Append(suffix).OpenParameterList()
+            .Append(ObservableOf(inv.SourceValueTypeFullName)).Line(SourceParameter)
+            .Append(inv.TargetTypeFullName).Line(" target)")
+            .Outdent()
+            .OpenBlock()
+            .BeginComment().Append("InvokeCommand: values -> ");
+        _ = CodeGeneratorHelpers.AppendPropertyPath(sb, inv.CommandPropertyPath).EndLine()
+            .If("target == null")
+            .Return(EmptyDisposableInstance)
+            .CloseBlock()
+            .BlankLine();
 
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
@@ -258,8 +252,9 @@ internal static class InvokeCommandCodeGenerator
             classInfo,
             CommandVariable);
 
-        _ = sb.Append("            return ").Append(CommandInvoker).Append(".Invoke(source, ").Append(CommandVariable).AppendLine(");")
-            .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
+        _ = sb.BeginReturn().Append(CommandInvoker).Append(".Invoke(source, ").Append(CommandVariable).Line(");")
+            .CloseBlock()
+            .BlankLine();
     }
 
     /// <summary>Names the worker a call site reaches.</summary>

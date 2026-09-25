@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -16,28 +16,28 @@ internal static class NativeEventSubscriptionEmitter
     /// <param name="segment">The observed property.</param>
     /// <param name="info">The selected native mechanism, which carries the verified events.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendSubscription(StringBuilder sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
+    internal static void AppendSubscription(SourceWriter sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
         Append(sb, info.Events);
 
     /// <summary>Attaches every event required by the selected property contract.</summary>
-    /// <param name="sb">The output builder.</param>
+    /// <param name="sb">The writer, inside the subscription callback.</param>
     /// <param name="events">The verified event names and delegate types.</param>
-    internal static void Append(StringBuilder sb, EquatableArray<NotificationEventInfo> events)
+    internal static void Append(SourceWriter sb, EquatableArray<NotificationEventInfo> events)
     {
         for (var i = 0; i < events.Length; i++)
         {
-            _ = sb.Append("                        ").Append(events[i].HandlerType).Append(" __handler").Append(i)
-                .AppendLine(" = (__sender, __args) => __notify();")
-                .Append("                        __source.").Append(events[i].Name).Append(" += __handler").Append(i).AppendLine(";");
+            _ = sb.Append(events[i].HandlerType).Append(" __handler").Append(i)
+                .Line(" = (__sender, __args) => __notify();")
+                .Append("__source.").Append(events[i].Name).Append(" += __handler").Append(i).EndStatement();
         }
 
-        _ = sb.AppendLine("                        return new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>")
-            .AppendLine("                        {");
+        _ = sb.Line($"return new {GeneratedTypeNames.ActionDisposable}(() =>")
+            .OpenBlock();
         for (var i = 0; i < events.Length; i++)
         {
-            _ = sb.Append("                            __source.").Append(events[i].Name).Append(" -= __handler").Append(i).AppendLine(";");
+            _ = sb.Append("__source.").Append(events[i].Name).Append(" -= __handler").Append(i).EndStatement();
         }
 
-        _ = sb.AppendLine("                        });");
+        _ = sb.CloseBlock(");");
     }
 }

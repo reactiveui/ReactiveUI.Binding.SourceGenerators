@@ -190,6 +190,9 @@ namespace ReactiveUI.Binding
         public void Map<TViewModel, TView>() where TViewModel : class where TView : ReactiveUI.Binding.IViewFor, new() { }
         public void Map<TViewModel, TView>(string? contract) where TViewModel : class where TView : ReactiveUI.Binding.IViewFor, new() { }
         public ReactiveUI.Binding.IViewFor? ResolveView(object? viewModel, string? contract) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
+        public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
         public ReactiveUI.Binding.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Unmap<TViewModel>() where TViewModel : class { }
@@ -1576,7 +1579,10 @@ namespace ReactiveUI.Binding
         extension(ReactiveUI.Binding.IViewLocator locator)
         {
             public ReactiveUI.Binding.IViewFor? ResolveView(object? viewModel) { }
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
             public ReactiveUI.Binding.IViewFor? ResolveView<TViewModel>(TViewModel viewModel) where TViewModel : class { }
+            public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
         }
     }
     [System.Serializable]
@@ -1595,6 +1601,9 @@ namespace ReactiveUI.Binding
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public ReactiveUI.Binding.ViewMappingBuilder Map<TViewModel, TView>() where TViewModel : class where TView : ReactiveUI.Binding.IViewFor, new() { }
         public ReactiveUI.Binding.ViewMappingBuilder Map<TViewModel, TView>(string? contract) where TViewModel : class where TView : ReactiveUI.Binding.IViewFor, new() { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public ReactiveUI.Binding.ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>() where TViewModel : class where TView : class, ReactiveUI.Binding.IViewFor { }
+        public ReactiveUI.Binding.ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract) where TViewModel : class where TView : class, ReactiveUI.Binding.IViewFor { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static class ViewThreadInvokers

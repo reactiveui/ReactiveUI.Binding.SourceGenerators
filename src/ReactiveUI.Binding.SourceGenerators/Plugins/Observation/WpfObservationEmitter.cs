@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -23,16 +23,16 @@ internal static class WpfObservationEmitter
     /// <param name="castTypeName">The concrete source type.</param>
     /// <param name="includeStartWith">Whether equal consecutive values are suppressed.</param>
     internal static void Emit(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
         bool includeStartWith) =>
-        _ = sb.Append("new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
+        _ = sb.Append($"new {GeneratedTypeNames.Observables}.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
             .Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
             .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(AddValueChangedCall).Append(rootVar)
             .Append(", __h), ").Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
             .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(RemoveValueChangedCall).Append(rootVar)
             .Append(", __h), ").Append("() => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append(", ")
-            .Append(includeStartWith ? "true" : "false").Append(')');
+            .AppendLiteral(includeStartWith).Append(')');
 }

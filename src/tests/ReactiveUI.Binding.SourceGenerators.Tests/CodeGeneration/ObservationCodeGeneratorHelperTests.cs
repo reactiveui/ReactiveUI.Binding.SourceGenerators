@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -189,7 +188,7 @@ public partial class ObservationCodeGeneratorHelperTests
     public async Task
         GenerateMultiPropertyObservation_ReactiveObjectBeforeChange_WithDeepChain_GeneratesPropertyChangingVariables()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment()

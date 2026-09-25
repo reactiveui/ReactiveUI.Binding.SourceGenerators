@@ -38,70 +38,70 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTwoWay_00000972B7EA334A(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindTwoWay: Count <-> CountText (with conversion) (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = source;
-            var __hookTarget = target;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Count;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.CountText;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string>>)(__property => __property.CountText)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                var __hookSource = source;
+                var __hookTarget = target;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Count;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.CountText;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string>>)(__property => __property.CountText)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.TwoWay))
+                {
+                    return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(source, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count, true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<int>)sourceObsMechanism
-            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                sourceObsRegistration,
-                source,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>>)(__e => __e.Count)).Body,
-                "Count",
-                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<int>)sourceObsMechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    sourceObsRegistration,
+                    source,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
+                    false,
+                    true);
             var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(target, "CountText", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText, true);
-        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(target.GetType(), "CountText", 5, false);
-        var targetObs = targetObsRegistration == null
-            ? (global::System.IObservable<string>)targetObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                targetObsRegistration,
-                target,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string>>)(__e => __e.CountText)).Body,
-                "CountText",
-                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
-                false,
-                true);
-        var __srcSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
-        var __tgtSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
-        var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__srcSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__srcSelected, scheduler);
-        var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__tgtSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__tgtSelected, scheduler);
+            var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(target.GetType(), "CountText", 5, false);
+            var targetObs = targetObsRegistration == null
+                ? (global::System.IObservable<string>)targetObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    targetObsRegistration,
+                    target,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string>>)(__e => __e.CountText)).Body,
+                    "CountText",
+                    (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
+                    false,
+                    true);
+            var __srcSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
+            var __tgtSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
+            var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__srcSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__srcSelected, scheduler);
+            var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__tgtSelected : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__tgtSelected, scheduler);
             var targetThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceBind, target) : sourceBind;
             var sourceThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetBind, source) : targetBind;
 

@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -97,7 +97,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_ObservableParam_EmitsVolatilePattern()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -123,7 +123,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_ValueTypeObservableParam_RecordsWithAPlainWrite()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.Guid",
@@ -151,7 +151,7 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -173,7 +173,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_NoParam_AssignsOnlyTheCommand()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasCommandProperty: true,
             hasCommandParameterProperty: true);
@@ -195,7 +195,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_RestoresTheControlOnDispose()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasCommandProperty: true,
             hasCommandParameterProperty: true);
@@ -258,7 +258,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task EventEnabledPlugin_EmitBinding_ObservableParam_EmitsCanExecuteSync()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -285,7 +285,7 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -307,7 +307,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task EventEnabledPlugin_EmitBinding_NoParam_EmitsNullParam()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             hasEnabledProperty: true);
@@ -326,7 +326,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task EventEnabledPlugin_EmitBinding_NullEventArgsType_UsesFallback()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             resolvedEventArgsTypeFullName: null,
@@ -370,7 +370,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task DefaultEventPlugin_EmitBinding_NullEventArgsType_UsesFallback()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             resolvedEventArgsTypeFullName: null);
@@ -387,7 +387,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task DefaultEventPlugin_EmitBinding_WithEventArgsType_UsesSpecificType()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             resolvedEventArgsTypeFullName: "global::System.Windows.RoutedEventArgs");
@@ -435,7 +435,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
         var group = new BindCommandCodeGenerator.BindCommandTypeGroup(
             inv.ViewTypeFullName,
@@ -459,7 +459,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerFilePath_GeneratesFilePathDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
         var group = new BindCommandCodeGenerator.BindCommandTypeGroup(
             inv.ViewTypeFullName,
@@ -483,7 +483,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerArgExprOverload_WithObservableParam_IncludesWithParameter()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -509,7 +509,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -535,7 +535,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerFilePathOverload_WithObservableParam_IncludesWithParameter()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -560,7 +560,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerFilePathOverload_WithExpressionParam_IncludesWithParameter()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -585,7 +585,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_CommandPropertyPlugin_EmitsCommandBinding()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasCommandProperty: true,
             hasCommandParameterProperty: true);
@@ -603,7 +603,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_EventEnabledPlugin_EmitsEnabledSync()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             hasCommandProperty: false,
@@ -624,7 +624,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_NoPlugin_EmitsThrow()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: null);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
@@ -642,7 +642,7 @@ public class BindCommandCodeGeneratorHelperTests
     public async Task EmitCommandAffinityCheck_ObservableParam_EmitsSelectWrapper()
     {
         const int GeneratedAffinity = 5;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -655,6 +655,20 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
+    /// <summary>An event whose args type was not resolved hands the custom binder the base event args type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitCommandAffinityCheck_EventWithoutArgsType_UsesEventArgs()
+    {
+        const int GeneratedAffinity = 5;
+        var sb = new SourceWriter();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo() with { ResolvedEventArgsTypeFullName = null };
+
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
+
+        await Assert.That(sb.ToString()).Contains("BindCommandToObject<global::TestApp.MyButton, global::System.EventArgs>(");
+    }
+
     /// <summary>A registered binder is handed the observed parameter, not the value it held at one moment.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -663,7 +677,7 @@ public class BindCommandCodeGeneratorHelperTests
         const int GeneratedAffinity = 3;
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -681,7 +695,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task EmitCommandAffinityCheck_NoParam_EmitsImmutableEmptySignal()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, -1, false);
@@ -692,16 +706,16 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(false)");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns MapSignal for observable parameter.</summary>
+    /// <summary>Verifies AppendParameterObservable returns MapSignal for observable parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ObservableParam_ReturnsMapSignal()
+    public async Task AppendParameterObservable_ObservableParam_ReturnsMapSignal()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName);
 
-        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+        var result = BindCommandCodeGenerator.AppendParameterObservable(new(), inv).ToString();
 
         await Assert.That(result).Contains("MapSignal<global::System.String, object>");
     }
@@ -709,7 +723,7 @@ public class BindCommandCodeGeneratorHelperTests
     /// <summary>An expression parameter reaches a binder as the same mapped stream a supplied observable does.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsTheObservedParameter()
+    public async Task AppendParameterObservable_ExpressionParam_ReturnsTheObservedParameter()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -718,19 +732,19 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: StringTypeName,
             parameterPropertyPath: paramPath);
 
-        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+        var result = BindCommandCodeGenerator.AppendParameterObservable(new(), inv).ToString();
 
         await Assert.That(result).Contains(MappedParameterStreamFragment);
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns ImmutableEmptySignal when no parameter.</summary>
+    /// <summary>Verifies AppendParameterObservable returns ImmutableEmptySignal when no parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_NoParam_ReturnsImmutableEmptySignal()
+    public async Task AppendParameterObservable_NoParam_ReturnsImmutableEmptySignal()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
-        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+        var result = BindCommandCodeGenerator.AppendParameterObservable(new(), inv).ToString();
 
         await Assert.That(result).Contains("ImmutableEmptySignal<object>.Instance");
     }
@@ -766,7 +780,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_WithObservableParam_IncludesObservableParam()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName);
@@ -788,7 +802,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_WithExpressionParam_ObservesTheParameterProperty()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -812,7 +826,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindCommandMethod_ExpressionParamWithNoResolvedType_ObservesItAsObject()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: null,
@@ -836,7 +850,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task DefaultEventPlugin_EmitBinding_SupportsNullable_EmitsNullableSender()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
         new DefaultEventBindingPlugin().EmitBinding(sb, inv, ViewSaveButtonName, true);
@@ -854,7 +868,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task DefaultEventPlugin_EmitBinding_NoNullable_EmitsPlainSender()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
         new DefaultEventBindingPlugin().EmitBinding(sb, inv, ViewSaveButtonName, false);
@@ -869,7 +883,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task EventEnabledPlugin_EmitBinding_SupportsNullable_EmitsNullableSender()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: ClickName,
             hasEnabledProperty: true);
@@ -888,7 +902,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_SupportsNullable_ReferenceParam_EmitsNullableLatestParam()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
@@ -910,7 +924,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task CommandPropertyPlugin_EmitBinding_SupportsNullable_ValueParam_KeepsNonNullableLatestParam()
     {
-        var sb = new StringBuilder();
+        var sb = WorkerBody();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.Int32",
@@ -933,7 +947,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_SupportsNullable_EmitsNullableToEvent()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = BindCommandCodeGenerator.GroupByTypeSignature(
             [ModelFactory.CreateBindCommandInvocationInfo()])[0];
 
@@ -947,7 +961,7 @@ public class BindCommandCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_NoNullable_EmitsPlainToEvent()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = BindCommandCodeGenerator.GroupByTypeSignature(
             [ModelFactory.CreateBindCommandInvocationInfo()])[0];
 
@@ -988,4 +1002,10 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).IsNotNull();
         await Assert.That(result!).DoesNotContain("#nullable enable");
     }
+
+    /// <summary>Creates a writer positioned inside a generated worker's body, where a command binding plugin writes.</summary>
+    /// <returns>A writer three levels deep: namespace, class, then member body.</returns>
+    /// <remarks>A plugin finishes the worker it writes into, so it has to be handed a writer inside one.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static SourceWriter WorkerBody() => new SourceWriter().Indent().Indent().Indent();
 }

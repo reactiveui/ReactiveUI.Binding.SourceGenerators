@@ -37,68 +37,68 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_0000102A67853CB8(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter)
         {
             // Bind: Count <-> CountText (with conversion)
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = viewModel;
-            var __hookTarget = view;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Count;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.CountText;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string>>)(__property => __property.CountText)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return null;
+                var __hookSource = viewModel;
+                var __hookTarget = view;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Count;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.CountText;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string>>)(__property => __property.CountText)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.TwoWay))
+                {
+                    return null;
+                }
             }
-        }
             var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(viewModel, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel)__o).Count, true);
-        var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Count", 5, false);
-        var vmObs = vmObsRegistration == null
-            ? (global::System.IObservable<int>)vmObsMechanism
-            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                vmObsRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>>)(__e => __e.Count)).Body,
-                "Count",
-                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel)__o).Count,
-                false,
-                true);
+            var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Count", 5, false);
+            var vmObs = vmObsRegistration == null
+                ? (global::System.IObservable<int>)vmObsMechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    vmObsRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel)__o).Count,
+                    false,
+                    true);
             var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(view, "CountText", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText, true);
-        var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "CountText", 5, false);
-        var viewObs = viewObsRegistration == null
-            ? (global::System.IObservable<string>)viewObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                viewObsRegistration,
-                view,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string>>)(__e => __e.CountText)).Body,
-                "CountText",
-                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
-                false,
-                true);
-        var vmBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
-        var viewBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
+            var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "CountText", 5, false);
+            var viewObs = viewObsRegistration == null
+                ? (global::System.IObservable<string>)viewObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    viewObsRegistration,
+                    view,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string>>)(__e => __e.CountText)).Body,
+                    "CountText",
+                    (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
+                    false,
+                    true);
+            var vmBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
+            var viewBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
 
             var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::System.ValueTuple<bool, string, int>>(vmBind, v => new global::System.ValueTuple<bool, string, int>(true, v, default(int)));
             var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::System.ValueTuple<bool, string, int>>(viewBind, v => new global::System.ValueTuple<bool, string, int>(false, default(string), v));
@@ -112,11 +112,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 {
                     var value = __change.Item2;
                     if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
-                {
-                    return;
-                }
+                    {
+                        return;
+                    }
 
-                view.CountText = value;
+                    view.CountText = value;
                     if (changed.HasObservers)
                     {
                         changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, true));
@@ -126,11 +126,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 {
                     var value = __change.Item3;
                     if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(viewModel.Count, value))
-                {
-                    return;
-                }
+                    {
+                        return;
+                    }
 
-                viewModel.Count = value;
+                    viewModel.Count = value;
                     if (changed.HasObservers)
                     {
                         changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, false));

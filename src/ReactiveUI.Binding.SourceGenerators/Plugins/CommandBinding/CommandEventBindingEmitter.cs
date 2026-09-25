@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -36,14 +36,14 @@ internal static class CommandEventBindingEmitter
     /// <param name="emitObservableParameter">Emits the binding when an observable parameter is supplied.</param>
     /// <param name="emitNoParameter">Emits the binding when no parameter is supplied.</param>
     internal static void EmitByParameterKind(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         bool supportsNullable,
-        Action<StringBuilder, BindCommandInvocationInfo, string, string, bool> emitObservableParameter,
-        Action<StringBuilder, BindCommandInvocationInfo, string, string, bool> emitNoParameter)
+        Action<SourceWriter, BindCommandInvocationInfo, string, string, bool> emitObservableParameter,
+        Action<SourceWriter, BindCommandInvocationInfo, string, string, bool> emitNoParameter)
     {
-        var eventArgsType = inv.ResolvedEventArgsTypeFullName ?? "global::System.EventArgs";
+        var eventArgsType = inv.ResolvedEventArgsTypeFullName ?? GeneratedTypeNames.EventArgs;
 
         if (CommandParameterEmitter.HasParameter(inv))
         {

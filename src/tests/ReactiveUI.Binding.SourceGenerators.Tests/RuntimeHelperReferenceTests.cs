@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -74,7 +73,7 @@ public class RuntimeHelperReferenceTests
         {
             NativeCommand = new(NativeCommandKind.AppKitTargetAction, null, null, false, false),
         };
-        var sb = new StringBuilder();
+        var sb = new SourceWriter().Indent().Indent().Indent();
 
         AppKitCommandEmitter.EmitBinding(sb, inv, ControlAccess);
 

@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -50,6 +50,6 @@ internal sealed class WpfObservationPlugin : IPlatformObservationPlugin
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+    public void EmitObservation(SourceWriter sb, in ObservationExpression observation) =>
         WpfObservationEmitter.Emit(sb, observation.Source, observation.Segment, observation.SourceType, observation.Distinct);
 }

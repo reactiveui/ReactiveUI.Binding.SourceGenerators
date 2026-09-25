@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -36,13 +35,10 @@ internal static class ObservableAsPropertyGenerator
     private const string ReactiveAttributeName = "ReactiveUI.Binding.Reactive.ObservableAsPropertyAttribute";
 
     /// <summary>The helper type the generated field holds.</summary>
-    private const string HelperType = "global::ReactiveUI.Binding.ObservableAsPropertyHelper";
+    private const string HelperType = GeneratedTypeNames.ObservableAsPropertyHelper;
 
     /// <summary>The prefix a fully qualified type name starts with.</summary>
     private const string GlobalPrefix = "global::";
-
-    /// <summary>The spaces one nesting level indents by.</summary>
-    private const int IndentWidth = 4;
 
     /// <summary>The suffix every generated file name ends with.</summary>
     private const string HintSuffix = ".ObservableAsProperties.g.cs";
@@ -58,8 +54,11 @@ internal static class ObservableAsPropertyGenerator
         in IncrementalGeneratorInitializationContext context,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
-        var lean = context.SyntaxProvider.ForAttributeWithMetadataName(LeanAttributeName, IsCandidate, Extract).Collect();
-        var reactive = context.SyntaxProvider.ForAttributeWithMetadataName(ReactiveAttributeName, IsCandidate, Extract).Collect();
+        // Converted once and shared, so both flavours' registrations use the same two delegates.
+        Func<SyntaxNode, CancellationToken, bool> isCandidate = IsCandidate;
+        Func<GeneratorAttributeSyntaxContext, CancellationToken, ObservableAsPropertyInfo?> extract = Extract;
+        var lean = context.SyntaxProvider.ForAttributeWithMetadataName(LeanAttributeName, isCandidate, extract).Collect();
+        var reactive = context.SyntaxProvider.ForAttributeWithMetadataName(ReactiveAttributeName, isCandidate, extract).Collect();
 
         context.RegisterSourceOutput(
             lean.Combine(reactive).Combine(languageFeatures),
@@ -156,63 +155,39 @@ internal static class ObservableAsPropertyGenerator
     private static string Generate(List<ObservableAsPropertyInfo> properties, in LanguageFeatures features)
     {
         var declaration = properties[0].Declaration;
-        var sb = PooledBuilder.Rent(CodeGeneratorHelpers.PerInvocationBufferCapacity * properties.Count);
-        CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
-        _ = sb.AppendLine("#nullable enable").AppendLine();
+        var sb = SourceWriter.Rent(CodeGeneratorHelpers.PerInvocationBufferCapacity * properties.Count)
+            .FileHeader(features.EmitGeneratedCodeMarkers, enableNullable: true)
+            .BlankLine();
 
-        var level = 0;
-        if (declaration.Namespace is { } ns)
-        {
-            _ = sb.Append("namespace ").AppendLine(ns).AppendLine("{");
-            level = 1;
-        }
-
-        var headers = declaration.TypeHeaders;
-        for (var i = 0; i < headers.Length; i++)
-        {
-            _ = AppendIndent(sb, level + i).AppendLine(headers[i]);
-            _ = AppendIndent(sb, level + i).AppendLine("{");
-        }
-
-        var member = level + headers.Length;
+        CodeGeneratorHelpers.OpenPartialDeclaration(sb, declaration);
         for (var i = 0; i < properties.Count; i++)
         {
             if (i > 0)
             {
-                _ = sb.AppendLine();
+                _ = sb.BlankLine();
             }
 
-            AppendProperty(sb, properties[i], member);
+            AppendProperty(sb, properties[i]);
         }
 
-        for (var i = headers.Length - 1; i >= 0; i--)
-        {
-            _ = AppendIndent(sb, level + i).AppendLine("}");
-        }
+        CodeGeneratorHelpers.ClosePartialDeclaration(sb, declaration);
 
-        if (declaration.Namespace is not null)
-        {
-            _ = sb.AppendLine("}");
-        }
-
-        return PooledBuilder.ToStringAndReturn(sb);
+        return sb.ToStringAndReturn();
     }
 
-    /// <summary>Appends one property's helper field and the body that reads it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes one property's helper field and the body that reads it.</summary>
+    /// <param name="sb">The writer, at the level of the type's members.</param>
     /// <param name="property">The property.</param>
-    /// <param name="level">The member nesting level.</param>
-    private static void AppendProperty(StringBuilder sb, ObservableAsPropertyInfo property, int level)
+    private static void AppendProperty(SourceWriter sb, ObservableAsPropertyInfo property)
     {
         var name = property.PropertyName;
-        _ = AppendIndent(sb, level).Append("/// <summary>Backs <see cref=\"").Append(name)
-            .AppendLine("\"/>; assign it with <c>ToProperty</c>.</summary>");
-        _ = AppendIndent(sb, level).Append("private ").Append(HelperType).Append('<').Append(property.TypeFullName).Append(">? ");
-        _ = AppendHelperFieldName(sb, name).AppendLine(";").AppendLine();
-        _ = AppendIndent(sb, level).Append(property.Modifiers).Append(' ').Append(property.TypeFullName).Append(' ')
-            .Append(name).Append(" => ");
+        _ = sb.Append("/// <summary>Backs <see cref=\"").Append(name).Line("\"/>; assign it with <c>ToProperty</c>.</summary>")
+            .Append("private ").Append(HelperType).Append('<').Append(property.TypeFullName).Append(">? ");
+        _ = AppendHelperFieldName(sb, name).EndStatement()
+            .BlankLine()
+            .Append(property.Modifiers).Append(' ').Append(property.TypeFullName).Append(' ').Append(name).Append(" => ");
         _ = AppendHelperFieldName(sb, name).Append(" is null ? default! : ");
-        _ = AppendHelperFieldName(sb, name).AppendLine(".Value;");
+        _ = AppendHelperFieldName(sb, name).Line(".Value;");
     }
 
     /// <summary>Appends the helper field for a property, <c>_{name}Helper</c> with the first letter lowered, without building a string for it.</summary>
@@ -220,7 +195,7 @@ internal static class ObservableAsPropertyGenerator
     /// <param name="propertyName">The property name.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendHelperFieldName(StringBuilder sb, string propertyName) =>
+    private static SourceWriter AppendHelperFieldName(SourceWriter sb, string propertyName) =>
         sb.Append('_').Append(char.ToLowerInvariant(propertyName[0])).Append(propertyName, 1, propertyName.Length - 1).Append("Helper");
 
     /// <summary>Names a type's generated file from its metadata name, which is unique within the compilation.</summary>
@@ -245,11 +220,4 @@ internal static class ObservableAsPropertyGenerator
 
         return name.Append(HintSuffix).ToStringAndReturn();
     }
-
-    /// <summary>Appends the indentation for a nesting level, without building a string for it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="level">The nesting level.</param>
-    /// <returns>The builder, for chaining.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendIndent(StringBuilder sb, int level) => sb.Append(' ', level * IndentWidth);
 }

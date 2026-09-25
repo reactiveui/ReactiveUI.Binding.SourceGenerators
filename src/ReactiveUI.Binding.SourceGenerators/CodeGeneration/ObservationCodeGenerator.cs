@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -21,31 +20,19 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 internal static class ObservationCodeGenerator
 {
     /// <summary>Opens the lambda that reads the property back off a before-change notification.</summary>
-    private const string ChangingReaderLambdaOpen = "                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((";
+    private const string ChangingReaderLambdaOpen = $"({INotifyPropertyChanging} __o) => ((";
 
     /// <summary>Passes the observed object to a before-change observation.</summary>
-    private const string ChangingSourceArgument = "                (global::System.ComponentModel.INotifyPropertyChanging)obj,";
+    private const string ChangingSourceArgument = $"({INotifyPropertyChanging})obj,";
 
-    /// <summary>Opens the branch a chain stage takes while its parent is present.</summary>
-    private const string ObservableTrueBranchOpen = "                ? (global::System.IObservable<";
+    /// <summary>Opens a before-change observation of a property.</summary>
+    private const string ChangingObservableOpen = $"new {PropertyChangingObservable}<";
 
-    /// <summary>Opens the branch a chain stage takes while its parent is null.</summary>
-    private const string ObservableFalseBranchOpen = "                : (global::System.IObservable<";
-
-    /// <summary>Tests that a chain stage's parent is present before observing it.</summary>
-    private const string ParentPresentTest = " != null";
-
-    /// <summary>Passes the observed object as the first argument of a generated call.</summary>
-    private const string MonitoredObjectArgument = "(objectToMonitor";
+    /// <summary>Opens a cast of an observation to the interface a chain stage is typed as.</summary>
+    private const string ObservableCastOpen = $"({IObservable}<";
 
     /// <summary>The name the generated overloads give the observed object.</summary>
     private const string MonitoredObjectName = "objectToMonitor";
-
-    /// <summary>Opens the observation a property that never notifies is read through.</summary>
-    private const string UnchangingObservableOpen = ")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
-
-    /// <summary>The indent an argument takes when the choice is written in an expression position.</summary>
-    private const string ExpressionChoiceArgumentIndent = "                ";
 
     /// <summary>Names the local holding the observation the generator's own mechanism builds.</summary>
     private const string MechanismVariableSuffix = "Mechanism";
@@ -54,7 +41,7 @@ internal static class ObservationCodeGenerator
     private const string RegistrationVariableSuffix = "Registration";
 
     /// <summary>Opens a fully qualified default equality comparer.</summary>
-    private const string EqualityComparerOpen = "global::System.Collections.Generic.EqualityComparer<";
+    private const string EqualityComparerOpen = $"{EqualityComparer}<";
 
     /// <summary>
     /// Returns the fully qualified type name for casting the observer parameter back to the
@@ -112,24 +99,28 @@ internal static class ObservationCodeGenerator
                 methodPrefix));
 
     /// <summary>Generates an observation method for a single invocation.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="suffix">The stable method name suffix (hex hash).</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     /// <param name="prefix">The method name prefix ("WhenChanged", "WhenChanging", or "WhenAnyValue").</param>
     internal static void GenerateObservationMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo inv,
         ClassBindingInfo? classInfo,
         string suffix,
         bool isBeforeChange,
         string prefix)
     {
-        var selectorParam = inv.HasSelector ? $", {GetSelectorType(inv)} selector" : string.Empty;
+        _ = sb.Append($"private static {IObservable}<").Append(inv.ReturnTypeFullName).Append("> __").Append(prefix).Append('_')
+            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj");
+        if (inv.HasSelector)
+        {
+            _ = sb.Append(", ").Append(GetSelectorType(inv)).Append(" selector");
+        }
 
-        _ = sb.Append("        private static global::System.IObservable<").Append(inv.ReturnTypeFullName).Append("> __").Append(prefix).Append('_')
-            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj").Append(selectorParam).AppendLine(")").AppendLine("        {");
+        _ = sb.Line(")").OpenBlock();
 
         if (inv.PropertyPaths.Length == 1)
         {
@@ -146,10 +137,10 @@ internal static class ObservationCodeGenerator
 
                 if (inv.HasSelector)
                 {
-                    _ = sb.Append("            return new ").Append(MapSignal).Append('<')
+                    _ = sb.BeginReturn().Append("new ").Append(MapSignal).Append('<')
                         .Append(path[0].PropertyTypeFullName).Append(", ").Append(inv.ReturnTypeFullName).Append(">(");
                     GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange);
-                    _ = sb.AppendLine(", selector);");
+                    _ = sb.Line(", selector);");
                 }
                 else
                 {
@@ -168,9 +159,8 @@ internal static class ObservationCodeGenerator
             GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange);
         }
 
-        _ = sb.AppendLine()
-            .AppendLine("        }")
-            .AppendLine();
+        _ = sb.CloseBlock()
+            .BlankLine();
     }
 
     /// <summary>Gets the Func type signature for a selector parameter.</summary>
@@ -178,7 +168,7 @@ internal static class ObservationCodeGenerator
     /// <returns>A fully qualified Func type string like <c>global::System.Func&lt;T1, T2, TReturn&gt;</c>.</returns>
     internal static string GetSelectorType(InvocationInfo inv)
     {
-        var sb = new PooledStringBuilder().Append("global::System.Func<");
+        var sb = new PooledStringBuilder().Append($"{Func}<");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             var path = inv.PropertyPaths[i];
@@ -189,12 +179,12 @@ internal static class ObservationCodeGenerator
         return sb.ToStringAndReturn();
     }
 
-    /// <summary>Starts a typed pair constructor or the wide-arity factory.</summary>
-    /// <param name="sb">The output builder.</param>
+    /// <summary>Starts a typed pair constructor or the wide-arity factory, leaving the writer on its argument level.</summary>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="paths">The observed property paths.</param>
     /// <param name="returnType">The projected result type.</param>
     internal static void AppendCombineLatestConstruction(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<EquatableArray<PropertyPathSegment>> paths,
         string returnType)
     {
@@ -202,15 +192,17 @@ internal static class ObservationCodeGenerator
         {
             var left = paths[0];
             var right = paths[1];
-            _ = sb.Append(GeneratedSyntax.ReturnNew).Append(CombineLatestSignal).Append('<')
+            _ = sb.BeginReturn().Append("new ").Append(CombineLatestSignal).Append('<')
                 .Append(left[left.Length - 1].PropertyTypeFullName).Append(", ")
                 .Append(right[right.Length - 1].PropertyTypeFullName).Append(", ")
-                .Append(returnType).AppendLine(">(");
+                .Append(returnType).Append(">(");
         }
         else
         {
-            _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+            _ = sb.BeginReturn().Append($"{LinqExtensions}.CombineLatest(");
         }
+
+        _ = sb.OpenContinuation();
     }
 
     /// <summary>
@@ -218,12 +210,12 @@ internal static class ObservationCodeGenerator
     /// Each property path observable is pre-declared as a local variable with properly
     /// formatted multi-line code, then referenced by name inside CombineLatest.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     internal static void GenerateMultiPropertyObservation(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo inv,
         ClassBindingInfo? classInfo,
         bool isBeforeChange)
@@ -233,48 +225,45 @@ internal static class ObservationCodeGenerator
         // properly formatted local variable, then are referenced by name in CombineLatest.
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
-            var path = inv.PropertyPaths[i];
-            var varName = $"__propObs{i}";
-
-            GenerateObservedPropertyVariable(sb, path, classInfo, isBeforeChange, varName);
+            GenerateObservedPropertyVariable(sb, inv.PropertyPaths[i], classInfo, isBeforeChange, $"__propObs{i}");
 
             // Blank line between variable declarations for readability
-            _ = sb.AppendLine()
-                .AppendLine();
+            _ = sb.BlankLine();
         }
 
         AppendCombineLatestConstruction(sb, inv.PropertyPaths, inv.ReturnTypeFullName);
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
-            _ = sb.Append("                __propObs").Append(i);
+            _ = sb.Append("__propObs").Append(i);
             if (i < inv.PropertyPaths.Length - 1)
             {
-                _ = sb.AppendLine(",");
+                _ = sb.Line(",");
             }
         }
 
         if (inv.HasSelector)
         {
-            _ = sb.AppendLine(",")
-                .Append("                selector);");
+            _ = sb.Line(",")
+                .Line("selector);");
         }
         else
         {
             EmitCombineLatestValuesProjection(sb, inv);
         }
+
+        _ = sb.Outdent();
     }
 
     /// <summary>
-    /// Generates a shallow (single-segment) path observation as a single-line expression.
+    /// Generates a shallow (single-segment) path observation as an inline expression.
     /// Uses plugin dispatch to emit platform-specific observation code.
-    /// Appended directly to <paramref name="sb"/> without a trailing newline.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, part way through the line the expression belongs to; the line is left open.</param>
     /// <param name="path">The single-segment property path.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     internal static void GenerateShallowPathObservation(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         ClassBindingInfo? classInfo,
         bool isBeforeChange)
@@ -288,10 +277,7 @@ internal static class ObservationCodeGenerator
             segment,
             plugin?.Affinity ?? 0,
             isBeforeChange,
-            string.Empty,
-            ExpressionChoiceArgumentIndent);
-
-        _ = sb.Append(ExpressionChoiceArgumentIndent);
+            string.Empty);
 
         if (plugin is not null)
         {
@@ -299,23 +285,22 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<").Append(segment.PropertyTypeFullName).Append(">((")
-                .Append("global::System.ComponentModel.INotifyPropertyChanging)obj, \"").Append(segment.PropertyName)
-                .Append("\", (global::System.ComponentModel.INotifyPropertyChanging __o) => (").Append('(').Append(GetTypeCastName(classInfo))
+            _ = sb.Append(ChangingObservableOpen).Append(segment.PropertyTypeFullName).Append(">((")
+                .Append($"{INotifyPropertyChanging})obj, ").AppendQuoted(segment.PropertyName)
+                .Append($", ({INotifyPropertyChanging} __o) => (").Append('(').Append(GetTypeCastName(classInfo))
                 .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(')');
         }
         else
         {
-            var propertyAccess = $"obj.{segment.PropertyName}";
-            _ = sb.Append("new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(segment.PropertyTypeFullName)
-                .Append(">(").Append(propertyAccess).Append(')');
+            _ = sb.Append(OpenUnchangingProperty).Append(segment.PropertyTypeFullName)
+                .Append(">(obj.").Append(segment.PropertyName).Append(')');
         }
 
-        _ = sb.Append(')');
+        _ = ChainRegistrationEmitter.AppendChoiceClose(sb);
     }
 
     /// <summary>Emits the variable holding one observed property.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="path">The property path being observed.</param>
     /// <param name="classInfo">The class binding info for the declaring type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
@@ -326,7 +311,7 @@ internal static class ObservationCodeGenerator
     /// rather than testing the length itself.
     /// </remarks>
     internal static void GenerateObservedPropertyVariable(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         ClassBindingInfo? classInfo,
         bool isBeforeChange,
@@ -345,13 +330,13 @@ internal static class ObservationCodeGenerator
     /// Generates a shallow (single-segment) path observable as a properly formatted local variable
     /// declaration. Uses plugin dispatch to emit platform-specific observation code.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="path">The single-segment property path.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     /// <param name="varName">The variable name to assign the observable to.</param>
     internal static void GenerateShallowObservableVariable(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         ClassBindingInfo? classInfo,
         bool isBeforeChange,
@@ -373,21 +358,19 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable).Append(" = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
-                .Append(segment.PropertyTypeFullName).AppendLine(">(")
-                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
-                .Append(segment.PropertyName).AppendLine("\",")
+            _ = sb.BeginVar(mechanismVariable).Append(ChangingObservableOpen).Append(segment.PropertyTypeFullName).Append(">(")
+                .OpenContinuation()
+                .Line(ChangingSourceArgument)
+                .AppendQuoted(segment.PropertyName).Line(",")
                 .Append(ChangingReaderLambdaOpen).Append(GetTypeCastName(classInfo))
-                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(");");
+                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Line(");")
+                .Outdent();
         }
         else
         {
-            var propertyAccess = $"obj.{segment.PropertyName}";
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable).Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
-                .Append(segment.PropertyTypeFullName).Append(">(").Append(propertyAccess).Append(");");
+            _ = sb.BeginVar(mechanismVariable).Append(OpenUnchangingProperty)
+                .Append(segment.PropertyTypeFullName).Append(">(obj.").Append(segment.PropertyName).Line(");");
         }
-
-        _ = sb.AppendLine();
 
         EmitInlinePluginChoice(
             sb,
@@ -395,20 +378,20 @@ internal static class ObservationCodeGenerator
             segment,
             plugin?.Affinity ?? 0,
             isBeforeChange,
-            new(GeneratedSyntax.BodyLocalDeclaration, "                ", mechanismVariable, varName));
+            new(mechanismVariable, varName));
     }
 
     /// <summary>
     /// Generates a deep chain observable as a properly formatted local variable declaration.
     /// Uses plugin dispatch for the root segment and inner segments.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="path">The multi-segment property path.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     /// <param name="varName">The variable name to assign the final observable to.</param>
     internal static void GenerateDeepChainVariable(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         ClassBindingInfo? classInfo,
         bool isBeforeChange,
@@ -416,20 +399,16 @@ internal static class ObservationCodeGenerator
     {
         // First segment: observe root object for first property
         var seg0 = path[0];
-        var obs0Var = $"{varName}_s0";
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
-        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, obs0Var);
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, $"{varName}_s0");
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
-        var lastObsVar = $"{varName}_s{path.Length - 1}";
-
         // Distinct on both timings. The runtime engine asks for it whichever way it observes, so a
         // before-change stream that repeated a value would emit where the runtime engine stayed quiet.
-        _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = ");
-        AppendUniqueObservation(sb, path[path.Length - 1].PropertyTypeFullName, lastObsVar);
-        _ = sb.AppendLine(";");
+        AppendUniqueObservation(sb.BeginVar(varName), path[path.Length - 1].PropertyTypeFullName, $"{varName}_s{path.Length - 1}");
+        _ = sb.EndStatement();
     }
 
     /// <summary>
@@ -443,14 +422,14 @@ internal static class ObservationCodeGenerator
         SignatureGrouping.Group(invocations, AppendSignatureKey, static (first, members) => new TypeGroup(first, members));
 
     /// <summary>Generates a concrete typed extension method overload with its dispatch table.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     internal static void GenerateConcreteOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
         bool supportsNullable,
@@ -469,17 +448,17 @@ internal static class ObservationCodeGenerator
 
         GenerateRuntimeFallback(sb, first, methodPrefix, propCount, hasSelector);
 
-        _ = sb.AppendLine("        }");
+        _ = sb.CloseBlock();
     }
 
     /// <summary>Ends the overload where the stub it displaces would have ended: at the runtime engine.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the overload's body.</param>
     /// <param name="first">The invocation whose types the whole group shares.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="propCount">The number of observed properties.</param>
     /// <param name="hasSelector">Whether the overload takes a selector.</param>
     internal static void GenerateRuntimeFallback(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo first,
         string methodPrefix,
         int propCount,
@@ -512,19 +491,19 @@ internal static class ObservationCodeGenerator
     }
 
     /// <summary>Generates a single-property observation method body using plugin dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="propertyAccess">The dotted property access expression (e.g. "obj.Name").</param>
     /// <param name="propertyName">The leaf property name for event filtering.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     internal static void GenerateSinglePropertyObservation(
-    StringBuilder sb,
-    InvocationInfo inv,
-    ClassBindingInfo? classInfo,
-    string propertyAccess,
-    string propertyName,
-    bool isBeforeChange)
+        SourceWriter sb,
+        InvocationInfo inv,
+        ClassBindingInfo? classInfo,
+        string propertyAccess,
+        string propertyName,
+        bool isBeforeChange)
     {
         var segment = inv.PropertyPaths[0][0];
         var plugin = ResolveRootPlugin(classInfo, segment, isBeforeChange);
@@ -535,10 +514,7 @@ internal static class ObservationCodeGenerator
             segment,
             plugin?.Affinity ?? 0,
             isBeforeChange,
-            "            return ",
-            ExpressionChoiceArgumentIndent);
-
-        _ = sb.Append(ExpressionChoiceArgumentIndent);
+            "return ");
 
         if (plugin is not null)
         {
@@ -547,28 +523,30 @@ internal static class ObservationCodeGenerator
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
             // INPChanging-only type (no INPC, no IReactiveObject) — can observe before-change
-            _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
-                .Append(inv.ReturnTypeFullName).AppendLine(">(").AppendLine(ChangingSourceArgument)
-                .Append(GeneratedSyntax.QuotedArgumentOpen).Append(propertyName).AppendLine("\",")
+            _ = sb.Append(ChangingObservableOpen).Append(inv.ReturnTypeFullName).Append(">(")
+                .OpenContinuation()
+                .Line(ChangingSourceArgument)
+                .AppendQuoted(propertyName).Line(",")
                 .Append(ChangingReaderLambdaOpen).Append(inv.SourceTypeFullName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).Append(')');
+                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).Append(')')
+                .Outdent();
         }
         else
         {
-            _ = sb.Append("new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
+            _ = sb.Append(OpenUnchangingProperty)
                 .Append(inv.ReturnTypeFullName).Append(">(").Append(propertyAccess).Append(')');
         }
 
-        _ = sb.Append(");");
+        _ = ChainRegistrationEmitter.AppendChoiceClose(sb).EndStatement();
     }
 
     /// <summary>Generates a deep chain observation method body using plugin dispatch for the root segment and inner segments.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
     internal static void GenerateDeepChainObservation(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo inv,
         ClassBindingInfo? classInfo,
         bool isBeforeChange)
@@ -582,22 +560,21 @@ internal static class ObservationCodeGenerator
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
-        var lastObs = $"__obs{path.Length - 1}";
         var leafType = path[path.Length - 1].PropertyTypeFullName;
-        _ = sb.Append("            return ");
+        _ = sb.BeginReturn();
         if (inv.HasSelector)
         {
             _ = sb.Append("new ").Append(MapSignal).Append('<').Append(leafType).Append(", ")
                 .Append(inv.ReturnTypeFullName).Append(">(");
         }
 
-        AppendUniqueObservation(sb, leafType, lastObs);
+        AppendUniqueObservation(sb, leafType, $"__obs{path.Length - 1}");
         if (inv.HasSelector)
         {
             _ = sb.Append(", selector)");
         }
 
-        _ = sb.Append(';');
+        _ = sb.EndStatement();
     }
 
     /// <summary>
@@ -605,7 +582,7 @@ internal static class ObservationCodeGenerator
     /// Used by binding generators to emit direct observation code
     /// instead of delegating to WhenChanged dispatch.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     /// <param name="rootVar">The root variable name (e.g., "source", "target").</param>
     /// <param name="propertyPath">The property path segments.</param>
     /// <param name="propertyTypeFullName">The fully qualified type of the leaf property.</param>
@@ -613,7 +590,7 @@ internal static class ObservationCodeGenerator
     /// <param name="variableName">The name for the resulting observable variable (e.g., "sourceObs").</param>
     /// <param name="brokenChainBehavior">What a deep path's leaf emits while a parent on the path is null.</param>
     internal static void EmitInlineObservation(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         EquatableArray<PropertyPathSegment> propertyPath,
         string propertyTypeFullName,
@@ -634,10 +611,8 @@ internal static class ObservationCodeGenerator
             }
             else
             {
-                var propertyAccess = $"{rootVar}.{segment.PropertyName}";
-                _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(mechanismVariable)
-                    .Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(propertyTypeFullName).Append(">(")
-                    .Append(propertyAccess).AppendLine(");");
+                _ = sb.BeginVar(mechanismVariable).Append(OpenUnchangingProperty).Append(propertyTypeFullName).Append(">(")
+                    .Append(rootVar).Append('.').Append(segment.PropertyName).Line(");");
             }
 
             EmitInlinePluginChoice(
@@ -646,9 +621,8 @@ internal static class ObservationCodeGenerator
                 segment,
                 plugin?.Affinity ?? 0,
                 false,
-                new(GeneratedSyntax.InlineLocalDeclaration, "            ", mechanismVariable, variableName),
+                new(mechanismVariable, variableName),
                 propertyTypeFullName);
-            _ = sb.AppendLine();
         }
         else
         {
@@ -684,19 +658,13 @@ internal static class ObservationCodeGenerator
         }
     }
 
-    /// <summary>Renders a flag as the generated output spells it.</summary>
-    /// <param name="value">The flag to render.</param>
-    /// <returns>The literal a generated argument carries.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string BooleanLiteral(bool value) => value ? "true" : "false";
-
     /// <summary>Emits the choice between the mechanism the generator picked and a registration that outranks it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the body the observation is built in.</param>
     /// <param name="rootVar">The variable holding the observed object.</param>
     /// <param name="segment">The property being observed.</param>
     /// <param name="generatedAffinity">The affinity of the mechanism the generator picked.</param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
-    /// <param name="layout">Where the choice is written and what it names the locals it declares.</param>
+    /// <param name="locals">The local holding the mechanism's observation, and the local the choice is assigned to.</param>
     /// <param name="valueTypeOverride">
     /// The element type the surrounding code expects, where it is not the property's own declared type.
     /// </param>
@@ -713,33 +681,35 @@ internal static class ObservationCodeGenerator
     /// </para>
     /// </remarks>
     private static void EmitInlinePluginChoice(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         PropertyPathSegment segment,
         int generatedAffinity,
         bool isBeforeChange,
-        in PluginChoiceLayout layout,
+        in PluginChoiceLocals locals,
         string? valueTypeOverride = null)
     {
         var valueType = valueTypeOverride ?? segment.PropertyTypeFullName;
-        var pluginVariable = layout.VariableName + RegistrationVariableSuffix;
-        var argumentIndent = $"{layout.ContinuationIndent}    ";
-        const string observableOpen = "? (global::System.IObservable<";
+        var pluginVariable = locals.VariableName + RegistrationVariableSuffix;
 
-        _ = sb.Append(layout.DeclarationPrefix).Append(pluginVariable).Append(" = ").Append(ObservationAffinityChecker)
-            .Append(".FindHigherAffinityPlugin(").Append(rootVar).Append(".GetType(), \"").Append(segment.PropertyName)
-            .Append("\", ").Append(generatedAffinity).Append(", ").Append(BooleanLiteral(isBeforeChange)).AppendLine(");")
-            .Append(layout.DeclarationPrefix).Append(layout.VariableName).Append(" = ").Append(pluginVariable).AppendLine(" == null")
-            .Append(layout.ContinuationIndent).Append(observableOpen).Append(valueType).Append(">)").AppendLine(layout.MechanismVariable)
-            .Append(layout.ContinuationIndent).Append(": (global::System.IObservable<").Append(valueType).Append(">)new ")
-            .Append(PluginPropertyObservable).Append('<').Append(valueType).AppendLine(">(");
-        _ = ChainRegistrationEmitter.AppendPluginObservableArguments(sb, argumentIndent, pluginVariable, rootVar, segment, valueType, isBeforeChange)
-            .AppendLine(",")
-            .Append(argumentIndent).Append("true);");
+        _ = sb.BeginVar(pluginVariable).Append(ObservationAffinityChecker)
+            .Append(".FindHigherAffinityPlugin(").Append(rootVar).Append(".GetType(), ").AppendQuoted(segment.PropertyName)
+            .Append(", ").Append(generatedAffinity).Append(", ").AppendLiteral(isBeforeChange).Line(");")
+            .BeginVar(locals.VariableName).Append(pluginVariable).Append(" == null")
+            .OpenContinuation()
+            .Append("? ").Append(ObservableCastOpen).Append(valueType).Append(">)").Line(locals.MechanismVariable)
+            .Append(": ").Append(ObservableCastOpen).Append(valueType).Append(">)new ")
+            .Append(PluginPropertyObservable).Append('<').Append(valueType).Append(">(")
+            .OpenContinuation();
+        _ = ChainRegistrationEmitter.AppendPluginObservableArguments(sb, pluginVariable, rootVar, segment, valueType, isBeforeChange)
+            .Line(",")
+            .Line("true);")
+            .Outdent()
+            .Outdent();
     }
 
     /// <summary>Emits the first link of a chain into a local, and the choice a registration can win for it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the body the chain is built in.</param>
     /// <param name="rootVar">The variable holding the chain root.</param>
     /// <param name="seg0">The first segment of the path.</param>
     /// <param name="classInfo">The root type's binding info, when known.</param>
@@ -752,7 +722,7 @@ internal static class ObservationCodeGenerator
     /// the change, even for a before-change observation.
     /// </remarks>
     private static void EmitChainRootWithChoice(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         PropertyPathSegment seg0,
         ClassBindingInfo? classInfo,
@@ -767,10 +737,9 @@ internal static class ObservationCodeGenerator
         }
         else
         {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable)
-                .Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
-                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(").Append(rootVar).Append('.')
-                .Append(seg0.PropertyName).AppendLine(");");
+            _ = sb.BeginVar(mechanismVariable).Append(ObservableCastOpen).Append(seg0.PropertyTypeFullName).Append(">)")
+                .Append(OpenUnchangingProperty).Append(seg0.PropertyTypeFullName).Append(">(").Append(rootVar).Append('.')
+                .Append(seg0.PropertyName).Line(");");
         }
 
         EmitInlinePluginChoice(
@@ -779,7 +748,7 @@ internal static class ObservationCodeGenerator
             seg0,
             rootPlugin?.Affinity ?? 0,
             false,
-            new(GeneratedSyntax.BodyLocalDeclaration, "                ", mechanismVariable, obsVar));
+            new(mechanismVariable, obsVar));
     }
 
     /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
@@ -802,7 +771,7 @@ internal static class ObservationCodeGenerator
     /// Chains the segments after the root for the standalone observation method, which names its
     /// stages <c>__obsN</c> rather than deriving them from a caller-supplied prefix.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="path">The property path being observed.</param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <remarks>
@@ -810,7 +779,7 @@ internal static class ObservationCodeGenerator
     /// while the leaf suppresses the default value to match the runtime expression-chain fallback.
     /// </remarks>
     private static void EmitObservationChainInnerSegments(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         bool isBeforeChange)
     {
@@ -824,7 +793,7 @@ internal static class ObservationCodeGenerator
     /// Chains the segments after the root with Select + Switch, so the observation re-subscribes when
     /// an intermediate value changes.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the observation method's body.</param>
     /// <param name="path">The property path being observed.</param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="varName">The variable-name prefix for the emitted stages.</param>
@@ -833,7 +802,7 @@ internal static class ObservationCodeGenerator
     /// while the leaf suppresses the default value to match the runtime expression-chain fallback.
     /// </remarks>
     private static void EmitDeepChainInnerSegments(
-        StringBuilder sb,
+        SourceWriter sb,
         EquatableArray<PropertyPathSegment> path,
         bool isBeforeChange,
         string varName)
@@ -845,7 +814,7 @@ internal static class ObservationCodeGenerator
     }
 
     /// <summary>Emits the stage that switches one segment after the root onto its parent's latest value.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the body the chain is built in.</param>
     /// <param name="seg">The segment the stage observes.</param>
     /// <param name="variables">The names of the parent stage, this stage and the lambda's parent parameter.</param>
     /// <param name="isLeaf">Whether the segment is the last in the path.</param>
@@ -855,21 +824,17 @@ internal static class ObservationCodeGenerator
     /// null and drops its subscription on the detached subtree.
     /// </remarks>
     private static void EmitInnerSegment(
-        StringBuilder sb,
+        SourceWriter sb,
         PropertyPathSegment seg,
         ChainStageVariables variables,
         bool isLeaf,
         bool isBeforeChange)
     {
-        var segType = seg.PropertyTypeFullName;
         var beforeLeaf = isBeforeChange && isLeaf;
         var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
         var nullParentBehavior = isLeaf
             ? NullParentObservationBehavior.SuppressEmission
             : NullParentObservationBehavior.EmitDefault;
-        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         if (segPlugin is not null)
         {
@@ -877,23 +842,39 @@ internal static class ObservationCodeGenerator
             return;
         }
 
-        // Every known type resolves a plugin, the POCO fallback at worst, so only a segment whose declaring type
-        // is unknown reaches here. Nothing about such a type says it notifies, so the stage reads the value once.
-        var lambdaParam = variables.ParentParameter;
-        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(variables.CurrentObservable).Append(" = ")
-            .Append(OpenChainSwitchMap(seg, segType, variables.PreviousObservable)).AppendLine()
-            .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-            .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
-            .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
-            .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
-            .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
+        EmitReadOnceStage(sb, seg, variables, nullParentBehavior);
+    }
+
+    /// <summary>Emits a chain stage for a segment whose declaring type is unknown, reading the value once per parent.</summary>
+    /// <param name="sb">The writer, inside the body the chain is built in.</param>
+    /// <param name="seg">The segment the stage observes.</param>
+    /// <param name="variables">The names of the parent stage, this stage and the lambda's parent parameter.</param>
+    /// <param name="nullParentBehavior">What the stage emits while its parent is null.</param>
+    /// <remarks>
+    /// Every known type resolves a plugin, the POCO fallback at worst, so only a segment whose declaring type is
+    /// unknown reaches here. Nothing about such a type says it notifies, so the stage reads the value once.
+    /// </remarks>
+    private static void EmitReadOnceStage(
+        SourceWriter sb,
+        PropertyPathSegment seg,
+        in ChainStageVariables variables,
+        NullParentObservationBehavior nullParentBehavior)
+    {
+        var segType = seg.PropertyTypeFullName;
+        ChainRegistrationEmitter.AppendStageOpen(sb, variables, seg, segType);
+        _ = sb.Append("? ").Append(ObservableCastOpen).Append(segType).Line(">)")
+            .Indent()
+            .Append($"new {ImmediateReturnSignal}<").Append(segType).Append(">(((")
+            .Append(seg.DeclaringTypeFullName).Append(')').Append(variables.ParentParameter).Append(").").Append(seg.PropertyName).Line(")")
+            .Outdent();
+        ChainRegistrationEmitter.AppendStageClose(sb, segType, nullParentBehavior);
     }
 
     /// <summary>
     /// Emits the Select/Switch chain for a multi-segment property path, one stage per segment, and
     /// the distinct-until-changed gate that terminates it.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     /// <param name="rootVar">The variable holding the chain root.</param>
     /// <param name="propertyPath">The property path being observed.</param>
     /// <param name="classInfo">The root type's binding info, when known.</param>
@@ -906,7 +887,7 @@ internal static class ObservationCodeGenerator
     /// clear its target, suppressing leaves the target as it was until the path is whole again.
     /// </remarks>
     private static void EmitInlineDeepChain(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         EquatableArray<PropertyPathSegment> propertyPath,
         ClassBindingInfo? classInfo,
@@ -914,50 +895,34 @@ internal static class ObservationCodeGenerator
         string variableName,
         NullParentObservationBehavior brokenChainBehavior)
     {
-        var seg0 = propertyPath[0];
-
-        EmitChainRootWithChoice(sb, rootVar, seg0, classInfo, plugin, $"__{variableName}_s0");
+        EmitChainRootWithChoice(sb, rootVar, propertyPath[0], classInfo, plugin, $"__{variableName}_s0");
 
         for (var s = 1; s < propertyPath.Length; s++)
         {
             var seg = propertyPath[s];
-            var prevVar = $"__{variableName}_s{s - 1}";
-            var curVar = $"__{variableName}_s{s}";
-            var lambdaParam = $"__p{s}";
+            var variables = new ChainStageVariables($"__{variableName}_s{s - 1}", $"__{variableName}_s{s}", $"__p{s}");
             var segPlugin = ResolveSegmentPlugin(seg);
             var nullParentBehavior = s == propertyPath.Length - 1 ? brokenChainBehavior : NullParentObservationBehavior.EmitDefault;
 
             if (segPlugin is not null)
             {
-                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, isBeforeChange: false, nullParentBehavior);
+                segPlugin.EmitDeepChainInnerSegment(sb, variables, seg, isBeforeChange: false, nullParentBehavior);
                 continue;
             }
 
-            var segType = seg.PropertyTypeFullName;
-            var declType = seg.DeclaringTypeFullName;
-            var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-            _ = sb.AppendLine().Append("    var ").Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
-                .Append("        ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
-                .Append("            ? (global::System.IObservable<").Append(segType).AppendLine(">)")
-                .Append("                new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
-                .Append(declType).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
-                .Append("            : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
+            EmitReadOnceStage(sb, seg, variables, nullParentBehavior);
         }
 
-        var lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";
-        _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName).Append(" = ");
-        AppendUniqueObservation(sb, propertyPath[propertyPath.Length - 1].PropertyTypeFullName, lastSeg);
-        _ = sb.AppendLine(";");
+        AppendUniqueObservation(sb.BeginVar(variableName), propertyPath[propertyPath.Length - 1].PropertyTypeFullName, $"__{variableName}_s{propertyPath.Length - 1}");
+        _ = sb.EndStatement();
     }
 
     /// <summary>Constructs typed distinct-value filtering with the default comparer.</summary>
-    /// <param name="sb">The output builder.</param>
+    /// <param name="sb">The writer, part way through the line the expression belongs to.</param>
     /// <param name="valueType">The observed value type.</param>
     /// <param name="source">The source variable.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendUniqueObservation(StringBuilder sb, string valueType, string source) =>
+    private static void AppendUniqueObservation(SourceWriter sb, string valueType, string source) =>
         sb.Append("new ").Append(UniqueSignal).Append('<').Append(valueType).Append(">(")
             .Append(source).Append(", ").Append(EqualityComparerOpen).Append(valueType).Append(">.Default)");
 
@@ -977,13 +942,13 @@ internal static class ObservationCodeGenerator
             inv.ExpressionTexts);
 
     /// <summary>Generates the concrete overload and per-invocation observation methods for a single type group.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The type group to generate code for.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot, which settles the dispatch.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     private static void GenerateGroup(
-        StringBuilder sb,
+        SourceWriter sb,
         TypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features,
@@ -1005,7 +970,7 @@ internal static class ObservationCodeGenerator
                 methodPrefix);
         }
 
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
 
         // Generate the observation methods for each invocation in this group. Call sites that share the
         // same source type and property expression(s) produce an identical worker, so the method is keyed
@@ -1030,7 +995,7 @@ internal static class ObservationCodeGenerator
     }
 
     /// <summary>Emits one interceptor per generated observation, claiming every call site that reaches it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The type group whose call sites are being claimed.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
@@ -1042,7 +1007,7 @@ internal static class ObservationCodeGenerator
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void GenerateInterceptors(
-        StringBuilder sb,
+        SourceWriter sb,
         TypeGroup group,
         string methodPrefix,
         in LanguageFeatures features) =>
@@ -1052,7 +1017,7 @@ internal static class ObservationCodeGenerator
             methodPrefix,
             MethodSuffix,
             in features,
-            static (StringBuilder builder, InvocationInfo first, in LanguageFeatures snapshot) => AppendParameterList(
+            static (SourceWriter builder, InvocationInfo first, in LanguageFeatures snapshot) => AppendParameterList(
                 builder,
                 first,
                 snapshot.SupportsCallerArgExpr,
@@ -1062,58 +1027,58 @@ internal static class ObservationCodeGenerator
                 first.HasSelector));
 
     /// <summary>Emits the trailing projection lambda that gathers a selector-less <c>CombineLatest</c> into one emission.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, after the last observed property's argument.</param>
     /// <param name="inv">The invocation, whose return type is the emission being constructed.</param>
-    private static void EmitCombineLatestValuesProjection(StringBuilder sb, InvocationInfo inv)
+    private static void EmitCombineLatestValuesProjection(SourceWriter sb, InvocationInfo inv)
     {
         var propertyCount = inv.PropertyPaths.Length;
 
-        _ = sb.AppendLine(",")
-            .Append("                (");
-        for (var i = 0; i < propertyCount; i++)
-        {
-            _ = sb.Append('p').Append(i + 1);
-            if (i < propertyCount - 1)
-            {
-                _ = sb.Append(", ");
-            }
-        }
-
+        _ = sb.Line(",").Append('(');
+        AppendProjectionParameters(sb, propertyCount);
         _ = sb.Append(") => new ").Append(inv.ReturnTypeFullName).Append('(');
+        AppendProjectionParameters(sb, propertyCount);
+        _ = sb.Line("));");
+    }
+
+    /// <summary>Writes the projection's parameters, <c>p1</c> onwards, comma separated.</summary>
+    /// <param name="sb">The writer, part way through the projection.</param>
+    /// <param name="propertyCount">How many observed properties the projection takes.</param>
+    private static void AppendProjectionParameters(SourceWriter sb, int propertyCount)
+    {
         for (var i = 0; i < propertyCount; i++)
         {
-            _ = sb.Append('p').Append(i + 1);
-            if (i < propertyCount - 1)
+            if (i > 0)
             {
                 _ = sb.Append(", ");
             }
-        }
 
-        _ = sb.Append("));");
+            _ = sb.Append('p').Append(i + 1);
+        }
     }
 
     /// <summary>
     /// Emits the XML doc comment, method signature, property expression parameters, optional selector,
     /// CallerArgumentExpression parameters, and the caller-info parameters that open the overload body.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level; left inside the overload's body.</param>
     /// <param name="first">The first invocation in the group, used for type information.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     private static void EmitOverloadSignature(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo first,
         bool supportsCallerArgExpr,
         bool supportsNullable,
         bool stubHasExpressionParameters,
         string methodPrefix)
     {
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ").Append(methodPrefix).Append(" on ")
-            .Append(first.SourceTypeFullName).AppendLine(".").AppendLine("        /// </summary>")
-            .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).Append("> ").Append(methodPrefix)
-            .AppendLine("(");
+        _ = sb.OpenSummary()
+            .BeginDocLine().Append("Concrete typed overload for ").Append(methodPrefix).Append(" on ").Append(first.SourceTypeFullName).Line(".")
+            .CloseSummary()
+            .Append($"public static {IObservable}<").Append(first.ReturnTypeFullName).Append("> ").Append(methodPrefix)
+            .OpenParameterList();
 
         AppendParameterList(
             sb,
@@ -1124,11 +1089,11 @@ internal static class ObservationCodeGenerator
             first.PropertyPaths.Length,
             first.HasSelector);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
     }
 
     /// <summary>Writes the parameters an observation member declares, closing the list.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="first">The invocation whose types the parameters are written from.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
@@ -1141,7 +1106,7 @@ internal static class ObservationCodeGenerator
     /// interceptor is refused outright unless its signature is the intercepted method's.
     /// </remarks>
     private static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         InvocationInfo first,
         bool supportsCallerArgExpr,
         bool supportsNullable,
@@ -1149,18 +1114,18 @@ internal static class ObservationCodeGenerator
         int propCount,
         bool hasSelector)
     {
-        _ = sb.Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+        _ = sb.Append("this ").Append(first.SourceTypeFullName).Line(" objectToMonitor,");
 
         for (var i = 0; i < propCount; i++)
         {
             var type = CodeGeneratorHelpers.NullableSelectorLeafType(first.PropertyPaths[i], supportsNullable);
-            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
-                .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
+            _ = sb.Append(GeneratedSyntax.SelectorTypeOpen).Append(first.SourceTypeFullName).Append(", ")
+                .Append(type).Append(">> property").Append(i + 1).Line(",");
         }
 
         if (hasSelector)
         {
-            _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
+            _ = sb.Append(GetSelectorType(first)).Line(" selector,");
         }
 
         if (stubHasExpressionParameters)
@@ -1175,18 +1140,18 @@ internal static class ObservationCodeGenerator
             }
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the overload's body.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="propCount">The number of property expressions.</param>
     /// <param name="hasSelector">Whether a selector function is present.</param>
     private static void EmitDispatchTable(
-        StringBuilder sb,
+        SourceWriter sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
         string methodPrefix,
@@ -1202,7 +1167,6 @@ internal static class ObservationCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var keyword = CodeGeneratorHelpers.ConditionKeyword(branchIndex);
 
             if (supportsCallerArgExpr)
             {
@@ -1211,60 +1175,28 @@ internal static class ObservationCodeGenerator
                     continue;
                 }
 
-                EmitCallerArgExprCondition(sb, inv, keyword, propCount);
+                CodeGeneratorHelpers.AppendSelectorTextCondition(sb, branchIndex, "property", inv.ExpressionTexts, propCount);
             }
             else
             {
-                var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = CodeGeneratorHelpers.AppendCallerFilePathTest(
-                        sb.Append("            ").Append(keyword).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).Append(" && "),
-                        suffix)
-                    .AppendLine(")");
+                CodeGeneratorHelpers.AppendInlineCallerInfoCondition(
+                    sb,
+                    branchIndex,
+                    inv.CallerLineNumber,
+                    CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
             }
 
             branchIndex++;
-            _ = sb.AppendLine("            {");
-            var selectorArg = hasSelector ? ", selector" : string.Empty;
-            _ = sb.Append("                return __").Append(methodPrefix).Append('_').Append(MethodSuffix(inv)).Append(MonitoredObjectArgument)
-                .Append(selectorArg).AppendLine(");").AppendLine("            }");
+            _ = sb.BeginReturn().Append("__").Append(methodPrefix).Append('_').Append(MethodSuffix(inv)).Append('(').Append(MonitoredObjectName)
+                .Append(hasSelector ? ", selector" : string.Empty).Line(");")
+                .CloseBlock();
         }
     }
 
-    /// <summary>Emits the CallerArgumentExpression match condition for a single invocation in the dispatch table.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The invocation info.</param>
-    /// <param name="condition">The conditional keyword (<c>"if"</c> or <c>"else if"</c>).</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    private static void EmitCallerArgExprCondition(
-        StringBuilder sb,
-        InvocationInfo inv,
-        string condition,
-        int propCount)
-    {
-        _ = sb.Append("            ").Append(condition).Append(" (");
-        for (var p = 0; p < propCount; p++)
-        {
-            _ = sb.Append("property").Append(p + 1).Append("Expression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p]))
-                .Append('"');
-            if (p < propCount - 1)
-            {
-                _ = sb.Append(" && ");
-            }
-        }
-
-        _ = sb.AppendLine(")");
-    }
-
-    /// <summary>Where a plugin choice is written, and what it names the two locals it declares.</summary>
-    /// <param name="DeclarationPrefix">The <c>var</c> declaration at the indentation the surrounding body sits at.</param>
-    /// <param name="ContinuationIndent">The indentation the branches of the choice are written at.</param>
+    /// <summary>The two locals a plugin choice names: the mechanism's observation and the observation chosen.</summary>
     /// <param name="MechanismVariable">The local holding the observation the generator's own mechanism built.</param>
     /// <param name="VariableName">The local the chosen observation is assigned to.</param>
-    internal readonly record struct PluginChoiceLayout(
-        string DeclarationPrefix,
-        string ContinuationIndent,
-        string MechanismVariable,
-        string VariableName);
+    internal readonly record struct PluginChoiceLocals(string MechanismVariable, string VariableName);
 
     /// <summary>Groups invocations by source and return type signature for overload generation.</summary>
     /// <param name="First">The first invocation in the group, used for type information.</param>

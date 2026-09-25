@@ -26,6 +26,9 @@ internal static class GeneratorSnapshot
     /// <summary>The directory holding the snapshots.</summary>
     private static readonly string SnapshotDirectory = ReadSnapshotDirectory();
 
+    /// <summary>Gets every stored snapshot, for checks that apply to all generated output.</summary>
+    internal static IEnumerable<string> VerifiedSnapshots => Directory.EnumerateFiles(SnapshotDirectory, $"*{VerifiedSuffix}");
+
     /// <summary>Asserts that the generated files match the stored snapshots.</summary>
     /// <param name="driver">The driver after the generator has run.</param>
     /// <param name="typeName">The snapshot name's type segment.</param>

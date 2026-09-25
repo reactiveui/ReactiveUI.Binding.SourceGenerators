@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -26,16 +26,16 @@ internal static class AppleNotificationEmitter
     }
 
     /// <summary>Attaches a sender-filtered notification and releases both its registration and token.</summary>
-    /// <param name="sb">The output builder.</param>
+    /// <param name="sb">The writer, inside the subscription callback.</param>
     /// <param name="segment">The property being observed.</param>
     /// <param name="info">The selected notification constant.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendSubscription(StringBuilder sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
-        sb.Append("                        var __token = global::Foundation.NSNotificationCenter.DefaultCenter.AddObserver(")
-            .Append(info.NotificationName).AppendLine(", __notification => __notify(), __source);")
-            .AppendLine("                        return new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>")
-            .AppendLine("                        {")
-            .AppendLine("                            global::Foundation.NSNotificationCenter.DefaultCenter.RemoveObserver(__token);")
-            .AppendLine("                            __token.Dispose();")
-            .AppendLine("                        });");
+    internal static void AppendSubscription(SourceWriter sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
+        sb.BeginVar("__token").Append("global::Foundation.NSNotificationCenter.DefaultCenter.AddObserver(")
+            .Append(info.NotificationName).Line(", __notification => __notify(), __source);")
+            .Line($"return new {GeneratedTypeNames.ActionDisposable}(() =>")
+            .OpenBlock()
+            .Line("global::Foundation.NSNotificationCenter.DefaultCenter.RemoveObserver(__token);")
+            .Line("__token.Dispose();")
+            .CloseBlock(");");
 }
