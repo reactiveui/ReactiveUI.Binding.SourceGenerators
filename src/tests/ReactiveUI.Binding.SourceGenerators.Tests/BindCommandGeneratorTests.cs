@@ -60,6 +60,48 @@ public class BindCommandGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
+    /// <summary>A view model passed as a bare <c>null</c> has no type to generate for, so the call stays on the stub.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task UntypedNullViewModel_GeneratesNothing()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Windows.Input;
+            using ReactiveUI.Binding;
+
+            public sealed class Model : INotifyPropertyChanged
+            {
+                public event PropertyChangedEventHandler PropertyChanged;
+                public ICommand Command { get; set; }
+            }
+
+            public sealed class Button
+            {
+                public event EventHandler Click;
+            }
+
+            public sealed class View : IViewFor<Model>
+            {
+                public Model ViewModel { get; set; }
+                object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (Model)value; }
+                public Button Control { get; } = new();
+            }
+
+            public static class Usage
+            {
+                public static IDisposable Bind(View view) =>
+                    view.BindCommand<View, Model, ICommand, Button>(null, x => x.Command, x => x.Control);
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+    }
+
     /// <summary>Verifies BindCommand with a basic button and no parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

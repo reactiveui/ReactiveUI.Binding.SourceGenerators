@@ -42,5 +42,12 @@ internal static class CommandControlEmitter
         }
 
         _ = sb.AppendLine(")").AppendLine("        {");
+
+        // The view is not thread-affine but the control is: each command lands on the control's thread.
+        if (inv.ControlOnlyViewThreadInvoker is { } controlInvoker)
+        {
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append("            commandObs = "), "commandObs", "__control", controlInvoker)
+                .AppendLine(";");
+        }
     }
 }

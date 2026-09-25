@@ -92,6 +92,7 @@ internal static class InvocationHelperRequirements
             {
                 AddCommand(command, classes, ref kinds);
                 AddName(command.ViewThreadInvoker, ref invokers);
+                AddName(command.ControlOnlyViewThreadInvoker, ref invokers);
                 break;
             }
 

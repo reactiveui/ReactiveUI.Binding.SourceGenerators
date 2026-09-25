@@ -66,4 +66,13 @@ internal sealed record BindCommandInvocationInfo(
 
     /// <summary>Gets the native command route verified during extraction.</summary>
     public NativeCommandInfo? NativeCommand { get; init; }
+
+    /// <summary>Gets the invoker class a write to the control carries, or null for none.</summary>
+    public string? ControlViewThreadInvoker { get; init; }
+
+    /// <summary>
+    /// Gets the invoker the per-control worker routes commands through: the control's, when the view has none. A
+    /// view that is not thread-affine can still hold a control that is, and the command is written to the control.
+    /// </summary>
+    public string? ControlOnlyViewThreadInvoker => ViewThreadInvoker is null ? ControlViewThreadInvoker : null;
 }
