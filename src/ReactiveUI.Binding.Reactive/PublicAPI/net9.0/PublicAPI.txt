@@ -53,7 +53,7 @@ namespace ReactiveUI.Binding.Reactive
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IDisposable Subscribe<T>(System.IObservable<T> source, System.Action<T> onNext, string bindingExpression) { }
     }
-    [System.Diagnostics.DebuggerDisplay("{_snapshot.Converters.Count} fallback converters registered")]
+    [System.Diagnostics.DebuggerDisplay("BindingFallbackConverterRegistry: {_snapshot.Converters.Count} fallback converters registered")]
     public sealed class BindingFallbackConverterRegistry
     {
         public BindingFallbackConverterRegistry() { }
@@ -79,7 +79,7 @@ namespace ReactiveUI.Binding.Reactive
         public static System.IObservable<T> ObserveOnViewThread<T>(System.IObservable<T> source, object? target, ReactiveUI.Binding.Reactive.IViewThreadInvoker fallback) { }
         public static void UseSynchronizationContext(System.Threading.SynchronizationContext? context) { }
     }
-    [System.Diagnostics.DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} converter")]
+    [System.Diagnostics.DebuggerDisplay("BindingTypeConverter: {FromType.Name,nq} -> {ToType.Name,nq} converter")]
     public abstract class BindingTypeConverter<TFrom, TTo> : ReactiveUI.Binding.Reactive.IBindingTypeConverter<TFrom, TTo>
     {
         protected BindingTypeConverter() { }
@@ -95,7 +95,7 @@ namespace ReactiveUI.Binding.Reactive
         public static bool TryConvertAny(object? converter, System.Type fromType, object? from, System.Type toType, object? conversionHint, out object? result) { }
         public static bool TryConvertFallback(ReactiveUI.Binding.Reactive.IBindingFallbackConverter converter, System.Type fromType, object from, System.Type toType, object? conversionHint, out object? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
+    [System.Diagnostics.DebuggerDisplay("BindingTypeConverterRegistry: Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
     public sealed class BindingTypeConverterRegistry
     {
         public BindingTypeConverterRegistry() { }
@@ -109,7 +109,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(bool from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("byte -> byte? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("ByteToNullableByteTypeConverter: byte -> byte? (affinity {Affinity})")]
     public sealed class ByteToNullableByteTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<byte, byte?>
     {
         public ByteToNullableByteTypeConverter() { }
@@ -137,7 +137,7 @@ namespace ReactiveUI.Binding.Reactive
             public void ImportFrom(Splat.IReadonlyDependencyResolver resolver) { }
         }
     }
-    [System.Diagnostics.DebuggerDisplay("Typed: {TypedConverters}; fallback: {FallbackConverters}; set-method: {SetMethodConverters}")]
+    [System.Diagnostics.DebuggerDisplay("ConverterService: Typed: {TypedConverters}; fallback: {FallbackConverters}; set-method: {SetMethodConverters}")]
     public sealed class ConverterService
     {
         public ConverterService() { }
@@ -175,7 +175,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(System.DateTime from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("decimal -> decimal? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("DecimalToNullableDecimalTypeConverter: decimal -> decimal? (affinity {Affinity})")]
     public sealed class DecimalToNullableDecimalTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<decimal, decimal?>
     {
         public DecimalToNullableDecimalTypeConverter() { }
@@ -196,7 +196,7 @@ namespace ReactiveUI.Binding.Reactive
     {
         public static void RegisterDefaults(ReactiveUI.Binding.Reactive.ConverterService service) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Mappings = {_mappings.Count}")]
+    [System.Diagnostics.DebuggerDisplay("DefaultViewLocator: Mappings = {_mappings.Count}")]
     public sealed class DefaultViewLocator : ReactiveUI.Binding.Reactive.IViewLocator
     {
         public DefaultViewLocator() { }
@@ -219,7 +219,7 @@ namespace ReactiveUI.Binding.Reactive
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static void SetGeneratedViewDispatch(System.Func<object, string, ReactiveUI.Binding.Reactive.IViewFor?> dispatch) { }
     }
-    [System.Diagnostics.DebuggerDisplay("double -> double? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("DoubleToNullableDoubleTypeConverter: double -> double? (affinity {Affinity})")]
     public sealed class DoubleToNullableDoubleTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<double, double?>
     {
         public DoubleToNullableDoubleTypeConverter() { }
@@ -236,7 +236,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(double from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
+    [System.Diagnostics.DebuggerDisplay("EqualityTypeConverter: {FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
     public sealed class EqualityTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter
     {
         public EqualityTypeConverter() { }
@@ -252,7 +252,7 @@ namespace ReactiveUI.Binding.Reactive
         public ExcludeFromViewRegistrationAttribute() { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("ExpressionChain: {Expression}, BeforeChange = {BeforeChange}, Distinct = {IsDistinct}")]
+    [System.Diagnostics.DebuggerDisplay("ExpressionChainParameters: ExpressionChain: {Expression}, BeforeChange = {BeforeChange}, Distinct = {IsDistinct}")]
     public readonly record struct ExpressionChainParameters<TSender> : System.IEquatable<ReactiveUI.Binding.Reactive.ExpressionChainParameters<TSender>>
     {
         public ExpressionChainParameters(TSender? Source, System.Linq.Expressions.Expression? Expression, System.Linq.Expressions.Expression[] Links, bool BeforeChange, bool SkipInitial, bool IsDistinct, bool SuppressWarnings) { }
@@ -368,7 +368,7 @@ namespace ReactiveUI.Binding.Reactive
         bool Claims(object target) { }
         void Post(object target, System.Action<object?> callback, object? state) { }
     }
-    [System.Diagnostics.DebuggerDisplay("int -> int? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("IntegerToNullableIntegerTypeConverter: int -> int? (affinity {Affinity})")]
     public sealed class IntegerToNullableIntegerTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<int, int?>
     {
         public IntegerToNullableIntegerTypeConverter() { }
@@ -385,7 +385,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(int from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Handlers = {_handlers.Length}")]
+    [System.Diagnostics.DebuggerDisplay("Interaction: Handlers = {_handlers.Length}")]
     public class Interaction<TInput, TOutput> : ReactiveUI.Binding.Reactive.IInteraction<TInput, TOutput>
     {
         public Interaction() { }
@@ -396,7 +396,7 @@ namespace ReactiveUI.Binding.Reactive
         public System.IDisposable RegisterHandler(System.Func<ReactiveUI.Binding.Reactive.IInteractionContext<TInput, TOutput>, System.Threading.Tasks.Task> handler) { }
         public System.IDisposable RegisterHandler<TDontCare>(System.Func<ReactiveUI.Binding.Reactive.IInteractionContext<TInput, TOutput>, System.IObservable<TDontCare>> handler) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Input = {Input}, Handled = {_outputSet == 1}, Output = {_output}")]
+    [System.Diagnostics.DebuggerDisplay("InteractionContext: Input = {Input}, Handled = {_outputSet == 1}, Output = {_output}")]
     public sealed class InteractionContext<TInput, TOutput> : ReactiveUI.Binding.Reactive.IOutputContext<TInput, TOutput>
     {
         public TInput Input { get; }
@@ -404,7 +404,7 @@ namespace ReactiveUI.Binding.Reactive
         public TOutput GetOutput() { }
         public void SetOutput(TOutput output) { }
     }
-    [System.Diagnostics.DebuggerDisplay("long -> long? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("LongToNullableLongTypeConverter: long -> long? (affinity {Affinity})")]
     public sealed class LongToNullableLongTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<long, long?>
     {
         public LongToNullableLongTypeConverter() { }
@@ -427,7 +427,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(bool? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("byte? -> byte (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableByteToByteTypeConverter: byte? -> byte (affinity {Affinity})")]
     public sealed class NullableByteToByteTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<byte?, byte>
     {
         public NullableByteToByteTypeConverter() { }
@@ -462,7 +462,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(System.DateTime? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("decimal? -> decimal (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableDecimalToDecimalTypeConverter: decimal? -> decimal (affinity {Affinity})")]
     public sealed class NullableDecimalToDecimalTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<decimal?, decimal>
     {
         public NullableDecimalToDecimalTypeConverter() { }
@@ -479,7 +479,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(decimal? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("double? -> double (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableDoubleToDoubleTypeConverter: double? -> double (affinity {Affinity})")]
     public sealed class NullableDoubleToDoubleTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<double?, double>
     {
         public NullableDoubleToDoubleTypeConverter() { }
@@ -502,7 +502,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(System.Guid? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("int? -> int (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableIntegerToIntegerTypeConverter: int? -> int (affinity {Affinity})")]
     public sealed class NullableIntegerToIntegerTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<int?, int>
     {
         public NullableIntegerToIntegerTypeConverter() { }
@@ -519,7 +519,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(int? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("long? -> long (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableLongToLongTypeConverter: long? -> long (affinity {Affinity})")]
     public sealed class NullableLongToLongTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<long?, long>
     {
         public NullableLongToLongTypeConverter() { }
@@ -536,7 +536,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(long? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("short? -> short (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableShortToShortTypeConverter: short? -> short (affinity {Affinity})")]
     public sealed class NullableShortToShortTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<short?, short>
     {
         public NullableShortToShortTypeConverter() { }
@@ -553,7 +553,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(short? from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("float? -> float (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("NullableSingleToSingleTypeConverter: float? -> float (affinity {Affinity})")]
     public sealed class NullableSingleToSingleTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<float?, float>
     {
         public NullableSingleToSingleTypeConverter() { }
@@ -582,12 +582,18 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(System.TimeSpan? from, object? conversionHint, out string? result) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Property, AllowMultiple=false, Inherited=false)]
+    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple=false, Inherited=false)]
+    [System.Diagnostics.DebuggerDisplay("ObservableAsPropertyAttribute: ReadOnly = {ReadOnly}, UseProtected = {UseProtected}, InitialValue = {InitialValue}")]
     public sealed class ObservableAsPropertyAttribute : System.Attribute
     {
         public ObservableAsPropertyAttribute() { }
+        public ReactiveUI.Binding.Reactive.ObservableAsPropertyInheritance Inheritance { get; set; }
+        public string? InitialValue { get; set; }
+        public string? PropertyName { get; set; }
+        public bool ReadOnly { get; set; }
+        public bool UseProtected { get; set; }
     }
-    [System.Diagnostics.DebuggerDisplay("Value = {_core.LastValue}, IsSubscribed = {IsSubscribed}")]
+    [System.Diagnostics.DebuggerDisplay("ObservableAsPropertyHelper: Value = {_core.LastValue}, IsSubscribed = {IsSubscribed}")]
     public sealed class ObservableAsPropertyHelper<T> : System.IDisposable
     {
         public ObservableAsPropertyHelper(System.IObservable<T?> observable, System.Action<T?> onChanged) { }
@@ -618,7 +624,14 @@ namespace ReactiveUI.Binding.Reactive
         public static ReactiveUI.Binding.Reactive.ObservableAsPropertyHelper<T> Default(T? initialValue) { }
         public static ReactiveUI.Binding.Reactive.ObservableAsPropertyHelper<T> Default(T? initialValue, System.Reactive.Concurrency.IScheduler? scheduler) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Expression = {Expression}, Sender = {Sender}, Value = {Value}")]
+    public enum ObservableAsPropertyInheritance
+    {
+        None = 0,
+        Virtual = 1,
+        Override = 2,
+        New = 3,
+    }
+    [System.Diagnostics.DebuggerDisplay("ObservedChange: Expression = {Expression}, Sender = {Sender}, Value = {Value}")]
     public class ObservedChange<TSender, TValue> : ReactiveUI.Binding.Reactive.IObservedChange<TSender, TValue>
     {
         public ObservedChange(TSender sender, System.Linq.Expressions.Expression? expression, TValue value) { }
@@ -836,7 +849,7 @@ namespace ReactiveUI.Binding.Reactive
         public T8 Property8 { get; init; }
         public T9 Property9 { get; init; }
     }
-    [System.Diagnostics.DebuggerDisplay("{Direction} binding on {View}")]
+    [System.Diagnostics.DebuggerDisplay("ReactiveBinding: {Direction} binding on {View}")]
     public sealed class ReactiveBinding<TView, TValue> : ReactiveUI.Binding.Reactive.IReactiveBinding<TView, TValue> where TView : ReactiveUI.Binding.Reactive.IViewFor
     {
         public ReactiveBinding(TView view, System.IObservable<TValue> changed, ReactiveUI.Binding.Reactive.BindingDirection direction, System.IDisposable subscription) { }
@@ -1627,7 +1640,7 @@ namespace ReactiveUI.Binding.Reactive
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.IObservable<TReturn> WhenChangingUnsafe<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn>(this TObj objectToMonitor, System.Linq.Expressions.Expression<System.Func<TObj, T1>> property1, System.Linq.Expressions.Expression<System.Func<TObj, T2>> property2, System.Linq.Expressions.Expression<System.Func<TObj, T3>> property3, System.Linq.Expressions.Expression<System.Func<TObj, T4>> property4, System.Linq.Expressions.Expression<System.Func<TObj, T5>> property5, System.Linq.Expressions.Expression<System.Func<TObj, T6>> property6, System.Linq.Expressions.Expression<System.Func<TObj, T7>> property7, System.Linq.Expressions.Expression<System.Func<TObj, T8>> property8, System.Linq.Expressions.Expression<System.Func<TObj, T9>> property9, System.Linq.Expressions.Expression<System.Func<TObj, T10>> property10, System.Linq.Expressions.Expression<System.Func<TObj, T11>> property11, System.Linq.Expressions.Expression<System.Func<TObj, T12>> property12, System.Linq.Expressions.Expression<System.Func<TObj, T13>> property13, System.Linq.Expressions.Expression<System.Func<TObj, T14>> property14, System.Linq.Expressions.Expression<System.Func<TObj, T15>> property15, System.Linq.Expressions.Expression<System.Func<TObj, T16>> property16, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn> conversionFunc) where TObj : class { }
     }
-    [System.Diagnostics.DebuggerDisplay("{_snapshot.Converters.Count} set-method converters registered")]
+    [System.Diagnostics.DebuggerDisplay("SetMethodBindingConverterRegistry: {_snapshot.Converters.Count} set-method converters registered")]
     public sealed class SetMethodBindingConverterRegistry
     {
         public SetMethodBindingConverterRegistry() { }
@@ -1635,7 +1648,7 @@ namespace ReactiveUI.Binding.Reactive
         public void Register(ReactiveUI.Binding.Reactive.ISetMethodBindingConverter converter) { }
         public ReactiveUI.Binding.Reactive.ISetMethodBindingConverter? TryGetConverter(System.Type? fromType, System.Type? toType) { }
     }
-    [System.Diagnostics.DebuggerDisplay("short -> short? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("ShortToNullableShortTypeConverter: short -> short? (affinity {Affinity})")]
     public sealed class ShortToNullableShortTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<short, short?>
     {
         public ShortToNullableShortTypeConverter() { }
@@ -1657,7 +1670,7 @@ namespace ReactiveUI.Binding.Reactive
     {
         public SingleInstanceViewAttribute() { }
     }
-    [System.Diagnostics.DebuggerDisplay("float -> float? (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("SingleToNullableSingleTypeConverter: float -> float? (affinity {Affinity})")]
     public sealed class SingleToNullableSingleTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<float, float?>
     {
         public SingleToNullableSingleTypeConverter() { }
@@ -1674,7 +1687,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(float from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("string -> string identity (affinity {Affinity})")]
+    [System.Diagnostics.DebuggerDisplay("StringConverter: string -> string identity (affinity {Affinity})")]
     public sealed class StringConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter
     {
         public StringConverter() { }
@@ -1875,7 +1888,7 @@ namespace ReactiveUI.Binding.Reactive
         ViewToViewModel = 0,
         ViewModelToView = 1,
     }
-    [System.Diagnostics.DebuggerDisplay("Input = {Input}, Interaction = {Interaction}")]
+    [System.Diagnostics.DebuggerDisplay("UnhandledInteractionException: Input = {Input}, Interaction = {Interaction}")]
     public class UnhandledInteractionException<TInput, TOutput> : System.Exception
     {
         public UnhandledInteractionException() { }
@@ -1892,7 +1905,7 @@ namespace ReactiveUI.Binding.Reactive
         public override bool TryConvert(System.Uri? from, object? conversionHint, out string? result) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class)]
-    [System.Diagnostics.DebuggerDisplay("Contract = {Contract}")]
+    [System.Diagnostics.DebuggerDisplay("ViewContractAttribute: Contract = {Contract}")]
     public sealed class ViewContractAttribute : System.Attribute
     {
         public ViewContractAttribute(string contract) { }
@@ -1920,7 +1933,7 @@ namespace ReactiveUI.Binding.Reactive
         public ViewLocatorNotFoundException(string message) { }
         public ViewLocatorNotFoundException(string message, System.Exception innerException) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Locator = {_locator}")]
+    [System.Diagnostics.DebuggerDisplay("ViewMappingBuilder: Locator = {_locator}")]
     public sealed class ViewMappingBuilder
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1958,7 +1971,7 @@ namespace ReactiveUI.Binding.Reactive.Builder
     public interface IReactiveUIBindingInstance : Splat.Builder.IAppInstance
     {
     }
-    [System.Diagnostics.DebuggerDisplay("CoreServicesRegistered = {_coreRegistered}")]
+    [System.Diagnostics.DebuggerDisplay("ReactiveUIBindingBuilder: CoreServicesRegistered = {_coreRegistered}")]
     public sealed class ReactiveUIBindingBuilder : Splat.Builder.AppBuilder, ReactiveUI.Binding.Reactive.Builder.IReactiveUIBindingBuilder, ReactiveUI.Binding.Reactive.Builder.IReactiveUIBindingInstance
     {
         public ReactiveUIBindingBuilder(Splat.IMutableDependencyResolver resolver, Splat.IReadonlyDependencyResolver? current) { }
@@ -2156,7 +2169,7 @@ namespace ReactiveUI.Binding.Reactive.ObservableForProperty
 {
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    [System.Diagnostics.DebuggerDisplay("{_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
+    [System.Diagnostics.DebuggerDisplay("ExpressionChainSink: {_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
     public sealed class ExpressionChainSink<TSender, TValue> : System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<TSender, TValue>>
     {
         public ExpressionChainSink(TSender? source, System.Linq.Expressions.Expression? expression, System.Linq.Expressions.Expression[] links, bool beforeChange, bool skipInitial, bool isDistinct, bool suppressWarnings) { }
@@ -2169,7 +2182,7 @@ namespace ReactiveUI.Binding.Reactive.ObservableForProperty
         public System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<object, object?>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged, bool suppressWarnings) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("{_expression}, Sender = {_sender}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
+    [System.Diagnostics.DebuggerDisplay("ObservableForPropertySink: {_expression}, Sender = {_sender}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
     public sealed class ObservableForPropertySink<TSender, TValue> : System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<TSender, TValue>>
     {
         public ObservableForPropertySink(TSender sender, System.Linq.Expressions.Expression expression, System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<object, object?>> notifications, System.Func<TValue> readValue, bool skipInitial, bool isDistinct) { }
@@ -2246,7 +2259,7 @@ namespace ReactiveUI.Binding.Reactive.Observables
         public System.IDisposable Subscribe(System.IObserver<ReactiveUI.Binding.Reactive.BindingChange> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("CallbackProperty: {_source}, Distinct = {_distinct}")]
+    [System.Diagnostics.DebuggerDisplay("CallbackPropertyObservable: CallbackProperty: {_source}, Distinct = {_distinct}")]
     public sealed class CallbackPropertyObservable<TSource, TValue> : System.IObservable<TValue>
     {
         public CallbackPropertyObservable(TSource source, System.Func<TSource, System.Action, System.IDisposable> subscribe, System.Func<TSource, TValue> getter, bool distinct) { }
@@ -2288,21 +2301,21 @@ namespace ReactiveUI.Binding.Reactive.Observables
         public static System.IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.IObservable<T1> source1, System.IObservable<T2> source2, System.IObservable<T3> source3, System.IObservable<T4> source4, System.IObservable<T5> source5, System.IObservable<T6> source6, System.IObservable<T7> source7, System.IObservable<T8> source8, System.IObservable<T9> source9, System.IObservable<T10> source10, System.IObservable<T11> source11, System.IObservable<T12> source12, System.IObservable<T13> source13, System.IObservable<T14> source14, System.IObservable<T15> source15, System.IObservable<T16> source16, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> resultSelector) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("DeferredProperty: {_source}")]
+    [System.Diagnostics.DebuggerDisplay("DeferredPropertyObservable: DeferredProperty: {_source}")]
     public sealed class DeferredPropertyObservable<TSource, TValue> : System.IObservable<TValue>
     {
         public DeferredPropertyObservable(TSource source, System.Func<TSource, TValue> getter) { }
         public System.IDisposable Subscribe(System.IObserver<TValue> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
+    [System.Diagnostics.DebuggerDisplay("EventObservable: Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
     public sealed class EventObservable<T> : System.IObservable<T>
     {
         public EventObservable(System.Action<System.EventHandler> addHandler, System.Action<System.EventHandler> removeHandler, System.Func<T> getter, bool distinctUntilChanged) { }
         public System.IDisposable Subscribe(System.IObserver<T> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
+    [System.Diagnostics.DebuggerDisplay("NotifyPropertyChangedObservable: Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
     public sealed class NotifyPropertyChangedObservable : System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<object, object?>>
     {
         public NotifyPropertyChangedObservable(object sender, System.Linq.Expressions.Expression expression, string expectedName, bool beforeChanged) { }
@@ -2314,28 +2327,28 @@ namespace ReactiveUI.Binding.Reactive.Observables
         public static System.IObservable<T> Choose<T>(object source, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChange, int generatedAffinity, System.Func<object, T?> getter, System.IObservable<T> generated) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("Property = {_propertyName}, Source = {_source}, BeforeChange = {_beforeChange}")]
+    [System.Diagnostics.DebuggerDisplay("PluginPropertyObservable: Property = {_propertyName}, Source = {_source}, BeforeChange = {_beforeChange}")]
     public sealed class PluginPropertyObservable<T> : System.IObservable<T>
     {
         public PluginPropertyObservable(ReactiveUI.Binding.Reactive.ICreatesObservableForProperty plugin, object source, System.Linq.Expressions.Expression expression, string propertyName, System.Func<object, T?> getter, bool beforeChange, bool distinctUntilChanged) { }
         public System.IDisposable Subscribe(System.IObserver<T> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("Property = {_propertyName}, Source = {_source}")]
+    [System.Diagnostics.DebuggerDisplay("PropertyChangingObservable: Property = {_propertyName}, Source = {_source}")]
     public sealed class PropertyChangingObservable<T> : System.IObservable<T>
     {
         public PropertyChangingObservable(System.ComponentModel.INotifyPropertyChanging source, string propertyName, System.Func<System.ComponentModel.INotifyPropertyChanging, T?> getter) { }
         public System.IDisposable Subscribe(System.IObserver<T> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
+    [System.Diagnostics.DebuggerDisplay("PropertyObservable: Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
     public sealed class PropertyObservable<T> : System.IObservable<T>
     {
         public PropertyObservable(System.ComponentModel.INotifyPropertyChanged source, string propertyName, System.Func<System.ComponentModel.INotifyPropertyChanged, T?> getter, bool distinctUntilChanged) { }
         public System.IDisposable Subscribe(System.IObserver<T> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    [System.Diagnostics.DebuggerDisplay("UnchangingProperty: {_value}")]
+    [System.Diagnostics.DebuggerDisplay("UnchangingPropertyObservable: UnchangingProperty: {_value}")]
     public sealed class UnchangingPropertyObservable<T> : System.IObservable<T>
     {
         public UnchangingPropertyObservable(T value) { }

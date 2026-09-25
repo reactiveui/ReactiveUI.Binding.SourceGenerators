@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 /// <summary>Default implementation of <see cref="IReactiveBinding{TView, TValue}"/> used by generated view-first bindings.</summary>
 /// <typeparam name="TView">The type of the view.</typeparam>
 /// <typeparam name="TValue">The type of the bound value.</typeparam>
-[DebuggerDisplay("{Direction} binding on {View}")]
+[DebuggerDisplay("ReactiveBinding: {Direction} binding on {View}")]
 public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TValue>
     where TView : IViewFor
 {

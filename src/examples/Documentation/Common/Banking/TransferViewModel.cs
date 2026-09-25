@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// one, asks the view for an approval code. Each command starts the matching method and returns; await the method
 /// itself to wait for its work. A refused request never throws from a method. It sets <see cref="ErrorMessage"/>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Draft = {Draft}, IsValid = {IsValid}")]
+[System.Diagnostics.DebuggerDisplay("TransferViewModel: Draft = {Draft}, IsValid = {IsValid}")]
 public sealed class TransferViewModel : ObservableObject
 {
     /// <summary>The separator between the messages of <see cref="ValidationSummary"/>.</summary>

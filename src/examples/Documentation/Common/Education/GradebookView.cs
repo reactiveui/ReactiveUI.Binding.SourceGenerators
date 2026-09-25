@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// The gradebook screen: a course list, the roster of the selected course, the assignments and a grade entry
 /// area. A MAUI page builds these controls from markup; here the view creates them in code.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("GradebookView: ViewModel = {ViewModel}")]
 public sealed class GradebookView : ObservableObject, IViewFor<GradebookViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

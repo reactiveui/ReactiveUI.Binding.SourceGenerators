@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.UnsafeOverloads;
 /// Generated code cannot call that method, so <c>ToProperty</c> reports RXUIBIND012 here and <c>ToPropertyUnsafe</c>
 /// backs the property instead.
 /// </summary>
-[DebuggerDisplay("Headline = {Headline}")]
+[DebuggerDisplay("TodoHeadlineViewModel: Headline = {Headline}")]
 public sealed class TodoHeadlineViewModel : ObservableObject
 {
     /// <summary>Backs <see cref="Headline"/>.</summary>

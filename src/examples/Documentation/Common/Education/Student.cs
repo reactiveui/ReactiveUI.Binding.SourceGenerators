@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Education;
 
 /// <summary>A student. Each property raises <c>PropertyChanged</c>, and <see cref="Enrolments"/> is replaced whenever the records change.</summary>
-[System.Diagnostics.DebuggerDisplay("{Id}: {Name}")]
+[System.Diagnostics.DebuggerDisplay("Student: {Id}: {Name}")]
 public sealed class Student : ObservableObject
 {
     /// <summary>Gets or sets the identifier of the student.</summary>

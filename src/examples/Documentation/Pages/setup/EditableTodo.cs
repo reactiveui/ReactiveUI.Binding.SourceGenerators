@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Setup;
 
 /// <summary>A to-do title that reports each change twice: <c>PropertyChanging</c> before it and <c>PropertyChanged</c> after it.</summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}")]
+[System.Diagnostics.DebuggerDisplay("EditableTodo: Title = {Title}")]
 public sealed class EditableTodo : ObservableObject, System.ComponentModel.INotifyPropertyChanging
 {
     /// <inheritdoc/>

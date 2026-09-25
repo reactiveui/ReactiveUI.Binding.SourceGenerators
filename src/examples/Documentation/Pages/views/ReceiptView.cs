@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The screen for a transfer receipt. It needs a heading to be built, so it has no parameterless constructor.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("ReceiptView: ViewModel = {ViewModel}")]
 public sealed class ReceiptView : ObservableObject, IViewFor<TransferReceipt>
 {
     /// <summary>Initializes a new instance of the <see cref="ReceiptView"/> class.</summary>

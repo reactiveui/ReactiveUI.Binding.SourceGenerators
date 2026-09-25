@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Custom bool-to-string converter that uses different labels than the default.</summary>
-[DebuggerDisplay("bool -> string (custom labels)")]
+[DebuggerDisplay("CustomBoolToStringConverter: bool -> string (custom labels)")]
 public sealed class CustomBoolToStringConverter : BindingTypeConverter<bool, string>
 {
     /// <summary>The affinity score to prioritize this converter over built-in ones.</summary>

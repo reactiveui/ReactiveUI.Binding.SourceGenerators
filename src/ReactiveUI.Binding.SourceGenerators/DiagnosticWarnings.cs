@@ -119,6 +119,26 @@ internal static class DiagnosticWarnings
         true,
         MissingViewThreadInvokerDescription);
 
+    /// <summary>RXUIBIND018: <c>[ObservableAsProperty]</c> marks something other than a partial get-only instance property.</summary>
+    internal static readonly DiagnosticDescriptor ObservableAsPropertyNeedsPartialProperty = new(
+        "RXUIBIND018",
+        "ObservableAsProperty needs a partial get-only property",
+        "'{0}' is not a partial get-only instance property, so nothing is generated for it; declare the property as 'partial T {0} {{ get; }}'",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        ObservableAsPropertyNeedsPartialPropertyDescription);
+
+    /// <summary>RXUIBIND019: a method marked <c>[ObservableAsProperty]</c> takes parameters.</summary>
+    internal static readonly DiagnosticDescriptor ObservableAsPropertyMethodHasParameters = new(
+        "RXUIBIND019",
+        "ObservableAsProperty method takes parameters",
+        "'{0}' takes parameters, so it cannot supply a property's values; remove the parameters or the attribute",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        ObservableAsPropertyMethodHasParametersDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -261,6 +281,18 @@ internal static class DiagnosticWarnings
         + "derive from ReactiveUI's ReactiveObject or implement IReactiveObject; expose a public or internal "
         + "RaisePropertyChanged or OnPropertyChanged method; or declare the type, and every type it is nested in, "
         + "as partial, so the generator can add a member that raises the type's own event.";
+
+    /// <summary>The string description of the ObservableAsProperty target warning.</summary>
+    private const string ObservableAsPropertyNeedsPartialPropertyDescription =
+        "The generator writes the body of a partial get-only instance property that you declare, so every generator in "
+        + "the build can see the property. A field, a method or an observable property marked with the attribute, as "
+        + "ReactiveUI's older source generator allowed, gets nothing. The code fix rewrites those as partial properties, "
+        + "which needs C# 13.";
+
+    /// <summary>The string description of the ObservableAsProperty method parameters warning.</summary>
+    private const string ObservableAsPropertyMethodHasParametersDescription =
+        "A method marked [ObservableAsProperty] supplies the observable a property is built from, so it is called with "
+        + "no arguments.";
 
     /// <summary>The string description of the unnamed ToProperty initial value error.</summary>
     private const string UnnamedToPropertyInitialValueDescription =

@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// The heading of the to-do screen. Its label is a named control, declared as a field in the part the markup
 /// compiler generates (<c>TodoHeadingView.g.cs</c>), the way <c>x:Name="TitleLabel"</c> declares one.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("TodoHeadingView: ViewModel = {ViewModel}")]
 public sealed partial class TodoHeadingView : ObservableObject, IViewFor<TodoListViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

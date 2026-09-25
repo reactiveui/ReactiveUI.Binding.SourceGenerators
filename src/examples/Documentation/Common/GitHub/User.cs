@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.GitHub;
 
 /// <summary>A person with an account on the server. Each property raises <c>PropertyChanged</c>.</summary>
-[System.Diagnostics.DebuggerDisplay("{Login}")]
+[System.Diagnostics.DebuggerDisplay("User: {Login}")]
 public sealed class User : ObservableObject
 {
     /// <summary>Gets or sets the account name, such as <c>priya-nair</c>.</summary>

@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Documentation.Observing;
 /// </summary>
 /// <param name="api">The server to search.</param>
 /// <param name="repository">The repository whose open issues are searched, such as <c>acme/webshop</c>.</param>
-[System.Diagnostics.DebuggerDisplay("SearchTerm = {SearchTerm}, IsSearching = {IsSearching}, Results = {Results.Count}")]
+[System.Diagnostics.DebuggerDisplay("IssueSearchViewModel: SearchTerm = {SearchTerm}, IsSearching = {IsSearching}, Results = {Results.Count}")]
 public sealed class IssueSearchViewModel(IGitHubApi api, string repository) : ObservableObject
 {
     /// <summary>Gets or sets the text the user has typed in the search box.</summary>

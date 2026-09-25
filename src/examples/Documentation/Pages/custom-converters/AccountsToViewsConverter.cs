@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Turns a list of accounts into a list of views, one for each account, by asking a view locator.</summary>
 /// <param name="locator">The locator that finds the view of an account.</param>
-[System.Diagnostics.DebuggerDisplay("accounts -> views")]
+[System.Diagnostics.DebuggerDisplay("AccountsToViewsConverter: accounts -> views")]
 public sealed class AccountsToViewsConverter(IViewLocator locator) : BindingTypeConverter<IReadOnlyList<Account>, IEnumerable>
 {
     /// <summary>The affinity of the converter for its type pair.</summary>

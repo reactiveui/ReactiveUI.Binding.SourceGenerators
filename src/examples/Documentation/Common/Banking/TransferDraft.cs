@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>The transfer the customer is filling in. Each property raises <c>PropertyChanged</c>.</summary>
-[System.Diagnostics.DebuggerDisplay("{Amount} to {Payee}")]
+[System.Diagnostics.DebuggerDisplay("TransferDraft: {Amount} to {Payee}")]
 public sealed class TransferDraft : ObservableObject
 {
     /// <summary>Gets or sets the account the money leaves.</summary>

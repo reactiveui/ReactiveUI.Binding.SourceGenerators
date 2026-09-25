@@ -9,5 +9,5 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// <param name="Amount">The amount sent.</param>
 /// <param name="NewBalance">The balance of the source account after the transfer.</param>
 /// <param name="CompletedAt">When the bank made the transfer.</param>
-[System.Diagnostics.DebuggerDisplay("{ReceiptNumber}: {Amount}")]
+[System.Diagnostics.DebuggerDisplay("TransferReceipt: {ReceiptNumber}: {Amount}")]
 public sealed record TransferReceipt(string ReceiptNumber, decimal Amount, decimal NewBalance, DateTimeOffset CompletedAt);

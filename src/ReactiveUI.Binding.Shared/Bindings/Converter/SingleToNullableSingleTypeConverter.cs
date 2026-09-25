@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts a <see cref="float"/> to a nullable <see cref="float"/>; the conversion always succeeds.</summary>
-[DebuggerDisplay("float -> float? (affinity {Affinity})")]
+[DebuggerDisplay("SingleToNullableSingleTypeConverter: float -> float? (affinity {Affinity})")]
 public sealed class SingleToNullableSingleTypeConverter : IBindingTypeConverter<float, float?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

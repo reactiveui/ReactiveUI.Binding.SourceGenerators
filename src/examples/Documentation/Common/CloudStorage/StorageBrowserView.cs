@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// The storage browser screen: a bucket list, a path box, an object list and an upload progress bar. A real UI
 /// framework builds these controls from markup; here the view creates them in code.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("StorageBrowserView: ViewModel = {ViewModel}")]
 public sealed class StorageBrowserView : ObservableObject, IViewFor<StorageBrowserViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

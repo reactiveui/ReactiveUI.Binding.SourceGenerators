@@ -16,7 +16,7 @@ namespace ReactiveUI.Binding.Observables;
 /// A <see cref="INotifyPropertyChanged.PropertyChanged"/> notification with a null or empty property name applies
 /// to every property. When distinct filtering is on, a value equal to the last emitted one is dropped.
 /// </remarks>
-[DebuggerDisplay("Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
+[DebuggerDisplay("PropertyObservable: Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyObservable<T> : IObservable<T>
 {

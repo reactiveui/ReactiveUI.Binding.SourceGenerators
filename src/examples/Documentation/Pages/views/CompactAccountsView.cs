@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The accounts screen for a narrow window: it shows only the balance of the selected account.</summary>
 [ViewContract(AccountViewContracts.Compact)]
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("CompactAccountsView: ViewModel = {ViewModel}")]
 public sealed class CompactAccountsView : ObservableObject, IViewFor<AccountsViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

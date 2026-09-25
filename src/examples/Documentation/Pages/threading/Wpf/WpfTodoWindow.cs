@@ -11,7 +11,7 @@ using Window = System.Windows.Window;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The to-do screen as a WPF window: the filter box, the checkbox and the tick mark for the selected item, and the count of items left.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WpfTodoWindow: ViewModel = {ViewModel}")]
 public sealed class WpfTodoWindow : Window, IViewFor<TodoListViewModel>
 {
     /// <summary>The dependency property behind <see cref="ViewModel"/>.</summary>

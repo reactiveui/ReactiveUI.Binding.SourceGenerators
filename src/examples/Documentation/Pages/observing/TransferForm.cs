@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Observing;
 /// The transfer screen: the draft the customer fills in, the source account it draws on and the delivery options.
 /// It reports each change before and after it is applied.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("{Amount} from {SourceName}")]
+[System.Diagnostics.DebuggerDisplay("TransferForm: {Amount} from {SourceName}")]
 public sealed class TransferForm : ChangingObject
 {
     /// <summary>Gets or sets the amount to send, in the currency of the source account.</summary>

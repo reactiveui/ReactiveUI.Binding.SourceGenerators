@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A view used for binding benchmarks. Implements <see cref="IViewFor{T}"/> to support ReactiveUI's expression-tree-based binding APIs.</summary>
-[DebuggerDisplay("DisplayName = {DisplayName}, DisplayAge = {DisplayAge}")]
+[DebuggerDisplay("BenchmarkView: DisplayName = {DisplayName}, DisplayAge = {DisplayAge}")]
 public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChanged
 {
     /// <inheritdoc/>

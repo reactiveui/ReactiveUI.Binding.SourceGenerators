@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// browser's upload command as its parameter.
 /// </summary>
 /// <param name="browser">The storage browser the dialog uploads through.</param>
-[System.Diagnostics.DebuggerDisplay("PendingUpload = {PendingUpload}")]
+[System.Diagnostics.DebuggerDisplay("UploadPanelViewModel: PendingUpload = {PendingUpload}")]
 public sealed class UploadPanelViewModel(StorageBrowserViewModel browser) : ObservableObject
 {
     /// <summary>Gets the command that uploads the picked file; it is the upload command of the browser.</summary>

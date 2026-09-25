@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Mechanisms;
 
 /// <summary>A to-do item being edited. It reports each change of its title and notes twice: before it is applied and after.</summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}")]
+[System.Diagnostics.DebuggerDisplay("DraftTodo: Title = {Title}")]
 public sealed class DraftTodo : ObservableObject, System.ComponentModel.INotifyPropertyChanging
 {
     /// <inheritdoc/>

@@ -5,7 +5,7 @@
 namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>Reports that the core banking backend refused a request.</summary>
-[System.Diagnostics.DebuggerDisplay("Failure = {Failure}, Message = {Message}")]
+[System.Diagnostics.DebuggerDisplay("BankingException: Failure = {Failure}, Message = {Message}")]
 public sealed class BankingException : Exception
 {
     /// <summary>Initializes a new instance of the <see cref="BankingException"/> class.</summary>

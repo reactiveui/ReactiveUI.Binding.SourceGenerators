@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.Observables;
 /// detached, and one that throws while the event is raised propagates to whoever raised it. The sequence never
 /// completes.
 /// </remarks>
-[DebuggerDisplay("Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
+[DebuggerDisplay("EventObservable: Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class EventObservable<T> : IObservable<T>
 {

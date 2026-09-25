@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.GitHub;
 
 /// <summary>A reported problem or request. Each property raises <c>PropertyChanged</c>.</summary>
-[System.Diagnostics.DebuggerDisplay("#{Number} {Title} ({State})")]
+[System.Diagnostics.DebuggerDisplay("Issue: #{Number} {Title} ({State})")]
 public sealed class Issue : ObservableObject
 {
     /// <summary>Gets or sets the number the repository gave the issue.</summary>

@@ -23,7 +23,7 @@ namespace ReactiveUI.Binding;
 /// to guard logic that should only execute once.
 /// </para>
 /// </remarks>
-[DebuggerDisplay("Input = {Input}, Handled = {_outputSet == 1}, Output = {_output}")]
+[DebuggerDisplay("InteractionContext: Input = {Input}, Handled = {_outputSet == 1}, Output = {_output}")]
 public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput, TOutput>
 {
     /// <summary>The output value set by a handler via <see cref="SetOutput"/>.</summary>

@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>The fallback converter an older to-do app registered with Splat. It shows any value as its text.</summary>
-[DebuggerDisplay("object -> string fallback")]
+[DebuggerDisplay("LegacyObjectToStringFallbackConverter: object -> string fallback")]
 public sealed class LegacyObjectToStringFallbackConverter : IBindingFallbackConverter
 {
     /// <summary>The affinity of a last resort fallback converter.</summary>

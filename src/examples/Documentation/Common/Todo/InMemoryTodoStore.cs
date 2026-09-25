@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Documentation.Todo;
 /// A to-do database that lives in memory. It keeps its own rows and hands out copies, so changing an item you
 /// read does not change the database until you call <see cref="UpdateAsync"/>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Rows = {RowCount}, IsOffline = {IsOffline}")]
+[System.Diagnostics.DebuggerDisplay("InMemoryTodoStore: Rows = {RowCount}, IsOffline = {IsOffline}")]
 public sealed class InMemoryTodoStore : ITodoStore
 {
     /// <summary>The message of the exception thrown while the database is offline.</summary>

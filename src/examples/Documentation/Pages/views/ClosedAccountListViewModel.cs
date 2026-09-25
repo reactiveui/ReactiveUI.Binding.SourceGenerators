@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The accounts the customer has closed.</summary>
-[System.Diagnostics.DebuggerDisplay("Accounts = {Accounts.Count}")]
+[System.Diagnostics.DebuggerDisplay("ClosedAccountListViewModel: Accounts = {Accounts.Count}")]
 public sealed class ClosedAccountListViewModel : ObservableObject, IAccountList
 {
     /// <summary>Initializes a new instance of the <see cref="ClosedAccountListViewModel"/> class.</summary>

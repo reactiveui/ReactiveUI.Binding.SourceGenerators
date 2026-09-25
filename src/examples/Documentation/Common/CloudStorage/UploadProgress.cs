@@ -7,7 +7,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// <summary>A report on how much of an upload the service has received.</summary>
 /// <param name="BytesSent">The number of bytes the service has received.</param>
 /// <param name="TotalBytes">The size of the whole upload in bytes.</param>
-[System.Diagnostics.DebuggerDisplay("{BytesSent} of {TotalBytes}")]
+[System.Diagnostics.DebuggerDisplay("UploadProgress: {BytesSent} of {TotalBytes}")]
 public sealed record UploadProgress(long BytesSent, long TotalBytes)
 {
     /// <summary>Gets how much has been received as a fraction from 0 to 1.</summary>

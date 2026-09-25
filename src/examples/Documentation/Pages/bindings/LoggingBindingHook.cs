@@ -6,7 +6,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>Writes down every binding that is created and lets each one through.</summary>
 /// <param name="name">The name that starts each line the hook writes.</param>
-[System.Diagnostics.DebuggerDisplay("Logging binding hook")]
+[System.Diagnostics.DebuggerDisplay("LoggingBindingHook: Logging binding hook")]
 public sealed class LoggingBindingHook(string name) : IPropertyBindingHook
 {
     /// <inheritdoc/>

@@ -8,7 +8,7 @@ using System.Globalization;
 namespace PlatformBindingsVerification.Wpf;
 
 /// <summary>Backs <see cref="Text"/> with an <see cref="ObservableAsPropertyHelper{T}"/> built from a source that is pushed from a background thread.</summary>
-[System.Diagnostics.DebuggerDisplay("Text = {Text}")]
+[System.Diagnostics.DebuggerDisplay("WpfCounterViewModel: Text = {Text}")]
 public sealed partial class WpfCounterViewModel : INotifyPropertyChanged
 {
     /// <summary>Backs <see cref="Text"/>.</summary>

@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding.Observables;
 /// to every property. Consecutive equal values are not filtered, because the value has not changed when the event
 /// fires.
 /// </remarks>
-[DebuggerDisplay("Property = {_propertyName}, Source = {_source}")]
+[DebuggerDisplay("PropertyChangingObservable: Property = {_propertyName}, Source = {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyChangingObservable<T> : IObservable<T>
 {

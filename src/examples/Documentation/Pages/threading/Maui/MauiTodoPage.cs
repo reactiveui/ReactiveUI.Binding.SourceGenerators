@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The to-do screen as a MAUI page: the filter entry, the checkbox and the tick mark for the selected item, and the count of items left.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("MauiTodoPage: ViewModel = {ViewModel}")]
 public sealed class MauiTodoPage : ContentPage, IViewFor<TodoListViewModel>
 {
     /// <summary>The bindable property behind <see cref="DoneMarkVisibility"/>.</summary>

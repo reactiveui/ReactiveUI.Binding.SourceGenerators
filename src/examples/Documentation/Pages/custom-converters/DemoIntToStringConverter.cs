@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Demo converter from int to string with adjustable affinity.</summary>
-[DebuggerDisplay("int -> string (affinity {_affinity})")]
+[DebuggerDisplay("DemoIntToStringConverter: int -> string (affinity {_affinity})")]
 public sealed class DemoIntToStringConverter : IBindingTypeConverter
 {
     /// <summary>The affinity score for this converter.</summary>

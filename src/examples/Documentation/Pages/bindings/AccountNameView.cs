@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>The account detail strip: the name of the selected account in a box the customer could type into.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountNameView: ViewModel = {ViewModel}")]
 public sealed class AccountNameView : ObservableObject, IViewFor<AccountsViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

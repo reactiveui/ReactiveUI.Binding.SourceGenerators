@@ -11,5 +11,5 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// <param name="Description">What the transaction was for.</param>
 /// <param name="Amount">The money moved. It is negative when money leaves the account.</param>
 /// <param name="BalanceAfter">The balance of the account after the transaction.</param>
-[System.Diagnostics.DebuggerDisplay("{Description}: {Amount}")]
+[System.Diagnostics.DebuggerDisplay("Transaction: {Description}: {Amount}")]
 public sealed record Transaction(int Id, string AccountId, DateTimeOffset PostedAt, string Description, decimal Amount, decimal BalanceAfter);

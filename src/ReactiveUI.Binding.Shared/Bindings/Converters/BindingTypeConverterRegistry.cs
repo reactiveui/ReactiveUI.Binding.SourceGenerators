@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding;
 /// Reads are lock-free against an immutable snapshot; each registration is serialized under a lock and publishes a
 /// new snapshot, so registering is expensive and lookups are cheap.
 /// </remarks>
-[DebuggerDisplay("Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
+[DebuggerDisplay("BindingTypeConverterRegistry: Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
 public sealed class BindingTypeConverterRegistry
 {
     /// <summary>Synchronization gate for serializing write operations.</summary>

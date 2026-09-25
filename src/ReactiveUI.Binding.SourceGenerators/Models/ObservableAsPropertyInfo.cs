@@ -10,9 +10,24 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Modifiers">The property's modifiers as declared, which the implementing part repeats.</param>
 /// <param name="TypeFullName">The property type, fully qualified with its nullable annotation.</param>
 /// <param name="PropertyName">The property name.</param>
+/// <param name="HelperModifiers">The helper field's modifiers: its accessibility, then <c>readonly</c> when asked for.</param>
+/// <param name="InitialValue">
+/// The expression the property returns until its helper is assigned, or null for the type's default.
+/// </param>
+/// <param name="StoresInitialValue">
+/// Whether the initial value is held in a backing field, evaluated once, rather than written into the getter.
+/// </param>
+/// <param name="Usings">
+/// The <c>extern alias</c> and <c>using</c> directives of the file declaring the property, which an initial value
+/// expression is written against. Empty when the property stores no initial value.
+/// </param>
 internal sealed record ObservableAsPropertyInfo(
     PartialTypeDeclaration Declaration,
     string HintName,
     string Modifiers,
     string TypeFullName,
-    string PropertyName);
+    string PropertyName,
+    string HelperModifiers,
+    string? InitialValue,
+    bool StoresInitialValue,
+    EquatableArray<string> Usings);

@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding;
 /// Reads are lock-free against an immutable snapshot; each registration is serialized under a lock and publishes a
 /// new snapshot.
 /// </remarks>
-[DebuggerDisplay("{_snapshot.Converters.Count} set-method converters registered")]
+[DebuggerDisplay("SetMethodBindingConverterRegistry: {_snapshot.Converters.Count} set-method converters registered")]
 public sealed class SetMethodBindingConverterRegistry
 {
     /// <summary>Synchronization gate for serializing write operations.</summary>

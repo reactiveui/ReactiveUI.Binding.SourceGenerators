@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding.Observables;
 /// notification. The current value is emitted on subscribe and again after each notification. An error or
 /// completion from the plugin is passed on after any value still waiting to be read.
 /// </remarks>
-[DebuggerDisplay("Property = {_propertyName}, Source = {_source}, BeforeChange = {_beforeChange}")]
+[DebuggerDisplay("PluginPropertyObservable: Property = {_propertyName}, Source = {_source}, BeforeChange = {_beforeChange}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PluginPropertyObservable<T> : IObservable<T>
 {

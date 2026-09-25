@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>A view locator for an application with one screen: it answers for the to-do list and for nothing else.</summary>
-[System.Diagnostics.DebuggerDisplay("Screen = TodoView")]
+[System.Diagnostics.DebuggerDisplay("TodoViewLocator: Screen = TodoView")]
 public sealed class TodoViewLocator : IViewLocator
 {
     /// <inheritdoc/>

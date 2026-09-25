@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// takes <see cref="Latency"/> to answer. It hands out copies, so changing an account you read does not change the
 /// bank until you make a transfer.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("DailyLimit = {DailyLimit}, IsUnavailable = {IsUnavailable}")]
+[System.Diagnostics.DebuggerDisplay("InMemoryBankingBackend: DailyLimit = {DailyLimit}, IsUnavailable = {IsUnavailable}")]
 public sealed class InMemoryBankingBackend : IBankingBackend
 {
     /// <summary>The currency of every account.</summary>

@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The detail screen of one to-do item. It is left out of the generated lookup, so the application registers it with the service locator.</summary>
 [ExcludeFromViewRegistration]
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("TodoItemDetailView: ViewModel = {ViewModel}")]
 public sealed class TodoItemDetailView : ObservableObject, IViewFor<TodoItem>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

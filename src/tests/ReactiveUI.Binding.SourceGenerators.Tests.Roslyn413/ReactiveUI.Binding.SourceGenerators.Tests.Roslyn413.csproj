@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="TUnit"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net110"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
     <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators.Roslyn413\ReactiveUI.Binding.SourceGenerators.Roslyn413.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer.Roslyn413\ReactiveUI.Binding.Analyzer.Roslyn413.csproj" Aliases="analyzer"/>
   </ItemGroup>
 
   <!-- No test source of its own: it recompiles the baseline project's files against the other generator. -->

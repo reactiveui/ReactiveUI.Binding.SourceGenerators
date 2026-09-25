@@ -65,13 +65,13 @@ public static class ObservationAffinityChecker
     /// <param name="Type">The type being observed.</param>
     /// <param name="PropertyName">The property being observed.</param>
     /// <param name="BeforeChanged">Whether notification occurs before the change.</param>
-    [DebuggerDisplay("{Type.Name,nq}.{PropertyName,nq}, BeforeChanged = {BeforeChanged}")]
+    [DebuggerDisplay("ObservationKey: {Type.Name,nq}.{PropertyName,nq}, BeforeChanged = {BeforeChanged}")]
     private readonly record struct ObservationKey(Type Type, string PropertyName, bool BeforeChanged);
 
     /// <summary>Keeps the strongest custom vote independently of any generated mechanism's affinity.</summary>
     /// <param name="Plugin">The winning registration, or null when no registration wins.</param>
     /// <param name="Affinity">The registration's property-specific score.</param>
-    [DebuggerDisplay("Affinity = {Affinity}")]
+    [DebuggerDisplay("PluginSelection: Affinity = {Affinity}")]
     private readonly record struct PluginSelection(ICreatesObservableForProperty? Plugin, int Affinity);
 
     /// <summary>Owns registrations and scored votes so refresh cannot receive a stale publication.</summary>

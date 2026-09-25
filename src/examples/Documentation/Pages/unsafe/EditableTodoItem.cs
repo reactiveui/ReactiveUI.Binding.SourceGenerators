@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.UnsafeOverloads;
 
 /// <summary>A to-do item being edited. It reports each change of its title, notes and done flag twice: before it is applied and after.</summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}")]
+[System.Diagnostics.DebuggerDisplay("EditableTodoItem: Title = {Title}")]
 public sealed class EditableTodoItem : ObservableObject, INotifyPropertyChanging
 {
     /// <inheritdoc/>

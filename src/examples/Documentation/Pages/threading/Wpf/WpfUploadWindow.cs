@@ -9,7 +9,7 @@ using Window = System.Windows.Window;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The storage upload screen as a WPF window: the progress bar of the running upload.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WpfUploadWindow: ViewModel = {ViewModel}")]
 public sealed class WpfUploadWindow : Window, IViewFor<StorageBrowserViewModel>
 {
     /// <summary>The value of a full progress bar.</summary>

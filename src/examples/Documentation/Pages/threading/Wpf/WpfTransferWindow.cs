@@ -10,7 +10,7 @@ using Window = System.Windows.Window;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The transfer screen as a WPF window: the amount box, the reference box, the send button and the labels for validation and the receipt.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WpfTransferWindow: ViewModel = {ViewModel}")]
 public sealed class WpfTransferWindow : Window, IViewFor<TransferViewModel>
 {
     /// <summary>Gets or sets the view model the window shows.</summary>

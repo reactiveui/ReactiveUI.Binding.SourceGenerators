@@ -11,7 +11,7 @@ using Splat;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>ReactiveUI expression-tree binding benchmarks for comparison.</summary>
-[DebuggerDisplay("Expression-tree binding over {PropertyChangeCount} changes")]
+[DebuggerDisplay("ReactiveUIBindingBenchmark: Expression-tree binding over {PropertyChangeCount} changes")]
 public class ReactiveUIBindingBenchmark
 {
     /// <summary>The number of property changes to fire during each benchmark iteration.</summary>

@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// ignored. A read that throws is forwarded to the observer as an error. Errors and completion of the
 /// notification source pass through to the observer.
 /// </remarks>
-[DebuggerDisplay("{_expression}, Sender = {_sender}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
+[DebuggerDisplay("ObservableForPropertySink: {_expression}, Sender = {_sender}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>
 {

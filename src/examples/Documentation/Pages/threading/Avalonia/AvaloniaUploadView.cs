@@ -9,7 +9,7 @@ using ProgressBar = Avalonia.Controls.ProgressBar;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The storage upload screen as an Avalonia view: the progress bar of the running upload.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AvaloniaUploadView: ViewModel = {ViewModel}")]
 public sealed class AvaloniaUploadView : UserControl, IViewFor<StorageBrowserViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

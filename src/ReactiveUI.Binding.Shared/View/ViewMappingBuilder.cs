@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Fluent builder for registering view-to-view-model mappings on a <see cref="DefaultViewLocator"/>.</summary>
-[DebuggerDisplay("Locator = {_locator}")]
+[DebuggerDisplay("ViewMappingBuilder: Locator = {_locator}")]
 public sealed class ViewMappingBuilder
 {
     /// <summary>The view locator to register mappings on.</summary>

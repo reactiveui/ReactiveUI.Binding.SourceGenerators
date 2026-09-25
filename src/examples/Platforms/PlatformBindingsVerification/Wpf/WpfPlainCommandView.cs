@@ -8,7 +8,7 @@ using Button = System.Windows.Controls.Button;
 namespace PlatformBindingsVerification.Wpf;
 
 /// <summary>A view that is a plain object, not a WPF element, holding a WPF button that the dispatcher owns.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WpfPlainCommandView: ViewModel = {ViewModel}")]
 public sealed class WpfPlainCommandView : IViewFor<WpfCommandViewModel>, INotifyPropertyChanged
 {
     /// <inheritdoc/>

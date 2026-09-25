@@ -10,5 +10,5 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <param name="EnrolledOn">The day the student took the place.</param>
 /// <param name="Grades">The scores recorded so far.</param>
 /// <param name="Submissions">The assignments the student handed in.</param>
-[System.Diagnostics.DebuggerDisplay("Student {StudentId} in {CourseCode}")]
+[System.Diagnostics.DebuggerDisplay("Enrolment: Student {StudentId} in {CourseCode}")]
 public sealed record Enrolment(int StudentId, string CourseCode, DateOnly EnrolledOn, IReadOnlyList<Grade> Grades, IReadOnlyList<Submission> Submissions);

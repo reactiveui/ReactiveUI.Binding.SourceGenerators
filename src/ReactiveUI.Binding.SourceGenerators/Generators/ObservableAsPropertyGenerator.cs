@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.PropertyRaise;
 
@@ -83,19 +84,82 @@ internal static class ObservableAsPropertyGenerator
     /// <returns>The model, or null when the property's type is not partial all the way out.</returns>
     internal static ObservableAsPropertyInfo? Extract(GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
-        if (context.TargetSymbol is not IPropertySymbol { ContainingType: { } type } property
+        // A static property has no instance to hold its helper; the analyzer reports it.
+        if (context.TargetSymbol is not IPropertySymbol { IsStatic: false, ContainingType: { } type } property
             || PartialTypeRaisePlugin.DescribeDeclaration(type) is not { } declaration)
         {
             return null;
         }
 
+        var options = ObservableAsPropertyOptions.Read(context.Attributes[0]);
+        var (initialValue, storesInitialValue) = InitialValueFor(property.Type, options.InitialValue);
         var syntax = (PropertyDeclarationSyntax)context.TargetNode;
         return new(
             declaration,
             HintNameFor(type),
             syntax.Modifiers.ToString(),
             property.Type.ToDisplayString(TypeFormat),
-            property.Name);
+            property.Name,
+            (options.UseProtected ? "protected" : "private") + (options.ReadOnly ? " readonly" : string.Empty),
+            initialValue,
+            storesInitialValue,
+            storesInitialValue ? UsingsOf(syntax) : new([]));
+    }
+
+    /// <summary>Collects the directives an initial value expression was written against, in the order they appear.</summary>
+    /// <param name="property">The property declaration.</param>
+    /// <returns>The <c>extern alias</c> directives, then the <c>using</c> directives of the file and its namespaces.</returns>
+    /// <remarks>
+    /// The expression is copied into a generated file of its own, so it only binds the way it did in the consumer's file
+    /// when that file's directives come with it. Namespace-level directives are lifted to the top of the generated file.
+    /// </remarks>
+    internal static EquatableArray<string> UsingsOf(PropertyDeclarationSyntax property)
+    {
+        var directives = new List<string>();
+        var unit = (CompilationUnitSyntax)property.SyntaxTree.GetRoot();
+        foreach (var alias in unit.Externs)
+        {
+            directives.Add(alias.ToString().Trim());
+        }
+
+        foreach (var directive in unit.Usings)
+        {
+            directives.Add(directive.ToString().Trim());
+        }
+
+        for (var node = property.Parent; node is not null; node = node.Parent)
+        {
+            if (node is BaseNamespaceDeclarationSyntax scope)
+            {
+                foreach (var directive in scope.Usings)
+                {
+                    directives.Add(directive.ToString().Trim());
+                }
+            }
+        }
+
+        return new([.. directives]);
+    }
+
+    /// <summary>Works out what a property returns before its helper is assigned.</summary>
+    /// <param name="type">The property type.</param>
+    /// <param name="initialValue">The attribute's <c>InitialValue</c>, or null.</param>
+    /// <returns>
+    /// The expression, or null for the type's default, and whether it is held in a backing field. A string property's
+    /// text is its value, so it is written as a literal. Any other type's text is an expression, evaluated once.
+    /// </returns>
+    internal static (string? Expression, bool Stores) InitialValueFor(ITypeSymbol type, string? initialValue)
+    {
+        var isString = type.SpecialType == SpecialType.System_String;
+        if (initialValue is not null)
+        {
+            return isString ? (SymbolDisplay.FormatLiteral(initialValue, true), false) : (initialValue, true);
+        }
+
+        // A non-nullable string never reports null, so it starts empty.
+        return isString && type.NullableAnnotation != NullableAnnotation.Annotated
+            ? ("global::System.String.Empty", false)
+            : (null, false);
     }
 
     /// <summary>Writes one file per type, holding every marked property the type declares.</summary>
@@ -159,6 +223,11 @@ internal static class ObservableAsPropertyGenerator
             .FileHeader(features.EmitGeneratedCodeMarkers, enableNullable: true)
             .BlankLine();
 
+        if (AppendUsings(sb, properties))
+        {
+            _ = sb.BlankLine();
+        }
+
         CodeGeneratorHelpers.OpenPartialDeclaration(sb, declaration);
         for (var i = 0; i < properties.Count; i++)
         {
@@ -175,28 +244,62 @@ internal static class ObservableAsPropertyGenerator
         return sb.ToStringAndReturn();
     }
 
+    /// <summary>Writes each directive the type's initial values need, once.</summary>
+    /// <param name="sb">The writer, at the top of the file.</param>
+    /// <param name="properties">The properties one type declares.</param>
+    /// <returns><see langword="true"/> when any directive was written.</returns>
+    private static bool AppendUsings(SourceWriter sb, List<ObservableAsPropertyInfo> properties)
+    {
+        HashSet<string>? written = null;
+        for (var i = 0; i < properties.Count; i++)
+        {
+            var usings = properties[i].Usings;
+            for (var j = 0; j < usings.Length; j++)
+            {
+                written ??= [with(StringComparer.Ordinal)];
+                if (written.Add(usings[j]))
+                {
+                    _ = sb.Line(usings[j]);
+                }
+            }
+        }
+
+        return written is not null;
+    }
+
     /// <summary>Writes one property's helper field and the body that reads it.</summary>
     /// <param name="sb">The writer, at the level of the type's members.</param>
     /// <param name="property">The property.</param>
     private static void AppendProperty(SourceWriter sb, ObservableAsPropertyInfo property)
     {
         var name = property.PropertyName;
+        if (property.StoresInitialValue)
+        {
+            _ = sb.Append("/// <summary>The value <see cref=\"").Append(name).Line("\"/> returns until its helper is assigned.</summary>")
+                .Append("private readonly ").Append(property.TypeFullName).Append(' ');
+            _ = AppendFieldName(sb, name).Append(" = ").Append(property.InitialValue!).EndStatement()
+                .BlankLine();
+        }
+
         _ = sb.Append("/// <summary>Backs <see cref=\"").Append(name).Line("\"/>; assign it with <c>ToProperty</c>.</summary>")
-            .Append("private ").Append(HelperType).Append('<').Append(property.TypeFullName).Append(">? ");
-        _ = AppendHelperFieldName(sb, name).EndStatement()
+            .Append(property.HelperModifiers).Append(' ').Append(HelperType).Append('<').Append(property.TypeFullName).Append(">? ");
+        _ = AppendFieldName(sb, name).Append("Helper").EndStatement()
             .BlankLine()
             .Append(property.Modifiers).Append(' ').Append(property.TypeFullName).Append(' ').Append(name).Append(" => ");
-        _ = AppendHelperFieldName(sb, name).Append(" is null ? default! : ");
-        _ = AppendHelperFieldName(sb, name).Line(".Value;");
+        _ = AppendFieldName(sb, name).Append("Helper is null ? ");
+        _ = property.StoresInitialValue
+            ? AppendFieldName(sb, name)
+            : sb.Append(property.InitialValue ?? "default!");
+        _ = AppendFieldName(sb.Append(" : "), name).Line("Helper.Value;");
     }
 
-    /// <summary>Appends the helper field for a property, <c>_{name}Helper</c> with the first letter lowered, without building a string for it.</summary>
+    /// <summary>Appends a field name for a property, <c>_{name}</c> with the first letter lowered, without building a string for it.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="propertyName">The property name.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static SourceWriter AppendHelperFieldName(SourceWriter sb, string propertyName) =>
-        sb.Append('_').Append(char.ToLowerInvariant(propertyName[0])).Append(propertyName, 1, propertyName.Length - 1).Append("Helper");
+    private static SourceWriter AppendFieldName(SourceWriter sb, string propertyName) =>
+        sb.Append('_').Append(char.ToLowerInvariant(propertyName[0])).Append(propertyName, 1, propertyName.Length - 1);
 
     /// <summary>Names a type's generated file from its metadata name, which is unique within the compilation.</summary>
     /// <param name="type">The type.</param>

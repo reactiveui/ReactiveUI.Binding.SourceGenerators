@@ -9,7 +9,7 @@ using CheckBox = Avalonia.Controls.CheckBox;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The to-do screen as an Avalonia view: the filter box, the item list, the checkbox for the selected item and the count of items left.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AvaloniaTodoView: ViewModel = {ViewModel}")]
 public sealed class AvaloniaTodoView : UserControl, IViewFor<TodoListViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

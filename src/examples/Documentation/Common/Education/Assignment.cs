@@ -11,5 +11,5 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <param name="Weight">How much the assignment counts towards the course, as a percentage.</param>
 /// <param name="MaxScore">The highest score the assignment awards.</param>
 /// <param name="DueDate">The last day a student can submit without being late.</param>
-[System.Diagnostics.DebuggerDisplay("{Title} ({Weight}%)")]
+[System.Diagnostics.DebuggerDisplay("Assignment: {Title} ({Weight}%)")]
 public sealed record Assignment(int Id, string CourseCode, string Title, decimal Weight, decimal MaxScore, DateOnly DueDate);

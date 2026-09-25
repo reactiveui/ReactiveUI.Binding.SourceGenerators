@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The screen for any list of accounts. It is registered for the interface, so every view model that implements it gets this screen.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountListView: ViewModel = {ViewModel}")]
 public sealed class AccountListView : ObservableObject, IViewFor<IAccountList>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

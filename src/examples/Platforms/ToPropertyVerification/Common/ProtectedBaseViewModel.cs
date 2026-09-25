@@ -9,7 +9,7 @@ namespace ToPropertyVerification.Common;
 /// <see langword="partial"/> declaration that calls it on the type's behalf. Backs <see cref="DeferredFlag"/> with
 /// deferred subscription, and <see cref="ScheduledLabel"/> with an explicit scheduler.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("DeferredFlag = {DeferredFlag}, ScheduledLabel = {ScheduledLabel}")]
+[System.Diagnostics.DebuggerDisplay("ProtectedBaseViewModel: DeferredFlag = {DeferredFlag}, ScheduledLabel = {ScheduledLabel}")]
 public sealed partial class ProtectedBaseViewModel : ProtectedRaiseBase
 {
     /// <summary>Backs <see cref="DeferredFlag"/>.</summary>

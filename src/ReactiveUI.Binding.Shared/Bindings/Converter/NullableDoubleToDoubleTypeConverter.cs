@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts a nullable <see cref="double"/> to a <see cref="double"/>; a null value fails the conversion.</summary>
-[DebuggerDisplay("double? -> double (affinity {Affinity})")]
+[DebuggerDisplay("NullableDoubleToDoubleTypeConverter: double? -> double (affinity {Affinity})")]
 public sealed class NullableDoubleToDoubleTypeConverter : IBindingTypeConverter<double?, double>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

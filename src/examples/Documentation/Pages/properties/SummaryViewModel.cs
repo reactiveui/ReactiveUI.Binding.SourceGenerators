@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.Properties;
 /// generator in the build can see it; the source generator writes the body and a field named
 /// <c>_{name}Helper</c>, which the constructor assigns with <c>ToProperty</c>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}, IsDone = {IsDone}")]
+[System.Diagnostics.DebuggerDisplay("SummaryViewModel: Title = {Title}, IsDone = {IsDone}")]
 public sealed partial class SummaryViewModel : INotifyPropertyChanged
 {
     /// <summary>Initializes a new instance of the <see cref="SummaryViewModel"/> class.</summary>

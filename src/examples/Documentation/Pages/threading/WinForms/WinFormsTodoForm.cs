@@ -11,7 +11,7 @@ using Label = System.Windows.Forms.Label;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The to-do screen as a Windows Forms form: the filter box, the item list, the priority picker, the checkbox for the selected item and the count of items left.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WinFormsTodoForm: ViewModel = {ViewModel}")]
 public sealed class WinFormsTodoForm : Form, IViewFor<TodoListViewModel>
 {
     /// <summary>Initializes a new instance of the <see cref="WinFormsTodoForm"/> class and puts its controls on the form.</summary>

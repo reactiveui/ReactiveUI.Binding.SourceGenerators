@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// view, which registers a handler against it.
 /// </summary>
 /// <param name="board">The issue board the panel triages.</param>
-[System.Diagnostics.DebuggerDisplay("Board = {Board}")]
+[System.Diagnostics.DebuggerDisplay("IssueTriageViewModel: Board = {Board}")]
 public sealed class IssueTriageViewModel(IssueBoardViewModel board) : ObservableObject
 {
     /// <summary>Gets the issue board the panel triages.</summary>

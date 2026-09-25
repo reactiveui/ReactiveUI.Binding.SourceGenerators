@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// methods and returns; call the method itself to wait for the work. A refused request never throws. It sets
 /// <see cref="ErrorMessage"/>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Course = {SelectedCourse}, Student = {SelectedStudent}, Average = {Average}")]
+[System.Diagnostics.DebuggerDisplay("GradebookViewModel: Course = {SelectedCourse}, Student = {SelectedStudent}, Average = {Average}")]
 public sealed class GradebookViewModel : ObservableObject
 {
     /// <summary>The service the view model calls.</summary>

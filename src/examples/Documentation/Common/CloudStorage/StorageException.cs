@@ -5,7 +5,7 @@
 namespace ReactiveUI.Binding.Documentation.CloudStorage;
 
 /// <summary>Reports that the storage service refused a request.</summary>
-[System.Diagnostics.DebuggerDisplay("Failure = {Failure}, Message = {Message}")]
+[System.Diagnostics.DebuggerDisplay("StorageException: Failure = {Failure}, Message = {Message}")]
 public sealed class StorageException : Exception
 {
     /// <summary>Initializes a new instance of the <see cref="StorageException"/> class.</summary>

@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The account screen: one line with the balance. The locator builds it once and hands out the same screen every time.</summary>
 [SingleInstanceView]
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountSummaryView: ViewModel = {ViewModel}")]
 public sealed class AccountSummaryView : ObservableObject, IViewFor<Account>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

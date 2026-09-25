@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.GitHub;
 namespace ReactiveUI.Binding.Documentation.Observing;
 
 /// <summary>The edit form of an issue. It reports each change before and after it is applied.</summary>
-[System.Diagnostics.DebuggerDisplay("#{Number} {Title} ({State})")]
+[System.Diagnostics.DebuggerDisplay("IssueDraft: #{Number} {Title} ({State})")]
 public sealed class IssueDraft : ChangingObject
 {
     /// <summary>Gets or sets the number the repository gave the issue.</summary>

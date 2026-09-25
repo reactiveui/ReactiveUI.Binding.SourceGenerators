@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding;
 /// The conversion always succeeds, and two nulls are equal. The converter is registered for the
 /// (<see cref="object"/>, <see cref="bool"/>) pair, so a registry lookup finds it only for that pair.
 /// </remarks>
-[DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
+[DebuggerDisplay("EqualityTypeConverter: {FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
 public sealed class EqualityTypeConverter : IBindingTypeConverter
 {
     /// <inheritdoc/>

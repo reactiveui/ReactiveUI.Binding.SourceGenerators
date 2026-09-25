@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <param name="StartHour">The hour the class starts, from 0 to 23.</param>
 /// <param name="DurationHours">How many hours the class lasts.</param>
 /// <param name="PassMark">The weighted average, as a percentage, a student needs to pass.</param>
-[System.Diagnostics.DebuggerDisplay("{Code}: {Title}")]
+[System.Diagnostics.DebuggerDisplay("Course: {Code}: {Title}")]
 public sealed record Course(string Code, string Title, int Capacity, DayOfWeek Day, int StartHour, int DurationHours, decimal PassMark)
 {
     /// <summary>Checks whether this course meets at the same time as another.</summary>

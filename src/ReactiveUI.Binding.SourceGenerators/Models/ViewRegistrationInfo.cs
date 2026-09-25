@@ -14,9 +14,15 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="HasParameterlessConstructor">Whether the view type has a parameterless constructor for direct instantiation.</param>
 /// <param name="Contract">The contract string from <c>[ViewContract]</c>, or <see langword="null"/> for default registration.</param>
 /// <param name="IsSingleInstance">Whether the view is marked with <c>[SingleInstanceView]</c> for cached singleton resolution.</param>
+/// <param name="IsDeclaredByAttribute">
+/// Whether the view was found through ReactiveUI.SourceGenerators' <c>[IViewFor]</c> rather than an <c>IViewFor&lt;T&gt;</c>
+/// in its source. That generator adds the interface, which no other generator can see, so the resolver checks for it
+/// at run time.
+/// </param>
 internal sealed record ViewRegistrationInfo(
     string ViewModelFullyQualifiedName,
     string ViewFullyQualifiedName,
     bool HasParameterlessConstructor,
     string? Contract,
-    bool IsSingleInstance);
+    bool IsSingleInstance,
+    bool IsDeclaredByAttribute = false);

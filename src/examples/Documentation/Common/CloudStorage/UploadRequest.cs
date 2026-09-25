@@ -8,5 +8,5 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// <param name="FileName">The name of the file, without a folder.</param>
 /// <param name="SizeBytes">The size of the file in bytes.</param>
 /// <param name="ContentType">The media type of the file.</param>
-[System.Diagnostics.DebuggerDisplay("{FileName} ({SizeBytes} bytes)")]
+[System.Diagnostics.DebuggerDisplay("UploadRequest: {FileName} ({SizeBytes} bytes)")]
 public sealed record UploadRequest(string FileName, long SizeBytes, string ContentType);

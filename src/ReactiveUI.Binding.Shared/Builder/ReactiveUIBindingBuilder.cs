@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Builder;
 #endif
 
 /// <summary>Configures ReactiveUI.Binding services, converters and platform modules on a Splat <see cref="AppBuilder"/>.</summary>
-[DebuggerDisplay("CoreServicesRegistered = {_coreRegistered}")]
+[DebuggerDisplay("ReactiveUIBindingBuilder: CoreServicesRegistered = {_coreRegistered}")]
 public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBuilder, IReactiveUIBindingInstance
 {
     /// <summary>Tracks whether core services are registered, so a repeat call registers nothing.</summary>

@@ -17,7 +17,7 @@ namespace ReactiveUI.Binding;
 /// using a three-tier resolution strategy: source-generated AOT-safe dispatch, explicit runtime
 /// mappings, and service locator fallback.
 /// </summary>
-[DebuggerDisplay("Mappings = {_mappings.Count}")]
+[DebuggerDisplay("DefaultViewLocator: Mappings = {_mappings.Count}")]
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>

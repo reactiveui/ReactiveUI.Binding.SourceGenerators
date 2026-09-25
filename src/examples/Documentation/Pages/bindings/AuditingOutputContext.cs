@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
 /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
 /// <param name="inner">The context that holds the input and the answer.</param>
-[System.Diagnostics.DebuggerDisplay("Input = {Input}, IsHandled = {IsHandled}")]
+[System.Diagnostics.DebuggerDisplay("AuditingOutputContext: Input = {Input}, IsHandled = {IsHandled}")]
 public sealed class AuditingOutputContext<TInput, TOutput>(IOutputContext<TInput, TOutput> inner) : IOutputContext<TInput, TOutput>
 {
     /// <inheritdoc/>

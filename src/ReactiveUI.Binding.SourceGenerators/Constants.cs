@@ -163,6 +163,21 @@ internal static class Constants
     /// <summary>Metadata name for the open generic <c>IViewFor&lt;T&gt;</c> interface used for view resolution.</summary>
     internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";
 
+    /// <summary>Metadata name for the System.Reactive flavour's open generic <c>IViewFor&lt;T&gt;</c> interface.</summary>
+    internal const string ReactiveIViewForGenericMetadataName = "ReactiveUI.Binding.Reactive.IViewFor`1";
+
+    /// <summary>The namespace the lean runtime declares its view types in, with the trailing dot.</summary>
+    internal const string LeanViewNamespacePrefix = "ReactiveUI.Binding.";
+
+    /// <summary>The namespace the System.Reactive runtime declares its view types in, with the trailing dot.</summary>
+    internal const string ReactiveViewNamespacePrefix = "ReactiveUI.Binding.Reactive.";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' generic <c>[IViewFor&lt;T&gt;]</c> attribute.</summary>
+    internal const string SourceGeneratorsGenericIViewForAttributeMetadataName = "ReactiveUI.SourceGenerators.IViewForAttribute`1";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[IViewFor("...")]</c> attribute.</summary>
+    internal const string SourceGeneratorsIViewForAttributeMetadataName = "ReactiveUI.SourceGenerators.IViewForAttribute";
+
     /// <summary>Metadata name for the <c>ExcludeFromViewRegistrationAttribute</c> used to skip view auto-registration.</summary>
     internal const string ExcludeFromViewRegistrationAttributeMetadataName =
         "ReactiveUI.Binding.ExcludeFromViewRegistrationAttribute";
