@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>The priority badge colour converter an older to-do app registered with Splat.</summary>
-[DebuggerDisplay("TodoPriority -> badge colour")]
+[DebuggerDisplay("LegacyPriorityToColorConverter: TodoPriority -> badge colour")]
 public sealed class LegacyPriorityToColorConverter : BindingTypeConverter<TodoPriority, string>
 {
     /// <summary>The badge colour of a low priority item.</summary>

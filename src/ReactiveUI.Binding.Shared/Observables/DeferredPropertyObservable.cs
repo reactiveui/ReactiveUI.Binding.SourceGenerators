@@ -21,7 +21,7 @@ namespace ReactiveUI.Binding.Observables;
 /// subscription reads the property afresh. The sequence never completes, so a binding or chain that observes it
 /// stays subscribed.
 /// </remarks>
-[DebuggerDisplay("DeferredProperty: {_source}")]
+[DebuggerDisplay("DeferredPropertyObservable: DeferredProperty: {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class DeferredPropertyObservable<TSource, TValue> : IObservable<TValue>
 {

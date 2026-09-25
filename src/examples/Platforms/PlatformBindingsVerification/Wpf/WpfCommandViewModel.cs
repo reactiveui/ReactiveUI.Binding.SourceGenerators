@@ -8,7 +8,7 @@ using System.Windows.Input;
 namespace PlatformBindingsVerification.Wpf;
 
 /// <summary>Holds the command a button runs, which the example replaces from a background thread.</summary>
-[System.Diagnostics.DebuggerDisplay("Save = {Save}")]
+[System.Diagnostics.DebuggerDisplay("WpfCommandViewModel: Save = {Save}")]
 public sealed class WpfCommandViewModel : INotifyPropertyChanged
 {
     /// <inheritdoc/>

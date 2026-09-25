@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>A form field for the reference on the payee's statement. The bank prints at most 18 characters, so the field refuses longer text.</summary>
-[System.Diagnostics.DebuggerDisplay("Reference = {Reference}")]
+[System.Diagnostics.DebuggerDisplay("StatementReferenceView: Reference = {Reference}")]
 public sealed class StatementReferenceView : ObservableObject
 {
     /// <summary>The number of characters the bank prints for a reference.</summary>

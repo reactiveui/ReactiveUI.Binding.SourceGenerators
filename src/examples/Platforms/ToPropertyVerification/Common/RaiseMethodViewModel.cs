@@ -10,7 +10,7 @@ namespace ToPropertyVerification.Common;
 /// Backs <see cref="CountText"/> with the named-property overload and a plain initial value, and
 /// <see cref="UpperLabel"/> with the selector overload and an initial-value factory.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("CountText = {CountText}, UpperLabel = {UpperLabel}")]
+[System.Diagnostics.DebuggerDisplay("RaiseMethodViewModel: CountText = {CountText}, UpperLabel = {UpperLabel}")]
 public sealed class RaiseMethodViewModel : RaiseMethodBase
 {
     /// <summary>The initial value <see cref="CountText"/> takes before the first notification.</summary>

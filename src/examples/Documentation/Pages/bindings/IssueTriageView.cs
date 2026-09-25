@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>The triage panel. It shows the confirmation dialog that appears before an issue closes.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("IssueTriageView: ViewModel = {ViewModel}")]
 public sealed class IssueTriageView : ObservableObject, IViewFor<IssueTriageViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

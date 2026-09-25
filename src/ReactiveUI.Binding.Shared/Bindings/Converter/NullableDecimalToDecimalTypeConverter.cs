@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts a nullable <see cref="decimal"/> to a <see cref="decimal"/>; a null value fails the conversion.</summary>
-[DebuggerDisplay("decimal? -> decimal (affinity {Affinity})")]
+[DebuggerDisplay("NullableDecimalToDecimalTypeConverter: decimal? -> decimal (affinity {Affinity})")]
 public sealed class NullableDecimalToDecimalTypeConverter : IBindingTypeConverter<decimal?, decimal>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// faults the observer with an <see cref="InvalidCastException"/>. The sequence never completes; observed values
 /// carry the root object as their sender.
 /// </remarks>
-[DebuggerDisplay("{_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
+[DebuggerDisplay("ExpressionChainSink: {_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>

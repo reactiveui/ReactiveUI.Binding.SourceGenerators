@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Setup.Aot;
 
 /// <summary>One row of the to-do list, with the two texts a row shows. It has no UI framework behind it, so the published program needs nothing else.</summary>
-[System.Diagnostics.DebuggerDisplay("TitleText = {TitleText}, StatusText = {StatusText}")]
+[System.Diagnostics.DebuggerDisplay("TodoRowView: TitleText = {TitleText}, StatusText = {StatusText}")]
 public sealed class TodoRowView : ObservableObject
 {
     /// <summary>Gets or sets the text that shows the title of the item.</summary>

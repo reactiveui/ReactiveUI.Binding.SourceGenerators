@@ -9,7 +9,7 @@ using System.Globalization;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Converts a banking amount to text with a currency symbol in front.</summary>
-[DebuggerDisplay("decimal -> currency text")]
+[DebuggerDisplay("CurrencyTextConverter: decimal -> currency text")]
 public sealed class CurrencyTextConverter : BindingTypeConverter<decimal, string>
 {
     /// <summary>The affinity of the converter for its type pair.</summary>

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Documentation.Todo;
+using ReactiveUI.Primitives.Signals;
 
 namespace ReactiveUI.Binding.Documentation.Properties;
 
@@ -21,5 +22,19 @@ public static class ObservableAsPropertyAttributeExamples
         item.IsDone = true;
 
         Console.WriteLine(summary.IsDone);
+    }
+
+    /// <summary>Reads a property before and after its helper is assigned: until then it returns its initial value.</summary>
+    public static void StartFromAnInitialValue()
+    {
+        var waiting = new StatusViewModel(null);
+        var ready = new StatusViewModel(Signal.Return("Ready"));
+
+        Console.WriteLine(waiting.Status);
+        Console.WriteLine(ready.Status);
+
+        // Output:
+        // Loading
+        // Ready
     }
 }

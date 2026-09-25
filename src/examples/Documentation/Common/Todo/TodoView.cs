@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Todo;
 /// The to-do screen: a list with a title box to add items and a detail area for the selected item. A real UI
 /// framework builds these controls from markup; here the view creates them in code.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("TodoView: ViewModel = {ViewModel}")]
 public sealed class TodoView : ObservableObject, IViewFor<TodoListViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

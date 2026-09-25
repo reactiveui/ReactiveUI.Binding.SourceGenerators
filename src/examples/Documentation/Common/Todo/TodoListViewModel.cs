@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.Todo;
 /// and keeps a count of the items still to do. Each command starts the matching method and returns; await the
 /// method itself to wait for its work.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Items = {Items.Count}, RemainingCount = {RemainingCount}")]
+[System.Diagnostics.DebuggerDisplay("TodoListViewModel: Items = {Items.Count}, RemainingCount = {RemainingCount}")]
 public sealed class TodoListViewModel : ObservableObject
 {
     /// <summary>The database the view model reads and writes.</summary>

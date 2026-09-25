@@ -6,7 +6,7 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>What the backend found when it checked a transfer without making it.</summary>
 /// <param name="Errors">The rules the transfer breaks; empty when the bank would accept it.</param>
-[System.Diagnostics.DebuggerDisplay("Errors = {Errors.Count}")]
+[System.Diagnostics.DebuggerDisplay("TransferValidation: Errors = {Errors.Count}")]
 public sealed record TransferValidation(IReadOnlyList<string> Errors)
 {
     /// <summary>Gets a value indicating whether the transfer breaks no rule.</summary>

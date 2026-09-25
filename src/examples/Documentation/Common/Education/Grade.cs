@@ -9,5 +9,5 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <param name="AssignmentId">The identifier of the assignment.</param>
 /// <param name="Score">The score awarded, from 0 to the assignment's maximum.</param>
 /// <param name="RecordedOn">When the teacher recorded the score.</param>
-[System.Diagnostics.DebuggerDisplay("Assignment {AssignmentId}: {Score}")]
+[System.Diagnostics.DebuggerDisplay("Grade: Assignment {AssignmentId}: {Score}")]
 public sealed record Grade(int StudentId, int AssignmentId, decimal Score, DateTimeOffset RecordedOn);

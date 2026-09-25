@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace ToPropertyVerification.Common;
 
 /// <summary>An ordinary <see cref="INotifyPropertyChanged"/> source that every scenario below follows with <c>WhenChanged</c>.</summary>
-[System.Diagnostics.DebuggerDisplay("Count = {Count}, Label = {Label}")]
+[System.Diagnostics.DebuggerDisplay("SourceItem: Count = {Count}, Label = {Label}")]
 public sealed class SourceItem : INotifyPropertyChanged
 {
     /// <summary>The label a new <see cref="SourceItem"/> starts with.</summary>

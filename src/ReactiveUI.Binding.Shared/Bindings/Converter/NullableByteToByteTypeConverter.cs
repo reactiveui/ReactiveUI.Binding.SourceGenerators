@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts a nullable <see cref="byte"/> to a <see cref="byte"/>; a null value fails the conversion.</summary>
-[DebuggerDisplay("byte? -> byte (affinity {Affinity})")]
+[DebuggerDisplay("NullableByteToByteTypeConverter: byte? -> byte (affinity {Affinity})")]
 public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte?, byte>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

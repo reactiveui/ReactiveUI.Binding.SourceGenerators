@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The account screen for printing a statement, registered under a contract.</summary>
 [ViewContract(AccountViewContracts.Statement)]
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountStatementView: ViewModel = {ViewModel}")]
 public sealed class AccountStatementView : ObservableObject, IViewFor<Account>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

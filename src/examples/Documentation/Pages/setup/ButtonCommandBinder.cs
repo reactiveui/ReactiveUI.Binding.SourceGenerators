@@ -10,7 +10,7 @@ using ReactiveUI.Primitives.Disposables;
 namespace ReactiveUI.Binding.Documentation.Setup;
 
 /// <summary>Attaches a command to a MAUI <see cref="Button"/> and forwards the command parameter to the button.</summary>
-[System.Diagnostics.DebuggerDisplay("BindCount = {BindCount}")]
+[System.Diagnostics.DebuggerDisplay("ButtonCommandBinder: BindCount = {BindCount}")]
 public sealed class ButtonCommandBinder : ICreatesCommandBinding
 {
     /// <summary>The score that makes this binder win over any other binder for a button.</summary>

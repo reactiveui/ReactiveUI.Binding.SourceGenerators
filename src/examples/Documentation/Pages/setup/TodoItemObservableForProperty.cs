@@ -9,7 +9,7 @@ using ReactiveUI.Binding.ObservableForProperty;
 namespace ReactiveUI.Binding.Documentation.Setup;
 
 /// <summary>Observes <see cref="TodoItem"/> properties through <c>PropertyChanged</c> and counts each observation it serves.</summary>
-[System.Diagnostics.DebuggerDisplay("ObservationCount = {ObservationCount}")]
+[System.Diagnostics.DebuggerDisplay("TodoItemObservableForProperty: ObservationCount = {ObservationCount}")]
 public sealed class TodoItemObservableForProperty : ICreatesObservableForProperty
 {
     /// <summary>The score that outranks the observation the generator writes for a <c>PropertyChanged</c> type.</summary>

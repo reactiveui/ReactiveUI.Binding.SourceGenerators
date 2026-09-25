@@ -38,7 +38,7 @@ namespace ReactiveUI.Binding;
 /// ]]>
 /// </code>
 /// </example>
-[DebuggerDisplay("Value = {_core.LastValue}, IsSubscribed = {IsSubscribed}")]
+[DebuggerDisplay("ObservableAsPropertyHelper: Value = {_core.LastValue}, IsSubscribed = {IsSubscribed}")]
 public sealed class ObservableAsPropertyHelper<T> : IDisposable
 {
     /// <summary>The state and source subscription behind this helper.</summary>

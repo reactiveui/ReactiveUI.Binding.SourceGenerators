@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding;
 /// <remarks>
 /// A new service holds no converters; <see cref="DefaultConverterRegistration.RegisterDefaults"/> adds the built-in ones.
 /// </remarks>
-[DebuggerDisplay("Typed: {TypedConverters}; fallback: {FallbackConverters}; set-method: {SetMethodConverters}")]
+[DebuggerDisplay("ConverterService: Typed: {TypedConverters}; fallback: {FallbackConverters}; set-method: {SetMethodConverters}")]
 public sealed class ConverterService
 {
     /// <summary>Initializes a new instance of the <see cref="ConverterService"/> class.</summary>

@@ -18,7 +18,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Each subscription registers its own observer for the key path and delivers the current value straight away. The
 /// sequence never completes. Disposing a subscription removes the observer once, however many times it is disposed.
 /// </remarks>
-[DebuggerDisplay("KvoProperty: {_keyPath}")]
+[DebuggerDisplay("KvoPropertyObservable: KvoProperty: {_keyPath}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class KvoPropertyObservable<T> : IObservable<T>
 {

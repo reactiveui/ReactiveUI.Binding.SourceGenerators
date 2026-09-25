@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.Properties;
 /// <see langword="partial"/>. This backs <see cref="Title"/> with the selector overload of <c>ToProperty</c>, and
 /// <see cref="Notes"/> with the overload that also returns the helper through an <see langword="out"/> parameter.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}")]
+[System.Diagnostics.DebuggerDisplay("PartialOwnEventViewModel: Title = {Title}")]
 public sealed partial class PartialOwnEventViewModel : INotifyPropertyChanged
 {
     /// <summary>Backs <see cref="Notes"/>.</summary>

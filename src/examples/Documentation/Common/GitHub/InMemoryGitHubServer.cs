@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Documentation.GitHub;
 /// minute per change, so the data never depends on the wall clock. Set <see cref="Latency"/> to delay each
 /// response.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("RateLimitRemaining = {RateLimitRemaining}")]
+[System.Diagnostics.DebuggerDisplay("InMemoryGitHubServer: RateLimitRemaining = {RateLimitRemaining}")]
 public sealed class InMemoryGitHubServer : IGitHubApi
 {
     /// <summary>The number the first issue of each repository receives.</summary>

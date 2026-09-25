@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding.Documentation.GitHub;
 /// <param name="Name">The name of the repository.</param>
 /// <param name="Description">What the repository is for.</param>
 /// <param name="OpenIssueCount">How many issues are open when the server reads the repository.</param>
-[System.Diagnostics.DebuggerDisplay("{FullName}")]
+[System.Diagnostics.DebuggerDisplay("Repository: {FullName}")]
 public sealed record Repository(string Owner, string Name, string Description, int OpenIssueCount)
 {
     /// <summary>Gets the name that identifies the repository to the server, such as <c>acme/webshop</c>.</summary>

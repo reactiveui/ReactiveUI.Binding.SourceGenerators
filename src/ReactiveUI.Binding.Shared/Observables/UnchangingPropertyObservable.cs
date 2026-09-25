@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <remarks>
 /// The sequence never completes, so a binding or chain that observes it stays subscribed.
 /// </remarks>
-[DebuggerDisplay("UnchangingProperty: {_value}")]
+[DebuggerDisplay("UnchangingPropertyObservable: UnchangingProperty: {_value}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class UnchangingPropertyObservable<T> : IObservable<T>
 {

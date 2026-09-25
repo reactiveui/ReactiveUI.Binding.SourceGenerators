@@ -11,7 +11,7 @@ namespace ToPropertyVerification.Common;
 /// the <see langword="out"/> parameter together with a plain initial value, and the <see langword="out"/> parameter
 /// together with an initial-value factory.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("DeferredScheduled = {DeferredScheduled}, OutWithInitial = {OutWithInitial}, OutWithFactory = {OutWithFactory}")]
+[System.Diagnostics.DebuggerDisplay("CombinedOverloadsViewModel: DeferredScheduled = {DeferredScheduled}, OutWithInitial = {OutWithInitial}, OutWithFactory = {OutWithFactory}")]
 public sealed partial class CombinedOverloadsViewModel : INotifyPropertyChanged
 {
     /// <summary>The plain initial value <see cref="OutWithInitial"/> starts at.</summary>

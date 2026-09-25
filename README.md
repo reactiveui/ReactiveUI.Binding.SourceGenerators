@@ -562,6 +562,29 @@ public partial class PersonViewModel : INotifyPropertyChanged
 The attribute ships in the runtime package, so the generator adds no types to your assembly. Two projects that see
 each other's internals both keep working.
 
+The attribute takes these options.
+
+| Option | Effect |
+|--------|--------|
+| `InitialValue` | What the property returns until you assign its helper. For a `string` property it is the value, such as `"none"`. For any other type it is a C# expression, such as `"1.5d"`, evaluated once. A non-nullable `string` property with no initial value returns `string.Empty`. |
+| `ReadOnly` | Makes the helper field `readonly`, so only a constructor can assign it. |
+| `UseProtected` | Makes the helper field `protected` rather than `private`, so a derived type can assign it. |
+
+```csharp
+[ObservableAsProperty(InitialValue = "Loading", ReadOnly = true)]
+public partial string Status { get; }
+```
+
+ReactiveUI's older source generator also accepted `[ObservableAsProperty]` on a field, on a method that returns an
+observable, and on an observable property. Nothing is generated for those forms. RXUIBIND018 reports each one, with a
+code fix that rewrites it as a partial property:
+
+- A field becomes a property named after it, without its `_` or `m_` prefix. Its initializer becomes `InitialValue`, and
+  its `Inheritance` becomes a `virtual`, `override` or `new` modifier.
+- A method or an observable property keeps its declaration and gains a property named `PropertyName`, or its own name
+  followed by `Property`. The fix writes an `InitializeOAPH` method that assigns each helper, which your constructor
+  already calls.
+
 ### Observing a path built at run time
 
 `WhenAnyDynamic` takes the path as an `Expression`, not a lambda. So you can build the path from a property name
@@ -581,7 +604,7 @@ path before you build, `WhenChanged` and `WhenAny` observe the same thing withou
 ## The view locator
 
 A view locator finds the view for a view model. Implement `IViewFor<T>`, and the generator registers the view for
-you.
+you. This works with both the `ReactiveUI.Binding` and `ReactiveUI.Binding.Reactive` packages.
 
 ```csharp
 public class LoginView : IViewFor<LoginViewModel>
@@ -605,6 +628,11 @@ Three attributes change what is registered.
 | `[ViewContract("name")]` | Registers the view under a contract, so one view model can have several views. Pass the contract to `ResolveView`. |
 | `[SingleInstanceView]` | Keeps one instance instead of creating a view each time. Do not use it for a view that appears more than once in the tree. |
 | `[ExcludeFromViewRegistration]` | Leaves the view out of the generated registration. |
+
+A view that ReactiveUI.SourceGenerators completes with `[IViewFor<T>]` or `[IViewFor("TypeName")]` is registered too.
+That generator adds `IViewFor<T>` to the class, so the generated lookup checks for the interface when it resolves the
+view. A class it leaves alone resolves to null. A `RegistrationType` of `LazySingleton` or `Constant` keeps one
+instance, created the first time the view resolves.
 
 ```csharp
 [ViewContract("compact")]
@@ -803,6 +831,8 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND015 | Warning | The call names a private or protected nested type, which generated code cannot reach, so nothing is generated and the call throws. Make the type `internal` or `public`, or call the `Unsafe` overload. |
 | RXUIBIND016 | Warning | The call is made through a type parameter of the calling code, so generated code cannot name its types and the call throws. Call the `Unsafe` overload. |
 | RXUIBIND017 | Warning | The binding writes to a WPF, WinForms or MAUI object, but the matching `ReactiveUI.Binding.Wpf`, `.WinForms` or `.Maui` package is not referenced, so writes from another thread are not marshalled onto the object's thread. Reference the platform package. |
+| RXUIBIND018 | Warning | `[ObservableAsProperty]` marks something other than a partial get-only instance property, so nothing is generated. For a field, a method or an observable property, a code fix rewrites it as a partial property (C# 13). |
+| RXUIBIND019 | Warning | A method marked `[ObservableAsProperty]` takes parameters, so it cannot supply a property's values. |
 
 The package's build targets report one error of their own.
 

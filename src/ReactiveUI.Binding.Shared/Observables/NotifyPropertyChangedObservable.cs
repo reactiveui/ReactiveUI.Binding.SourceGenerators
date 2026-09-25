@@ -18,7 +18,7 @@ namespace ReactiveUI.Binding.Observables;
 /// every property. Nothing is emitted on subscribe, and the emitted change carries no value: the sender and
 /// expression identify the property to read. The sequence never completes.
 /// </remarks>
-[DebuggerDisplay("Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
+[DebuggerDisplay("NotifyPropertyChangedObservable: Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChange<object, object?>>
 {

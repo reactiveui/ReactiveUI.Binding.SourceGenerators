@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// <see cref="StateChanged"/> event, in the style of many older libraries. It does not implement
 /// <c>INotifyPropertyChanged</c>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("{Endpoint}: {State}")]
+[System.Diagnostics.DebuggerDisplay("StorageConnection: {Endpoint}: {State}")]
 public sealed class StorageConnection
 {
     /// <summary>Occurs after <see cref="State"/> changes.</summary>

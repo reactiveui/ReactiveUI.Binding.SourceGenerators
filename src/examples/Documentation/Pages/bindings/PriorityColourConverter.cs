@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// Turns the priority of a to-do item into the colour of its badge. The conversion hint <c>"dark"</c> picks the
 /// palette for a dark theme; any other hint, or none, picks the light palette.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Priority colour converter")]
+[System.Diagnostics.DebuggerDisplay("PriorityColourConverter: Priority colour converter")]
 public sealed class PriorityColourConverter : BindingTypeConverter<TodoPriority, Color>
 {
     /// <summary>The hint that asks for the dark palette.</summary>

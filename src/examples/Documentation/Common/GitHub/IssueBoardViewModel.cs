@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Documentation.GitHub;
 /// method to wait for the work. A failed request never throws from those methods. It sets
 /// <see cref="ErrorMessage"/>, and a 401 signs the user out.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("IsSignedIn = {IsSignedIn}, Issues = {Issues.Count}")]
+[System.Diagnostics.DebuggerDisplay("IssueBoardViewModel: IsSignedIn = {IsSignedIn}, Issues = {Issues.Count}")]
 public sealed class IssueBoardViewModel : ObservableObject
 {
     /// <summary>The server the view model calls.</summary>

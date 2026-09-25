@@ -8,5 +8,5 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// <param name="Name">The name of the bucket, unique across the service.</param>
 /// <param name="Region">The region that stores the bucket, such as <c>ap-southeast-2</c>.</param>
 /// <param name="CreatedAt">When the bucket was created.</param>
-[System.Diagnostics.DebuggerDisplay("{Name} ({Region})")]
+[System.Diagnostics.DebuggerDisplay("Bucket: {Name} ({Region})")]
 public sealed record Bucket(string Name, string Region, DateTimeOffset CreatedAt);

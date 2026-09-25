@@ -22,7 +22,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <c>subscribe</c>. The sequence never completes. Disposing a subscription detaches it once, however many times it
 /// is disposed.
 /// </remarks>
-[DebuggerDisplay("CallbackProperty: {_source}, Distinct = {_distinct}")]
+[DebuggerDisplay("CallbackPropertyObservable: CallbackProperty: {_source}, Distinct = {_distinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class CallbackPropertyObservable<TSource, TValue> : IObservable<TValue>
 {

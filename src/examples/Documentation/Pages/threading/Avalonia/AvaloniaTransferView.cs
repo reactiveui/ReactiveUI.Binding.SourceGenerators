@@ -9,7 +9,7 @@ using Button = Avalonia.Controls.Button;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The transfer screen as an Avalonia view: the amount box, the send button and the label for validation.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AvaloniaTransferView: ViewModel = {ViewModel}")]
 public sealed class AvaloniaTransferView : UserControl, IViewFor<TransferViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

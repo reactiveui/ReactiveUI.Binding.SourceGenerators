@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// Each command starts the matching method and returns; await the method itself to wait for its work. A refused
 /// request never throws from a method. It sets <see cref="ErrorMessage"/>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Account = {SelectedAccount}, TotalBalance = {TotalBalance}")]
+[System.Diagnostics.DebuggerDisplay("AccountsViewModel: Account = {SelectedAccount}, TotalBalance = {TotalBalance}")]
 public sealed class AccountsViewModel : ObservableObject
 {
     /// <summary>The backend the view model calls.</summary>

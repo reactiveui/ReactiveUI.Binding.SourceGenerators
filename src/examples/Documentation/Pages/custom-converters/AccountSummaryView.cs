@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>A one-line summary of an account, shown as a row of the accounts list.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountSummaryView: ViewModel = {ViewModel}")]
 public sealed class AccountSummaryView : ObservableObject, IViewFor<Account>
 {
     /// <summary>Gets or sets the account the row shows.</summary>

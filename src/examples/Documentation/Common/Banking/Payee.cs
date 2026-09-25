@@ -9,5 +9,5 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// <param name="Name">The name of the payee.</param>
 /// <param name="AccountNumber">The account that receives the money.</param>
 /// <param name="TransferLimit">The most the customer allows in one transfer to this payee, or <see langword="null"/> when there is no limit.</param>
-[System.Diagnostics.DebuggerDisplay("{Name}")]
+[System.Diagnostics.DebuggerDisplay("Payee: {Name}")]
 public sealed record Payee(int Id, string Name, string AccountNumber, decimal? TransferLimit);

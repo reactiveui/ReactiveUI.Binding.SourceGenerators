@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Observing;
 /// The live event streams of one repository, one stream per kind of activity. The server pushes an event onto the
 /// stream that matches it, and every subscriber of that stream hears it.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("{Repository}")]
+[System.Diagnostics.DebuggerDisplay("RepositoryChannels: {Repository}")]
 public sealed class RepositoryChannels : IDisposable
 {
     /// <summary>Every stream the repository owns.</summary>

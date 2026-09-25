@@ -29,7 +29,7 @@ namespace ReactiveUI.Binding;
 /// <see cref="UnhandledInteractionException{TInput, TOutput}"/> if no handler handles the interaction.
 /// </para>
 /// </remarks>
-[DebuggerDisplay("Handlers = {_handlers.Length}")]
+[DebuggerDisplay("Interaction: Handlers = {_handlers.Length}")]
 public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 {
     /// <summary>

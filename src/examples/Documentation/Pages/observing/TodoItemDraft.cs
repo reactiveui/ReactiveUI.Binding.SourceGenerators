@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Observing;
 
 /// <summary>The edit form of a to-do item. It reports each change before and after it is applied.</summary>
-[System.Diagnostics.DebuggerDisplay("Title = {Title}, IsDone = {IsDone}")]
+[System.Diagnostics.DebuggerDisplay("TodoItemDraft: Title = {Title}, IsDone = {IsDone}")]
 public sealed class TodoItemDraft : ChangingObject
 {
     /// <summary>Gets or sets the short summary of the task.</summary>

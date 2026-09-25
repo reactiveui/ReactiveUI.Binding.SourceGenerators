@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// and follows the state of the link. Each command starts the matching <c>...Async</c> method and returns; await
 /// the method to wait for the work. A failed request never throws from either. It sets <see cref="ErrorMessage"/>.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Bucket = {SelectedBucket}, Objects = {Objects.Count}, UploadPercent = {UploadPercent}")]
+[System.Diagnostics.DebuggerDisplay("StorageBrowserViewModel: Bucket = {SelectedBucket}, Objects = {Objects.Count}, UploadPercent = {UploadPercent}")]
 public sealed class StorageBrowserViewModel : ObservableObject
 {
     /// <summary>The value of <see cref="UploadPercent"/> when the upload is complete.</summary>

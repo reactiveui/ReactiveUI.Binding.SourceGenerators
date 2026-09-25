@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <see cref="Latency"/> sets how long each response takes. It hands out copies, so changing a student you read
 /// does not change the records.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Students = {_students.Count}, Enrolments = {_enrolments.Count}, IsUnavailable = {IsUnavailable}")]
+[System.Diagnostics.DebuggerDisplay("InMemoryStudentRecords: Students = {_students.Count}, Enrolments = {_enrolments.Count}, IsUnavailable = {IsUnavailable}")]
 public sealed class InMemoryStudentRecords : IStudentRecords
 {
     /// <summary>The courses a new service starts with. CS101 has three places, and HIST110 meets while CS101 does.</summary>

@@ -13,7 +13,7 @@ namespace ToPropertyVerification.Common;
 /// <see cref="LabelText"/> with the selector overload that returns its helper through an <see langword="out"/>
 /// parameter.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("DoubledCount = {DoubledCount}, LabelText = {LabelText}")]
+[System.Diagnostics.DebuggerDisplay("FieldEventViewModel: DoubledCount = {DoubledCount}, LabelText = {LabelText}")]
 public sealed partial class FieldEventViewModel : INotifyPropertyChanged
 {
     /// <summary>The factor <see cref="DoubledCount"/> multiplies the followed item's count by.</summary>

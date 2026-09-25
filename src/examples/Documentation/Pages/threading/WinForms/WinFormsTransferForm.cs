@@ -11,7 +11,7 @@ using Label = System.Windows.Forms.Label;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The transfer screen as a Windows Forms form: the amount box, the reference box, the send button and the labels for validation and the receipt.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WinFormsTransferForm: ViewModel = {ViewModel}")]
 public sealed class WinFormsTransferForm : Form, IViewFor<TransferViewModel>
 {
     /// <summary>Gets or sets the view model the form shows.</summary>

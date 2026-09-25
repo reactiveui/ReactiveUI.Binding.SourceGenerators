@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -50,12 +51,42 @@ internal static class ViewLocatorDispatchGenerator
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 
-        // Collect and deduplicate
-        var collected = viewRegistrations.Collect();
+        // ReactiveUI.SourceGenerators adds IViewFor<T> in output this generator cannot see, so its attribute is read too.
+        Func<SyntaxNode, CancellationToken, bool> isClass = static (node, _) => node is ClassDeclarationSyntax;
+        Func<GeneratorAttributeSyntaxContext, CancellationToken, ViewRegistrationInfo?> fromAttribute = ViewRegistrationExtractor.ExtractFromIViewForAttribute;
+        var genericAttribute = context.SyntaxProvider
+            .ForAttributeWithMetadataName(Constants.SourceGeneratorsGenericIViewForAttributeMetadataName, isClass, fromAttribute)
+            .Collect();
+        var namedAttribute = context.SyntaxProvider
+            .ForAttributeWithMetadataName(Constants.SourceGeneratorsIViewForAttributeMetadataName, isClass, fromAttribute)
+            .Collect();
 
+        // Views found through the interface come first, so deduplication keeps them over the attribute's.
         context.RegisterSourceOutput(
-            collected.Combine(languageFeatures),
-            static (ctx, data) => Generate(ctx, data.Left, data.Right));
+            viewRegistrations.Collect().Combine(genericAttribute).Combine(namedAttribute).Combine(languageFeatures),
+            static (ctx, data) => Generate(ctx, Concatenate(data.Left.Left.Left, data.Left.Left.Right, data.Left.Right), data.Right));
+    }
+
+    /// <summary>Joins the registrations each pipeline found, interface registrations first.</summary>
+    /// <param name="fromInterfaces">The views found through <c>IViewFor&lt;T&gt;</c>.</param>
+    /// <param name="fromGenericAttribute">The views found through <c>[IViewFor&lt;T&gt;]</c>, with nulls for declined ones.</param>
+    /// <param name="fromNamedAttribute">The views found through <c>[IViewFor("...")]</c>, with nulls for declined ones.</param>
+    /// <returns>Every registration, in that order.</returns>
+    internal static ImmutableArray<ViewRegistrationInfo> Concatenate(
+        ImmutableArray<ViewRegistrationInfo> fromInterfaces,
+        ImmutableArray<ViewRegistrationInfo?> fromGenericAttribute,
+        ImmutableArray<ViewRegistrationInfo?> fromNamedAttribute)
+    {
+        if (fromGenericAttribute.IsEmpty && fromNamedAttribute.IsEmpty)
+        {
+            return fromInterfaces;
+        }
+
+        var all = ImmutableArray.CreateBuilder<ViewRegistrationInfo>(fromInterfaces.Length + fromGenericAttribute.Length + fromNamedAttribute.Length);
+        all.AddRange(fromInterfaces);
+        AddFound(all, fromGenericAttribute);
+        AddFound(all, fromNamedAttribute);
+        return all.ToImmutable();
     }
 
     /// <summary>Generates the ViewDispatch.g.cs source file from collected view registrations.</summary>
@@ -122,6 +153,20 @@ internal static class ViewLocatorDispatchGenerator
         if (features.DeclaresModuleInitializerAttribute)
         {
             EmitModuleInitializerAttribute(sb);
+        }
+    }
+
+    /// <summary>Adds the registrations a pipeline found, skipping the ones it declined.</summary>
+    /// <param name="all">The registrations so far.</param>
+    /// <param name="found">The pipeline's results, with nulls for declined ones.</param>
+    private static void AddFound(ImmutableArray<ViewRegistrationInfo>.Builder all, ImmutableArray<ViewRegistrationInfo?> found)
+    {
+        for (var i = 0; i < found.Length; i++)
+        {
+            if (found[i] is { } registration)
+            {
+                all.Add(registration);
+            }
         }
     }
 
@@ -442,7 +487,8 @@ internal static class ViewLocatorDispatchGenerator
         if (!reg.IsSingleInstance)
         {
             _ = sb.BeginComment().Append("Fallback: direct construction (").Append(reg.ViewFullyQualifiedName).Line(" has a parameterless constructor).")
-                .BeginReturn().Append("new ").Append(reg.ViewFullyQualifiedName).Line("();");
+                .BeginReturn();
+            _ = AppendViewResult(sb, reg, $"new {reg.ViewFullyQualifiedName}()").EndStatement();
             return;
         }
 
@@ -457,6 +503,22 @@ internal static class ViewLocatorDispatchGenerator
             .Outdent()
             .CloseBlock()
             .BlankLine()
-            .Return(fieldName);
+            .BeginReturn();
+        _ = AppendViewResult(sb, reg, fieldName).EndStatement();
     }
+
+    /// <summary>Writes a constructed or cached view as the resolver's result.</summary>
+    /// <param name="sb">The writer, after <c>return </c>.</param>
+    /// <param name="reg">The view registration.</param>
+    /// <param name="view">The expression holding the view.</param>
+    /// <returns>The writer, for chaining.</returns>
+    /// <remarks>
+    /// A view found through <c>[IViewFor]</c> may not implement <c>IViewFor</c>: ReactiveUI.SourceGenerators only adds
+    /// the interface to a class deriving from a UI type it supports. Casting through <see cref="object"/> keeps the
+    /// resolver compiling either way, and a view without the interface resolves to null.
+    /// </remarks>
+    private static SourceWriter AppendViewResult(SourceWriter sb, ViewRegistrationInfo reg, string view) =>
+        reg.IsDeclaredByAttribute
+            ? sb.Append("(object)").Append(view).Append($" as {GeneratedTypeNames.IViewFor}")
+            : sb.Append(view);
 }

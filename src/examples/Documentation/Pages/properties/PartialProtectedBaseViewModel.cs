@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.Documentation.Properties;
 /// generator adds a small member to a <see langword="partial"/> declaration that calls it on the type's behalf. This
 /// backs <see cref="IsDone"/> with deferred subscription, and <see cref="DueDateLabel"/> with a scheduler.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("DueDateLabel = {DueDateLabel}")]
+[System.Diagnostics.DebuggerDisplay("PartialProtectedBaseViewModel: DueDateLabel = {DueDateLabel}")]
 public sealed partial class PartialProtectedBaseViewModel : ObservableObject
 {
     /// <summary>The label shown for an item with no due date.</summary>

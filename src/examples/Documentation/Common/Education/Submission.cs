@@ -9,5 +9,5 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <param name="AssignmentId">The identifier of the assignment.</param>
 /// <param name="SubmittedAt">When the student handed the work in.</param>
 /// <param name="IsLate">Whether the student handed the work in after the due date.</param>
-[System.Diagnostics.DebuggerDisplay("Assignment {AssignmentId}, late = {IsLate}")]
+[System.Diagnostics.DebuggerDisplay("Submission: Assignment {AssignmentId}, late = {IsLate}")]
 public sealed record Submission(int StudentId, int AssignmentId, DateTimeOffset SubmittedAt, bool IsLate);

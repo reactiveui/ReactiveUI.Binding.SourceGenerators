@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>A preview of one to-do item. It is left out of the generated lookup, so the application maps it itself.</summary>
 [ExcludeFromViewRegistration]
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("TodoItemPreviewView: ViewModel = {ViewModel}")]
 public sealed class TodoItemPreviewView : ObservableObject, IViewFor<TodoItem>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

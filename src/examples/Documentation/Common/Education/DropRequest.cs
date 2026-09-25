@@ -7,5 +7,5 @@ namespace ReactiveUI.Binding.Documentation.Education;
 /// <summary>The question the gradebook asks before it takes a student out of a course.</summary>
 /// <param name="Student">The student who would be dropped.</param>
 /// <param name="Course">The course the student would leave.</param>
-[System.Diagnostics.DebuggerDisplay("Drop {Student} from {Course}")]
+[System.Diagnostics.DebuggerDisplay("DropRequest: Drop {Student} from {Course}")]
 public sealed record DropRequest(Student Student, Course Course);

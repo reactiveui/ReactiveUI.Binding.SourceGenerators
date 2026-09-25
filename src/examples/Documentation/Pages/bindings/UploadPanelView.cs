@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>The upload dialog: a single button that uploads the file the user picked.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("UploadPanelView: ViewModel = {ViewModel}")]
 public sealed class UploadPanelView : ObservableObject, IViewFor<UploadPanelViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

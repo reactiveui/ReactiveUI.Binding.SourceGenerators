@@ -14,7 +14,7 @@ namespace ToPropertyVerification.Common;
 /// avoid reusing the exact selector text SourceItem's own <c>WhenChanged</c> call sites use elsewhere in this
 /// project; see the remark on <c>ReactiveObjectViewModel</c> for why.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("AttrCount = {AttrCount}, AttrLabel = {AttrLabel}")]
+[System.Diagnostics.DebuggerDisplay("AttributeViewModel: AttrCount = {AttrCount}, AttrLabel = {AttrLabel}")]
 public sealed partial class AttributeViewModel : INotifyPropertyChanged
 {
     /// <summary>Initializes a new instance of the <see cref="AttributeViewModel"/> class.</summary>

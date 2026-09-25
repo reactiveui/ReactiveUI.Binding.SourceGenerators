@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts a nullable <see cref="int"/> to an <see cref="int"/>; a null value fails the conversion.</summary>
-[DebuggerDisplay("int? -> int (affinity {Affinity})")]
+[DebuggerDisplay("NullableIntegerToIntegerTypeConverter: int? -> int (affinity {Affinity})")]
 public sealed class NullableIntegerToIntegerTypeConverter : IBindingTypeConverter<int?, int>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

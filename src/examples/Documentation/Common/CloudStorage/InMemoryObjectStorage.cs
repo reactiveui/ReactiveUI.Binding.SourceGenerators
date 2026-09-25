@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// an upload, take time, so an example decides how long each step lasts. <see cref="ThrottleNext"/> and
 /// <see cref="Disconnect"/> make the service refuse requests.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Connection = {Connection.State}, Throttled = {_throttled}")]
+[System.Diagnostics.DebuggerDisplay("InMemoryObjectStorage: Connection = {Connection.State}, Throttled = {_throttled}")]
 public sealed class InMemoryObjectStorage : IObjectStorage
 {
     /// <summary>The size of one part of an upload, 4 MiB.</summary>

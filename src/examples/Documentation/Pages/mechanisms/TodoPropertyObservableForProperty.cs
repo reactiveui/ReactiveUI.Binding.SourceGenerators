@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.Documentation.Mechanisms;
 /// </summary>
 /// <param name="observedProperty">The name of the property this provider bids for.</param>
 /// <param name="bid">The affinity this provider bids for that property.</param>
-[System.Diagnostics.DebuggerDisplay("{ObservedProperty}: Bid = {Bid}")]
+[System.Diagnostics.DebuggerDisplay("TodoPropertyObservableForProperty: {ObservedProperty}: Bid = {Bid}")]
 public sealed class TodoPropertyObservableForProperty(string observedProperty, int bid) : ICreatesObservableForProperty
 {
     /// <summary>Observes properties the way an ordinary <c>PropertyChanged</c> type is observed.</summary>

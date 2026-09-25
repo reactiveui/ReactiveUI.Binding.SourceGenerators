@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Views;
 
 /// <summary>The accounts the customer can use.</summary>
-[System.Diagnostics.DebuggerDisplay("Accounts = {Accounts.Count}")]
+[System.Diagnostics.DebuggerDisplay("AccountListViewModel: Accounts = {Accounts.Count}")]
 public sealed class AccountListViewModel : ObservableObject, IAccountList
 {
     /// <summary>Initializes a new instance of the <see cref="AccountListViewModel"/> class.</summary>

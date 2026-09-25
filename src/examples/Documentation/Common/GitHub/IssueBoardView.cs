@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.GitHub;
 /// The issue board screen: a sign-in strip, a repository list, an issue list and a detail area for the selected
 /// issue. The view creates its MAUI controls in code; a real page builds them from markup.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("IssueBoardView: ViewModel = {ViewModel}")]
 public sealed class IssueBoardView : ObservableObject, IViewFor<IssueBoardViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

@@ -9,5 +9,5 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// <param name="PayeeId">The payee the money goes to.</param>
 /// <param name="Amount">The amount to send.</param>
 /// <param name="Reference">The text that appears on the payee's statement.</param>
-[System.Diagnostics.DebuggerDisplay("{Amount} from {SourceAccountId} to payee {PayeeId}")]
+[System.Diagnostics.DebuggerDisplay("TransferRequest: {Amount} from {SourceAccountId} to payee {PayeeId}")]
 public sealed record TransferRequest(string SourceAccountId, int PayeeId, decimal Amount, string Reference);

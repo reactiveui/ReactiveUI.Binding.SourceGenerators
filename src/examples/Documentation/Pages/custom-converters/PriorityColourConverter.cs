@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Converts a to-do priority to a colour name. It implements <see cref="IBindingTypeConverter"/> directly.</summary>
-[System.Diagnostics.DebuggerDisplay("TodoPriority -> colour")]
+[System.Diagnostics.DebuggerDisplay("PriorityColourConverter: TodoPriority -> colour")]
 public sealed class PriorityColourConverter : IBindingTypeConverter
 {
     /// <summary>The affinity of the converter for its type pair.</summary>

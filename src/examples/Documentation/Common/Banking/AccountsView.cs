@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Banking;
 /// The accounts screen: the accounts, the balance of the selected account and its transactions. A real UI framework
 /// builds these controls from markup; here the view creates them in code.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("AccountsView: ViewModel = {ViewModel}")]
 public sealed class AccountsView : ObservableObject, IViewFor<AccountsViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

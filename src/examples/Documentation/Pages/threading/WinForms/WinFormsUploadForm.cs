@@ -10,7 +10,7 @@ using ProgressBar = System.Windows.Forms.ProgressBar;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The storage upload screen as a Windows Forms form: the progress bar of the running upload.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("WinFormsUploadForm: ViewModel = {ViewModel}")]
 public sealed class WinFormsUploadForm : Form, IViewFor<StorageBrowserViewModel>
 {
     /// <summary>Gets or sets the view model the form shows.</summary>

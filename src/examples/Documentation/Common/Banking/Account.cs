@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Banking;
 
 /// <summary>A bank account. Each property raises <c>PropertyChanged</c>, and <see cref="AvailableBalance"/> changes with <see cref="Balance"/>.</summary>
-[System.Diagnostics.DebuggerDisplay("{Id} {Name}: {Balance} {Currency}")]
+[System.Diagnostics.DebuggerDisplay("Account: {Id} {Name}: {Balance} {Currency}")]
 public sealed class Account : ObservableObject
 {
     /// <summary>Gets or sets the number that identifies the account, such as <c>ACC-1001</c>.</summary>

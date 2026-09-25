@@ -5,7 +5,7 @@
 namespace ReactiveUI.Binding.Documentation.Education;
 
 /// <summary>Reports that the student records service refused a request.</summary>
-[System.Diagnostics.DebuggerDisplay("Failure = {Failure}, Message = {Message}")]
+[System.Diagnostics.DebuggerDisplay("StudentRecordsException: Failure = {Failure}, Message = {Message}")]
 public sealed class StudentRecordsException : Exception
 {
     /// <summary>Initializes a new instance of the <see cref="StudentRecordsException"/> class.</summary>

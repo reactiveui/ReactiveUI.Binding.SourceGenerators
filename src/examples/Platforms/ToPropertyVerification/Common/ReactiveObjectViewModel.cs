@@ -11,7 +11,7 @@ namespace ToPropertyVerification.Common;
 /// Backs <see cref="Count"/> with the selector overload, and <see cref="Label"/> with the selector
 /// overload that returns its helper through an <see langword="out"/> parameter and a plain initial value.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Count = {Count}, Label = {Label}")]
+[System.Diagnostics.DebuggerDisplay("ReactiveObjectViewModel: Count = {Count}, Label = {Label}")]
 public sealed class ReactiveObjectViewModel : global::ReactiveUI.ReactiveObject
 {
     /// <summary>The plain initial value <see cref="Label"/> starts at.</summary>

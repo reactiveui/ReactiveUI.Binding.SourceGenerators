@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Banking;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>Refuses every two-way binding on the accounts screen, so a view can show an account but never write to it.</summary>
-[System.Diagnostics.DebuggerDisplay("Read-only account hook")]
+[System.Diagnostics.DebuggerDisplay("ReadOnlyAccountHook: Read-only account hook")]
 public sealed class ReadOnlyAccountHook : IPropertyBindingHook
 {
     /// <inheritdoc/>

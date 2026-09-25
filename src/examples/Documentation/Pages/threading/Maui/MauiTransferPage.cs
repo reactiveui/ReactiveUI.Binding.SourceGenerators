@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Banking;
 namespace ReactiveUI.Binding.Documentation.Threading;
 
 /// <summary>The transfer screen as a MAUI page: the amount entry, the send button and the labels for validation and the receipt.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("MauiTransferPage: ViewModel = {ViewModel}")]
 public sealed class MauiTransferPage : ContentPage, IViewFor<TransferViewModel>
 {
     /// <summary>The bindable property behind <see cref="ValidationVisibility"/>.</summary>

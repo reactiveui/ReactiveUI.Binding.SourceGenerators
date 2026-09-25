@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Converts a line of comma separated text to the tags of a to-do item, dropping blank tags.</summary>
-[System.Diagnostics.DebuggerDisplay("text -> tags")]
+[System.Diagnostics.DebuggerDisplay("TextToTagListConverter: text -> tags")]
 public sealed class TextToTagListConverter : BindingTypeConverter<string, IReadOnlyList<string>>
 {
     /// <summary>The affinity of the converter for its type pair.</summary>

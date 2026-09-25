@@ -9,7 +9,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>The row of one to-do item in a list: a badge that shows how urgent the item is.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("TodoItemBadgeView: ViewModel = {ViewModel}")]
 public sealed class TodoItemBadgeView : ObservableObject, IViewFor<TodoItem>
 {
     /// <summary>Gets or sets the item the row shows.</summary>

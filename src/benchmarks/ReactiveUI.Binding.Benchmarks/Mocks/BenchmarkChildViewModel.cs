@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A child view model for deep chain benchmarks.</summary>
-[DebuggerDisplay("Value = {Value}")]
+[DebuggerDisplay("BenchmarkChildViewModel: Value = {Value}")]
 public class BenchmarkChildViewModel : INotifyPropertyChanged
 {
     /// <inheritdoc/>

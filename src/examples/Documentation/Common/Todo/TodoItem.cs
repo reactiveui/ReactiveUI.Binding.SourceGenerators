@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Todo;
 
 /// <summary>One task on the to-do list. Each property raises <c>PropertyChanged</c>.</summary>
-[System.Diagnostics.DebuggerDisplay("{Id}: {Title}, IsDone = {IsDone}")]
+[System.Diagnostics.DebuggerDisplay("TodoItem: {Id}: {Title}, IsDone = {IsDone}")]
 public sealed class TodoItem : ObservableObject
 {
     /// <summary>Gets or sets the identifier the store assigned; zero until the item is stored.</summary>

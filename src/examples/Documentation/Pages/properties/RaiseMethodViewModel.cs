@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Documentation.Properties;
 /// method it inherits. This backs <see cref="RemainingLabel"/> with the selector overload and an initial-value
 /// factory, and <see cref="Priority"/> with the named-property overload and an initial value.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("RemainingLabel = {RemainingLabel}")]
+[System.Diagnostics.DebuggerDisplay("RaiseMethodViewModel: RemainingLabel = {RemainingLabel}")]
 public sealed class RaiseMethodViewModel : RaiseMethodBase
 {
     /// <summary>The label shown before the item is loaded.</summary>

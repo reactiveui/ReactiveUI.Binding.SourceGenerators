@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Converts a priority to <see langword="true"/> when it equals the priority passed as the conversion hint.</summary>
-[System.Diagnostics.DebuggerDisplay("TodoPriority -> bool (equals the hint)")]
+[System.Diagnostics.DebuggerDisplay("PriorityMatchesHintConverter: TodoPriority -> bool (equals the hint)")]
 public sealed class PriorityMatchesHintConverter : BindingTypeConverter<TodoPriority, bool>
 {
     /// <summary>The affinity of the converter for its type pair.</summary>

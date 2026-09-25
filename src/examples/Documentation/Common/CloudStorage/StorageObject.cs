@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding.Documentation.CloudStorage;
 /// implement <c>INotifyPropertyChanged</c> and raises no event when a property changes, so nothing tells an observer
 /// that a property changed.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("{Key} ({Size} bytes)")]
+[System.Diagnostics.DebuggerDisplay("StorageObject: {Key} ({Size} bytes)")]
 public sealed class StorageObject
 {
     /// <summary>Gets or sets the full name of the object inside its bucket, such as <c>photos/2026/launch.png</c>.</summary>

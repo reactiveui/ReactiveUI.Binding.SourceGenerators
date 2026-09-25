@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Observing;
 
 /// <summary>The issue search screen: a search box, a search button, a busy bar and the list of matches.</summary>
-[System.Diagnostics.DebuggerDisplay("ViewModel = {ViewModel}")]
+[System.Diagnostics.DebuggerDisplay("IssueSearchView: ViewModel = {ViewModel}")]
 public sealed class IssueSearchView : ObservableObject, IViewFor<IssueSearchViewModel>
 {
     /// <summary>Gets or sets the view model the view shows.</summary>

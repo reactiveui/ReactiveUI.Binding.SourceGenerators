@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// Shows an amount of money as text with a dollar sign. The conversion hint is the number format; without one the
 /// converter uses two decimal places.
 /// </summary>
-[System.Diagnostics.DebuggerDisplay("Currency text converter")]
+[System.Diagnostics.DebuggerDisplay("CurrencyTextConverter: Currency text converter")]
 public sealed class CurrencyTextConverter : BindingTypeConverter<decimal, string>
 {
     /// <summary>The affinity that outranks the converters the library registers.</summary>

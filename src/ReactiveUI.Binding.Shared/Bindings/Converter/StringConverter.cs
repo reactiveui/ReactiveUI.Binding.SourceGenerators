@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Passes a <see cref="string"/> through unchanged; a null or non-string value fails the conversion.</summary>
-[DebuggerDisplay("string -> string identity (affinity {Affinity})")]
+[DebuggerDisplay("StringConverter: string -> string identity (affinity {Affinity})")]
 public sealed class StringConverter : IBindingTypeConverter
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

@@ -7,7 +7,7 @@ namespace ReactiveUI.Binding.Documentation.Bindings;
 /// <summary>An interaction that writes each question and answer to the console, as a bank keeps an audit trail of an approval.</summary>
 /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
 /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
-[System.Diagnostics.DebuggerDisplay("Audited interaction")]
+[System.Diagnostics.DebuggerDisplay("AuditedInteraction: Audited interaction")]
 public sealed class AuditedInteraction<TInput, TOutput> : Interaction<TInput, TOutput>
 {
     /// <inheritdoc/>

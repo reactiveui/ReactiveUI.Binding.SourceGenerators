@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding;
 /// Reads are lock-free against an immutable snapshot; each registration is serialized under a lock and publishes a
 /// new snapshot.
 /// </remarks>
-[DebuggerDisplay("{_snapshot.Converters.Count} fallback converters registered")]
+[DebuggerDisplay("BindingFallbackConverterRegistry: {_snapshot.Converters.Count} fallback converters registered")]
 public sealed class BindingFallbackConverterRegistry
 {
     /// <summary>Synchronization gate for serializing write operations.</summary>

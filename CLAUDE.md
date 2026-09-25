@@ -294,13 +294,16 @@ src/
 ├── ReactiveUI.Binding.Analyzer.Roslyn413/         # The same analyzer source against Roslyn 4.13
 │
 ├── ReactiveUI.Binding.Analyzer/                 # Roslyn analyzer (netstandard2.0)
-│   └── Analyzers/
-│       ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
-│       ├── DispatchReachAnalyzer.cs              # RXUIBIND009
-│       ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
-│       ├── ToPropertyInitialValueAnalyzer.cs     # RXUIBIND014
-│       ├── UnreachableTypeAnalyzer.cs            # RXUIBIND015, 016
-│       └── TypeAnalyzer.cs                       # RXUIBIND002
+│   ├── Analyzers/
+│   │   ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
+│   │   ├── DispatchReachAnalyzer.cs              # RXUIBIND009
+│   │   ├── ObservableAsPropertyAnalyzer.cs       # RXUIBIND018, 019
+│   │   ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
+│   │   ├── ToPropertyInitialValueAnalyzer.cs     # RXUIBIND014
+│   │   ├── UnreachableTypeAnalyzer.cs            # RXUIBIND015, 016
+│   │   └── TypeAnalyzer.cs                       # RXUIBIND002
+│   └── CodeFixes/
+│       └── ObservableAsPropertyCodeFixProvider.cs # RXUIBIND018: older [ObservableAsProperty] forms to partial properties
 │
 ├── benchmarks/
 │   ├── ReactiveUI.Binding.Benchmarks/            # Runtime binding benchmarks
@@ -364,6 +367,15 @@ constructor resolves to null. `[ExcludeFromViewRegistration]` leaves a view out.
 
 A view is skipped when it, or a type it is nested in, is an open generic. A closed subclass of a generic view
 base registers through its own `IViewFor<T>` interface.
+
+Both runtime flavours are matched: `ReactiveUI.Binding.IViewFor<T>` and `ReactiveUI.Binding.Reactive.IViewFor<T>`.
+The view attributes are read from the flavour of the interface the view implements.
+
+ReactiveUI.SourceGenerators' `[IViewFor<T>]` and `[IViewFor("TypeName")]` also register a view. That generator adds
+`IViewFor<T>` to the class in output no other generator can see, so the attributes are matched by metadata name through
+`ForAttributeWithMetadataName`. The type name is bound at the class's position, so usings, `nameof` and generic names
+resolve. The resolver casts the view through `object` with `as`, because the class may not implement the interface. A
+view found both ways registers once. A `RegistrationType` of `LazySingleton` or `Constant` is a `[SingleInstanceView]`.
 
 The generated class registers the lookup with `DefaultViewLocator.SetGeneratedViewDispatch`. From C# 9 it does
 so in a module initializer, which runs before any code in the assembly. The generator declares
@@ -757,6 +769,13 @@ writes the property's body and a `_{name}Helper` field, and the consumer assigns
 consumer declares the property, so every generator in the build sees it. A property written from a field would
 exist only in generated code, which no other generator can observe or bind, so that form is not offered.
 
+The attribute's `InitialValue`, `ReadOnly` and `UseProtected` shape the generated members. A non-string
+`InitialValue` is an expression held in a backing field. The generated file repeats the declaring file's `using` and
+`extern alias` directives, so the expression binds as it was written. The attribute is also valid on a field, a method
+and a property, the forms of ReactiveUI's older generator, so that code compiles. RXUIBIND018 reports them, and
+`ObservableAsPropertyCodeFixProvider` rewrites them as partial properties; `PropertyName` and `Inheritance` exist only
+for that rewrite.
+
 ### One Body Per Reachable Branch
 
 The two dispatch mechanisms differ in what they can tell apart, and the emitted bodies follow. File-and-line
@@ -884,6 +903,8 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND015 | Warning | Binding call names a type generated code cannot reach |
 | RXUIBIND016 | Warning | Binding call is made through a type parameter |
 | RXUIBIND017 | Warning | Binding writes to a UI object without its platform package |
+| RXUIBIND018 | Warning | ObservableAsProperty needs a partial get-only property |
+| RXUIBIND019 | Warning | ObservableAsProperty method takes parameters |
 
 ## Code Style & Quality Requirements
 

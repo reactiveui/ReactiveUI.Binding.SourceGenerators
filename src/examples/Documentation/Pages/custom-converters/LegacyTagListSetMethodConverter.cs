@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>The set-method converter an older to-do app registered with Splat. It fills a tag list instead of replacing it.</summary>
-[DebuggerDisplay("tags -> List<string> set method")]
+[DebuggerDisplay("LegacyTagListSetMethodConverter: tags -> List<string> set method")]
 public sealed class LegacyTagListSetMethodConverter : ISetMethodBindingConverter
 {
     /// <summary>The affinity the older app gave the converter.</summary>

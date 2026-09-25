@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding;
 /// </summary>
 /// <typeparam name="TFrom">The source type to convert from.</typeparam>
 /// <typeparam name="TTo">The target type to convert to.</typeparam>
-[DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} converter")]
+[DebuggerDisplay("BindingTypeConverter: {FromType.Name,nq} -> {ToType.Name,nq} converter")]
 public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<TFrom, TTo>
 {
     /// <inheritdoc/>

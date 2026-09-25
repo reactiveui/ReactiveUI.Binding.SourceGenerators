@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>The dialog that exports an account statement. The export runs only while a statement is chosen.</summary>
-[System.Diagnostics.DebuggerDisplay("ExportCount = {ExportCount}")]
+[System.Diagnostics.DebuggerDisplay("StatementExportViewModel: ExportCount = {ExportCount}")]
 public sealed class StatementExportViewModel : ObservableObject
 {
     /// <summary>Initializes a new instance of the <see cref="StatementExportViewModel"/> class.</summary>

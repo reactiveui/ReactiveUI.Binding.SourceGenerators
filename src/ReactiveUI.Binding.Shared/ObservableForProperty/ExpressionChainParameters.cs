@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding;
 /// <param name="SkipInitial">Whether the first value the chain produces is dropped.</param>
 /// <param name="IsDistinct">Whether consecutive equal leaf values are suppressed.</param>
 /// <param name="SuppressWarnings">Whether the warning a property with no notification mechanism raises is suppressed.</param>
-[DebuggerDisplay("ExpressionChain: {Expression}, BeforeChange = {BeforeChange}, Distinct = {IsDistinct}")]
+[DebuggerDisplay("ExpressionChainParameters: ExpressionChain: {Expression}, BeforeChange = {BeforeChange}, Distinct = {IsDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct ExpressionChainParameters<TSender>(
     TSender? Source,

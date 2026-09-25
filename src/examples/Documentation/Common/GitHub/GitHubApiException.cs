@@ -7,7 +7,7 @@ using System.Net;
 namespace ReactiveUI.Binding.Documentation.GitHub;
 
 /// <summary>Reports that the server answered a request with an error status.</summary>
-[System.Diagnostics.DebuggerDisplay("StatusCode = {StatusCode}, Message = {Message}")]
+[System.Diagnostics.DebuggerDisplay("GitHubApiException: StatusCode = {StatusCode}, Message = {Message}")]
 public sealed class GitHubApiException : Exception
 {
     /// <summary>Initializes a new instance of the <see cref="GitHubApiException"/> class.</summary>

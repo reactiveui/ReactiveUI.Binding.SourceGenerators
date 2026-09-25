@@ -8,5 +8,5 @@ namespace ReactiveUI.Binding.Documentation.GitHub;
 /// <param name="Author">The account name of the person who wrote the comment.</param>
 /// <param name="Body">The text of the comment.</param>
 /// <param name="CreatedAt">When the comment was written.</param>
-[System.Diagnostics.DebuggerDisplay("{Author}: {Body}")]
+[System.Diagnostics.DebuggerDisplay("IssueComment: {Author}: {Body}")]
 public sealed record IssueComment(string Author, string Body, DateTimeOffset CreatedAt);
