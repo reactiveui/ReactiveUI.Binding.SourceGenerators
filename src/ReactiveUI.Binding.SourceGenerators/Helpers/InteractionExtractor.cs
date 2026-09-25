@@ -147,13 +147,18 @@ internal static class InteractionExtractor
 
     /// <summary>
     /// Resolves the <c>TInput</c> and <c>TOutput</c> type arguments of the targeted
-    /// <c>IInteraction&lt;TInput, TOutput&gt;</c> property by re-resolving the lambda body.
+    /// <c>IInteraction&lt;TInput, TOutput&gt;</c> member from the type of the lambda body.
     /// </summary>
     /// <param name="propertyNameArg">The property-name lambda expression.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <param name="inputTypeFullName">The resolved fully qualified TInput type, or empty string.</param>
     /// <param name="outputTypeFullName">The resolved fully qualified TOutput type, or empty string.</param>
+    /// <remarks>
+    /// The caller only reaches here once it has resolved a property path from this same argument, which fails
+    /// unless it is a lambda with an expression body, so neither is tested again. The body's type is read rather
+    /// than its member's symbol, so an interaction held in a field resolves as well as one held in a property.
+    /// </remarks>
     private static void ResolveInteractionTypeArguments(
         ExpressionSyntax propertyNameArg,
         SemanticModel semanticModel,
@@ -161,23 +166,11 @@ internal static class InteractionExtractor
         out string inputTypeFullName,
         out string outputTypeFullName)
     {
-        inputTypeFullName = string.Empty;
-        outputTypeFullName = string.Empty;
-
-        // The lambda and body tests are folded in rather than standing alone: the caller only reaches here
-        // once it has resolved a property path from this same argument, which fails unless it is a lambda
-        // with a body, so a separate guard for either could never be taken.
-        if (propertyNameArg is not LambdaExpressionSyntax lambda
-            || SyntaxHelpers.GetLambdaBody(lambda) is not ExpressionSyntax body
-            || SyntaxHelpers.UnwrapNullForgiving(body) is not MemberAccessExpressionSyntax leafMemberAccess
-            || semanticModel.GetSymbolInfo(leafMemberAccess, ct).Symbol is not IPropertySymbol propertySymbol
-            || !SymbolHelpers.ExtractInteractionTypeArguments(propertySymbol.Type, out var input, out var output))
-        {
-            return;
-        }
-
-        inputTypeFullName = input;
-        outputTypeFullName = output;
+        var body = ((LambdaExpressionSyntax)propertyNameArg).Body;
+        _ = SymbolHelpers.ExtractInteractionTypeArguments(
+            semanticModel.GetTypeInfo(body, ct).Type!,
+            out inputTypeFullName,
+            out outputTypeFullName);
     }
 
     /// <summary>
