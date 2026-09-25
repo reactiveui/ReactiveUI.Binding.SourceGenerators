@@ -65,12 +65,6 @@ changed example is updated on the website in the same series of pull requests.
 - **Cancel the running CI of a pull request before pushing to it again.** A run that the next push replaces
   wastes shared runners.
 
-### Editing
-
-- Edit files with editor tools. Never rewrite source with `sed`, `awk` or ad hoc scripts.
-- Never run `rm -rf` or a delete built from shell expansion. Write each coverage run and each examples run to a
-  new directory instead of clearing an old one. Remove tracked files with `git rm <exact path>`.
-
 ## Build & Test Commands
 
 This project uses **Microsoft Testing Platform (MTP)** with the **TUnit** testing framework. Test commands differ significantly from traditional VSTest.
