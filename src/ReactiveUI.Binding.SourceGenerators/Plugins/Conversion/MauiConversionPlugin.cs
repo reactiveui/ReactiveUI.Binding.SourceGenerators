@@ -11,8 +11,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
 /// <summary>Adapts Maui visibility to typed boolean bindings.</summary>
 internal sealed class MauiConversionPlugin : IConversionPlugin
 {
+    /// <summary>MAUI's visibility enum, with ReactiveUI's hint and this library's MAUI hint.</summary>
+    private static readonly VisibilityPlatform Platform = new("Microsoft.Maui.Visibility", "Collapsed", true, "ReactiveUI", "Maui");
+
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ConversionInfo? Select(ITypeSymbol source, ITypeSymbol target, Compilation compilation) =>
-        VisibilityConversion.Select(source, target, "Microsoft.Maui.Visibility", "Collapsed", compilation, true, "ReactiveUI");
+        VisibilityConversion.Select(source, target, Platform, compilation);
 }

@@ -11,8 +11,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
 /// <summary>Adapts Android visibility to typed boolean bindings.</summary>
 internal sealed class AndroidConversionPlugin : IConversionPlugin
 {
+    /// <summary>Android's view state enum, which takes no hint.</summary>
+    private static readonly VisibilityPlatform Platform = new("Android.Views.ViewStates", "Gone", false, string.Empty, string.Empty);
+
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ConversionInfo? Select(ITypeSymbol source, ITypeSymbol target, Compilation compilation) =>
-        VisibilityConversion.Select(source, target, "Android.Views.ViewStates", "Gone", compilation, false, string.Empty);
+        VisibilityConversion.Select(source, target, Platform, compilation);
 }

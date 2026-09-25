@@ -11,8 +11,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
 /// <summary>Adapts Uno visibility to typed boolean bindings.</summary>
 internal sealed class UnoConversionPlugin : IConversionPlugin
 {
+    /// <summary>Uno's visibility enum, with ReactiveUI.Uno's hint.</summary>
+    private static readonly VisibilityPlatform Platform = new("Windows.UI.Xaml.Visibility", "Collapsed", false, "ReactiveUI.Uno", string.Empty);
+
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ConversionInfo? Select(ITypeSymbol source, ITypeSymbol target, Compilation compilation) =>
-        VisibilityConversion.Select(source, target, "Windows.UI.Xaml.Visibility", "Collapsed", compilation, false, "ReactiveUI.Uno");
+        VisibilityConversion.Select(source, target, Platform, compilation);
 }
