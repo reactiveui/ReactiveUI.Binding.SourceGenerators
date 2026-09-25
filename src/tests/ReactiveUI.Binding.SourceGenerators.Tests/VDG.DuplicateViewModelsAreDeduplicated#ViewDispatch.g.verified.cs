@@ -27,7 +27,7 @@ namespace ReactiveUI.Binding
             object instance, string contract)
         {
             // global::TestApp.SharedViewModel -> global::TestApp.DesktopView
-            if (instance is global::TestApp.SharedViewModel)
+            if (instance is global::TestApp.SharedViewModel && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }

@@ -63,7 +63,7 @@ public static class ViewContractExamples
         // True
     }
 
-    /// <summary>Resolves with a contract that no screen claims: the generated lookup answers with the screen that has no contract.</summary>
+    /// <summary>Resolves with a contract that no screen claims: the screen that has no contract does not answer it, so no view resolves.</summary>
     public static void ResolveUnclaimedContract()
     {
         var account = CreateAccount();
@@ -71,10 +71,10 @@ public static class ViewContractExamples
 
         var view = locator.ResolveView(account, UnclaimedContract);
 
-        Console.WriteLine(view?.GetType().Name);
+        Console.WriteLine(view is null);
 
         // Output:
-        // AccountSummaryView
+        // True
     }
 
     /// <summary>Creates the account the examples show.</summary>

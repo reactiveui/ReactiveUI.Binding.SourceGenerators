@@ -99,6 +99,64 @@ public class ViewDispatchRegistrationTests
         }
         """;
 
+    /// <summary>
+    /// A view model with a default view and a contract view, and one with a default view only. A contract answers
+    /// only with a view registered under it.
+    /// </summary>
+    private const string ContractConsumer = """
+        using ReactiveUI.Binding;
+
+        public class ViewBase<TViewModel> : IViewFor<TViewModel>
+            where TViewModel : class
+        {
+            public TViewModel ViewModel { get; set; }
+
+            object IViewFor.ViewModel
+            {
+                get => ViewModel;
+                set => ViewModel = (TViewModel)value;
+            }
+        }
+
+        public class PanelViewModel
+        {
+        }
+
+        public class PanelView : ViewBase<PanelViewModel>
+        {
+        }
+
+        [ViewContract("ContractA")]
+        public class PanelViewA : ViewBase<PanelViewModel>
+        {
+        }
+
+        public class ToolViewModel
+        {
+        }
+
+        public class ToolView : ViewBase<ToolViewModel>
+        {
+        }
+
+        public static class Usage
+        {
+            public static bool Run()
+            {
+                var locator = new DefaultViewLocator();
+                var panel = new PanelViewModel();
+                var tool = new ToolViewModel();
+
+                return locator.ResolveView(panel, null) is PanelView
+                    && locator.ResolveView(panel, "") is PanelView
+                    && locator.ResolveView(panel, "ContractA") is PanelViewA
+                    && locator.ResolveView(panel, "ContractB") == null
+                    && locator.ResolveView(tool, null) is ToolView
+                    && locator.ResolveView(tool, "ContractB") == null;
+            }
+        }
+        """;
+
     /// <summary>Verifies the dispatch is in place before any code in the assembly runs, with no binding call made.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -142,6 +200,20 @@ public class ViewDispatchRegistrationTests
         var dispatch = result.GeneratedSources[DispatchHintName];
         await Assert.That(dispatch.Contains(ModuleInitializerUse, StringComparison.Ordinal)).IsEqualTo(usesModuleInitializer);
         await Assert.That(dispatch.Contains(SharedTierStaticConstructor, StringComparison.Ordinal)).IsEqualTo(!usesModuleInitializer);
+    }
+
+    /// <summary>
+    /// Verifies a view with no contract answers only a request with no contract, both where it is the view model's
+    /// only view and where a contract view sits beside it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DefaultViewAnswersOnlyARequestWithNoContract()
+    {
+        var result = TestHelper.RunGenerator(ContractConsumer, LanguageVersion.CSharp10);
+
+        await result.CompilationSucceeds();
+        await AssertUsageResolvesView(result);
     }
 
     /// <summary>Verifies a framework without the module initializer attribute gets a file-local declaration of it.</summary>

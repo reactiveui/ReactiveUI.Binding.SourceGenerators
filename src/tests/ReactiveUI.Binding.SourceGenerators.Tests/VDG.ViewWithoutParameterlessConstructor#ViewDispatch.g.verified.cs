@@ -27,7 +27,7 @@ namespace ReactiveUI.Binding
             object instance, string contract)
         {
             // global::TestApp.SettingsViewModel -> global::TestApp.SettingsView
-            if (instance is global::TestApp.SettingsViewModel)
+            if (instance is global::TestApp.SettingsViewModel && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }

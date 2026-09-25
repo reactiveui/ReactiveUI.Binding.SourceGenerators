@@ -27,12 +27,12 @@ namespace ReactiveUI.Binding
             object instance, string contract)
         {
             // global::TestApp.LoginViewModel -> global::TestApp.LoginView
-            if (instance is global::TestApp.LoginViewModel)
+            if (instance is global::TestApp.LoginViewModel && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }
             // global::TestApp.MainViewModel -> global::TestApp.MainView
-            if (instance is global::TestApp.MainViewModel)
+            if (instance is global::TestApp.MainViewModel && contract.Length == 0)
             {
                 return __ResolveView_1(contract);
             }

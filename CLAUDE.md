@@ -357,7 +357,8 @@ per call site. [API Pattern](#api-pattern) shows how a call site reaches that me
 - its `[ViewContract]` contract and its `[SingleInstanceView]` flag
 
 It writes `ViewDispatch.g.cs`, a type switch from view model to view. A view with the requested contract comes
-before the default view. Each view's resolver tries the service locator first. It then uses the cached instance
+before the default view. The default view answers only an empty contract, so a contract no view claims returns
+null from the lookup. Each view's resolver tries the service locator first. It then uses the cached instance
 for a `[SingleInstanceView]` view, or calls the parameterless constructor. A view with no parameterless
 constructor resolves to null. `[ExcludeFromViewRegistration]` leaves a view out.
 

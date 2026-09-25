@@ -32,7 +32,7 @@ namespace ReactiveUI.Binding
             object instance, string contract)
         {
             // global::TestApp.SingletonViewModel -> global::TestApp.SingletonView
-            if (instance is global::TestApp.SingletonViewModel)
+            if (instance is global::TestApp.SingletonViewModel && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }

@@ -27,7 +27,7 @@ namespace ReactiveUI.Binding
             object instance, string contract)
         {
             // global::TestApp.PrivateCtorViewModel -> global::TestApp.PrivateCtorView
-            if (instance is global::TestApp.PrivateCtorViewModel)
+            if (instance is global::TestApp.PrivateCtorViewModel && contract.Length == 0)
             {
                 return __ResolveView_0(contract);
             }
