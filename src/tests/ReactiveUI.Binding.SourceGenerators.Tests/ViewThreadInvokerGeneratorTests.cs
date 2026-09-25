@@ -256,6 +256,47 @@ public class ViewThreadInvokerGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
+    /// <summary>A command binding on a plain view writes its command on the thread of the WPF control it binds.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommand_OnAPlainViewWithAWpfControl_CarriesTheWpfInvokerForTheControl()
+    {
+        const string usage = """
+                             namespace TestApp
+                             {
+                                 public class CommandButton : System.Windows.Threading.DispatcherObject
+                                 {
+                                     public System.Windows.Input.ICommand? Command { get; set; }
+
+                                     public object? CommandParameter { get; set; }
+                                 }
+
+                                 public class MyView : IViewFor, INotifyPropertyChanged
+                                 {
+                                     public event PropertyChangedEventHandler? PropertyChanged;
+
+                                     public object? ViewModel { get; set; }
+
+                                     public CommandButton SaveButton { get; } = new CommandButton();
+                                 }
+
+                                 public static class Usage
+                                 {
+                                     public static object BindSave(MyView view, MyViewModel viewModel) =>
+                                         view.BindCommand(viewModel, x => x.Save, x => x.SaveButton);
+                                 }
+                             }
+                             """;
+
+        var result = await TestHelper.TestPassWithResult(
+            Imports + usage + ViewModelSource + WpfStubs,
+            typeof(ViewThreadInvokerGeneratorTests),
+            LanguageVersion.CSharp10);
+
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
     /// <summary>The generated invokers compile against the System.Reactive flavour of the runtime.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

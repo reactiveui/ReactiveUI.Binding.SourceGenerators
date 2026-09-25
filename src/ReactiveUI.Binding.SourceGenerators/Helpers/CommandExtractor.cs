@@ -99,7 +99,7 @@ internal static class CommandExtractor
             controlBinding.Capabilities.HasEnabled,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
             sides.ViewThreadInvoker)
-        { HasExplicitEvent = controlBinding.HasExplicitEvent, NativeCommand = controlBinding.NativeCommand };
+        { HasExplicitEvent = controlBinding.HasExplicitEvent, NativeCommand = controlBinding.NativeCommand, ControlViewThreadInvoker = controlBinding.ViewThreadInvoker };
     }
 
     /// <summary>Searches invocation arguments for a valid <c>withParameter</c> lambda expression.</summary>
@@ -242,6 +242,7 @@ internal static class CommandExtractor
         {
             HasExplicitEvent = explicitEvent,
             NativeCommand = explicitEvent ? null : CommandBindingPluginRegistry.InspectControl(controlLeafType),
+            ViewThreadInvoker = ViewThreadPluginRegistry.InvokerFor(controlLeafType, semanticModel.Compilation),
         };
     }
 
@@ -367,6 +368,9 @@ internal static class CommandExtractor
 
         /// <summary>Gets the verified native command members.</summary>
         public NativeCommandInfo? NativeCommand { get; init; }
+
+        /// <summary>Gets the invoker class a write to the control carries, or null for none.</summary>
+        public string? ViewThreadInvoker { get; init; }
     }
 
     /// <summary>Holds the detected <c>withParameter</c> overload information for a BindCommand invocation.</summary>
