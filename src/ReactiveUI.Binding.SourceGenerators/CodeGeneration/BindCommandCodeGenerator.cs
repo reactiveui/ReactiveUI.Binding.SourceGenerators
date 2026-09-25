@@ -174,7 +174,7 @@ internal static class BindCommandCodeGenerator
         // Only a caller-supplied stream is passed in; a parameter named as a property is observed inside the worker.
         if (inv.HasObservableParameter)
         {
-            _ = sb.Line(",").Append(GeneratedTypeNames.ObservableOf(inv.ParameterTypeFullName ?? GeneratedTypeNames.ObjectType)).Append(" withParameter");
+            _ = sb.Line(",").Append(GeneratedTypeNames.IObservable).Append('<').Append(inv.ParameterTypeFullName).Append("> withParameter");
         }
 
         _ = sb.Line(")").Outdent().OpenBlock()
@@ -363,7 +363,7 @@ internal static class BindCommandCodeGenerator
 
         if (group.HasObservableParameter)
         {
-            _ = sb.Append(GeneratedTypeNames.ObservableOf(group.ParameterTypeFullName ?? GeneratedTypeNames.ObjectType)).Line(" withParameter,");
+            _ = sb.Append(GeneratedTypeNames.IObservable).Append('<').Append(group.ParameterTypeFullName).Line("> withParameter,");
         }
         else if (group.HasExpressionParameter)
         {

@@ -263,21 +263,6 @@ internal static class GeneratedTypeNames
     internal static string PropertyExpression(string declaringType, string propertyType) =>
         $"{Expression}<{FuncOf(declaringType, propertyType)}>";
 
-    /// <summary>
-    /// Opens the stage that projects each value of a deep chain's parent onto the observable of its next stage
-    /// and follows the latest one, ready for the projection lambda and the closing parenthesis.
-    /// </summary>
-    /// <param name="segment">The chain segment being observed, whose declaring type is the parent's type.</param>
-    /// <param name="segmentTypeName">The fully-qualified type of the segment's property.</param>
-    /// <param name="parentVariable">The variable holding the parent stage's observable.</param>
-    /// <returns>The opening text of the stage construction.</returns>
-    internal static string OpenChainSwitchMap(
-        Models.PropertyPathSegment segment,
-        string segmentTypeName,
-        string parentVariable) =>
-        // Typed as the declaring type: IObservable is covariant, so a parent of a more derived type still converts.
-        $"new {SwitchMapSignal}<{segment.DeclaringTypeFullName}, {segmentTypeName}>({parentVariable},";
-
     /// <summary>Renders the read of a segment's property from an object that has to be cast to reach it.</summary>
     /// <param name="segment">The property being read.</param>
     /// <param name="castTypeName">The type the object is cast to before the read.</param>

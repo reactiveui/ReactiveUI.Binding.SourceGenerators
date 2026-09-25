@@ -54,8 +54,11 @@ internal static class ObservableAsPropertyGenerator
         in IncrementalGeneratorInitializationContext context,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
-        var lean = context.SyntaxProvider.ForAttributeWithMetadataName(LeanAttributeName, IsCandidate, Extract).Collect();
-        var reactive = context.SyntaxProvider.ForAttributeWithMetadataName(ReactiveAttributeName, IsCandidate, Extract).Collect();
+        // Converted once and shared, so both flavours' registrations use the same two delegates.
+        Func<SyntaxNode, CancellationToken, bool> isCandidate = IsCandidate;
+        Func<GeneratorAttributeSyntaxContext, CancellationToken, ObservableAsPropertyInfo?> extract = Extract;
+        var lean = context.SyntaxProvider.ForAttributeWithMetadataName(LeanAttributeName, isCandidate, extract).Collect();
+        var reactive = context.SyntaxProvider.ForAttributeWithMetadataName(ReactiveAttributeName, isCandidate, extract).Collect();
 
         context.RegisterSourceOutput(
             lean.Combine(reactive).Combine(languageFeatures),

@@ -655,6 +655,20 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
+    /// <summary>An event whose args type was not resolved hands the custom binder the base event args type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitCommandAffinityCheck_EventWithoutArgsType_UsesEventArgs()
+    {
+        const int GeneratedAffinity = 5;
+        var sb = new SourceWriter();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo() with { ResolvedEventArgsTypeFullName = null };
+
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
+
+        await Assert.That(sb.ToString()).Contains("BindCommandToObject<global::TestApp.MyButton, global::System.EventArgs>(");
+    }
+
     /// <summary>A registered binder is handed the observed parameter, not the value it held at one moment.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

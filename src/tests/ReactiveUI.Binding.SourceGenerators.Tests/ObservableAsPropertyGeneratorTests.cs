@@ -148,6 +148,35 @@ public class ObservableAsPropertyGeneratorTests
         await result.CompilationSucceeds();
     }
 
+    /// <summary>
+    /// A type with more than one type parameter names its file without the space its display name puts between
+    /// them, so the hint name stays a plain file name.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TwoTypeParameters_NamesTheFileWithoutSpaces()
+    {
+        const string source = """
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public partial class Pair<TKey, TValue> : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      [ObservableAsProperty]
+                                      public partial int Count { get; }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp13);
+        await result.HasGeneratedSource("TestApp.Pair[TKey,TValue].ObservableAsProperties.g.cs");
+        await result.CompilationSucceeds();
+    }
+
     /// <summary>A property that is not a partial get-only declaration is left alone.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
