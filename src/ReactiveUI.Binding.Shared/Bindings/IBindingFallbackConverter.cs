@@ -40,9 +40,7 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// </para>
     /// </remarks>
     int GetAffinityForObjects(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType);
 
     /// <summary>Attempts to convert the value to the target type.</summary>
@@ -69,10 +67,8 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// </para>
     /// </remarks>
     bool TryConvert(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
         object from,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType,
         object? conversionHint,
         out object? result);

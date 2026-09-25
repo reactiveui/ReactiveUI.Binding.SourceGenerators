@@ -23,10 +23,7 @@ public static class CommandBinderService
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns>The best binder; the first registered wins a tie. Null when every registered binder returns an affinity of zero or less.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
-    public static ICreatesCommandBinding? GetBinder<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents
-                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
-    T>(bool hasEventTarget)
+    public static ICreatesCommandBinding? GetBinder<T>(bool hasEventTarget)
     {
         var binders = Locator.Current.GetServices<ICreatesCommandBinding>();
 

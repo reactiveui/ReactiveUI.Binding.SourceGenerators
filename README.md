@@ -678,6 +678,10 @@ bar-button `Clicked`, and AppKit `Target`/`Action`. It follows command and contr
 or property-based parameters, and detaches handlers when disposed. Registered command binders take over when
 their score exceeds the selected adapter's score.
 
+`ICreatesCommandBinding` carries no trimming attributes, so a generated binding that hands a command to a
+registered binder stays safe to trim and to publish ahead of time. A binder you write must not rely on reflection
+that trimming can break.
+
 | Command mechanism | Score |
 |-------------------|------:|
 | UIKit refresh control or bar button | 10 |

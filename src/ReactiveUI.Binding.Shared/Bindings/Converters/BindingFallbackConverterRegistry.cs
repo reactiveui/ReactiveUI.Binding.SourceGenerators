@@ -54,9 +54,7 @@ public sealed class BindingFallbackConverterRegistry
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
     /// </exception>
     public IBindingFallbackConverter? TryGetConverter(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type fromType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType)
     {
         ArgumentExceptionHelper.ThrowIfNull(fromType);

@@ -30,9 +30,7 @@ public static class RuntimeBindingConverter
     /// <param name="result">The converted value when conversion succeeds.</param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise <see langword="false"/>.</returns>
     /// <remarks>The converter is resolved from <typeparamref name="TFrom"/> and <typeparamref name="TTo"/>, not from the runtime type of <paramref name="value"/>.</remarks>
-    public static bool TryConvert<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TFrom,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTo>(
+    public static bool TryConvert<TFrom, TTo>(
         TFrom value,
         object? conversionHint,
         IBindingTypeConverter? converterOverride,

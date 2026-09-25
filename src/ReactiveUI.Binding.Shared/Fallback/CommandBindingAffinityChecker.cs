@@ -23,10 +23,7 @@ public static class CommandBindingAffinityChecker
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns><see langword="true"/> if a user plugin should override the generated binding; the registrations are read from the service locator on every call.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
-    public static bool HasHigherAffinityPlugin<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents
-                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
-    T>(int generatedAffinity, bool hasEventTarget)
+    public static bool HasHigherAffinityPlugin<T>(int generatedAffinity, bool hasEventTarget)
     {
         foreach (var plugin in Locator.Current.GetServices<ICreatesCommandBinding>())
         {
