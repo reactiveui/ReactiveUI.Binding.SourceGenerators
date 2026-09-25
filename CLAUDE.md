@@ -9,6 +9,68 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **NEVER give up because a task is complex** - break it down and keep going
 - If a tool call is rejected, adapt your approach immediately and continue
 
+## Contribution Rules (Mandatory)
+
+These apply to every change and every pull request. They are not negotiable.
+
+### Generated code never repeats across assemblies
+
+- **Never inject fixed code into a consumer.** A helper class, observable, invoker, command bridge or any other
+  code whose content does not depend on the call site belongs in a runtime package as public API. Generated code
+  references it by its fully qualified name.
+- **Never generate a type whose fully qualified name can repeat in another assembly.** With `InternalsVisibleTo`,
+  a friend assembly sees both copies. Generated types live in a namespace unique to the assembly.
+- **Do not use `RegisterPostInitializationOutput`** or any other output that is the same for every consumer.
+- A compiler polyfill that generated code needs (`InterceptsLocationAttribute`, `ModuleInitializerAttribute`) is
+  declared `file`-scoped in the file that uses it. Do not ship public polyfills from the runtime: they clash
+  (CS0436) with the consumer's own polyfills.
+
+### Never add a package without maintainer approval
+
+Platform-specific code goes in the existing packages under platform target frameworks. Follow ReactiveUI's
+layout: platform TFM properties in `Directory.Build.props`, and source folders such as `Platforms/apple-common`,
+`Platforms/ios` and `Platforms/mac` that compile only for the matching TFMs.
+
+### Every changed file is fully covered
+
+Every source file a change adds or modifies reaches **100% line and branch coverage for the whole file**, not
+only the changed lines. Measure each test project's cobertura report separately and merge them per file. Remove
+code no caller can reach rather than testing it. The codecov/patch, codecov/project and SonarCloud quality gates
+must all pass.
+
+### Every change runs the examples
+
+Run the full examples suite on every pull request:
+
+- **Linux:** every `Documentation/Pages` project, `ToPropertyVerification` on net8.0 to net11.0,
+  `PlatformBindingsVerification -- --verify` on net10.0, and a native AOT publish of `setup/aot` that reports no
+  trim or AOT warnings and runs.
+- **Windows** (a real Windows machine or VM): `ToPropertyVerification` on net462 to net481 and net8.0 to net11.0,
+  `PlatformBindingsVerification -- --verify` and `threading` on net10.0-windows10.0.19041.0.
+- Apple targets are exempt when no Apple host is available.
+
+A behaviour change that users can see gets an example. The website quotes example methods word for word, so a
+changed example is updated on the website in the same series of pull requests.
+
+### Pull requests
+
+- **Use the organisation template**, [`reactiveui/.github`
+  `PULL_REQUEST_TEMPLATE.md`](https://github.com/reactiveui/.github/blob/main/.github/PULL_REQUEST_TEMPLATE.md),
+  and fill every section. "How this was verified" never lists test counts, test names or pass results.
+- **Title the change by what the code now does**, in Conventional Commits form, e.g. `fix: generate
+  BindInteraction calls that start at a field`. Never title it by history, e.g. "add missed tests" or "cover
+  lines #126 left".
+- **Merge only when every check is green**, including codecov/patch, codecov/project and the SonarCloud quality
+  gate. CodeQL does not block. Do not rely on auto-merge: it waits only for required checks.
+- **Cancel the running CI of a pull request before pushing to it again.** A run that the next push replaces
+  wastes shared runners.
+
+### Editing
+
+- Edit files with editor tools. Never rewrite source with `sed`, `awk` or ad hoc scripts.
+- Never run `rm -rf` or a delete built from shell expansion. Write each coverage run and each examples run to a
+  new directory instead of clearing an old one. Remove tracked files with `git rm <exact path>`.
+
 ## Build & Test Commands
 
 This project uses **Microsoft Testing Platform (MTP)** with the **TUnit** testing framework. Test commands differ significantly from traditional VSTest.
