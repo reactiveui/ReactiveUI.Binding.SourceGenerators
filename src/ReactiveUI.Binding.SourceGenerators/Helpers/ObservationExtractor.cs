@@ -138,7 +138,10 @@ internal static class ObservationExtractor
     /// <param name="propertyPaths">The list to append extracted property paths to.</param>
     /// <param name="expressionTexts">The list to append normalized expression texts to.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns><see langword="true"/> if a selector/conversion parameter was found.</returns>
+    /// <returns>
+    /// <see langword="true"/> if a selector/conversion parameter was found. When a path cannot be read,
+    /// <paramref name="propertyPaths"/> is left empty.
+    /// </returns>
     private static bool CollectPropertyPaths(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
@@ -165,13 +168,18 @@ internal static class ObservationExtractor
             // Check if parameter type is Expression<Func<...>>
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
             {
+                // One path generated code cannot read leaves the whole call to the runtime stub. Keeping the
+                // others would generate a method with fewer parameters than the call, which an interceptor cannot claim.
                 var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                if (path is not null)
+                if (path is null)
                 {
-                    propertyPaths.Add(new(path));
-                    expressionTexts.Add(
-                        args[i].Expression.ToString());
+                    propertyPaths.Clear();
+                    return false;
                 }
+
+                propertyPaths.Add(new(path));
+                expressionTexts.Add(
+                    args[i].Expression.ToString());
             }
             else if (IsSelectorParameterName(parameter.Name))
             {
