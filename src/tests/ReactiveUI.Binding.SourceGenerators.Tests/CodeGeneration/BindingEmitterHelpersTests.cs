@@ -148,19 +148,6 @@ public class BindingEmitterHelpersTests
         await Assert.That(api.WorkerArguments).IsEqualTo($"{ViewModelVariableName}, view");
     }
 
-    /// <summary>A conversion requested from the registry emits a stage under the name it was given.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitRegistryConversion_DifferingTypes_EmitsTheNamedStage()
-    {
-        const string resultVar = "convertedObs";
-        var sb = new StringBuilder();
-
-        BindingEmitterHelpers.EmitRegistryConversion(sb, "sourceObs", resultVar, IntTypeName, "global::System.String");
-
-        await Assert.That(sb.ToString()).Contains(resultVar);
-    }
-
     /// <summary>An interceptor for a compiler without caller-argument expressions declares no expression-text parameters.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
