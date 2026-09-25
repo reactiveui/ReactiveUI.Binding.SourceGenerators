@@ -17,5 +17,3 @@ jobs:
         uses: reactiveui/actions-common/.github/workflows/workflow-common-aot-smoke.yml@main
         with:
             projectFile: src/tests/ReactiveUI.Binding.TrimValidation/ReactiveUI.Binding.TrimValidation.csproj
-            # The referenced runtime builds Apple heads on Windows and macOS, and restoring them needs their workloads.
-            installWorkloads: true
