@@ -103,11 +103,14 @@ public sealed class KvoPropertyObservable<T> : IObservable<T>
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) is not null)
+            if (Interlocked.Exchange(ref _observer, null) is null)
             {
-                _parent._source.RemoveObserver(_kvoObserver, _parent._keyPath);
-                _handle.Free();
+                return;
             }
+
+            _parent._source.RemoveObserver(_kvoObserver, _parent._keyPath);
+            _handle.Free();
+            _kvoObserver.Dispose();
         }
 
         /// <summary>Reads the property and delivers it, unless disposed or unchanged under distinct delivery.</summary>

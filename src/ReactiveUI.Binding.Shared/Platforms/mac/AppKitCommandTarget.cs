@@ -15,8 +15,8 @@ namespace ReactiveUI.Binding.CommandBinding;
 
 /// <summary>The Cocoa target/action receiver that runs a command when an AppKit control or menu item fires its action.</summary>
 /// <remarks>
-/// Generated command bindings set a control's <c>Target</c> to an instance and its <c>Action</c> to
-/// <see cref="ActionSelectorName"/>, and keep <see cref="IsEnabled"/> in step with the command, which is what
+/// Generated command bindings set a control's <c>Target</c> to an instance and its <c>Action</c> to the
+/// <c>theAction:</c> selector, and keep <see cref="IsEnabled"/> in step with the command, which is what
 /// <c>validateMenuItem:</c> answers for a menu item.
 /// </remarks>
 [DebuggerDisplay("AppKitCommandTarget: IsEnabled = {IsEnabled}")]
@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding.CommandBinding;
 public sealed class AppKitCommandTarget : NSObject
 {
     /// <summary>The selector the target exports for the control's action.</summary>
-    public const string ActionSelectorName = "theAction:";
+    private const string ActionSelectorName = "theAction:";
 
     /// <summary>The command the action runs.</summary>
     private readonly ICommand _command;
@@ -65,5 +65,6 @@ public sealed class AppKitCommandTarget : NSObject
     /// <param name="item">The menu item being validated.</param>
     /// <returns><see langword="true"/> when the command can run.</returns>
     [Export("validateMenuItem:")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ValidateMenuItem(NSMenuItem item) => IsEnabled;
 }
