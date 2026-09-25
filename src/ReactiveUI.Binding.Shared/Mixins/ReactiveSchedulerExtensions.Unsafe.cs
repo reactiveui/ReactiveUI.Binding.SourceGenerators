@@ -43,7 +43,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindOneWay(
             source,
@@ -79,7 +79,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindOneWay(
             source,
@@ -119,7 +119,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindOneWay(
             source,
@@ -161,7 +161,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindTwoWay(
             source,
@@ -199,7 +199,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindTwoWay(
             source,
@@ -241,7 +241,7 @@ public static partial class ReactiveSchedulerExtensions
         where TSource : class
         where TTarget : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(sourceProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(sourceProperty.Body));
 
         return RuntimeBindingFallback.BindTwoWay(
             source,
@@ -296,7 +296,7 @@ public static partial class ReactiveSchedulerExtensions
         where TView : class, IViewFor
         where TViewModel : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(viewModelProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(viewModelProperty.Body));
 
         return RuntimeBindingFallback.OneWayBind(
             view,
@@ -336,7 +336,7 @@ public static partial class ReactiveSchedulerExtensions
         where TView : class, IViewFor
         where TViewModel : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(viewModelProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(viewModelProperty.Body));
 
         return RuntimeBindingFallback.OneWayBind(
             view,
@@ -383,7 +383,7 @@ public static partial class ReactiveSchedulerExtensions
         where TView : class, IViewFor
         where TViewModel : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(viewModelProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(viewModelProperty.Body));
 
         return RuntimeBindingFallback.Bind(
             view,
@@ -425,7 +425,7 @@ public static partial class ReactiveSchedulerExtensions
         where TView : class, IViewFor
         where TViewModel : class
     {
-        var bindingExpression = Reflection.ExpressionToPropertyNames(viewModelProperty.Body);
+        var bindingExpression = Reflection.ExpressionToPropertyNames(Reflection.Rewrite(viewModelProperty.Body));
 
         return RuntimeBindingFallback.Bind(
             view,
