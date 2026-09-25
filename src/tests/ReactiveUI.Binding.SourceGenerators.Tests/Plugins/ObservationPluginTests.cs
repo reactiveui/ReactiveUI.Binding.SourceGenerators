@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -98,7 +98,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitShallowObservation_AfterChange_EmitsEventObservable()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, false, true);
@@ -118,7 +118,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitShallowObservation_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
@@ -134,7 +134,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitShallowObservationVariable_AfterChange_EmitsEventObservable()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
@@ -150,7 +150,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
@@ -166,7 +166,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitDeepChainRootSegment_AfterChange_EmitsEventObservable()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
@@ -182,7 +182,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
@@ -198,7 +198,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsEventObservable()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
@@ -214,7 +214,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitDeepChainInnerSegment_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
@@ -230,7 +230,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
@@ -246,7 +246,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitInlineObservationVariable_EmitsEventObservable()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyControlTypeName, SourceObsName);
@@ -287,7 +287,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitShallowObservationVariable_AfterChange_EmitsEventObservable()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
@@ -303,7 +303,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
@@ -317,7 +317,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, true, true);
@@ -331,7 +331,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitDeepChainRootSegment_AfterChange_EmitsEventObservable()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
@@ -347,7 +347,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
@@ -361,7 +361,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsEventObservable()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
@@ -377,7 +377,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
@@ -391,7 +391,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
@@ -407,7 +407,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitInlineObservationVariable_EmitsEventObservable()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyTextBoxTypeName, SourceObsName);
@@ -424,7 +424,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
@@ -438,7 +438,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitShallowObservationVariable_AfterChange_EmitsWinUIDPObservable()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
@@ -454,7 +454,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
@@ -468,7 +468,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitDeepChainRootSegment_AfterChange_EmitsWinUIDPObservable()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
@@ -482,7 +482,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
@@ -496,7 +496,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsWinUIDPObservable()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
@@ -512,7 +512,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
@@ -526,7 +526,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
@@ -542,7 +542,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitInlineObservationVariable_EmitsWinUIDPObservable()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyControlTypeName, SourceObsName);
@@ -559,7 +559,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitShallowObservationVariable_AfterChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyViewTypeName, false, Obs0Local);
@@ -575,7 +575,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitShallowObservationVariable_BeforeChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyViewTypeName, true, Obs0Local);
@@ -591,7 +591,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitDeepChainRootSegment_AfterChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyViewTypeName, false, Obs0Local);
@@ -607,7 +607,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyViewTypeName, true, Obs0Local);
@@ -623,7 +623,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitDeepChainInnerSegment_AfterChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
@@ -639,7 +639,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
@@ -655,7 +655,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
@@ -671,7 +671,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitInlineObservationVariable_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyViewTypeName, SourceObsName);
@@ -687,7 +687,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_BooleanProperty_UsesIsPrefix()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Enabled", "bool");
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyViewTypeName, false, true);
@@ -701,7 +701,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_BooleanPropertyAlreadyStartingWithIs_DoesNotDoublePrefix()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("IsEnabled", "bool");
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyViewTypeName, false, true);
@@ -715,7 +715,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmptyPropertyName_ReturnsEmpty()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment(string.Empty, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyViewTypeName, false, true);
@@ -729,7 +729,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitShallowObservation_BeforeChange_EmitsKVOObservable()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyViewTypeName, true, true);
@@ -746,7 +746,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservationVariable_SubscribesTheWidgetEvent()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
@@ -762,7 +762,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
@@ -778,7 +778,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitDeepChainRootSegment_SubscribesTheWidgetEvent()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
@@ -794,7 +794,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitDeepChainRootSegment_UnreportedProperty_EmitsTheUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
@@ -810,7 +810,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
@@ -826,7 +826,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
         plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
@@ -842,7 +842,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitInlineObservationVariable_SubscribesTheWidgetEvent()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
@@ -858,7 +858,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitInlineObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
@@ -888,7 +888,7 @@ public class ObservationPluginTests
     public async Task INPCPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = new INPCObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Name", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", false, false);
@@ -902,7 +902,7 @@ public class ObservationPluginTests
     public async Task ReactiveObjectPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = new ReactiveObjectObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Name", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", false, false);
@@ -916,7 +916,7 @@ public class ObservationPluginTests
     public async Task WpfPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = new WpfObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, false, false);
@@ -930,7 +930,7 @@ public class ObservationPluginTests
     public async Task WinFormsPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = WinFormsObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, false, false);
@@ -944,7 +944,7 @@ public class ObservationPluginTests
     public async Task WinUIPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = WinUIObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, false, false);
@@ -958,7 +958,7 @@ public class ObservationPluginTests
     public async Task KVOPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = new KVOObservationPlugin();
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyViewTypeName, false, false);
@@ -972,7 +972,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservation_SubscribesTheWidgetEvent()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
@@ -988,7 +988,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservation_UnreportedProperty_EmitsTheUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
@@ -1005,7 +1005,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, false);
@@ -1021,7 +1021,7 @@ public class ObservationPluginTests
     public async Task AndroidPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = AndroidObservation.Plugin;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, true, true);

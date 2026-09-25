@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -92,7 +91,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprSupported_GeneratesCallerArgExprOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -115,7 +114,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprNotSupported_GeneratesCallerFilePathOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -138,7 +137,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerArgExprOverload_SingleInvocation_GeneratesDualExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(
             isTwoWay: true,
             methodName: BindTwoWayName);
@@ -165,7 +164,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     public async Task GenerateCallerFilePathOverload_SingleInvocation_GeneratesFilePathDispatch()
     {
         const int CallerLineNumber = 55;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(
             "/src/Views/MyView.cs",
             CallerLineNumber,
@@ -193,7 +192,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindTwoWayMethod_StandardInvocation_GeneratesMultipleDisposable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
@@ -308,7 +307,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindTwoWayMethod_WithConversion_IncludesMapChains()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(
             hasConversion: true,
             isTwoWay: true,
@@ -332,7 +331,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindTwoWayMethod_WithScheduler_RoutesBothDirectionsThroughTheLatestWinsStage()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(
             hasScheduler: true,
             isTwoWay: true,
@@ -362,7 +361,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindTwoWayMethod_RoutesBothDirectionsAndWeighsTheTargetsFirstValue()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
@@ -383,7 +382,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task AppendExtraParameters_WithConversion_AppendsConverterParamsWithTypes()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,

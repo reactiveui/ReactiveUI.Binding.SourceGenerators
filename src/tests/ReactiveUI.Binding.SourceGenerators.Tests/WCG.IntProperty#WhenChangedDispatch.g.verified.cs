@@ -30,12 +30,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Count", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.IntProperty.MyViewModel, int>>)(__e => __e.Count)).Body,
-                "Count",
-                (object __o) => ((global::SharedScenarios.WhenChanged.IntProperty.MyViewModel)__o).Count,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.IntProperty.MyViewModel, int>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::SharedScenarios.WhenChanged.IntProperty.MyViewModel)__o).Count,
+                    false, false)
                 : (global::System.IObservable<int>)
                 new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.IntProperty.MyViewModel)__o).Count, true));
         }

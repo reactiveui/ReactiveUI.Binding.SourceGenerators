@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reflection;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Generators;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -156,7 +156,7 @@ public class ViewDispatchRegistrationTests
             EmitGeneratedCodeMarkers: true,
             SupportsModuleInitializer: true,
             DeclaresModuleInitializerAttribute: true);
-        var builder = new StringBuilder();
+        var builder = new SourceWriter();
 
         ViewLocatorDispatchGenerator.GenerateSource(builder, registrations, features);
         var generated = builder.ToString();

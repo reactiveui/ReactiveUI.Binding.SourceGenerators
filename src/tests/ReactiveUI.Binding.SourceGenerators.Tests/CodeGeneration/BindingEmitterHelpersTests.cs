@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -118,7 +117,7 @@ public class BindingEmitterHelpersTests
     {
         var api = new BindingEmitterHelpers.BindingDispatchApi();
         var group = Group(false, IntTypeName, IntTypeName);
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         api.AppendExtraParameters(sb, group, false);
 
@@ -153,7 +152,7 @@ public class BindingEmitterHelpersTests
     [Test]
     public async Task GenerateInterceptors_WithoutCallerArgumentExpressions_DeclaresNoExpressionTextParameters()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         BindingEmitterHelpers.GenerateInterceptors(
             sb,
@@ -171,7 +170,7 @@ public class BindingEmitterHelpersTests
     [Test]
     public async Task GenerateInterceptors_WithConverterOverride_DeclaresNoExpressionTextParameters()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         BindingEmitterHelpers.GenerateInterceptors(
             sb,
@@ -190,7 +189,7 @@ public class BindingEmitterHelpersTests
     public async Task EmitDualStreamStages_ApiWithOnlyAForwardConverter_ConvertsBothDirectionsWithIt()
     {
         var api = OneWayBindCodeGenerator.DispatchApi;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         var observables = BindingEmitterHelpers.EmitDualStreamStages(
             sb,

@@ -29,7 +29,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338746(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
         {
             var __obsPropertyMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(obj, "MyCommand", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel)__o).MyCommand, true);
-
             var __obsPropertyRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "MyCommand", 5, false);
             var __obsProperty = __obsPropertyRegistration == null
                 ? (global::System.IObservable<global::System.IObservable<string>>)__obsPropertyMechanism

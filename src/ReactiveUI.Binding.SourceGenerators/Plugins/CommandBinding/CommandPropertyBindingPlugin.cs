@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -45,7 +45,7 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
 
     /// <inheritdoc/>
     public void EmitBinding(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         bool supportsNullable)
@@ -58,29 +58,25 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
 
         var tracksParameter = inv is { HasExpressionParameter: true, ParameterPropertyPath: not null };
 
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
         AppendCapturedOriginals(sb, controlAccess);
-
-        _ = sb.AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
-            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
-            .AppendLine("            {")
-            .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;");
+        _ = CommandBindingSyntax.OpenUntypedCommandSubscription(sb);
 
         if (tracksParameter)
         {
             // The parameter is a stream, so the control follows every value the property takes for as long as
             // the command is bound. Subscribing lands the current value before the command is assigned.
-            _ = sb.AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
-                .Append("                    withParameter, __p => ").Append(controlAccess)
-                .AppendLine(".CommandParameter = __p);");
+            _ = sb.Line($"serial.Disposable = {GeneratedTypeNames.Subscribe}(")
+                .Indent()
+                .Append("withParameter, __p => ").Append(controlAccess).Line(".CommandParameter = __p);")
+                .Outdent();
         }
 
         // The command is assigned last, so the control never sees one with a parameter still to arrive.
-        _ = sb.Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
-            .AppendLine("            });")
-            .AppendLine();
+        _ = CommandBindingSyntax.CloseCommandSubscription(sb.Append(controlAccess).Line(".Command = cmd;"))
+            .BlankLine();
 
-        AppendRestoringReturn(sb, controlAccess, "new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial)");
+        AppendRestoringReturn(sb, controlAccess, $"new {GeneratedTypeNames.MultipleDisposable}(__cmdSub, serial)");
     }
 
     /// <summary>
@@ -155,16 +151,16 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
         property.Name == "CommandParameter" && !property.IsReadOnly && !property.IsStatic
         && property.DeclaredAccessibility == Accessibility.Public;
 
-    /// <summary>Appends the reads that remember what the control carried before the binding touched it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the reads that remember what the control carried before the binding touched it.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     /// <param name="controlAccess">The access chain to the bound control.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendCapturedOriginals(StringBuilder sb, string controlAccess) =>
-        sb.Append("            var __originalCommand = ").Append(controlAccess).AppendLine(".Command;")
-            .Append("            var __originalParameter = ").Append(controlAccess).AppendLine(".CommandParameter;");
+    private static void AppendCapturedOriginals(SourceWriter sb, string controlAccess) =>
+        sb.BeginVar("__originalCommand").Append(controlAccess).Line(".Command;")
+            .BeginVar("__originalParameter").Append(controlAccess).Line(".CommandParameter;");
 
-    /// <summary>Appends the return that disposes the binding and puts the control back as it was found.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the return that disposes the binding and puts the control back as it was found, and closes the worker.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     /// <param name="controlAccess">The access chain to the bound control.</param>
     /// <param name="subscriptions">The expression producing the binding's own subscriptions.</param>
     /// <remarks>
@@ -173,22 +169,23 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     /// control never briefly holds the old command against the new parameter.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendRestoringReturn(StringBuilder sb, string controlAccess, string subscriptions) =>
-        sb.Append("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(")
-            .AppendLine()
-            .Append("                ").Append(subscriptions).AppendLine(",")
-            .AppendLine("                new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>")
-            .AppendLine("                {")
-            .Append("                    ").Append(controlAccess).AppendLine(".CommandParameter = __originalParameter;")
-            .Append("                    ").Append(controlAccess).AppendLine(".Command = __originalCommand;")
-            .AppendLine("                }));")
-            .AppendLine("        }");
+    private static void AppendRestoringReturn(SourceWriter sb, string controlAccess, string subscriptions) =>
+        sb.Line($"return new {GeneratedTypeNames.MultipleDisposable}(")
+            .Indent()
+            .Append(subscriptions).Line(",")
+            .Line($"new {GeneratedTypeNames.ActionDisposable}(() =>")
+            .OpenBlock()
+            .Append(controlAccess).Line(".CommandParameter = __originalParameter;")
+            .Append(controlAccess).Line(".Command = __originalCommand;")
+            .CloseBlock("));")
+            .Outdent()
+            .CloseBlock();
 
     /// <summary>
     /// Emits the binding for the variant that has both a CommandParameter property and an observable
     /// parameter, which must track the latest parameter value and re-subscribe per command.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the worker's body.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The access chain to the bound control.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
@@ -198,45 +195,43 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     /// first decides the control's enabled state from the parameter belonging to the command it just replaced.
     /// </remarks>
     private static void EmitObservableParameterBinding(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         bool supportsNullable)
     {
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
         AppendCapturedOriginals(sb, controlAccess);
 
         var nullableSuffix = supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty;
         var writeLatest = CommandBindingSyntax.WriteLatestParameter(inv, "p");
 
-        _ = sb.Append("            ").Append(inv.ParameterTypeFullName).Append(nullableSuffix)
-            .AppendLine(" __latestParam = default;")
-            .AppendLine("            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
-            .Append("                withParameter, p => ").Append(writeLatest).AppendLine(");")
-            .AppendLine()
-            .AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
-            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
-            .AppendLine("            {")
-            .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
-            .Append("                var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";")
-            .Append("                ").Append(controlAccess).AppendLine(".CommandParameter = param;")
-            .Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
-            .AppendLine("                if (cmd != null)")
-            .AppendLine("                {")
-            .AppendLine("                    serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
-            .AppendLine("                        withParameter, p =>")
-            .AppendLine("                        {")
-            .Append("                            ").Append(writeLatest).AppendLine(";")
-            .Append("                            ").Append(controlAccess).AppendLine(".CommandParameter = p;")
-            .AppendLine("                        });")
-            .AppendLine("                }")
-            .AppendLine("            });")
-            .AppendLine();
+        _ = sb.Append(inv.ParameterTypeFullName).Append(nullableSuffix).Line(" __latestParam = default;")
+            .Line($"var __paramSub = {GeneratedTypeNames.Subscribe}(")
+            .Indent()
+            .Append("withParameter, p => ").Append(writeLatest).Line(");")
+            .Outdent()
+            .BlankLine();
+        _ = CommandBindingSyntax.OpenUntypedCommandSubscription(sb)
+            .Var("param", CommandBindingSyntax.ReadLatestParameter(inv))
+            .Append(controlAccess).Line(".CommandParameter = param;")
+            .Append(controlAccess).Line(".Command = cmd;")
+            .If("cmd != null")
+            .Line($"serial.Disposable = {GeneratedTypeNames.Subscribe}(")
+            .Indent()
+            .Line("withParameter, p =>")
+            .OpenBlock()
+            .Append(writeLatest).EndStatement()
+            .Append(controlAccess).Line(".CommandParameter = p;")
+            .CloseBlock(");")
+            .Outdent()
+            .CloseBlock();
+        _ = CommandBindingSyntax.CloseCommandSubscription(sb).BlankLine();
 
         AppendRestoringReturn(
             sb,
             controlAccess,
-            "new global::ReactiveUI.Primitives.Disposables.MultipleDisposable("
-            + "new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial)");
+            $"new {GeneratedTypeNames.MultipleDisposable}("
+            + $"new {GeneratedTypeNames.MultipleDisposable}(__cmdSub, __paramSub), serial)");
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -219,7 +218,7 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task AppendExtensionClassHeader_ProducesExpectedStructure()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
 
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, new(false, true, true));
 
@@ -230,17 +229,17 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).Contains("__ReactiveUIGeneratedBindings");
     }
 
-    /// <summary>Verifies AppendExtensionClassFooter produces closing braces.</summary>
+    /// <summary>Verifies AppendExtensionClassFooter closes the class and its namespace, returning to the file level.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AppendExtensionClassFooter_ProducesClosingBraces()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter().Indent().Indent();
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
 
-        var result = sb.ToString();
-        await Assert.That(result).Contains("}");
+        await Assert.That(sb.ToString()).IsEqualTo("    }\n}\n");
+        await Assert.That(sb.Level).IsEqualTo(0);
     }
 
     /// <summary>Verifies BuildPropertyAccessLambda delegates to BuildPropertyAccessChain.</summary>
@@ -517,14 +516,14 @@ public class CodeGeneratorHelpersTests
         const int line = 42;
         const string worker = "__Worker_1";
         const string arguments = "view, viewModel";
-        var expected = new StringBuilder();
+        var expected = new SourceWriter().Indent();
         CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
             expected,
-            keyword,
+            index,
             line,
             CodeGeneratorHelpers.ComputePathSuffix(SrcTestcsName));
         CodeGeneratorHelpers.AppendDispatchReturn(expected, worker, arguments);
-        var actual = new StringBuilder();
+        var actual = new SourceWriter().Indent();
 
         CodeGeneratorHelpers.AppendCallerInfoDispatchBranch(actual, index, line, SrcTestcsName, worker, arguments);
 

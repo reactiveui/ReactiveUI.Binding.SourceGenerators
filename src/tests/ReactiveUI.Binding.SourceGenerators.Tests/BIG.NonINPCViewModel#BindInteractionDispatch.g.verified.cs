@@ -38,22 +38,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             // BindInteraction: Confirm
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
 
-        if (viewModel == null)
-        {
-            return serial;
-        }
+            if (viewModel == null)
+            {
+                return serial;
+            }
             var interactionObsMechanism = new global::ReactiveUI.Binding.Observables.DeferredPropertyObservable<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(viewModel, __source => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__source).Confirm);
-        var interactionObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Confirm", 1, false);
-        var interactionObs = interactionObsRegistration == null
-            ? (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)interactionObsMechanism
-            : (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(
-                interactionObsRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>>)(__e => __e.Confirm)).Body,
-                "Confirm",
-                (object __o) => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__o).Confirm,
-                false,
-                true);
+            var interactionObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Confirm", 1, false);
+            var interactionObs = interactionObsRegistration == null
+                ? (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)interactionObsMechanism
+                : (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(
+                    interactionObsRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>>)(__e => __e.Confirm)).Body,
+                    "Confirm",
+                    (object __o) => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__o).Confirm,
+                    false,
+                    true);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

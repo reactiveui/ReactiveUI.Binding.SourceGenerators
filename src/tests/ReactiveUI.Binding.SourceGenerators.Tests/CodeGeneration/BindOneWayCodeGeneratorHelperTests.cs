@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -67,7 +66,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprSupported_GeneratesCallerArgExprOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -90,7 +89,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprNotSupported_GeneratesCallerFilePathOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -113,7 +112,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerArgExprOverload_SingleInvocation_GeneratesDualExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -137,7 +136,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateCallerFilePathOverload_SingleInvocation_GeneratesFilePathDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var group = new BindingTypeGroup(
             MyViewModelTypeName,
@@ -161,7 +160,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindOneWayMethod_StandardInvocation_GeneratesPropertyObservableSubscribe()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
@@ -256,7 +255,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindOneWayMethod_WithConversion_IncludesMapChain()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
@@ -272,7 +271,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindOneWayMethod_WithScheduler_IncludesWitnessOnSignal()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(hasScheduler: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 

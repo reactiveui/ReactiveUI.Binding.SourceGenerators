@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -47,8 +46,8 @@ internal static class BindCodeGenerator
         FormatExtraArguments = FormatExtraArgs,
     };
 
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                ";
+    /// <summary>The local a two-way callback holds the value it applies in.</summary>
+    private const string AppliedValueLocal = "value";
 
     /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
     private const string ForwardConverterName = "viewModelToViewConverter";
@@ -69,26 +68,15 @@ internal static class BindCodeGenerator
     /// <param name="targetClassInfo">The target type class binding info.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateBindMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo,
         string suffix)
     {
-        var viewPropertyAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "view",
-            inv.TargetPropertyPath,
-            "value",
-            SubscriptionBodyIndent);
-
         // Both directions follow the view's current view model, so the write walks the same re-rooted path the
         // observation does and its guard drops the write while the view holds none.
         var observation = BindingEmitterHelpers.ResolveViewModelObservation(inv, sourceClassInfo, targetClassInfo);
-        var viewModelSetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            observation.RootVariable,
-            observation.Path,
-            "value",
-            SubscriptionBodyIndent);
         BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
@@ -111,7 +99,7 @@ internal static class BindCodeGenerator
 
         var (viewModelVar, viewVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
 
-        EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
+        EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, observation);
     }
 
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
@@ -119,7 +107,7 @@ internal static class BindCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+    internal static void AppendExtraParameters(SourceWriter sb, BindingTypeGroup group, bool supportsNullable) =>
         BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName, supportsNullable);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
@@ -140,21 +128,20 @@ internal static class BindCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <returns>The fully qualified return type string.</returns>
     internal static string FormatReturnType(BindingTypeGroup group) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {BindingChange}>";
+        $"{IReactiveBinding}<{group.TargetTypeFullName}, {BindingChange}>";
 
     /// <summary>Formats the return type for a private Bind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The fully qualified return type string.</returns>
     internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindingChange}>";
+        $"{IReactiveBinding}<{inv.TargetTypeFullName}, {BindingChange}>";
 
     /// <summary>Emits the two-way pipeline and the <c>ReactiveBinding</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <param name="viewModelVar">The view model observable variable name.</param>
     /// <param name="viewVar">The view observable variable name.</param>
-    /// <param name="viewPropertyAccess">The view property setter access chain.</param>
-    /// <param name="viewModelSetAccess">The view model property setter access chain.</param>
+    /// <param name="observation">The re-rooted path the view model side is written through.</param>
     /// <remarks>
     /// Both directions become one stream, which is then routed once and applied once. Three things follow from
     /// that, and none of them hold when each direction is wired on its own.
@@ -175,51 +162,59 @@ internal static class BindCodeGenerator
     /// </para>
     /// </remarks>
     private static void EmitTwoWaySubscription(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         string viewModelVar,
         string viewVar,
-        string viewPropertyAccess,
-        string viewModelSetAccess)
+        in BindingEmitterHelpers.ViewModelObservation observation)
     {
         var changeType = $"global::System.ValueTuple<bool, {inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}>";
-        _ = sb.AppendLine()
-            .Append("            var __vmTagged = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName).Append(", ")
+        _ = sb.BlankLine()
+            .BeginVar("__vmTagged").Append("new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName).Append(", ")
             .Append(changeType).Append(">(").Append(viewModelVar).Append(", v => new ").Append(changeType)
-            .Append("(true, v, default(").Append(inv.SourcePropertyTypeFullName).AppendLine(")));")
-            .Append("            var __viewTagged = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName).Append(", ")
+            .Append("(true, v, default(").Append(inv.SourcePropertyTypeFullName).Line(")));")
+            .BeginVar("__viewTagged").Append("new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName).Append(", ")
             .Append(changeType).Append(">(").Append(viewVar).Append(", v => new ").Append(changeType)
-            .Append("(false, default(").Append(inv.TargetPropertyTypeFullName).AppendLine("), v));")
-            .Append("            var __sides = new ").Append(MergeSignal).Append('<').Append(changeType).AppendLine(">(__vmTagged, __viewTagged);");
+            .Append("(false, default(").Append(inv.TargetPropertyTypeFullName).Line("), v));")
+            .BeginVar("__sides").Append("new ").Append(MergeSignal).Append('<').Append(changeType).Line(">(__vmTagged, __viewTagged);");
 
         var routedVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, "__sides", "__routed", "view", inv.TargetViewThreadInvoker);
 
-        _ = sb.AppendLine("            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();")
-            .AppendLine().Append("            var disposable = ").Append(BindingErrors).Append(".Subscribe(").Append(routedVar).AppendLine(", __change =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine("                if (__change.Item1)")
-            .AppendLine("                {")
-            .AppendLine("                    var value = __change.Item2;")
-            .Append("                    ").Append(viewPropertyAccess).AppendLine()
-            .AppendLine("                    if (changed.HasObservers)")
-            .AppendLine("                    {")
-            .Append("                        changed.OnNext(new ").Append(BindingChange).AppendLine("(value, true));")
-            .AppendLine("                    }")
-            .AppendLine("                }")
-            .AppendLine("                else")
-            .AppendLine("                {")
-            .AppendLine("                    var value = __change.Item3;")
-            .Append("                    ").Append(viewModelSetAccess).AppendLine()
-            .AppendLine("                    if (changed.HasObservers)")
-            .AppendLine("                    {")
-            .Append("                        changed.OnNext(new ").Append(BindingChange).AppendLine("(value, false));")
-            .AppendLine("                    }")
-            .AppendLine("                }")
-            .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).Append(" / ")
-            .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
-            .AppendLine().Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
-            .Append(BindingChange).AppendLine(">(").AppendLine("                view,").AppendLine("                changed,")
-            .AppendLine("                global::ReactiveUI.Binding.BindingDirection.TwoWay,").AppendLine("                disposable);")
-            .AppendLine("        }").AppendLine();
+        _ = sb.Var("changed", $"new {Observables}.AppliedChangeObservable()")
+            .BlankLine()
+            .BeginVar("disposable").Append(BindingErrors).Append(".Subscribe(").Append(routedVar).Line(", __change =>")
+            .OpenBlock()
+            .If("__change.Item1")
+            .Var(AppliedValueLocal, "__change.Item2");
+        CodeGeneratorHelpers.AppendGuardedAssignment(sb, "view", inv.TargetPropertyPath, AppliedValueLocal);
+        _ = AppendAppliedChange(sb, fromViewModel: true)
+            .CloseBlock()
+            .Else()
+            .Var(AppliedValueLocal, "__change.Item3");
+        CodeGeneratorHelpers.AppendGuardedAssignment(sb, observation.RootVariable, observation.Path, AppliedValueLocal);
+        _ = AppendAppliedChange(sb, fromViewModel: false)
+            .CloseBlock()
+            .CloseBlockInline().Append(", \"").AppendEscaped(inv.SourceExpressionText).Append(" / ")
+            .AppendEscaped(inv.TargetExpressionText).Line("\");")
+            .BlankLine()
+            .BeginReturn().Append($"new {ReactiveBinding}<").Append(inv.TargetTypeFullName).Append(", ")
+            .Append(BindingChange).Append(">(").OpenContinuation()
+            .Line("view,")
+            .Line("changed,")
+            .Line($"{BindingDirection}.TwoWay,")
+            .Line("disposable);")
+            .Outdent()
+            .CloseBlock()
+            .BlankLine();
     }
+
+    /// <summary>Writes the publication of a change the guard let through, to whoever subscribed to the binding.</summary>
+    /// <param name="sb">The writer, inside the branch that applied the change.</param>
+    /// <param name="fromViewModel">Whether the change travelled from the view model to the view.</param>
+    /// <returns>The writer, for chaining.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static SourceWriter AppendAppliedChange(SourceWriter sb, bool fromViewModel) =>
+        sb.If("changed.HasObservers")
+            .Append("changed.OnNext(new ").Append(BindingChange).Append("(value, ").AppendLiteral(fromViewModel).Line("));")
+            .CloseBlock();
 }

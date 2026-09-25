@@ -54,7 +54,7 @@ internal static class RuntimeFlavourRewriter
         }
 
         var scheduled = source.Replace(Constants.LeanSchedulerTypeName, Constants.ReactiveSchedulerTypeName)
-            .Replace("global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate", "global::System.Reactive.Concurrency.Scheduler.Immediate");
+            .Replace(GeneratedTypeNames.ImmediateSequencer, "global::System.Reactive.Concurrency.Scheduler.Immediate");
         var runtime = ShiftNamespace(scheduled, LeanPrefix, features.RuntimeNamespaceMembers, matchWholePath: false);
         return ShiftNamespace(runtime, PrimitivesPrefix, features.PrimitivesNamespaceMembers, matchWholePath: true);
     }

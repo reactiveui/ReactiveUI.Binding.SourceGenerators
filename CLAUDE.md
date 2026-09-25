@@ -289,8 +289,10 @@ src/
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
 │   └── CodeGeneration/
-│       ├── CodeGenerator.cs                     # StringBuilder-based code generation
-│       ├── PooledBuilder.cs                     # Per-thread StringBuilder pool for whole files
+│       ├── SourceWriter.cs                      # Indentation-aware writer every generated file goes through
+│       ├── SourceWriterExtensions.cs            # Named C# constructs: namespaces, types, blocks, statements
+│       ├── GeneratedTypeNames.cs                # Fully qualified type names the emitters write
+│       ├── PooledBuilder.cs                     # Per-thread StringBuilder pool behind SourceWriter
 │       ├── PooledStringBuilder.cs               # char[]-backed builder for generated fragments
 │       └── RuntimeFlavourRewriter.cs            # Retargets output onto the .Reactive package
 │
@@ -977,10 +979,42 @@ All pipeline models are `sealed record` types with value equality. NEVER include
 
 ### Code Generation Strategy
 
-- Uses StringBuilder, NOT SyntaxFactory
+- Emitters write through `SourceWriter`, not `SyntaxFactory` and not a raw `StringBuilder`
 - Generated code emitted as C# source via `context.AddSource()`
 - `#pragma warning disable` at top of generated files
 - All generated types use `[Microsoft.CodeAnalysis.Embedded]` attribute
+
+### Writing Generated Code
+
+`SourceWriter` owns the layout of every generated file. An emitter says what it writes, and the writer decides
+the indentation.
+
+- **The writer tracks the level.** A line is indented when its first character is written. A blank line carries
+  no whitespace. Every line ends with `\n`. No string literal in an emitter starts with spaces.
+- **Blocks change the level.** `OpenBlock` and `CloseBlock` write the braces and move one level in and out.
+  `OpenContinuation` moves the rest of a multi-line expression one level deeper.
+- **Each emitter method writes at the level it is given.** It leaves the level as it found it, unless its name
+  says it opens something, like `OpenParameterList` or `AppendChoiceOpen`. Its doc comment says where it leaves
+  the writer.
+- **C# constructs have names.** `SourceWriterExtensions` covers the file header, namespaces, types, doc comments,
+  attributes, parameter lists, branches, locals, returns and `try`/`finally`. A construct built from several
+  values has a `Begin` member that writes the keyword. The emitter appends the parts, and a closing member
+  finishes the line, so no intermediate string is built.
+- **Domain shapes have names too.** Examples are `CodeGeneratorHelpers.AppendGuardedAssignment`,
+  `BindingEmitterHelpers.AppendWriteSubscription`, `ChainRegistrationEmitter.AppendStageOpen` and
+  `CommandBindingSyntax.OpenCommandSubscription`. Reuse one before you write the same lines again.
+- **Type names live in `GeneratedTypeNames`.** A string literal names a type through a constant hole, such as
+  `$"var x = {GeneratedTypeNames.SwapDisposable}();"`. With only constant holes, the compiler folds the string to
+  one constant, so this costs nothing at run time.
+- **Fixed text is written with `Lines`.** A fixed block, such as the command parameter capture, sits in a raw
+  string literal with its indentation relative to column zero. `Lines` indents it from the writer's level.
+
+`SourceWriter.Rent` takes its `StringBuilder` from `PooledBuilder`'s per-thread free list, and
+`ToStringAndReturn` gives it back. `PooledStringBuilder` stays the builder for short fragments that are not
+lines, such as grouping keys and type argument lists.
+
+`GeneratedLayoutTests` checks every stored snapshot. Each closing brace must line up with its opening brace. A
+line inside a block must sit deeper than the block's braces, in whole levels. No line may end in whitespace.
 
 ### Generated Code Declares No Shared Types
 
@@ -1144,7 +1178,7 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 
 - **ISymbol/SyntaxNode in pipeline outputs** - breaks incremental caching
 - **Runtime reflection** in generated code - breaks AOT compatibility
-- **SyntaxFactory for code generation** - use StringBuilder instead
+- **SyntaxFactory or a raw StringBuilder for code generation** - write through `SourceWriter` instead
 - **Diagnostics in generator** - use separate analyzer project
 - **LINQ in hot paths** - use manual loops (Roslyn convention)
 - **Non-value-equatable models** in pipeline - breaks caching

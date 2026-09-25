@@ -70,6 +70,12 @@ internal static class GeneratedTypeNames
     /// <summary>The subscription that holds nothing, handed back where there is nothing to disconnect.</summary>
     internal const string EmptyDisposable = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable";
 
+    /// <summary>The type a value is carried as when nothing more specific is known.</summary>
+    internal const string ObjectType = "object";
+
+    /// <summary>The shared <c>EmptyDisposable</c> instance a generated member returns when it has nothing to release.</summary>
+    internal const string EmptyDisposableInstance = $"{EmptyDisposable}.Instance";
+
     /// <summary>The runtime gate that offers each value to a command and executes the ones it accepts.</summary>
     internal const string CommandInvoker = "global::ReactiveUI.Binding.CommandBinding.CommandInvoker";
 
@@ -147,6 +153,93 @@ internal static class GeneratedTypeNames
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IViewThreadInvoker</c>.</summary>
     internal const string IViewThreadInvoker = "global::ReactiveUI.Binding.IViewThreadInvoker";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.Disposables.MultipleDisposable</c>.</summary>
+    internal const string MultipleDisposable = "global::ReactiveUI.Primitives.Disposables.MultipleDisposable";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.Disposables.SwapDisposable</c>.</summary>
+    internal const string SwapDisposable = "global::ReactiveUI.Primitives.Disposables.SwapDisposable";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.Disposables.ActionDisposable</c>.</summary>
+    internal const string ActionDisposable = "global::ReactiveUI.Primitives.Disposables.ActionDisposable";
+
+    /// <summary>The fully qualified subscription extension a generated binding subscribes a callback with.</summary>
+    internal const string Subscribe = $"{RxBindingExtensions}.Subscribe";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.Advanced.ImmutableEmptySignal</c>.</summary>
+    internal const string ImmutableEmptySignal = "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.Advanced.ImmediateReturnSignal</c>.</summary>
+    internal const string ImmediateReturnSignal = "global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.PropertyObservable</c>.</summary>
+    internal const string PropertyObservable = "global::ReactiveUI.Binding.Observables.PropertyObservable";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.PropertyChangingObservable</c>.</summary>
+    internal const string PropertyChangingObservable = "global::ReactiveUI.Binding.Observables.PropertyChangingObservable";
+
+    /// <summary>The fully qualified name of <c>System.Collections.Generic.EqualityComparer</c>.</summary>
+    internal const string EqualityComparer = "global::System.Collections.Generic.EqualityComparer";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IInteractionContext</c>.</summary>
+    internal const string IInteractionContext = "global::ReactiveUI.Binding.IInteractionContext";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.ReactiveBinding</c>.</summary>
+    internal const string ReactiveBinding = "global::ReactiveUI.Binding.ReactiveBinding";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IReactiveBinding</c>.</summary>
+    internal const string IReactiveBinding = "global::ReactiveUI.Binding.IReactiveBinding";
+
+    /// <summary>The fully qualified name of <c>System.EventHandler</c>.</summary>
+    internal const string EventHandler = "global::System.EventHandler";
+
+    /// <summary>The fully qualified name of <c>System.EventArgs</c>.</summary>
+    internal const string EventArgs = "global::System.EventArgs";
+
+    /// <summary>The fully qualified name of <c>System.Threading.Tasks.Task</c>.</summary>
+    internal const string Task = "global::System.Threading.Tasks.Task";
+
+    /// <summary>The fully qualified name of <c>System.Threading.Volatile</c>.</summary>
+    internal const string Volatile = "global::System.Threading.Volatile";
+
+    /// <summary>The fully qualified name of <c>System.IObserver</c>.</summary>
+    internal const string IObserver = "global::System.IObserver";
+
+    /// <summary>The fully qualified name of <c>System.Action</c>.</summary>
+    internal const string Action = "global::System.Action";
+
+    /// <summary>The fully qualified name of <c>System.ArgumentNullException</c>.</summary>
+    internal const string ArgumentNullException = "global::System.ArgumentNullException";
+
+    /// <summary>The fully qualified name of <c>System.AttributeUsage</c>.</summary>
+    internal const string AttributeUsage = "global::System.AttributeUsage";
+
+    /// <summary>The fully qualified name of <c>System.AttributeTargets</c>.</summary>
+    internal const string AttributeTargets = "global::System.AttributeTargets";
+
+    /// <summary>The fully qualified name of <c>System.Attribute</c>.</summary>
+    internal const string Attribute = "global::System.Attribute";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.ObservableAsPropertyHelper</c>.</summary>
+    internal const string ObservableAsPropertyHelper = "global::ReactiveUI.Binding.ObservableAsPropertyHelper";
+
+    /// <summary>The fully qualified immediate sequencer, which a binding treats the same as no scheduler.</summary>
+    internal const string ImmediateSequencer = "global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IViewFor</c>.</summary>
+    internal const string IViewFor = "global::ReactiveUI.Binding.IViewFor";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.DefaultViewLocator</c>.</summary>
+    internal const string DefaultViewLocator = "global::ReactiveUI.Binding.DefaultViewLocator";
+
+    /// <summary>The fully qualified name of <c>System.Windows.Forms.Control</c>.</summary>
+    internal const string WinFormsControl = "global::System.Windows.Forms.Control";
+
+    /// <summary>The fully qualified name of <c>Foundation.NSString</c>.</summary>
+    internal const string NSString = "global::Foundation.NSString";
+
+    /// <summary>The fully qualified name of <c>Foundation.NSObject</c>.</summary>
+    internal const string NSObject = "global::Foundation.NSObject";
 
     /// <summary>The message a generated overload throws when no binding matches the call site.</summary>
     internal const string NoBindingFoundMessage =

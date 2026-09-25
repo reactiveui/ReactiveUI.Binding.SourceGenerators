@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -19,11 +19,11 @@ internal static class CommandParameterEmitter
     /// <summary>Emits typed parameter storage, preserving null until the first value arrives.</summary>
     /// <param name="sb">The output builder.</param>
     /// <param name="inv">The command binding.</param>
-    internal static void EmitCapture(StringBuilder sb, BindCommandInvocationInfo inv)
+    internal static void EmitCapture(SourceWriter sb, BindCommandInvocationInfo inv)
     {
         var type = inv.ParameterTypeFullName ?? "object";
-        _ = sb.Append("            ").Append(type).Append(" __latestParam = default(").Append(type).AppendLine(");")
-            .AppendLine("""
+        _ = sb.Append(type).Append(" __latestParam = default(").Append(type).Line(");")
+            .Lines($$"""
                         var __parameterGate = new object();
                         var __hasParameter = false;
                         var __argumentCached = false;
@@ -44,7 +44,7 @@ internal static class CommandParameterEmitter
                                 return __argument;
                             }
                         }
-                        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(withParameter, __parameter =>
+                        var __paramSub = {{GeneratedTypeNames.Subscribe}}(withParameter, __parameter =>
                         {
                             lock (__parameterGate)
                             {
@@ -53,7 +53,7 @@ internal static class CommandParameterEmitter
                                 __argumentCached = false;
                             }
                         });
-                """);
+                        """);
     }
 
     /// <summary>Returns the expression read at the ICommand object-parameter boundary.</summary>

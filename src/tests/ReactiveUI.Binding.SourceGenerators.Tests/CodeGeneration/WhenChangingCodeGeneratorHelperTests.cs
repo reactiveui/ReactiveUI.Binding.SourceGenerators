@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -64,7 +63,7 @@ public class WhenChangingCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprSupported_GeneratesCallerArgExprOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -80,7 +79,7 @@ public class WhenChangingCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExprNotSupported_GeneratesCallerFilePathOverload()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -96,7 +95,7 @@ public class WhenChangingCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesPropertyExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
@@ -114,7 +113,7 @@ public class WhenChangingCodeGeneratorHelperTests
     public async Task GenerateConcreteOverload_CallerFilePath_GeneratesFilePathDispatch()
     {
         const int CallerLineNumber = 42;
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateInvocationInfo(
             "/src/ViewModels/MyViewModel.cs",
             CallerLineNumber,

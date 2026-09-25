@@ -36,7 +36,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IDisposable __BindCommand_00000F3AD26C97AB(
             global::SharedScenarios.BindCommand.ObservableParam.MyView view,
-            global::SharedScenarios.BindCommand.ObservableParam.MyViewModel viewModel, global::System.IObservable<string> withParameter)
+            global::SharedScenarios.BindCommand.ObservableParam.MyViewModel viewModel,
+            global::System.IObservable<string> withParameter)
         {
             // BindCommand: Save -> SaveButton (event: Click)
             if (viewModel == null)
@@ -45,30 +46,30 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             }
 
             var __commandChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(viewModel, "Save", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyViewModel)__o).Save, true);
-        var __commandChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Save", 5, false);
-        var __commandChanges = __commandChangesRegistration == null
-            ? (global::System.IObservable<global::System.Windows.Input.ICommand>)__commandChangesMechanism
-            : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.Windows.Input.ICommand>(
-                __commandChangesRegistration,
-                viewModel,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyViewModel, global::System.Windows.Input.ICommand>>)(__e => __e.Save)).Body,
-                "Save",
-                (object __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyViewModel)__o).Save,
-                false,
-                true);
+            var __commandChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Save", 5, false);
+            var __commandChanges = __commandChangesRegistration == null
+                ? (global::System.IObservable<global::System.Windows.Input.ICommand>)__commandChangesMechanism
+                : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.Windows.Input.ICommand>(
+                    __commandChangesRegistration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyViewModel, global::System.Windows.Input.ICommand>>)(__e => __e.Save)).Body,
+                    "Save",
+                    (object __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyViewModel)__o).Save,
+                    false,
+                    true);
             var commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__commandChanges, view);
             var __controlChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>(view, "SaveButton", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyView)__o).SaveButton, true);
-        var __controlChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "SaveButton", 5, false);
-        var __controlChanges = __controlChangesRegistration == null
-            ? (global::System.IObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>)__controlChangesMechanism
-            : (global::System.IObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>(
-                __controlChangesRegistration,
-                view,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyView, global::SharedScenarios.BindCommand.ObservableParam.MyButton>>)(__e => __e.SaveButton)).Body,
-                "SaveButton",
-                (object __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyView)__o).SaveButton,
-                false,
-                true);
+            var __controlChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "SaveButton", 5, false);
+            var __controlChanges = __controlChangesRegistration == null
+                ? (global::System.IObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>)__controlChangesMechanism
+                : (global::System.IObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.BindCommand.ObservableParam.MyButton>(
+                    __controlChangesRegistration,
+                    view,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ObservableParam.MyView, global::SharedScenarios.BindCommand.ObservableParam.MyButton>>)(__e => __e.SaveButton)).Body,
+                    "SaveButton",
+                    (object __o) => ((global::SharedScenarios.BindCommand.ObservableParam.MyView)__o).SaveButton,
+                    false,
+                    true);
             var __controls = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__controlChanges, view);
             var __controlBinding = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __controlSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__controls, __control =>
@@ -106,35 +107,35 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             }
 
             string __latestParam = default(string);
-        var __parameterGate = new object();
-        var __hasParameter = false;
-        var __argumentCached = false;
-        object __argument = null;
-        object __ReadParameter()
-        {
-            lock (__parameterGate)
+            var __parameterGate = new object();
+            var __hasParameter = false;
+            var __argumentCached = false;
+            object __argument = null;
+            object __ReadParameter()
             {
-                if (!__hasParameter)
+                lock (__parameterGate)
                 {
-                    return null;
+                    if (!__hasParameter)
+                    {
+                        return null;
+                    }
+                    if (!__argumentCached)
+                    {
+                        __argument = __latestParam;
+                        __argumentCached = true;
+                    }
+                    return __argument;
                 }
-                if (!__argumentCached)
-                {
-                    __argument = __latestParam;
-                    __argumentCached = true;
-                }
-                return __argument;
             }
-        }
-        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(withParameter, __parameter =>
-        {
-            lock (__parameterGate)
+            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(withParameter, __parameter =>
             {
-                __latestParam = __parameter;
-                __hasParameter = true;
-                __argumentCached = false;
-            }
-        });
+                lock (__parameterGate)
+                {
+                    __latestParam = __parameter;
+                    __hasParameter = true;
+                    __argumentCached = false;
+                }
+            });
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, (global::System.Windows.Input.ICommand cmd) =>
             {

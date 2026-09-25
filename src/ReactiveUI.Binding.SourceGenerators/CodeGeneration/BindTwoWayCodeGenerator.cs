@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
-using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -28,7 +26,7 @@ internal static class BindTwoWayCodeGenerator
         WorkerSourceParameterName = SourceParameterName,
         WorkerTargetParameterName = TargetParameterName,
         IsTwoWay = true,
-        HookRefusalValue = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance",
+        HookRefusalValue = GeneratedTypeNames.EmptyDisposableInstance,
         SourceObservableName = BindTwoWayCodeGenerator.SourceObservableName,
         TargetObservableName = BindTwoWayCodeGenerator.TargetObservableName,
         SourceConvertedName = "__srcSelected",
@@ -43,9 +41,6 @@ internal static class BindTwoWayCodeGenerator
         FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
     };
-
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                ";
 
     /// <summary>What this API calls the source-to-target converter in its generated signatures.</summary>
     private const string ForwardConverterName = "sourceToTargetConv";
@@ -72,22 +67,12 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="targetClassInfo">The target type class binding info.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateBindTwoWayMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo,
         string suffix)
     {
-        var targetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            TargetParameterName,
-            inv.TargetPropertyPath,
-            "value",
-            SubscriptionBodyIndent);
-        var sourceSetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            SourceParameterName,
-            inv.SourcePropertyPath,
-            "value",
-            SubscriptionBodyIndent);
         BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
@@ -114,7 +99,7 @@ internal static class BindTwoWayCodeGenerator
         sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs", TargetParameterName, inv.TargetViewThreadInvoker);
         targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs", SourceParameterName, inv.SourceViewThreadInvoker);
 
-        EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
+        EmitTwoWaySubscription(sb, inv, sourceVar, targetVar);
     }
 
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
@@ -122,7 +107,7 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+    internal static void AppendExtraParameters(SourceWriter sb, BindingTypeGroup group, bool supportsNullable) =>
         BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName, supportsNullable);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
@@ -139,13 +124,11 @@ internal static class BindTwoWayCodeGenerator
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
 
-    /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The call site, naming the expressions a faulting write is reported against.</param>
+    /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block, and closes the worker.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
+    /// <param name="inv">The call site, naming the paths written and the expressions a faulting write is reported against.</param>
     /// <param name="sourceVar">The source observable variable name to subscribe to.</param>
     /// <param name="targetVar">The target observable variable name to subscribe to.</param>
-    /// <param name="targetAccess">The target property setter access chain.</param>
-    /// <param name="sourceSetAccess">The source property setter access chain.</param>
     /// <remarks>
     /// The target's own first value is weighed rather than dropped by position. Both observations report what
     /// they hold when subscribed, and the source is subscribed first, so by the time the target reports the
@@ -154,18 +137,26 @@ internal static class BindTwoWayCodeGenerator
     /// through a null intermediate does exactly that.
     /// </remarks>
     private static void EmitTwoWaySubscription(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         string sourceVar,
-        string targetVar,
-        string targetAccess,
-        string sourceSetAccess) => _ = sb.AppendLine().Append("            var d1 = ").Append(BindingErrors).Append(".Subscribe(").Append(sourceVar)
-            .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(targetAccess).AppendLine()
-            .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine()
-            .Append("            var d2 = ").Append(BindingErrors).Append(".Subscribe(").Append(targetVar).AppendLine(", value =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .Append("                ").Append(sourceSetAccess).AppendLine().Append("            }, \"")
-            .Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).AppendLine("\");").AppendLine()
-            .AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);").AppendLine("        }")
-            .AppendLine();
+        string targetVar)
+    {
+        BindingEmitterHelpers.AppendWriteSubscription(
+            sb.BlankLine().BeginVar("d1"),
+            sourceVar,
+            TargetParameterName,
+            inv.TargetPropertyPath,
+            inv.TargetExpressionText);
+        BindingEmitterHelpers.AppendWriteSubscription(
+            sb.BlankLine().BeginVar("d2"),
+            targetVar,
+            SourceParameterName,
+            inv.SourcePropertyPath,
+            inv.SourceExpressionText);
+        _ = sb.BlankLine()
+            .Return($"new {GeneratedTypeNames.MultipleDisposable}(d1, d2)")
+            .CloseBlock()
+            .BlankLine();
+    }
 }

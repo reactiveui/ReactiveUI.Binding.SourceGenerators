@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -25,7 +24,7 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 internal static class ToPropertyCodeGenerator
 {
     /// <summary>The generic helper type every worker constructs.</summary>
-    internal const string HelperType = "global::ReactiveUI.Binding.ObservableAsPropertyHelper";
+    internal const string HelperType = GeneratedTypeNames.ObservableAsPropertyHelper;
 
     /// <summary>The event-args type a changed raise passes.</summary>
     private const string ChangedEventArgsType = "global::System.ComponentModel.PropertyChangedEventArgs";
@@ -37,17 +36,8 @@ internal static class ToPropertyCodeGenerator
     private const string EditorBrowsableNever =
         "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
 
-    /// <summary>The spaces one nesting level indents by.</summary>
-    private const int IndentWidth = 4;
-
-    /// <summary>The nesting level of a member of the generated class: namespace, then class.</summary>
-    private const int MemberIndentLevel = 2;
-
     /// <summary>The name each raise lambda gives the owning object.</summary>
     private const string OwnerParameter = "__owner";
-
-    /// <summary>The indentation and arrow an interceptor forwards to its worker behind.</summary>
-    private const string ForwardingBodyPrefix = "            => ";
 
     /// <summary>The message a generated overload throws when no call site matches.</summary>
     private const string NoDispatchMessage =
@@ -64,9 +54,8 @@ internal static class ToPropertyCodeGenerator
             return null;
         }
 
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = SourceWriter.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
         for (var g = 0; g < groups.Count; g++)
@@ -102,7 +91,7 @@ internal static class ToPropertyCodeGenerator
                 GenerateConcreteOverload(sb, group, sites, features);
             }
 
-            _ = sb.AppendLine();
+            _ = sb.BlankLine();
 
             for (var i = 0; i < sites.Length; i++)
             {
@@ -111,11 +100,10 @@ internal static class ToPropertyCodeGenerator
         }
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
 
         AppendAccessors(sb, invocations);
 
-        return PooledBuilder.ToStringAndReturn(sb);
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Groups call sites by the overload they share: source type, value type and stub shape.</summary>
@@ -155,68 +143,64 @@ internal static class ToPropertyCodeGenerator
     /// <param name="group">The group of call sites sharing one overload.</param>
     /// <param name="sites">The group's call sites, each with its worker suffix.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
-    internal static void GenerateConcreteOverload(StringBuilder sb, ToPropertyTypeGroup group, Site[] sites, in LanguageFeatures features)
+    internal static void GenerateConcreteOverload(SourceWriter sb, ToPropertyTypeGroup group, Site[] sites, in LanguageFeatures features)
     {
         var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
         var byName = group.Shape.NamesPropertyByString;
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ToProperty of ").Append(group.SourceTypeFullName)
-            .AppendLine(".")
-            .AppendLine(DispatchSummary(byName, dispatchesOnExpressionText))
-            .AppendLine("        /// </summary>");
+        _ = sb.OpenSummary()
+            .BeginDocLine().Append("Concrete typed overload for ToProperty of ").Append(group.SourceTypeFullName).Line(".")
+            .DocLine(DispatchSummary(byName, dispatchesOnExpressionText))
+            .CloseSummary();
 
         // A positional initial value of the property's type can also fill a caller-information parameter of the
         // overload without one; the stub breaks that tie the same way, and so must the overloads beside it here.
         if (!byName && group.Shape.InitialValue == ToPropertyInitialValueKind.Value && features.SupportsOverloadResolutionPriority)
         {
-            _ = sb.AppendLine("        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]");
+            _ = sb.Attribute("global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)");
         }
 
-        _ = sb.Append("        public static ");
-        _ = AppendHelperType(sb, group.ValueTypeDisplay).AppendLine(" ToProperty(");
+        _ = AppendHelperType(sb.Append("public static "), group.ValueTypeDisplay).Append(" ToProperty").OpenParameterList();
 
         AppendParameterList(sb, group, dispatchesOnExpressionText, features);
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
 
         for (var i = 0; i < sites.Length; i++)
         {
             var inv = sites[i].Invocation;
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
             if (byName)
             {
-                _ = sb.Append("            ").Append(condition).Append(" (property == \"")
-                    .Append(CodeGeneratorHelpers.EscapeString(inv.PropertyName)).AppendLine("\")")
-                    .AppendLine(GeneratedSyntax.StatementBlockOpen);
+                _ = CodeGeneratorHelpers.AppendExpressionTextTest(sb.BeginBranch(i), "property", inv.PropertyName).CloseCondition();
             }
             else if (dispatchesOnExpressionText)
             {
-                _ = sb.Append("            ").Append(condition).Append(" (propertyExpression == \"")
-                    .Append(CodeGeneratorHelpers.EscapeString(inv.PropertyExpressionText)).AppendLine("\")")
-                    .AppendLine(GeneratedSyntax.StatementBlockOpen);
+                _ = CodeGeneratorHelpers.AppendExpressionTextTest(sb.BeginBranch(i), "propertyExpression", inv.PropertyExpressionText).CloseCondition();
             }
             else
             {
                 CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
                     sb,
-                    condition,
+                    i,
                     inv.CallerLineNumber,
                     CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
             }
 
             AppendWorkerCall(sb, group, sites[i].Suffix);
-            _ = sb.AppendLine(GeneratedSyntax.StatementBlockClose);
+            _ = sb.CloseBlock();
         }
 
-        _ = sb.Append("            throw new ").Append(GeneratedTypeNames.InvalidOperationException).AppendLine("(")
-            .Append("                \"").Append(NoDispatchMessage).AppendLine("\");")
-            .AppendLine(GeneratedSyntax.MemberBodyClose);
+        _ = sb.Append("throw new ").Append(GeneratedTypeNames.InvalidOperationException).Append('(')
+            .OpenContinuation()
+            .AppendQuoted(NoDispatchMessage).Line(");")
+            .Outdent()
+            .CloseBlock();
     }
 
     /// <summary>Generates the worker that creates the helper for one call site.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="site">The call site and its worker suffix.</param>
     /// <param name="valueType">The value type as the group declares it.</param>
     /// <param name="supportsNullable">Whether the consumer compiles with nullable reference types.</param>
-    internal static void GenerateWorker(StringBuilder sb, in Site site, string valueType, bool supportsNullable)
+    internal static void GenerateWorker(SourceWriter sb, in Site site, string valueType, bool supportsNullable)
     {
         var (inv, suffix) = site;
         var raise = inv.Raise;
@@ -225,80 +209,78 @@ internal static class ToPropertyCodeGenerator
         // accessor inside the type caches its own.
         if (raise.Accessor is null)
         {
-            AppendArgsField(sb, raise.Changed, isChanging: false, suffix, inv.PropertyName, MemberIndentLevel);
+            AppendArgsField(sb, raise.Changed, isChanging: false, suffix, inv.PropertyName);
             if (raise.Changing is { } changingCall)
             {
-                AppendArgsField(sb, changingCall, isChanging: true, suffix, inv.PropertyName, MemberIndentLevel);
+                AppendArgsField(sb, changingCall, isChanging: true, suffix, inv.PropertyName);
             }
         }
 
-        _ = sb.Append("        private static ");
-        _ = AppendHelperType(sb, valueType).Append(" __ToProperty_").Append(suffix).AppendLine("(")
-            .Append("            ").Append(GeneratedTypeNames.IObservable).Append('<').Append(valueType).AppendLine("> target,")
-            .Append("            ").Append(inv.SourceTypeFullName).AppendLine(" source,")
-            .Append("            ");
-        _ = AppendInitialValueParameter(sb, inv.Shape.InitialValue, valueType).AppendLine(",")
-            .AppendLine("            bool deferSubscription,")
-            .Append("            ").Append(GeneratedTypeNames.ISequencer).Append(supportsNullable ? "?" : string.Empty).AppendLine(" scheduler)")
-            .AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .Append("            // ToProperty: ").Append(inv.SourceTypeFullName).Append('.').Append(inv.PropertyName)
-            .Append(" raised through ").AppendLine(raise.Mechanism)
-            .Append("            return ");
-        _ = AppendHelperType(sb, valueType).AppendLine(".Create(")
-            .AppendLine("                target,")
-            .AppendLine("                source,");
+        _ = AppendHelperType(sb.Append("private static "), valueType).Append(" __ToProperty_").Append(suffix).OpenParameterList()
+            .Append(GeneratedTypeNames.IObservable).Append('<').Append(valueType).Line("> target,")
+            .Append(inv.SourceTypeFullName).Line(" source,");
+        _ = AppendInitialValueParameter(sb, inv.Shape.InitialValue, valueType).Line(",")
+            .Line("bool deferSubscription,")
+            .Append(GeneratedTypeNames.ISequencer).Append(supportsNullable ? "?" : string.Empty).Line(" scheduler)")
+            .Outdent()
+            .OpenBlock()
+            .BeginComment().Append("ToProperty: ").Append(inv.SourceTypeFullName).Append('.').Append(inv.PropertyName)
+            .Append(" raised through ").Line(raise.Mechanism);
+        _ = AppendHelperType(sb.BeginReturn(), valueType).Append(".Create(")
+            .OpenContinuation()
+            .Line("target,")
+            .Line("source,");
 
         AppendRaiseLambda(sb, inv, raise.Changed, isChanging: false, suffix);
-        _ = sb.AppendLine(",");
+        _ = sb.Line(",");
         if (raise.Changing is { } changing)
         {
             AppendRaiseLambda(sb, inv, changing, isChanging: true, suffix);
-            _ = sb.AppendLine(",");
+            _ = sb.Line(",");
         }
         else
         {
-            _ = sb.AppendLine("                null,");
+            _ = sb.Line("null,");
         }
 
-        _ = sb.Append("                ").Append(inv.Shape.InitialValue == ToPropertyInitialValueKind.Factory ? "getInitialValue" : "initialValue")
-            .AppendLine(",")
-            .AppendLine("                deferSubscription,")
-            .AppendLine("                scheduler);")
-            .AppendLine(GeneratedSyntax.MemberBodyClose)
-            .AppendLine();
+        _ = sb.Append(inv.Shape.InitialValue == ToPropertyInitialValueKind.Factory ? "getInitialValue" : "initialValue").Line(",")
+            .Line("deferSubscription,")
+            .Line("scheduler);")
+            .Outdent()
+            .CloseBlock()
+            .BlankLine();
     }
 
     /// <summary>Emits one interceptor per worker, claiming every call site that reaches it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group of call sites being claimed.</param>
     /// <param name="sites">The group's call sites, each with its worker suffix.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
-    private static void GenerateInterceptors(StringBuilder sb, ToPropertyTypeGroup group, Site[] sites, in LanguageFeatures features)
+    private static void GenerateInterceptors(SourceWriter sb, ToPropertyTypeGroup group, Site[] sites, in LanguageFeatures features)
     {
         foreach (var entry in InterceptorEmitter.GroupCallSites(sites, static x => x.Invocation.Interceptor, static x => x.Suffix))
         {
             foreach (var callSite in entry.Value)
             {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Invocation.Interceptor, InterceptorEmitter.MemberIndent);
+                InterceptorEmitter.AppendAttribute(sb, callSite.Invocation.Interceptor);
             }
 
-            _ = sb.Append("        internal static ");
-            _ = AppendHelperType(sb, group.ValueTypeDisplay).Append(" __Intercept_ToProperty_").Append(entry.Key).AppendLine("(");
+            _ = AppendHelperType(sb.Append("internal static "), group.ValueTypeDisplay).Append(" __Intercept_ToProperty_").Append(entry.Key).OpenParameterList();
             AppendParameterList(sb, group, features.SupportsCallerArgExpr, features);
 
-            _ = sb.Append(ForwardingBodyPrefix);
+            _ = sb.Indent().Append("=> ");
             if (group.Shape.HasResult)
             {
                 _ = sb.Append("result = ");
             }
 
             _ = sb.Append("__ToProperty_").Append(entry.Key).Append('(');
-            _ = AppendWorkerArguments(sb, group).AppendLine(");").AppendLine();
+            _ = AppendWorkerArguments(sb, group).Line(");").Outdent().BlankLine();
         }
     }
 
     /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The group whose types and shape the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text identifies a call site.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
@@ -308,14 +290,14 @@ internal static class ToPropertyCodeGenerator
     /// for a lambda that captures nothing, where building an expression tree allocates and reflects at every call.
     /// </remarks>
     private static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         ToPropertyTypeGroup group,
         bool dispatchesOnExpressionText,
         in LanguageFeatures features)
     {
         var shape = group.Shape;
-        _ = sb.Append("            this ").Append(GeneratedTypeNames.IObservable).Append('<').Append(group.ValueTypeDisplay).Append("> target");
-        _ = NextParameter(sb).Append(group.SourceTypeFullName).Append(" source");
+        _ = sb.Append("this ").Append(GeneratedTypeNames.IObservable).Append('<').Append(group.ValueTypeDisplay).Line("> target,")
+            .Append(group.SourceTypeFullName).Append(" source");
         _ = NextParameter(sb);
         if (shape.NamesPropertyByString)
         {
@@ -350,24 +332,24 @@ internal static class ToPropertyCodeGenerator
         // continues into the caller-information parameters.
         if (shape.NamesPropertyByString)
         {
-            _ = sb.AppendLine(")");
+            _ = sb.Line(")").Outdent();
             return;
         }
 
-        _ = sb.AppendLine(",");
+        _ = sb.Line(",");
         if (dispatchesOnExpressionText || features.StubHasExpressionParameters)
         {
             CodeGeneratorHelpers.AppendExpressionParameter(sb, "property", "propertyExpression", dispatchesOnExpressionText);
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
     /// <summary>Appends the arguments an overload forwards to its worker, filling the ones its shape lacks.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group whose shape decides the arguments.</param>
     /// <returns>The builder, for chaining.</returns>
-    private static StringBuilder AppendWorkerArguments(StringBuilder sb, ToPropertyTypeGroup group)
+    private static SourceWriter AppendWorkerArguments(SourceWriter sb, ToPropertyTypeGroup group)
     {
         var shape = group.Shape;
         _ = sb.Append("target, source, ");
@@ -385,13 +367,13 @@ internal static class ToPropertyCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group, whose shape decides the arguments and whether <c>result</c> is assigned.</param>
     /// <param name="suffix">The worker's stable suffix.</param>
-    private static void AppendWorkerCall(StringBuilder sb, ToPropertyTypeGroup group, string suffix)
+    private static void AppendWorkerCall(SourceWriter sb, ToPropertyTypeGroup group, string suffix)
     {
-        _ = sb.Append(group.Shape.HasResult ? "                result = __ToProperty_" : "                return __ToProperty_").Append(suffix).Append('(');
-        _ = AppendWorkerArguments(sb, group).AppendLine(");");
+        _ = sb.Append(group.Shape.HasResult ? "result = __ToProperty_" : "return __ToProperty_").Append(suffix).Append('(');
+        _ = AppendWorkerArguments(sb, group).Line(");");
         if (group.Shape.HasResult)
         {
-            _ = sb.AppendLine("                return result;");
+            _ = sb.Return("result");
         }
     }
 
@@ -401,9 +383,9 @@ internal static class ToPropertyCodeGenerator
     /// <param name="call">The raise call.</param>
     /// <param name="isChanging">Whether this raises the before-change notification.</param>
     /// <param name="suffix">The worker's stable suffix, which names its cached event args.</param>
-    private static void AppendRaiseLambda(StringBuilder sb, ToPropertyInvocationInfo inv, in PropertyRaiseCall call, bool isChanging, string suffix)
+    private static void AppendRaiseLambda(SourceWriter sb, ToPropertyInvocationInfo inv, in PropertyRaiseCall call, bool isChanging, string suffix)
     {
-        _ = sb.Append("                (").Append(OwnerParameter).Append(", __value) => ");
+        _ = sb.Append('(').Append(OwnerParameter).Append(", __value) => ");
 
         if (inv.Raise.Accessor is not null)
         {
@@ -422,7 +404,7 @@ internal static class ToPropertyCodeGenerator
     /// <param name="propertyName">The property name.</param>
     /// <param name="isChanging">Whether this raises the before-change notification.</param>
     /// <param name="argsKey">What names the cached event-args field: the worker suffix, or the property name in an accessor.</param>
-    private static void AppendRaiseCall(StringBuilder sb, in PropertyRaiseCall call, string? castType, string propertyName, bool isChanging, string argsKey)
+    private static void AppendRaiseCall(SourceWriter sb, in PropertyRaiseCall call, string? castType, string propertyName, bool isChanging, string argsKey)
     {
         switch (call.Kind)
         {
@@ -453,7 +435,7 @@ internal static class ToPropertyCodeGenerator
         }
         else
         {
-            _ = sb.Append('"').Append(CodeGeneratorHelpers.EscapeString(propertyName)).Append('"');
+            _ = sb.AppendQuoted(propertyName);
         }
 
         _ = sb.Append(')');
@@ -464,7 +446,7 @@ internal static class ToPropertyCodeGenerator
     /// <param name="castType">The type the owner parameter is cast to, or null for <c>this</c>.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendReceiver(StringBuilder sb, string? castType) =>
+    private static SourceWriter AppendReceiver(SourceWriter sb, string? castType) =>
         castType is null ? sb.Append("this") : AppendOwnerCast(sb, castType);
 
     /// <summary>Appends the owner parameter cast to the source type.</summary>
@@ -472,17 +454,16 @@ internal static class ToPropertyCodeGenerator
     /// <param name="sourceType">The fully qualified source type.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendOwnerCast(StringBuilder sb, string sourceType) =>
+    private static SourceWriter AppendOwnerCast(SourceWriter sb, string sourceType) =>
         sb.Append("((").Append(sourceType).Append(')').Append(OwnerParameter).Append(')');
 
-    /// <summary>Appends the static field caching one property's event args, when the raise call passes them.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the static field caching one property's event args, when the raise call passes them.</summary>
+    /// <param name="sb">The writer, at the level of the type's members.</param>
     /// <param name="call">The raise call.</param>
     /// <param name="isChanging">Whether the field holds before-change event args.</param>
     /// <param name="argsKey">What names the field: the worker suffix, or the property name in an accessor.</param>
     /// <param name="propertyName">The property name.</param>
-    /// <param name="indentLevel">The member nesting level.</param>
-    private static void AppendArgsField(StringBuilder sb, in PropertyRaiseCall call, bool isChanging, string argsKey, string propertyName, int indentLevel)
+    private static void AppendArgsField(SourceWriter sb, in PropertyRaiseCall call, bool isChanging, string argsKey, string propertyName)
     {
         if (call.Argument != PropertyRaiseArgumentKind.EventArgs)
         {
@@ -490,15 +471,15 @@ internal static class ToPropertyCodeGenerator
         }
 
         var argsType = isChanging ? ChangingEventArgsType : ChangedEventArgsType;
-        _ = AppendIndent(sb, indentLevel).Append("private static readonly ").Append(argsType).Append(' ');
-        _ = AppendArgsFieldName(sb, isChanging, argsKey).Append(" = new ").Append(argsType)
-            .Append("(\"").Append(CodeGeneratorHelpers.EscapeString(propertyName)).AppendLine("\");").AppendLine();
+        _ = AppendArgsFieldName(sb.Append("private static readonly ").Append(argsType).Append(' '), isChanging, argsKey)
+            .Append(" = new ").Append(argsType).Append('(').AppendQuoted(propertyName).Line(");")
+            .BlankLine();
     }
 
     /// <summary>Appends the accessors raise calls reach when they can only run inside the type, one per type and property.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="invocations">All call sites.</param>
-    private static void AppendAccessors(StringBuilder sb, ImmutableArray<ToPropertyInvocationInfo> invocations)
+    private static void AppendAccessors(SourceWriter sb, ImmutableArray<ToPropertyInvocationInfo> invocations)
     {
         // Most compilations raise without an accessor, so the collections below are only built when one is needed.
         if (!NeedsAccessors(invocations))
@@ -550,72 +531,47 @@ internal static class ToPropertyCodeGenerator
         return false;
     }
 
-    /// <summary>Appends one partial declaration holding the accessors for the properties it backs.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes one partial declaration holding the accessors for the properties it backs.</summary>
+    /// <param name="sb">The writer, at the start of a line outside any namespace.</param>
     /// <param name="declaration">The partial declaration.</param>
     /// <param name="invocations">One call site per property.</param>
-    private static void AppendAccessorDeclaration(StringBuilder sb, PartialTypeDeclaration declaration, List<ToPropertyInvocationInfo> invocations)
+    private static void AppendAccessorDeclaration(SourceWriter sb, PartialTypeDeclaration declaration, List<ToPropertyInvocationInfo> invocations)
     {
-        var baseLevel = 0;
-        _ = sb.AppendLine();
-        if (declaration.Namespace is { } ns)
-        {
-            _ = sb.Append("namespace ").AppendLine(ns).AppendLine("{");
-            baseLevel = 1;
-        }
+        CodeGeneratorHelpers.OpenPartialDeclaration(sb.BlankLine(), declaration);
 
-        var headers = declaration.TypeHeaders;
-        for (var i = 0; i < headers.Length; i++)
-        {
-            _ = AppendIndent(sb, baseLevel + i).AppendLine(headers[i]);
-            _ = AppendIndent(sb, baseLevel + i).AppendLine("{");
-        }
-
-        var memberLevel = baseLevel + headers.Length;
         for (var i = 0; i < invocations.Count; i++)
         {
             var inv = invocations[i];
             if (i > 0)
             {
-                _ = sb.AppendLine();
+                _ = sb.BlankLine();
             }
 
-            AppendAccessor(sb, inv.Raise.Changed, inv.PropertyName, isChanging: false, memberLevel);
+            AppendAccessor(sb, inv.Raise.Changed, inv.PropertyName, isChanging: false);
             if (inv.Raise.Changing is not { } changing)
             {
                 continue;
             }
 
-            _ = sb.AppendLine();
-            AppendAccessor(sb, changing, inv.PropertyName, isChanging: true, memberLevel);
+            _ = sb.BlankLine();
+            AppendAccessor(sb, changing, inv.PropertyName, isChanging: true);
         }
 
-        for (var i = headers.Length - 1; i >= 0; i--)
-        {
-            _ = AppendIndent(sb, baseLevel + i).AppendLine("}");
-        }
-
-        if (declaration.Namespace is not null)
-        {
-            _ = sb.AppendLine("}");
-        }
+        CodeGeneratorHelpers.ClosePartialDeclaration(sb, declaration);
     }
 
-    /// <summary>Appends one accessor and the event args it caches.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes one accessor and the event args it caches.</summary>
+    /// <param name="sb">The writer, at the level of the type's members.</param>
     /// <param name="call">The raise call the accessor makes.</param>
     /// <param name="propertyName">The property name.</param>
     /// <param name="isChanging">Whether the accessor raises the before-change notification.</param>
-    /// <param name="indentLevel">The member nesting level.</param>
-    private static void AppendAccessor(StringBuilder sb, in PropertyRaiseCall call, string propertyName, bool isChanging, int indentLevel)
+    private static void AppendAccessor(SourceWriter sb, in PropertyRaiseCall call, string propertyName, bool isChanging)
     {
-        AppendArgsField(sb, call, isChanging, propertyName, propertyName, indentLevel);
+        AppendArgsField(sb, call, isChanging, propertyName, propertyName);
 
-        _ = AppendIndent(sb, indentLevel).AppendLine(EditorBrowsableNever);
-        _ = AppendIndent(sb, indentLevel).Append("internal void ");
-        _ = AppendAccessorName(sb, propertyName, isChanging).Append("() => ");
+        _ = AppendAccessorName(sb.Line(EditorBrowsableNever).Append("internal void "), propertyName, isChanging).Append("() => ");
         AppendRaiseCall(sb, call, null, propertyName, isChanging, propertyName);
-        _ = sb.AppendLine(";");
+        _ = sb.EndStatement();
     }
 
     /// <summary>Appends the name of the accessor that raises one notification for a property.</summary>
@@ -624,7 +580,7 @@ internal static class ToPropertyCodeGenerator
     /// <param name="isChanging">Whether the accessor raises the before-change notification.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendAccessorName(StringBuilder sb, string propertyName, bool isChanging) =>
+    private static SourceWriter AppendAccessorName(SourceWriter sb, string propertyName, bool isChanging) =>
         sb.Append(isChanging ? "__ToPropertyRaiseChanging_" : "__ToPropertyRaiseChanged_").Append(propertyName);
 
     /// <summary>Appends the name of a cached event-args field.</summary>
@@ -633,28 +589,21 @@ internal static class ToPropertyCodeGenerator
     /// <param name="argsKey">The worker suffix, or the property name in an accessor.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendArgsFieldName(StringBuilder sb, bool isChanging, string argsKey) =>
+    private static SourceWriter AppendArgsFieldName(SourceWriter sb, bool isChanging, string argsKey) =>
         sb.Append(isChanging ? "__ToPropertyChangingArgs_" : "__ToPropertyChangedArgs_").Append(argsKey);
 
-    /// <summary>Ends the previous parameter and indents the next one.</summary>
+    /// <summary>Ends the previous parameter, so the next one starts on its own line.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder NextParameter(StringBuilder sb) => sb.AppendLine(",").Append("            ");
-
-    /// <summary>Appends the indentation for a nesting level, without building a string for it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="level">The nesting level.</param>
-    /// <returns>The builder, for chaining.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendIndent(StringBuilder sb, int level) => sb.Append(' ', level * IndentWidth);
+    private static SourceWriter NextParameter(SourceWriter sb) => sb.Line(",");
 
     /// <summary>Appends the closed helper type for a value type.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="valueType">The fully qualified value type.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendHelperType(StringBuilder sb, string valueType) =>
+    private static SourceWriter AppendHelperType(SourceWriter sb, string valueType) =>
         sb.Append(HelperType).Append('<').Append(valueType).Append('>');
 
     /// <summary>Appends the worker's initial-value parameter declaration.</summary>
@@ -663,7 +612,7 @@ internal static class ToPropertyCodeGenerator
     /// <param name="valueType">The fully qualified value type.</param>
     /// <returns>The builder, for chaining.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendInitialValueParameter(StringBuilder sb, ToPropertyInitialValueKind kind, string valueType) =>
+    private static SourceWriter AppendInitialValueParameter(SourceWriter sb, ToPropertyInitialValueKind kind, string valueType) =>
         kind == ToPropertyInitialValueKind.Factory
             ? sb.Append(GeneratedTypeNames.Func).Append('<').Append(valueType).Append("> getInitialValue")
             : sb.Append(valueType).Append(" initialValue");
@@ -687,12 +636,12 @@ internal static class ToPropertyCodeGenerator
     {
         if (byName)
         {
-            return "        /// Dispatches on the property name.";
+            return "Dispatches on the property name.";
         }
 
         return dispatchesOnExpressionText
-            ? "        /// Uses CallerArgumentExpression for dispatch."
-            : "        /// Uses CallerFilePath + CallerLineNumber for dispatch.";
+            ? "Uses CallerArgumentExpression for dispatch."
+            : "Uses CallerFilePath + CallerLineNumber for dispatch.";
     }
 
     /// <summary>A call site with its worker suffix, hashed once.</summary>

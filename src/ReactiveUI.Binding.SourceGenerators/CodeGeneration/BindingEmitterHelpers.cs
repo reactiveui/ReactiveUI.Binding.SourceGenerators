@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -29,7 +27,7 @@ internal static class BindingEmitterHelpers
     private const string WeaklyTypedViewModel = "object";
 
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
-    private const string FuncParameterPrefix = ", global::System.Func<";
+    private const string FuncParameterPrefix = $", {GeneratedTypeNames.Func}<";
 
     /// <summary>The stream carrying values converted for the target.</summary>
     private const string ConvertedForwardName = "__convertedForward";
@@ -43,8 +41,17 @@ internal static class BindingEmitterHelpers
     /// <summary>What a converter overload calls the hint it hands its converters.</summary>
     private const string ConversionHintName = "conversionHint";
 
-    /// <summary>Declares a local one block deeper than an inline emitter's own locals.</summary>
-    private const string NestedLocalDeclaration = "            var ";
+    /// <summary>The list a hook reader collects the changes along its path into.</summary>
+    private const string HookChangesName = "__hookChanges";
+
+    /// <summary>What a hook reader returns: the changes it reached.</summary>
+    private const string HookChangesResult = "__hookChanges.ToArray()";
+
+    /// <summary>Names the local holding the owner a hook reader reads one segment from, before its index.</summary>
+    private const string HookOwnerPrefix = "__hookOwner";
+
+    /// <summary>Names the local holding the value a hook reader read for one segment, before its index.</summary>
+    private const string HookValuePrefix = "__hookValue";
 
     /// <summary>Emits a whole binding dispatch file, claiming its call sites through one API's dispatch.</summary>
     /// <param name="invocations">The detected call sites for this API.</param>
@@ -63,7 +70,7 @@ internal static class BindingEmitterHelpers
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features,
         BindingDispatchApi api,
-        Action<StringBuilder, BindEmitContext> emitMethod) =>
+        Action<SourceWriter, BindEmitContext> emitMethod) =>
         Generate(
             invocations,
             allClasses,
@@ -85,8 +92,8 @@ internal static class BindingEmitterHelpers
         ImmutableArray<BindingInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features,
-        Action<StringBuilder, BindingTypeGroup, LanguageFeatures> emitOverload,
-        Action<StringBuilder, BindEmitContext> emitMethod)
+        Action<SourceWriter, BindingTypeGroup, LanguageFeatures> emitOverload,
+        Action<SourceWriter, BindEmitContext> emitMethod)
     {
         if (invocations.IsDefaultOrEmpty)
         {
@@ -94,9 +101,8 @@ internal static class BindingEmitterHelpers
         }
 
         var snapshot = features;
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = SourceWriter.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, snapshot);
-        _ = sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
 
@@ -112,7 +118,7 @@ internal static class BindingEmitterHelpers
                 : groups[g];
 
             emitOverload(sb, group, snapshot);
-            _ = sb.AppendLine();
+            _ = sb.BlankLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
             {
@@ -135,9 +141,8 @@ internal static class BindingEmitterHelpers
         }
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
 
-        return PooledBuilder.ToStringAndReturn(sb);
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Emits the guard that lets a registered binding hook refuse this binding.</summary>
@@ -156,7 +161,7 @@ internal static class BindingEmitterHelpers
     /// source object alive for as long as the target lives.
     /// </remarks>
     internal static void EmitBindingHookGuard(
-        StringBuilder sb,
+        SourceWriter sb,
         string sourceVar,
         EquatableArray<PropertyPathSegment> sourcePath,
         string targetVar,
@@ -167,77 +172,79 @@ internal static class BindingEmitterHelpers
         const string HookSource = "__hookSource";
         const string HookTarget = "__hookTarget";
 
-        _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any)").AppendLine("        {")
-            .Append(NestedLocalDeclaration).Append(HookSource).Append(" = ").Append(sourceVar).AppendLine(";")
-            .Append(NestedLocalDeclaration).Append(HookTarget).Append(" = ").Append(targetVar).AppendLine(";")
-            .Append("            if (!").Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(")
-            .Append("                ").Append(HookSource).AppendLine(",")
-            .Append("                ").Append(HookTarget).AppendLine(",");
+        _ = sb.BeginIf().Append(GeneratedTypeNames.BindingHooks).Append(".Any").CloseCondition()
+            .Var(HookSource, sourceVar)
+            .Var(HookTarget, targetVar)
+            .BeginIf().Append('!').Append(GeneratedTypeNames.BindingHooks).Append(".ShouldBind(").OpenContinuation()
+            .Append(HookSource).Line(",")
+            .Append(HookTarget).Line(",");
 
         AppendHookPropertyReader(sb, HookSource, sourcePath);
-        _ = sb.AppendLine(",");
+        _ = sb.Line(",");
         AppendHookPropertyReader(sb, HookTarget, targetPath);
 
-        _ = sb.AppendLine(",").Append("                ").Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction)
-            .AppendLine("))").AppendLine("            {").Append("                return ").Append(earlyReturn)
-            .AppendLine(";").AppendLine("            }").AppendLine("        }");
+        _ = sb.Line(",")
+            .Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction).Append(')')
+            .Outdent().CloseCondition()
+            .BeginReturn().Append(earlyReturn).EndStatement()
+            .CloseBlock()
+            .CloseBlock();
     }
 
     /// <summary>Emits a lazy reader whose changes retain each segment's owner, expression and value.</summary>
-    /// <param name="sb">The generated source builder.</param>
+    /// <param name="sb">The writer, at the level of the argument the reader is passed as.</param>
     /// <param name="root">The object at the start of the path.</param>
     /// <param name="path">The property path, empty when the source is already an observable.</param>
-    internal static void AppendHookPropertyReader(StringBuilder sb, string root, EquatableArray<PropertyPathSegment> path)
+    /// <remarks>Leaves the line open after the reader, for the caller to separate or close the argument list.</remarks>
+    internal static void AppendHookPropertyReader(SourceWriter sb, string root, EquatableArray<PropertyPathSegment> path)
     {
         if (path.Length == 0)
         {
-            _ = sb.Append("                () => global::System.Array.Empty<")
+            _ = sb.Append("() => global::System.Array.Empty<")
                 .Append(GeneratedTypeNames.IObservedChange).Append("<object, object>>()");
             return;
         }
 
-        _ = sb.AppendLine("                () =>")
-            .AppendLine("                {")
-            .Append("                    var __hookChanges = new global::System.Collections.Generic.List<")
-            .Append(GeneratedTypeNames.IObservedChange).Append("<object, object>>(").Append(path.Length).AppendLine(");");
+        _ = sb.Line("() =>")
+            .OpenBlock()
+            .BeginVar(HookChangesName).Append("new global::System.Collections.Generic.List<")
+            .Append(GeneratedTypeNames.IObservedChange).Append("<object, object>>(").Append(path.Length).Line(");");
 
         for (var i = 0; i < path.Length; i++)
         {
             AppendHookPropertySegment(sb, root, path, i);
         }
 
-        _ = sb.AppendLine("                    return __hookChanges.ToArray();")
-            .Append("                }");
+        _ = sb.Return(HookChangesResult)
+            .CloseBlockInline();
     }
 
     /// <summary>Emits one guarded property read and the change describing it.</summary>
-    /// <param name="sb">The generated source builder.</param>
+    /// <param name="sb">The writer, inside the reader's body.</param>
     /// <param name="root">The first owner in the path.</param>
     /// <param name="path">The property path being read.</param>
     /// <param name="index">The segment to emit.</param>
     internal static void AppendHookPropertySegment(
-        StringBuilder sb,
+        SourceWriter sb,
         string root,
         EquatableArray<PropertyPathSegment> path,
         int index)
     {
-        var number = index.ToString(CultureInfo.InvariantCulture);
-        var owner = $"__hookOwner{number}";
-        var value = $"__hookValue{number}";
-        var previous = index == 0 ? root : $"__hookValue{(index - 1).ToString(CultureInfo.InvariantCulture)}";
         var segment = path[index];
 
-        _ = sb.Append("                    var ").Append(owner).Append(" = ").Append(previous).AppendLine(";")
-            .Append("                    if (").Append(owner).AppendLine(" is null)")
-            .AppendLine("                    {")
-            .AppendLine("                        return __hookChanges.ToArray();")
-            .AppendLine("                    }")
-            .Append("                    var ").Append(value).Append(" = ").Append(owner).Append('.').Append(segment.PropertyName).AppendLine(";")
-            .Append("                    __hookChanges.Add(new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(")
-            .Append(owner).Append(", ((global::System.Linq.Expressions.Expression<global::System.Func<")
+        _ = sb.Append("var ").Append(HookOwnerPrefix).Append(index).Append(" = ");
+        _ = index == 0 ? sb.Append(root) : sb.Append(HookValuePrefix).Append(index - 1);
+        _ = sb.EndStatement()
+            .BeginIf().Append(HookOwnerPrefix).Append(index).Append(" is null").CloseCondition()
+            .Return(HookChangesResult)
+            .CloseBlock()
+            .Append("var ").Append(HookValuePrefix).Append(index).Append(" = ")
+            .Append(HookOwnerPrefix).Append(index).Append('.').Append(segment.PropertyName).EndStatement()
+            .Append(HookChangesName).Append(".Add(new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(")
+            .Append(HookOwnerPrefix).Append(index).Append($", (({GeneratedTypeNames.Expression}<{GeneratedTypeNames.Func}<")
             .Append(segment.DeclaringTypeFullName).Append(", ").Append(segment.PropertyTypeFullName)
             .Append(">>)(__property => __property.").Append(segment.PropertyName).Append(")).Body, ")
-            .Append(value).AppendLine("));");
+            .Append(HookValuePrefix).Append(index).Line("));");
     }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
@@ -264,14 +271,14 @@ internal static class BindingEmitterHelpers
                 first.HasScheduler,
                 members) { HasConverterOverride = first.HasConverterOverride });
 
-    /// <summary>Appends the optional converters and scheduler for a two-way overload's parameter list.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the optional converters and scheduler of a two-way overload's parameter list.</summary>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="forwardName">What this API calls the source-to-target converter.</param>
     /// <param name="reverseName">What this API calls the target-to-source converter.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void AppendTwoWayExtraParameters(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         string forwardName,
         string reverseName,
@@ -279,10 +286,8 @@ internal static class BindingEmitterHelpers
     {
         if (group.HasConversion)
         {
-            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
-                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(forwardName).AppendLine(",").Append(GeneratedSyntax.FuncParameterOpen)
-                .Append(group.TargetPropertyTypeFullName).Append(", ").Append(group.SourcePropertyTypeFullName).Append("> ").Append(reverseName)
-                .AppendLine(",");
+            AppendFuncParameter(sb, group.SourcePropertyTypeFullName, group.TargetPropertyTypeFullName, forwardName);
+            AppendFuncParameter(sb, group.TargetPropertyTypeFullName, group.SourcePropertyTypeFullName, reverseName);
         }
 
         if (!group.HasScheduler)
@@ -355,21 +360,20 @@ internal static class BindingEmitterHelpers
         return sb.ToStringAndReturn();
     }
 
-    /// <summary>Appends the optional conversion and scheduler parameters to an overload's parameter list.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the optional conversion and scheduler parameters of an overload's parameter list.</summary>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="conversionParameterName">What this API calls its conversion argument.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void AppendExtraParameters(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         string conversionParameterName,
         bool supportsNullable)
     {
         if (group.HasConversion)
         {
-            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
-                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(conversionParameterName).AppendLine(",");
+            AppendFuncParameter(sb, group.SourcePropertyTypeFullName, group.TargetPropertyTypeFullName, conversionParameterName);
         }
 
         if (!group.HasScheduler)
@@ -381,11 +385,20 @@ internal static class BindingEmitterHelpers
     }
 
     /// <summary>Writes the required scheduler parameter, which the stub declares nullable.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendSchedulerParameter(StringBuilder sb, bool supportsNullable) =>
-        sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.ISequencer).AppendLine(supportsNullable ? "? scheduler," : " scheduler,");
+    internal static void AppendSchedulerParameter(SourceWriter sb, bool supportsNullable) =>
+        sb.Append(GeneratedTypeNames.ISequencer).Line(supportsNullable ? "? scheduler," : " scheduler,");
+
+    /// <summary>Writes a conversion delegate parameter that another parameter follows.</summary>
+    /// <param name="sb">The writer, inside the parameter list.</param>
+    /// <param name="fromType">The type the delegate takes.</param>
+    /// <param name="toType">The type the delegate returns.</param>
+    /// <param name="name">The parameter's name.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendFuncParameter(SourceWriter sb, string fromType, string toType, string name) =>
+        sb.Append(GeneratedSyntax.FuncTypeOpen).Append(fromType).Append(", ").Append(toType).Append("> ").Append(name).Line(",");
 
     /// <summary>Formats the extra arguments for forwarding to the generated binding method.</summary>
     /// <param name="group">The binding type group.</param>
@@ -457,6 +470,28 @@ internal static class BindingEmitterHelpers
         !inv.HasConversion
         && (inv.ForwardConversion is not null || !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal));
 
+    /// <summary>
+    /// Writes the subscription that assigns each value to the end of a property path, reporting a faulting write
+    /// against the expression the call site bound.
+    /// </summary>
+    /// <param name="sb">The writer, part way through the statement the subscription belongs to.</param>
+    /// <param name="observable">The local holding the values to write.</param>
+    /// <param name="root">The object the path is walked from.</param>
+    /// <param name="path">The property path the values are written to.</param>
+    /// <param name="reportedExpression">The expression a faulting write is reported against.</param>
+    /// <remarks>Ends the statement.</remarks>
+    internal static void AppendWriteSubscription(
+        SourceWriter sb,
+        string observable,
+        string root,
+        EquatableArray<PropertyPathSegment> path,
+        string reportedExpression)
+    {
+        _ = sb.Append(GeneratedTypeNames.BindingErrors).Append(".Subscribe(").Append(observable).Line(", value =>").OpenBlock();
+        CodeGeneratorHelpers.AppendGuardedAssignment(sb, root, path, "value");
+        _ = sb.CloseBlockInline().Append(", ").AppendQuoted(reportedExpression).Line(");");
+    }
+
     /// <summary>Emits the stage that delivers a write on the owning thread of the object it lands on.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
@@ -466,7 +501,7 @@ internal static class BindingEmitterHelpers
     /// <param name="invoker">The invoker class that object's type carries, or null for none.</param>
     /// <returns>The variable to subscribe the write to.</returns>
     internal static string EmitViewThreadStage(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         string sourceVar,
         string resultVar,
@@ -477,13 +512,13 @@ internal static class BindingEmitterHelpers
         // site that passes null or leaves it out leaves the write to the thread that owns the target.
         if (inv.HasScheduler)
         {
-            _ = AppendViewThreadCall(sb.Append(NestedLocalDeclaration).Append(resultVar).Append(" = scheduler == null ? "), sourceVar, targetVar, invoker)
-                .Append(" : ").Append(sourceVar).AppendLine(";");
+            _ = AppendViewThreadCall(sb.BeginVar(resultVar).Append("scheduler == null ? "), sourceVar, targetVar, invoker)
+                .Append(" : ").Append(sourceVar).EndStatement();
 
             return resultVar;
         }
 
-        _ = AppendViewThreadCall(sb.Append(NestedLocalDeclaration).Append(resultVar).Append(" = "), sourceVar, targetVar, invoker).AppendLine(";");
+        _ = AppendViewThreadCall(sb.BeginVar(resultVar), sourceVar, targetVar, invoker).EndStatement();
 
         return resultVar;
     }
@@ -494,7 +529,7 @@ internal static class BindingEmitterHelpers
     /// <param name="targetVar">The variable naming the object the write lands on.</param>
     /// <param name="invoker">The invoker class that object's type carries, or null for none.</param>
     /// <returns>The string builder.</returns>
-    internal static StringBuilder AppendViewThreadCall(StringBuilder sb, string sourceVar, string targetVar, string? invoker)
+    internal static SourceWriter AppendViewThreadCall(SourceWriter sb, string sourceVar, string targetVar, string? invoker)
     {
         _ = sb.Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnViewThread(").Append(sourceVar).Append(", ").Append(targetVar);
 
@@ -598,7 +633,7 @@ internal static class BindingEmitterHelpers
     /// <paramref name="api"/> carries, so the shape is written here once.
     /// </remarks>
     internal static void GenerateDispatchOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         BindingDispatchApi api,
         bool dispatchesOnExpressionText,
@@ -612,11 +647,11 @@ internal static class BindingEmitterHelpers
             group.TargetTypeFullName,
             dispatchesOnExpressionText);
 
-        _ = sb.Append("        public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).AppendLine("(");
+        _ = sb.Append("public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).OpenParameterList();
 
         AppendParameterList(sb, group, api, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.OpenBlock();
 
         if (dispatchesOnExpressionText)
         {
@@ -631,7 +666,7 @@ internal static class BindingEmitterHelpers
     }
 
     /// <summary>Writes the parameters a binding member declares, closing the list.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="api">What distinguishes this API's output from the other three.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
@@ -643,7 +678,7 @@ internal static class BindingEmitterHelpers
     /// interceptor is refused outright unless its signature is the intercepted method's.
     /// </remarks>
     internal static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         BindingDispatchApi api,
         bool dispatchesOnExpressionText,
@@ -654,17 +689,16 @@ internal static class BindingEmitterHelpers
         var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
         var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
 
-        _ = sb.Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
-            .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
-            .Append(CodeGeneratorHelpers.ParameterIndent)
+        _ = sb.Append("this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
+            .Append(' ').Append(api.ReceiverParameterName).Line(",")
             .Append(api.ReceiverIsTarget
                 ? CodeGeneratorHelpers.NullableSelectorType(group.SourceTypeFullName, true, supportsNullable)
                 : group.TargetTypeFullName)
-            .Append(' ').Append(api.OtherParameterName).AppendLine(",")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
-            .Append(">> ").Append(api.SourceSelectorName).AppendLine(",")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
-            .Append(">> ").Append(api.TargetSelectorName).AppendLine(",");
+            .Append(' ').Append(api.OtherParameterName).Line(",")
+            .Append(GeneratedSyntax.SelectorTypeOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
+            .Append(">> ").Append(api.SourceSelectorName).Line(",")
+            .Append(GeneratedSyntax.SelectorTypeOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
+            .Append(">> ").Append(api.TargetSelectorName).Line(",");
 
         if (group.HasConverterOverride)
         {
@@ -681,11 +715,11 @@ internal static class BindingEmitterHelpers
             }
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
     /// <summary>Writes the converter, hint and scheduler parameters a converter overload declares.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="api">What names this API gives its converters.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <remarks>
@@ -693,22 +727,19 @@ internal static class BindingEmitterHelpers
     /// overload does the same: a call that leaves them out only resolves to this overload if it can leave them
     /// out too, and it can only be told apart from the stub by file and line.
     /// </remarks>
-    internal static void AppendConverterOverrideParameters(StringBuilder sb, BindingDispatchApi api, bool supportsNullable)
+    internal static void AppendConverterOverrideParameters(SourceWriter sb, BindingDispatchApi api, bool supportsNullable)
     {
         var annotation = supportsNullable ? "?" : string.Empty;
 
-        _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ')
-            .Append(api.OverrideForwardName).AppendLine(",");
+        _ = sb.Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ').Append(api.OverrideForwardName).Line(",");
 
         if (api.OverrideReverseName is not null)
         {
-            _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ')
-                .Append(api.OverrideReverseName).AppendLine(",");
+            _ = sb.Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ').Append(api.OverrideReverseName).Line(",");
         }
 
-        _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append("object").Append(annotation).Append(' ').Append(ConversionHintName)
-            .AppendLine(" = null,").Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.ISequencer).Append(annotation)
-            .AppendLine(" scheduler = null,");
+        _ = sb.Append("object").Append(annotation).Append(' ').Append(ConversionHintName).Line(" = null,")
+            .Append(GeneratedTypeNames.ISequencer).Append(annotation).Line(" scheduler = null,");
     }
 
     /// <summary>Formats the arguments a dispatch forwards to a generated worker beyond the two bound objects.</summary>
@@ -756,7 +787,7 @@ internal static class BindingEmitterHelpers
     /// rather than repeated at each of their four call sites.
     /// </remarks>
     internal static void EmitOverloadOrInterceptors(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         BindingDispatchApi api,
         in LanguageFeatures features)
@@ -787,7 +818,7 @@ internal static class BindingEmitterHelpers
     /// dispatch parameters go unread and the body forwards straight to the worker.
     /// </remarks>
     internal static void GenerateInterceptors(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         BindingDispatchApi api,
         in LanguageFeatures features)
@@ -801,21 +832,24 @@ internal static class BindingEmitterHelpers
         {
             foreach (var callSite in entry.Value)
             {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor);
             }
 
-            _ = sb.Append("        internal static ").Append(api.FormatReturnType(group)).Append(" __Intercept_")
-                .Append(api.Name).Append('_').Append(entry.Key).AppendLine("(");
+            _ = sb.Append("internal static ").Append(api.FormatReturnType(group)).Append(" __Intercept_")
+                .Append(api.Name).Append('_').Append(entry.Key).OpenParameterList();
 
             AppendParameterList(sb, group, api, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-            _ = sb.Append("            => ").Append(api.WorkerMethodPrefix).Append(entry.Key).Append('(')
-                .Append(api.WorkerArguments).Append(extraArguments).AppendLine(");").AppendLine();
+            _ = sb.Indent()
+                .Append("=> ").Append(api.WorkerMethodPrefix).Append(entry.Key).Append('(')
+                .Append(api.WorkerArguments).Append(extraArguments).Line(");")
+                .Outdent()
+                .BlankLine();
         }
     }
 
     /// <summary>Emits the head of a generated worker: its signature, the path it binds, and the hook guard.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level; left inside the worker's body.</param>
     /// <param name="api">What distinguishes this API's worker from the other three.</param>
     /// <param name="inv">The call site being emitted.</param>
     /// <param name="suffix">The stable method-name suffix for this call site.</param>
@@ -825,21 +859,23 @@ internal static class BindingEmitterHelpers
     /// varies is the naming and the direction, which <paramref name="api"/> carries.
     /// </remarks>
     internal static void AppendWorkerMethodHeader(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingDispatchApi api,
         BindingInvocationInfo inv,
         string suffix)
     {
-        _ = sb.Append("        private static ").Append(api.FormatWorkerReturnType(inv)).Append(' ').Append(api.WorkerMethodPrefix).Append(suffix)
+        _ = sb.Append("private static ").Append(api.FormatWorkerReturnType(inv)).Append(' ').Append(api.WorkerMethodPrefix).Append(suffix)
             .Append('(').Append(inv.SourceTypeFullName).Append(' ').Append(api.WorkerSourceParameterName).Append(", ")
             .Append(inv.TargetTypeFullName).Append(' ').Append(api.WorkerTargetParameterName)
             .Append(inv.HasConverterOverride ? FormatConverterOverrideParameters(api) : api.FormatWorkerParameters(inv))
-            .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .Append("            // ").Append(api.Name).Append(": ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath))
-            .Append(api.IsTwoWay ? " <-> " : " -> ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath))
+            .Line(")").OpenBlock()
+            .BeginComment().Append(api.Name).Append(": ");
+        _ = CodeGeneratorHelpers.AppendPropertyPath(sb, inv.SourcePropertyPath)
+            .Append(api.IsTwoWay ? " <-> " : " -> ");
+        _ = CodeGeneratorHelpers.AppendPropertyPath(sb, inv.TargetPropertyPath)
             .Append(inv.HasConversion ? " (with conversion)" : string.Empty)
             .Append(inv.HasConverterOverride ? " (with converter)" : string.Empty)
-            .Append(inv.HasScheduler ? " (with scheduler)" : string.Empty).AppendLine();
+            .Append(inv.HasScheduler ? " (with scheduler)" : string.Empty).EndLine();
 
         EmitBindingHookGuard(
             sb,
@@ -856,7 +892,7 @@ internal static class BindingEmitterHelpers
     /// <param name="api">What this API calls the locals along the way.</param>
     /// <param name="inv">The call site being emitted.</param>
     /// <returns>The local the subscription should read from.</returns>
-    internal static string EmitSingleStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    internal static string EmitSingleStreamStages(SourceWriter sb, BindingDispatchApi api, BindingInvocationInfo inv)
     {
         var forward = ForwardStage(api, inv);
         var currentVar = forward.ObservableName;
@@ -900,7 +936,7 @@ internal static class BindingEmitterHelpers
     /// Each direction assigns across the same type gap in the opposite sense, so the two run the same stages
     /// with their type arguments and converter swapped.
     /// </remarks>
-    internal static BindingObservables EmitDualStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    internal static BindingObservables EmitDualStreamStages(SourceWriter sb, BindingDispatchApi api, BindingInvocationInfo inv)
     {
         var forward = ForwardStage(api, inv);
         var reverse = ReverseStage(api, inv);
@@ -995,7 +1031,7 @@ internal static class BindingEmitterHelpers
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="api">What distinguishes this API's overload from the other three.</param>
-    private static void AppendExpressionDispatchBody(StringBuilder sb, BindingTypeGroup group, BindingDispatchApi api)
+    private static void AppendExpressionDispatchBody(SourceWriter sb, BindingTypeGroup group, BindingDispatchApi api)
     {
         var extraArguments = api.FormatExtraArguments(group);
 
@@ -1005,7 +1041,7 @@ internal static class BindingEmitterHelpers
 
             CodeGeneratorHelpers.AppendExpressionDispatchCondition(
                 sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
+                i,
                 api.SourceExpressionParameter,
                 inv.SourceExpressionText,
                 api.TargetExpressionParameter,
@@ -1022,7 +1058,7 @@ internal static class BindingEmitterHelpers
     /// <param name="group">The binding type group.</param>
     /// <param name="api">What distinguishes this API's overload from the other three.</param>
     private static void AppendCallerInfoDispatchBody(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingTypeGroup group,
         BindingDispatchApi api)
     {
@@ -1075,13 +1111,13 @@ internal static class BindingEmitterHelpers
     /// <param name="sourceVar">The local holding the values to convert.</param>
     /// <param name="hasScheduler">Whether a scheduler stage follows, which decides what the result is called.</param>
     /// <returns>The local holding the converted values.</returns>
-    private static string AppendMapStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar, bool hasScheduler)
+    private static string AppendMapStage(SourceWriter sb, in BindingStreamStage stage, string sourceVar, bool hasScheduler)
     {
         var resultVar = hasScheduler ? stage.ConvertedName : stage.ScheduledName;
 
-        _ = sb.Append("        var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+        _ = sb.BeginVar(resultVar).Append("new ").Append(GeneratedTypeNames.MapSignal).Append('<')
             .Append(stage.FromTypeFullName).Append(", ").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar)
-            .Append(", ").Append(stage.ConverterArgument).AppendLine(");");
+            .Append(", ").Append(stage.ConverterArgument).Line(");");
 
         return resultVar;
     }
@@ -1098,17 +1134,17 @@ internal static class BindingEmitterHelpers
     /// every value writes an older one back over a newer one, so the two sides hand each other stale values
     /// without end.
     /// </remarks>
-    private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar, bool latestWins)
+    private static string AppendObserveOnStage(SourceWriter sb, in BindingStreamStage stage, string sourceVar, bool latestWins)
     {
-        _ = sb.Append("        var ").Append(stage.ScheduledName)
-            .Append(" = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (")
+        _ = sb.BeginVar(stage.ScheduledName)
+            .Append($"scheduler == null || scheduler == {GeneratedTypeNames.ImmediateSequencer} ? (")
             .Append(GeneratedTypeNames.ObservableOf(stage.ToTypeFullName)).Append(')').Append(sourceVar).Append(" : ");
 
         _ = latestWins
             ? sb.Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnSequencer<").Append(stage.ToTypeFullName).Append(">(")
             : sb.Append("new ").Append(GeneratedTypeNames.WitnessOnSignal).Append('<').Append(stage.ToTypeFullName).Append(">(");
 
-        _ = sb.Append(sourceVar).AppendLine(", scheduler);");
+        _ = sb.Append(sourceVar).Line(", scheduler);");
 
         return stage.ScheduledName;
     }
@@ -1233,18 +1269,18 @@ internal static class BindingEmitterHelpers
 
         /// <summary>Gets the function rendering what the overload returns.</summary>
         internal Func<BindingTypeGroup, string> FormatReturnType { get; init; } =
-            static _ => "global::System.IDisposable";
+            static _ => GeneratedTypeNames.IDisposable;
 
         /// <summary>Gets the function rendering what a generated worker returns.</summary>
         internal Func<BindingInvocationInfo, string> FormatWorkerReturnType { get; init; } =
-            static _ => "global::System.IDisposable";
+            static _ => GeneratedTypeNames.IDisposable;
 
         /// <summary>Gets the function rendering the conversion and scheduler parameters a generated worker declares.</summary>
         internal Func<BindingInvocationInfo, string> FormatWorkerParameters { get; init; } =
             static _ => string.Empty;
 
         /// <summary>Gets the action appending the conversion and scheduler parameters this API takes.</summary>
-        internal Action<StringBuilder, BindingTypeGroup, bool> AppendExtraParameters { get; init; } =
+        internal Action<SourceWriter, BindingTypeGroup, bool> AppendExtraParameters { get; init; } =
             static (_, _, _) => { };
 
         /// <summary>Gets the function rendering the conversion and scheduler arguments the worker takes.</summary>

@@ -2,8 +2,8 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -60,7 +60,7 @@ internal static class UIKitObservation
     /// <param name="sb">The output builder.</param>
     /// <param name="segment">The observed property.</param>
     /// <param name="info">The verified native notification.</param>
-    internal static void AppendSubscription(StringBuilder sb, PropertyPathSegment segment, PlatformObservationInfo info)
+    internal static void AppendSubscription(SourceWriter sb, PropertyPathSegment segment, PlatformObservationInfo info)
     {
         if (info.NotificationName is not null)
         {

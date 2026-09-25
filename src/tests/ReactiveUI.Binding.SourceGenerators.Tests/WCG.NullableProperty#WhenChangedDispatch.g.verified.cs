@@ -30,12 +30,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableName", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel, string>>)(__e => __e.NullableName)).Body,
-                "NullableName",
-                (object __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel, string>>)(__e => __e.NullableName)).Body,
+                    "NullableName",
+                    (object __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName,
+                    false, false)
                 : (global::System.IObservable<string>)
                 new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName, true));
         }

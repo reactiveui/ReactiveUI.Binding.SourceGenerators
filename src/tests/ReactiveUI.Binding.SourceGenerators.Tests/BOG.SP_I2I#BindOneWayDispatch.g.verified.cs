@@ -35,54 +35,54 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_7FFFCFD371F7E301(global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyView target)
         {
             // BindOneWay: Count -> DisplayCount
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = source;
-            var __hookTarget = target;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Count;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.DisplayCount;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyView, int>>)(__property => __property.DisplayCount)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.OneWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                var __hookSource = source;
+                var __hookTarget = target;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Count;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel, int>>)(__property => __property.Count)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.DisplayCount;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyView, int>>)(__property => __property.DisplayCount)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.OneWay))
+                {
+                    return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(source, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel)__o).Count, true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<int>)sourceObsMechanism
-            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                sourceObsRegistration,
-                source,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel, int>>)(__e => __e.Count)).Body,
-                "Count",
-                (object __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel)__o).Count,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<int>)sourceObsMechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    sourceObsRegistration,
+                    source,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel, int>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel)__o).Count,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
             if (__convertedForwardConverter == null)
             {

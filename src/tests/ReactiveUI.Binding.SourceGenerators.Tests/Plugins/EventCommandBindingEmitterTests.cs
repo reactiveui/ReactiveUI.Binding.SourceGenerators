@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
@@ -20,11 +19,11 @@ public class EventCommandBindingEmitterTests
     public async Task AppendHandler_WithParameter_ReadsTheParameterThenRunsTheCommandWithIt()
     {
         const string paramAccess = "viewModel.Selected";
-        var expected = new StringBuilder();
+        var expected = new SourceWriter();
         EventCommandBindingEmitter.AppendHandlerDeclaration(expected, EventArgsType, false);
-        _ = expected.Append("                    var param = ").Append(paramAccess).AppendLine(";");
+        _ = expected.Var("param", paramAccess);
         EventCommandBindingEmitter.AppendHandlerExecution(expected, "param");
-        var actual = new StringBuilder();
+        var actual = new SourceWriter();
 
         EventCommandBindingEmitter.AppendHandler(actual, EventArgsType, false, paramAccess);
 
@@ -36,10 +35,10 @@ public class EventCommandBindingEmitterTests
     [Test]
     public async Task AppendHandler_WithoutParameter_RunsTheCommandWithNull()
     {
-        var expected = new StringBuilder();
+        var expected = new SourceWriter();
         EventCommandBindingEmitter.AppendHandlerDeclaration(expected, EventArgsType, true);
         EventCommandBindingEmitter.AppendHandlerExecution(expected, "null");
-        var actual = new StringBuilder();
+        var actual = new SourceWriter();
 
         EventCommandBindingEmitter.AppendHandler(actual, EventArgsType, true, null);
 
@@ -52,12 +51,11 @@ public class EventCommandBindingEmitterTests
     [Test]
     public async Task AppendCommandOnlyReturn_ReturnsTheSubscriptionAndClosesTheMember()
     {
-        var actual = new StringBuilder();
+        var actual = new SourceWriter().Indent();
 
         EventCommandBindingEmitter.AppendCommandOnlyReturn(actual);
 
         await Assert.That(actual.ToString()).IsEqualTo(
-            CommandBindingSyntax.CommandOnlyDisposableReturn + Environment.NewLine
-            + GeneratedSyntax.MemberBodyClose + Environment.NewLine);
+            "    return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);\n}\n");
     }
 }

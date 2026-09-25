@@ -30,12 +30,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration_obj,
-                obj,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel, string>>)(__e => __e.Name)).Body,
-                "Name",
-                (object __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel)__o).Name,
-                false, false)
+                    __registration_obj,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel, string>>)(__e => __e.Name)).Body,
+                    "Name",
+                    (object __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel)__o).Name,
+                    false, false)
                 : (global::System.IObservable<string>)
                 new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel)__o).Name, true));
         }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -245,7 +244,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesExpressionDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
         var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
@@ -268,7 +267,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task GenerateConcreteOverload_CallerFilePath_GeneratesFilePathDispatch()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
         var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
@@ -291,7 +290,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task GenerateBindMethod_StandardInvocation_GeneratesTwoWayBinding()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
@@ -316,7 +315,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task AppendExtraParameters_WithConversion_AppendsConverterParams()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
@@ -339,7 +338,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task AppendExtraParameters_WithScheduler_AppendsSchedulerParam()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
@@ -360,7 +359,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task AppendExtraParameters_WithSchedulerAndNullableSupport_DeclaresSchedulerNullable()
     {
-        var sb = new StringBuilder();
+        var sb = new SourceWriter();
         var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,

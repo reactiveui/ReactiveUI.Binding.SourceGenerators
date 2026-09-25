@@ -42,19 +42,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __obsProperty_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>(__obsProperty_s0,
                 __obsProperty_p1 => __obsProperty_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty_p1.GetType(), "MyCommand", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___obsProperty_p1
-                    ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
-                    __registration___obsProperty_p1,
-                    __obsProperty_p1,
-                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>>)(__e => __e.MyCommand)).Body,
-                    "MyCommand",
-                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
-                    false, false)
-                    : (global::System.IObservable<global::System.IObservable<string>>)
-new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty_p1, "MyCommand", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand, false))
-                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
+                    ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty_p1.GetType(), "MyCommand", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___obsProperty_p1
+                        ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                            __registration___obsProperty_p1,
+                            __obsProperty_p1,
+                            ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>>)(__e => __e.MyCommand)).Body,
+                            "MyCommand",
+                            (object __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
+                            false, false)
+                        : (global::System.IObservable<global::System.IObservable<string>>)
+                        new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty_p1, "MyCommand", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand, false))
+                    : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
             var __obsProperty = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<string>>(__obsProperty_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<string>>.Default);
-
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);

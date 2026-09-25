@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
@@ -33,6 +33,6 @@ internal sealed class AndroidCommandBindingPlugin : IPlatformCommandBindingPlugi
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
+    public void EmitBinding(SourceWriter sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
         NativeCommandEmitter.EmitEvent(sb, inv, controlAccess, supportsNullable);
 }

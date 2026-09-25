@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -19,13 +18,13 @@ public class InterceptorEmitterTests
     [Test]
     public async Task AppendClaimingMethodOpen_WritesOneAttributePerCallSiteThenOpensTheMethod()
     {
-        const string declarationOpen = "        internal static global::System.IDisposable __Intercept_Probe_";
+        const string declarationOpen = "internal static global::System.IDisposable __Intercept_Probe_";
         List<InterceptorLocation> callSites = [new(1, "first"), new(1, "second")];
-        var expected = new StringBuilder();
-        InterceptorEmitter.AppendAttribute(expected, callSites[0], InterceptorEmitter.MemberIndent);
-        InterceptorEmitter.AppendAttribute(expected, callSites[1], InterceptorEmitter.MemberIndent);
-        _ = expected.Append(declarationOpen).Append("ABC").AppendLine("(");
-        var actual = new StringBuilder();
+        var expected = new SourceWriter();
+        InterceptorEmitter.AppendAttribute(expected, callSites[0]);
+        InterceptorEmitter.AppendAttribute(expected, callSites[1]);
+        _ = expected.Append(declarationOpen).Append("ABC").OpenParameterList();
+        var actual = new SourceWriter();
 
         InterceptorEmitter.AppendClaimingMethodOpen(actual, callSites, static location => location, declarationOpen, "ABC");
 

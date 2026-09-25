@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -39,15 +39,17 @@ internal static class DependencyPropertyObservationEmitter
     }
 
     /// <summary>Pairs a native callback token with deterministic unregistration.</summary>
-    /// <param name="sb">The output builder.</param>
+    /// <param name="sb">The writer, inside the subscription callback.</param>
     /// <param name="segment">The concrete observed property.</param>
     /// <param name="info">The verified native mechanism.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendSubscription(StringBuilder sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
-        sb.Append("                        var __token = __source.RegisterPropertyChangedCallback(")
+    internal static void AppendSubscription(SourceWriter sb, PropertyPathSegment segment, PlatformObservationInfo info) =>
+        sb.BeginVar("__token").Append("__source.RegisterPropertyChangedCallback(")
             .Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
-            .AppendLine("Property, (__sender, __property) => __notify());")
-            .AppendLine("                        return new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>")
-            .Append("                            __source.UnregisterPropertyChangedCallback(").Append(segment.DeclaringTypeFullName)
-            .Append('.').Append(segment.PropertyName).AppendLine("Property, __token));");
+            .Line("Property, (__sender, __property) => __notify());")
+            .Line($"return new {GeneratedTypeNames.ActionDisposable}(() =>")
+            .Indent()
+            .Append("__source.UnregisterPropertyChangedCallback(").Append(segment.DeclaringTypeFullName)
+            .Append('.').Append(segment.PropertyName).Line("Property, __token));")
+            .Outdent();
 }

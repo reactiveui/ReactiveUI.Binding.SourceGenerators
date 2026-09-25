@@ -37,66 +37,66 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTwoWay_7FFFFFB804424766(global::TestApp.Person source, global::TestApp.PersonView target, global::ReactiveUI.Binding.IBindingTypeConverter sourceToTargetConverter, global::ReactiveUI.Binding.IBindingTypeConverter targetToSourceConverter, object conversionHint, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindTwoWay: Count <-> Text (with converter) (with scheduler)
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = source;
-            var __hookTarget = target;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Count;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.Person, int>>)(__property => __property.Count)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Text;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.PersonView, string>>)(__property => __property.Text)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                var __hookSource = source;
+                var __hookTarget = target;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Count;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.Person, int>>)(__property => __property.Count)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Text;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.PersonView, string>>)(__property => __property.Text)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.TwoWay))
+                {
+                    return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(source, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.Person)__o).Count, true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<int>)sourceObsMechanism
-            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                sourceObsRegistration,
-                source,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.Person, int>>)(__e => __e.Count)).Body,
-                "Count",
-                (object __o) => ((global::TestApp.Person)__o).Count,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Count", 5, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<int>)sourceObsMechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    sourceObsRegistration,
+                    source,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.Person, int>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::TestApp.Person)__o).Count,
+                    false,
+                    true);
             var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(target, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.PersonView)__o).Text, true);
-        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(target.GetType(), "Text", 5, false);
-        var targetObs = targetObsRegistration == null
-            ? (global::System.IObservable<string>)targetObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                targetObsRegistration,
-                target,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.PersonView, string>>)(__e => __e.Text)).Body,
-                "Text",
-                (object __o) => ((global::TestApp.PersonView)__o).Text,
-                false,
-                true);
+            var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(target.GetType(), "Text", 5, false);
+            var targetObs = targetObsRegistration == null
+                ? (global::System.IObservable<string>)targetObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    targetObsRegistration,
+                    target,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.PersonView, string>>)(__e => __e.Text)).Body,
+                    "Text",
+                    (object __o) => ((global::TestApp.PersonView)__o).Text,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = sourceToTargetConverter;
             if (__convertedForwardConverter == null)
             {
@@ -170,8 +170,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     int __parsed = default(int);
                     return int.TryParse(__value, out __parsed) ? (true, __parsed) : (false, default(int));
                 });
-        var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__convertedForward, scheduler);
-        var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__convertedReverse : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__convertedReverse, scheduler);
+            var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__convertedForward, scheduler);
+            var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__convertedReverse : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<int>(__convertedReverse, scheduler);
             var targetThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceBind, target) : sourceBind;
             var sourceThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetBind, source) : targetBind;
 

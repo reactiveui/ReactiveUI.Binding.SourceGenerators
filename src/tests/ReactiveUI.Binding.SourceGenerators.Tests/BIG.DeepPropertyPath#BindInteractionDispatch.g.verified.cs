@@ -38,10 +38,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             // BindInteraction: Child.Confirm
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
 
-        if (viewModel == null)
-        {
-            return serial;
-        }
+            if (viewModel == null)
+            {
+                return serial;
+            }
             var __interactionObs_s0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(viewModel, "Child", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child, false);
             var __interactionObs_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Child", 5, false);
             var __interactionObs_s0 = __interactionObs_s0Registration == null
@@ -56,18 +56,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __interactionObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s0,
                 __p1 => __p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Confirm", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___p1
-                    ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
-                    __registration___p1,
-                    __p1,
-                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>>)(__e => __e.Confirm)).Body,
-                    "Confirm",
-                    (object __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
-                    false, false)
-                    : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)
-new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(__p1, "Confirm", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm, false))
-                : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
-        var interactionObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s1, global::System.Collections.Generic.EqualityComparer<global::ReactiveUI.Binding.Interaction<string, bool>>.Default);
+                    ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Confirm", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___p1
+                        ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
+                            __registration___p1,
+                            __p1,
+                            ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>>)(__e => __e.Confirm)).Body,
+                            "Confirm",
+                            (object __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
+                            false, false)
+                        : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)
+                        new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(__p1, "Confirm", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm, false))
+                    : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
+            var interactionObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s1, global::System.Collections.Generic.EqualityComparer<global::ReactiveUI.Binding.Interaction<string, bool>>.Default);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

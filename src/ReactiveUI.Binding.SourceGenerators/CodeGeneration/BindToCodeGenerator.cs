@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 
@@ -15,24 +14,6 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// <summary>Generates the typed overloads, interceptors and binding methods for <c>BindTo</c> invocations.</summary>
 internal static class BindToCodeGenerator
 {
-    /// <summary>The indentation the direct-assignment subscription body sits at.</summary>
-    private const string DirectSubscriptionBodyIndent = "                ";
-
-    /// <summary>The indentation the converted-assignment subscription body sits at, one block deeper.</summary>
-    private const string ConvertedSubscriptionBodyIndent = "                    ";
-
-    /// <summary>The indentation and keyword a dispatch branch returns its binding behind.</summary>
-    private const string ReturnStatementPrefix = "                return ";
-
-    /// <summary>The indentation and arrow an interceptor forwards to its binding behind.</summary>
-    private const string ForwardingBodyPrefix = "            => ";
-
-    /// <summary>The indentation a forwarded argument sits at.</summary>
-    private const string ArgumentIndent = "                ";
-
-    /// <summary>The opening of a worker's return statement.</summary>
-    private const string ReturnPrefix = "            return ";
-
     /// <summary>The worker parameter naming the object a write lands on.</summary>
     private const string TargetParameterName = "target";
 
@@ -52,10 +33,9 @@ internal static class BindToCodeGenerator
             return null;
         }
 
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = SourceWriter.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
 
@@ -79,7 +59,7 @@ internal static class BindToCodeGenerator
                 GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             }
 
-            _ = sb.AppendLine();
+            _ = sb.BlankLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
             {
@@ -94,9 +74,8 @@ internal static class BindToCodeGenerator
         }
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
 
-        return PooledBuilder.ToStringAndReturn(sb);
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>
@@ -134,7 +113,7 @@ internal static class BindToCodeGenerator
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindToTypeGroup group,
         bool supportsCallerArgExpr,
         bool supportsNullable,
@@ -151,86 +130,65 @@ internal static class BindToCodeGenerator
     }
 
     /// <summary>Generates a concrete <c>BindTo</c> overload that dispatches using CallerArgumentExpression.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    internal static void GenerateCallerArgExprOverload(StringBuilder sb, BindToTypeGroup group, bool supportsNullable)
+    internal static void GenerateCallerArgExprOverload(SourceWriter sb, BindToTypeGroup group, bool supportsNullable)
     {
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindTo of ").Append(IObservable).Append("&lt;")
-            .Append(group.SourceValueTypeFullName).Append("&gt; to ").Append(group.TargetTypeFullName).AppendLine(".")
-            .AppendLine("        /// Uses CallerArgumentExpression for dispatch.").AppendLine("        /// </summary>").Append("        public static ")
-            .Append(GeneratedTypeNames.IDisposable).AppendLine(" BindTo(");
-
-        AppendParameterList(sb, group, true, supportsNullable, true);
-
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        AppendOverloadOpen(sb, group, true, supportsNullable, true);
 
         var extraArguments = FormatExtraArgs(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
 
-            _ = sb.Append("            ").Append(condition).Append(" (propertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")")
-                .AppendLine(GeneratedSyntax.StatementBlockOpen);
-            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), extraArguments);
-            _ = sb.AppendLine("            }");
+            _ = CodeGeneratorHelpers.AppendExpressionTextTest(sb.BeginBranch(i), "propertyExpression", inv.TargetExpressionText)
+                .CloseCondition();
+            AppendWorkerInvocation(sb.BeginReturn(), BindToMethodSuffix(inv), extraArguments);
+            _ = sb.CloseBlock();
         }
 
-        _ = sb.Append("            throw new ").Append(GeneratedTypeNames.InvalidOperationException).AppendLine("(").Append(ArgumentIndent).Append('"')
-            .Append(NoBindingFoundMessage).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates a concrete <c>BindTo</c> overload that dispatches using CallerFilePath + CallerLineNumber.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
-        StringBuilder sb,
+        SourceWriter sb,
         BindToTypeGroup group,
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindTo of ").Append(IObservable).Append("&lt;")
-            .Append(group.SourceValueTypeFullName).Append("&gt; to ").Append(group.TargetTypeFullName).AppendLine(".")
-            .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
-            .Append("        public static ").Append(GeneratedTypeNames.IDisposable).AppendLine(" BindTo(");
-
-        AppendParameterList(sb, group, false, supportsNullable, stubHasExpressionParameters);
-
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+        AppendOverloadOpen(sb, group, false, supportsNullable, stubHasExpressionParameters);
 
         var extraArguments = FormatExtraArgs(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = CodeGeneratorHelpers.AppendCallerFilePathTest(
-                    sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                        .Append("                && "),
-                    pathSuffix)
-                .AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen);
-            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), extraArguments);
-            _ = sb.AppendLine("            }");
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                i,
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            AppendWorkerInvocation(sb.BeginReturn(), BindToMethodSuffix(inv), extraArguments);
+            _ = sb.CloseBlock();
         }
 
-        _ = sb.Append("            throw new ").Append(GeneratedTypeNames.InvalidOperationException).AppendLine("(").Append(ArgumentIndent).Append('"')
-            .Append(NoBindingFoundMessage).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates the binding method that writes each source value to the target property on the target's thread.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="suffix">The stable method-name suffix.</param>
-    internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
+    internal static void GenerateBindToMethod(SourceWriter sb, BindToInvocationInfo inv, string suffix)
     {
-        var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
         var extraParams = FormatExtraMethodParams(inv);
 
         // Direct assignment is only safe when the value type matches the property type and the caller did
@@ -238,18 +196,20 @@ internal static class BindToCodeGenerator
         var directAssign = inv.SourceValueTypeFullName == inv.TargetPropertyTypeFullName && !inv.HasConverterOverride;
         var sourceVariable = SourceParameterName;
 
-        _ = sb.Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(" __BindTo_").Append(suffix).Append('(')
+        _ = sb.Append("private static ").Append(GeneratedTypeNames.IDisposable).Append(" __BindTo_").Append(suffix).Append('(')
             .Append(ObservableOf(inv.SourceValueTypeFullName)).Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams)
-            .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen).Append("            // BindTo: observable -> ").Append(targetPathComment).AppendLine();
+            .Line(")").OpenBlock()
+            .BeginComment().Append("BindTo: observable -> ");
+        _ = CodeGeneratorHelpers.AppendPropertyPath(sb, inv.TargetPropertyPath).EndLine();
 
         EmitBindingHookGuard(sb, inv);
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
 
         if (inv.SetMethod is { } setMethod)
         {
-            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append("            var __setSource = "), "source", TargetParameterName, inv.TargetViewThreadInvoker).AppendLine(";");
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.BeginVar("__setSource"), "source", TargetParameterName, inv.TargetViewThreadInvoker).EndStatement();
             CollectionSetMethodEmitter.EmitSubscription(sb, new(TargetParameterName, inv.TargetPropertyPath, inv.SourceValueTypeFullName, setMethod, inv.TargetExpressionText, false), "__setSource");
-            _ = sb.AppendLine("            return __setSubscription;").AppendLine(GeneratedSyntax.MemberBodyClose);
+            _ = sb.Return("__setSubscription").CloseBlock();
             return;
         }
 
@@ -267,43 +227,35 @@ internal static class BindToCodeGenerator
             directAssign = true;
         }
 
+        _ = BindingEmitterHelpers.AppendViewThreadCall(sb.BeginReturn().Append(BindingErrors).Append(".Subscribe("), sourceVariable, TargetParameterName, inv.TargetViewThreadInvoker)
+            .Line(", value =>").OpenBlock();
+
         if (directAssign)
         {
-            var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-                TargetParameterName,
-                inv.TargetPropertyPath,
-                "value",
-                DirectSubscriptionBodyIndent);
-            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), sourceVariable, TargetParameterName, inv.TargetViewThreadInvoker)
-                .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                ").Append(directAssignment).AppendLine().Append("            }, \"")
-                .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
+            CodeGeneratorHelpers.AppendGuardedAssignment(sb, TargetParameterName, inv.TargetPropertyPath, "value");
         }
         else
         {
-            var convertedAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-                TargetParameterName,
-                inv.TargetPropertyPath,
-                "__converted",
-                ConvertedSubscriptionBodyIndent);
-            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), sourceVariable, TargetParameterName, inv.TargetViewThreadInvoker)
-                .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                if (").Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
-                .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).AppendLine(", out var __converted))")
-                .AppendLine("                {").Append("                    ").Append(convertedAssignment).AppendLine().AppendLine("                }")
-                .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
-                .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
+            _ = sb.BeginIf().Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
+                .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).Append(", out var __converted)")
+                .CloseCondition();
+            CodeGeneratorHelpers.AppendGuardedAssignment(sb, TargetParameterName, inv.TargetPropertyPath, "__converted");
+            _ = sb.CloseBlock();
         }
+
+        _ = sb.CloseBlockInline().Append(", ").AppendQuoted(inv.TargetExpressionText).Line(");")
+            .CloseBlock()
+            .BlankLine();
     }
 
-    /// <summary>Appends the conversion-hint and converter-override parameters to the concrete overload signature.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the conversion-hint and converter-override parameters of the concrete overload signature.</summary>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The binding type group.</param>
-    internal static void AppendExtraParameters(StringBuilder sb, BindToTypeGroup group)
+    internal static void AppendExtraParameters(SourceWriter sb, BindToTypeGroup group)
     {
         if (group.HasConversionHint)
         {
-            _ = sb.AppendLine("            object conversionHint,");
+            _ = sb.Parameter("object conversionHint");
         }
 
         if (!group.HasConverterOverride)
@@ -311,7 +263,7 @@ internal static class BindToCodeGenerator
             return;
         }
 
-        _ = sb.Append("            ").Append(IBindingTypeConverter).AppendLine(" converterOverride,");
+        _ = sb.Append(IBindingTypeConverter).Line(" converterOverride,");
     }
 
     /// <summary>Formats the extra arguments forwarded from the concrete overload to the worker method.</summary>
@@ -356,7 +308,7 @@ internal static class BindToCodeGenerator
     /// <param name="sb">The generated source builder.</param>
     /// <param name="inv">The binding invocation being emitted.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitBindingHookGuard(StringBuilder sb, BindToInvocationInfo inv) =>
+    private static void EmitBindingHookGuard(SourceWriter sb, BindToInvocationInfo inv) =>
         BindingEmitterHelpers.EmitBindingHookGuard(
             sb,
             SourceParameterName,
@@ -364,13 +316,13 @@ internal static class BindToCodeGenerator
             TargetParameterName,
             inv.TargetPropertyPath,
             "OneWay",
-            $"{EmptyDisposable}.Instance");
+            EmptyDisposableInstance);
 
     /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of call sites being claimed.</param>
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
-    private static void GenerateInterceptors(StringBuilder sb, BindToTypeGroup group, in LanguageFeatures features)
+    private static void GenerateInterceptors(SourceWriter sb, BindToTypeGroup group, in LanguageFeatures features)
     {
         var extraArguments = FormatExtraArgs(group);
         var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
@@ -381,27 +333,54 @@ internal static class BindToCodeGenerator
         {
             foreach (var callSite in entry.Value)
             {
-                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor);
             }
 
-            _ = sb.Append("        internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_BindTo_")
-                .Append(entry.Key).AppendLine("(");
+            _ = sb.Append("internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_BindTo_")
+                .Append(entry.Key).OpenParameterList();
 
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-            AppendWorkerInvocation(sb, ForwardingBodyPrefix, entry.Key, extraArguments);
-            _ = sb.AppendLine();
+            AppendWorkerInvocation(sb.Indent().Append("=> "), entry.Key, extraArguments);
+            _ = sb.Outdent().BlankLine();
         }
     }
 
+    /// <summary>Writes the summary and signature of a concrete overload, and opens its body.</summary>
+    /// <param name="sb">The writer, at the class's member level; left inside the overload's body.</param>
+    /// <param name="group">The group whose types the signature is written from.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
+    private static void AppendOverloadOpen(
+        SourceWriter sb,
+        BindToTypeGroup group,
+        bool dispatchesOnExpressionText,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        _ = sb.OpenSummary()
+            .BeginDocLine().Append("Concrete typed overload for BindTo of ").Append(IObservable).Append("&lt;")
+            .Append(group.SourceValueTypeFullName).Append("&gt; to ").Append(group.TargetTypeFullName).Line(".")
+            .DocLine(dispatchesOnExpressionText
+                ? "Uses CallerArgumentExpression for dispatch."
+                : "Uses CallerFilePath + CallerLineNumber for dispatch.")
+            .CloseSummary()
+            .Append("public static ").Append(GeneratedTypeNames.IDisposable).Append(" BindTo").OpenParameterList();
+
+        AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
+
+        _ = sb.OpenBlock();
+    }
+
     /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the parameter list.</param>
     /// <param name="group">The group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
     private static void AppendParameterList(
-        StringBuilder sb,
+        SourceWriter sb,
         BindToTypeGroup group,
         bool dispatchesOnExpressionText,
         bool supportsNullable,
@@ -412,9 +391,9 @@ internal static class BindToCodeGenerator
             group.TargetPropertyIsReferenceType,
             supportsNullable);
 
-        _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName))
-            .AppendLine(" source,").Append("            ").Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).AppendLine(" target,")
-            .Append("            ").Append(PropertyExpression(group.TargetTypeFullName, targetPropType)).AppendLine(" property,");
+        _ = sb.Append("this ").Append(ObservableOf(group.SourceValueTypeFullName)).Line(" source,")
+            .Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).Line(" target,")
+            .Append(PropertyExpression(group.TargetTypeFullName, targetPropType)).Line(" property,");
 
         AppendExtraParameters(sb, group);
 
@@ -423,17 +402,16 @@ internal static class BindToCodeGenerator
             CodeGeneratorHelpers.AppendExpressionParameter(sb, "property", "propertyExpression", dispatchesOnExpressionText);
         }
 
-        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+        CodeGeneratorHelpers.AppendCallerInfoParameters(sb);
     }
 
-    /// <summary>Appends the call forwarding the bound stream and target on to the generated worker.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="prefix">The indentation and statement keyword the call sits behind.</param>
+    /// <summary>Writes the call forwarding the bound stream and target on to the generated worker, ending the statement.</summary>
+    /// <param name="sb">The writer, after the keyword or arrow the call sits behind.</param>
     /// <param name="methodSuffix">The stable suffix naming the worker.</param>
     /// <param name="extraArguments">The conversion-hint and converter-override arguments, if any.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendWorkerInvocation(StringBuilder sb, string prefix, string methodSuffix, string extraArguments) =>
-        sb.Append(prefix).Append("__BindTo_").Append(methodSuffix).Append("(source, target").Append(extraArguments).AppendLine(");");
+    private static void AppendWorkerInvocation(SourceWriter sb, string methodSuffix, string extraArguments) =>
+        sb.Append("__BindTo_").Append(methodSuffix).Append("(source, target").Append(extraArguments).Line(");");
 
     /// <summary>Names the generated binding a call site reaches.</summary>
     /// <param name="inv">The call site.</param>

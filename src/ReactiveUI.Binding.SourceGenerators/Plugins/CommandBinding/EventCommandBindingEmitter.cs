@@ -2,7 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -11,50 +11,44 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// <summary>Shares command-event subscription fragments across binding mechanisms.</summary>
 internal static class EventCommandBindingEmitter
 {
-    /// <summary>Appends the subscription that rebinds the control whenever the command property changes.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    internal static void AppendCommandSubscription(StringBuilder sb) =>
-        _ = sb.AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
-            .AppendLine(CommandBindingSyntax.CommandMissingTest)
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen);
+    /// <summary>Writes the subscription that rebinds the control whenever the command property changes, up to the missing-command branch.</summary>
+    /// <param name="sb">The writer, inside the worker's body; left inside the <c>cmd == null</c> branch.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCommandSubscription(SourceWriter sb) =>
+        _ = CommandBindingSyntax.OpenCommandSubscription(sb);
 
-    /// <summary>Appends the capture of the latest parameter, and opens the command subscription over it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the capture of the latest parameter, and opens the command subscription over it.</summary>
+    /// <param name="sb">The writer, inside the worker's body; left inside the <c>cmd == null</c> branch.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     internal static void AppendLatestParameterCapture(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv)
     {
         CommandParameterEmitter.EmitCapture(sb, inv);
         AppendCommandSubscription(sb);
     }
 
-    /// <summary>Appends the declaration of the handler the control's event runs the command from.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the declaration of the handler the control's event runs the command from.</summary>
+    /// <param name="sb">The writer, inside the subscription's callback; left inside the handler's body.</param>
     /// <param name="eventArgsType">The event args type the control's event carries.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
-    internal static void AppendHandlerDeclaration(StringBuilder sb, string eventArgsType, bool supportsNullable) =>
-        _ = sb.AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
-            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator)
-            .Append(eventArgsType).AppendLine(" e)").AppendLine(CommandBindingSyntax.SubscriptionBlockOpen);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendHandlerDeclaration(SourceWriter sb, string eventArgsType, bool supportsNullable) =>
+        _ = CommandBindingSyntax.OpenHandler(sb.BlankLine(), eventArgsType, supportsNullable);
 
-    /// <summary>Appends the guarded run of the command inside the control's event handler.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the guarded run of the command inside the control's event handler, and closes the handler.</summary>
+    /// <param name="sb">The writer, inside the handler's body.</param>
     /// <param name="argument">The expression the command is asked about and run with.</param>
-    internal static void AppendHandlerExecution(StringBuilder sb, string argument) =>
-        _ = sb.Append("                    if (cmd.CanExecute(").Append(argument).AppendLine("))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
-            .Append("                        cmd.Execute(").Append(argument).AppendLine(");").AppendLine(CommandBindingSyntax.NestedBlockClose)
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendHandlerExecution(SourceWriter sb, string argument) =>
+        _ = CommandBindingSyntax.AppendGuardedExecute(sb, argument).CloseBlock().BlankLine();
 
-    /// <summary>Appends the handler that runs the command, reading the parameter from the view model when one is named.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Writes the handler that runs the command, reading the parameter from the view model when one is named.</summary>
+    /// <param name="sb">The writer, inside the subscription's callback.</param>
     /// <param name="eventArgsType">The event args type the control's event carries.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
     /// <param name="paramAccess">The typed access that reads the command parameter, or null to run the command with none.</param>
-    internal static void AppendHandler(StringBuilder sb, string eventArgsType, bool supportsNullable, string? paramAccess)
+    internal static void AppendHandler(SourceWriter sb, string eventArgsType, bool supportsNullable, string? paramAccess)
     {
         AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
         if (paramAccess is null)
@@ -63,19 +57,21 @@ internal static class EventCommandBindingEmitter
             return;
         }
 
-        _ = sb.Append("                    var param = ").Append(paramAccess).AppendLine(";");
+        _ = sb.Var("param", paramAccess);
         AppendHandlerExecution(sb, "param");
     }
 
-    /// <summary>Appends the return of the command subscription when no parameter stream was subscribed to, and closes the member.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    internal static void AppendCommandOnlyReturn(StringBuilder sb) =>
-        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+    /// <summary>Writes the return of the command subscription when no parameter stream was subscribed to, and closes the member.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
+    internal static void AppendCommandOnlyReturn(SourceWriter sb) =>
+        _ = sb.Return($"new {GeneratedTypeNames.MultipleDisposable}(__cmdSub, serial)").CloseBlock();
 
-    /// <summary>Appends the return of the binding's own subscriptions when a parameter stream was subscribed to.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    internal static void AppendParameterisedDisposableReturn(StringBuilder sb) =>
-        _ = sb.AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(")
-            .AppendLine("                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);")
-            .AppendLine(GeneratedSyntax.MemberBodyClose);
+    /// <summary>Writes the return of the binding's own subscriptions when a parameter stream was subscribed to, and closes the member.</summary>
+    /// <param name="sb">The writer, inside the worker's body.</param>
+    internal static void AppendParameterisedDisposableReturn(SourceWriter sb) =>
+        _ = sb.Line($"return new {GeneratedTypeNames.MultipleDisposable}(")
+            .Indent()
+            .Line($"new {GeneratedTypeNames.MultipleDisposable}(__cmdSub, __paramSub), serial);")
+            .Outdent()
+            .CloseBlock();
 }

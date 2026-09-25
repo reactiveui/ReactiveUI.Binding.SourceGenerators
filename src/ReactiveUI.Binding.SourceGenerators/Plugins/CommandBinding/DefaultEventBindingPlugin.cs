@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventCommandBindingEmitter;
 
@@ -36,7 +36,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
+    public void EmitBinding(SourceWriter sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
         CommandEventBindingEmitter.EmitByParameterKind(
             sb,
             inv,
@@ -52,7 +52,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     /// <param name="eventArgsType">The framework event argument type.</param>
     /// <param name="supportsNullable">Whether nullable annotations are available.</param>
     internal static void EmitWithObservableParameter(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
@@ -72,13 +72,13 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     /// <param name="eventArgsType">The framework event argument type.</param>
     /// <param name="supportsNullable">Whether nullable annotations are available.</param>
     internal static void EmitWithNoParameter(
-        StringBuilder sb,
+        SourceWriter sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
         bool supportsNullable)
     {
-        _ = sb.AppendLine();
+        _ = sb.BlankLine();
         AppendCommandSubscription(sb);
         AppendCommandMissingExit(sb);
         AppendHandler(sb, eventArgsType, supportsNullable, null);
@@ -86,20 +86,22 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         AppendCommandOnlyReturn(sb);
     }
 
-    /// <summary>Appends the exit taken while the view model has handed over no command.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Leaves the binding inert until a command arrives.</summary>
+    /// <param name="sb">The writer, inside the <c>cmd == null</c> branch.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendCommandMissingExit(StringBuilder sb) =>
-        _ = sb.AppendLine(CommandBindingSyntax.CommandMissingReturn).AppendLine(CommandBindingSyntax.SubscriptionBlockClose);
+    private static void AppendCommandMissingExit(SourceWriter sb) =>
+        _ = CommandBindingSyntax.CloseCommandMissing(sb);
 
-    /// <summary>Appends the handler's subscription to the control's event, and the disposable that detaches it.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <summary>Attaches the handler to the control's event, detaches it when the command changes, and closes the command subscription.</summary>
+    /// <param name="sb">The writer, inside the subscription's callback.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
+    /// <param name="controlAccess">The control access chain expression.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendHandlerAttachment(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess) =>
-        _ = sb.Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
-            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
-            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose);
+    private static void AppendHandlerAttachment(SourceWriter sb, BindCommandInvocationInfo inv, string controlAccess) =>
+        _ = CommandBindingSyntax.CloseCommandSubscription(
+            sb.Append(controlAccess).Append('.').Append(inv.ResolvedEventName).Line(CommandBindingSyntax.HandlerSubscribe)
+                .Line($"serial.Disposable = new {GeneratedTypeNames.ActionDisposable}(() =>")
+                .Indent()
+                .Append(controlAccess).Append('.').Append(inv.ResolvedEventName).Line(" -= __Handler);")
+                .Outdent());
 }

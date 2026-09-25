@@ -35,54 +35,54 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_000018C063784C6B(global::TestApp.MyAppleView source, global::TestApp.MyViewModel target)
         {
             // BindOneWay: Text -> Name
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = source;
-            var __hookTarget = target;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookSource;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Text;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__property => __property.Text)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Name;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyViewModel, string>>)(__property => __property.Name)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.OneWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                var __hookSource = source;
+                var __hookTarget = target;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookSource;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Text;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__property => __property.Text)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Name;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyViewModel, string>>)(__property => __property.Name)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.OneWay))
+                {
+                    return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                }
             }
-        }
             var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.KvoPropertyObservable<string>((global::Foundation.NSObject)source, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Text", 15, false);
-        var sourceObs = sourceObsRegistration == null
-            ? (global::System.IObservable<string>)sourceObsMechanism
-            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                sourceObsRegistration,
-                source,
-                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
-                "Text",
-                (object __o) => ((global::TestApp.MyAppleView)__o).Text,
-                false,
-                true);
+            var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Text", 15, false);
+            var sourceObs = sourceObsRegistration == null
+                ? (global::System.IObservable<string>)sourceObsMechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    sourceObsRegistration,
+                    source,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
+                    "Text",
+                    (object __o) => ((global::TestApp.MyAppleView)__o).Text,
+                    false,
+                    true);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
             if (__convertedForwardConverter == null)
             {

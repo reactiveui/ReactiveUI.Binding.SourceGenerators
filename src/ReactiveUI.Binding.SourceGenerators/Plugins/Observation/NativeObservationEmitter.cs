@@ -2,7 +2,6 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -17,10 +16,10 @@ internal static class NativeObservationEmitter
     /// <param name="kind">The selected mechanism's identity.</param>
     /// <param name="emitSubscription">The mechanism's static subscription emitter.</param>
     internal static void Emit(
-        StringBuilder sb,
+        SourceWriter sb,
         in ObservationExpression observation,
         string kind,
-        Action<StringBuilder, PropertyPathSegment, PlatformObservationInfo> emitSubscription)
+        Action<SourceWriter, PropertyPathSegment, PlatformObservationInfo> emitSubscription)
     {
         var segment = observation.Segment;
         var info = PlatformSymbols.Candidate(segment.DeclaringTypeInfo, segment.PropertyName, kind);
@@ -32,9 +31,12 @@ internal static class NativeObservationEmitter
 
         _ = sb.Append(GeneratedTypeNames.OpenCallbackProperty).Append(observation.SourceType).Append(", ")
             .Append(segment.PropertyTypeFullName).Append(">((").Append(observation.SourceType).Append(')').Append(observation.Source)
-            .AppendLine(", (__source, __notify) =>").AppendLine("                    {");
+            .Line(", (__source, __notify) =>")
+            .Indent()
+            .OpenBlock();
         emitSubscription(sb, segment, info);
-        _ = sb.Append("                    }, __source => __source.").Append(segment.PropertyName)
-            .Append(", ").Append(observation.Distinct ? "true" : "false").Append(')');
+        _ = sb.CloseBlockInline().Append(", __source => __source.").Append(segment.PropertyName)
+            .Append(", ").AppendLiteral(observation.Distinct).Append(')')
+            .Outdent();
     }
 }

@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
-using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -28,7 +26,7 @@ internal static class BindOneWayCodeGenerator
         WorkerSourceParameterName = "source",
         WorkerTargetParameterName = "target",
         IsTwoWay = false,
-        HookRefusalValue = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance",
+        HookRefusalValue = GeneratedTypeNames.EmptyDisposableInstance,
         SourceObservableName = SourceObservableVariable,
         SourceConvertedName = "__selected",
         SourceScheduledName = "bindObs",
@@ -45,28 +43,19 @@ internal static class BindOneWayCodeGenerator
     /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
     private const string SourceObservableVariable = "sourceObs";
 
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                ";
-
     /// <summary>
     /// Generates the BindOneWay method used for binding a source property to a target property with optional conversion and scheduler.
     /// </summary>
-    /// <param name="sb">The StringBuilder for appending the generated code.</param>
+    /// <param name="sb">The SourceWriter for appending the generated code.</param>
     /// <param name="inv">The invocation information containing details about the binding.</param>
     /// <param name="sourceClassInfo">The class binding information of the source, or null if not applicable.</param>
     /// <param name="suffix">The suffix to append to the generated method name for uniqueness.</param>
     internal static void GenerateBindOneWayMethod(
-        StringBuilder sb,
+        SourceWriter sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
         string suffix)
     {
-        var targetAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "target",
-            inv.TargetPropertyPath,
-            "value",
-            SubscriptionBodyIndent);
-
         BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
@@ -82,9 +71,8 @@ internal static class BindOneWayCodeGenerator
 
         subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs", "target", inv.TargetViewThreadInvoker);
 
-        _ = sb.AppendLine().Append("            return ").Append(BindingErrors).Append(".Subscribe(").Append(subscribeVar).AppendLine(", value =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(targetAssignment).AppendLine().Append("            }, \"")
-            .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine("        }").AppendLine();
+        BindingEmitterHelpers.AppendWriteSubscription(sb.BlankLine().BeginReturn(), subscribeVar, "target", inv.TargetPropertyPath, inv.TargetExpressionText);
+        _ = sb.CloseBlock().BlankLine();
     }
 
     /// <summary>Appends extra parameters (converter, scheduler) to the concrete overload signature.</summary>
@@ -92,7 +80,7 @@ internal static class BindOneWayCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+    internal static void AppendExtraParameters(SourceWriter sb, BindingTypeGroup group, bool supportsNullable) =>
         BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName, supportsNullable);
 
     /// <summary>Formats extra arguments (converter, scheduler) for forwarding to the binding method.</summary>

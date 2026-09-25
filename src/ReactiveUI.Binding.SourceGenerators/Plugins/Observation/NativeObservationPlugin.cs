@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -21,7 +21,7 @@ internal sealed class NativeObservationPlugin : IPlatformObservationPlugin
     private readonly Func<INamedTypeSymbol, IPropertySymbol, PlatformObservationInfo?> _inspect;
 
     /// <summary>Emits the statements that attach to the platform's notification and detach from it.</summary>
-    private readonly Action<StringBuilder, PropertyPathSegment, PlatformObservationInfo> _appendSubscription;
+    private readonly Action<SourceWriter, PropertyPathSegment, PlatformObservationInfo> _appendSubscription;
 
     /// <summary>Initializes a new instance of the <see cref="NativeObservationPlugin"/> class.</summary>
     /// <param name="observationKind">The platform mechanism's identity.</param>
@@ -32,7 +32,7 @@ internal sealed class NativeObservationPlugin : IPlatformObservationPlugin
         string observationKind,
         int affinity,
         Func<INamedTypeSymbol, IPropertySymbol, PlatformObservationInfo?> inspect,
-        Action<StringBuilder, PropertyPathSegment, PlatformObservationInfo> appendSubscription)
+        Action<SourceWriter, PropertyPathSegment, PlatformObservationInfo> appendSubscription)
     {
         ObservationKind = observationKind;
         Affinity = affinity;
@@ -69,6 +69,6 @@ internal sealed class NativeObservationPlugin : IPlatformObservationPlugin
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+    public void EmitObservation(SourceWriter sb, in ObservationExpression observation) =>
         NativeObservationEmitter.Emit(sb, observation, ObservationKind, _appendSubscription);
 }

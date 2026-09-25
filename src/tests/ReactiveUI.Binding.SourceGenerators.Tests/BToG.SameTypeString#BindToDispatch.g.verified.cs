@@ -32,31 +32,31 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTo_000016A7FA446B38(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
-        if (global::ReactiveUI.Binding.BindingHooks.Any)
-        {
-            var __hookSource = source;
-            var __hookTarget = target;
-            if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
-                __hookSource,
-                __hookTarget,
-                () => global::System.Array.Empty<global::ReactiveUI.Binding.IObservedChange<object, object>>(),
-                () =>
-                {
-                    var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
-                    var __hookOwner0 = __hookTarget;
-                    if (__hookOwner0 is null)
-                    {
-                        return __hookChanges.ToArray();
-                    }
-                    var __hookValue0 = __hookOwner0.Caption;
-                    __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.SameTypeString.MyView, string>>)(__property => __property.Caption)).Body, __hookValue0));
-                    return __hookChanges.ToArray();
-                },
-                global::ReactiveUI.Binding.BindingDirection.OneWay))
+            if (global::ReactiveUI.Binding.BindingHooks.Any)
             {
-                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                var __hookSource = source;
+                var __hookTarget = target;
+                if (!global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                    __hookSource,
+                    __hookTarget,
+                    () => global::System.Array.Empty<global::ReactiveUI.Binding.IObservedChange<object, object>>(),
+                    () =>
+                    {
+                        var __hookChanges = new global::System.Collections.Generic.List<global::ReactiveUI.Binding.IObservedChange<object, object>>(1);
+                        var __hookOwner0 = __hookTarget;
+                        if (__hookOwner0 is null)
+                        {
+                            return __hookChanges.ToArray();
+                        }
+                        var __hookValue0 = __hookOwner0.Caption;
+                        __hookChanges.Add(new global::ReactiveUI.Binding.ObservedChange<object, object>(__hookOwner0, ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.SameTypeString.MyView, string>>)(__property => __property.Caption)).Body, __hookValue0));
+                        return __hookChanges.ToArray();
+                    },
+                    global::ReactiveUI.Binding.BindingDirection.OneWay))
+                {
+                    return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                }
             }
-        }
 
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
             if (__convertedSourceConverter == null)

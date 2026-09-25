@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -19,17 +18,8 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators;
 /// </summary>
 internal static class ViewLocatorDispatchGenerator
 {
-    /// <summary>Opens the documentation comment on a generated resolver method.</summary>
-    private const string DocCommentOpen = "            /// <summary>";
-
-    /// <summary>Closes the documentation comment on a generated resolver method.</summary>
-    private const string DocCommentClose = "            /// </summary>";
-
-    /// <summary>Opens a comment naming the view a dispatch branch resolves.</summary>
-    private const string CommentLineOpen = "            // ";
-
     /// <summary>Opens the test that narrows a resolved instance to a view type.</summary>
-    private const string InstanceTypeTestOpen = "            if (instance is ";
+    private const string InstanceTypeTestOpen = "if (instance is ";
 
     /// <summary>Closes a call that passes the requested contract through to a resolver.</summary>
     private const string ContractResolverCall = "(contract);";
@@ -79,23 +69,27 @@ internal static class ViewLocatorDispatchGenerator
         const int DispatchPreambleCapacity = 2_048;
         const int PerRegistrationCapacity = 512;
 
-        var sb = CodeGeneration.PooledBuilder.Rent(DispatchPreambleCapacity + (deduplicated.Count * PerRegistrationCapacity));
+        var sb = SourceWriter.Rent(DispatchPreambleCapacity + (deduplicated.Count * PerRegistrationCapacity));
         GenerateSource(sb, deduplicated, features);
-        CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
+        CodeGeneratorHelpers.AddGeneratedSource(
             context,
             "ViewDispatch.g.cs",
-            CodeGeneration.PooledBuilder.ToStringAndReturn(sb),
+            sb.ToStringAndReturn(),
             features);
     }
 
-    /// <summary>Generates the full source output into the StringBuilder.</summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <summary>Generates the full source output into the writer.</summary>
+    /// <param name="sb">The writer, at the start of the file.</param>
     /// <param name="registrations">The deduplicated registrations.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    internal static void GenerateSource(StringBuilder sb, List<ViewRegistrationInfo> registrations, in LanguageFeatures features)
+    internal static void GenerateSource(SourceWriter sb, List<ViewRegistrationInfo> registrations, in LanguageFeatures features)
     {
         var supportsNullable = features.SupportsNullable;
-        EmitFileHeader(sb, features);
+        CodeGeneratorHelpers.OpenGeneratedClass(
+            sb.FileHeader(features.EmitGeneratedCodeMarkers, supportsNullable)
+                .BlankLine()
+                .OpenNamespace(features.GeneratedNamespace),
+            features);
 
         // Singleton cache fields for [SingleInstanceView] views
         EmitSingletonFields(sb, registrations);
@@ -105,12 +99,10 @@ internal static class ViewLocatorDispatchGenerator
         // Emit the per-view-model dispatch branches into the dispatch function body.
         EmitDispatchBranches(sb, registrations);
 
-        _ = sb.AppendLine().Append("""
-
-                                               // No compile-time mapping found; fall back to runtime resolution.
-                                               return null;
-                                           }
-                               """);
+        _ = sb.BlankLine()
+            .Comment("No compile-time mapping found; fall back to runtime resolution.")
+            .Return("null")
+            .CloseBlock();
 
         // Per-view resolver methods
         for (var i = 0; i < registrations.Count; i++)
@@ -118,10 +110,8 @@ internal static class ViewLocatorDispatchGenerator
             GenerateResolverMethod(sb, registrations[i], i, supportsNullable);
         }
 
-        _ = sb.AppendLine().Append("""
-                                   }
-                               }
-                               """);
+        _ = sb.CloseBlock()
+            .CloseBlock();
 
         if (features.DeclaresModuleInitializerAttribute)
         {
@@ -150,43 +140,23 @@ internal static class ViewLocatorDispatchGenerator
     }
 
     /// <summary>Declares the module initializer attribute for a consumer whose framework does not ship it.</summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="sb">The writer, at the start of a line outside any namespace.</param>
     /// <remarks>
     /// File-local, so the declaration belongs to this file alone: a shared internal one would be a type visible to
     /// every assembly granted <c>InternalsVisibleTo</c>, colliding with that assembly's own.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitModuleInitializerAttribute(StringBuilder sb) =>
-        sb.AppendLine().AppendLine()
-            .AppendLine("namespace System.Runtime.CompilerServices")
-            .AppendLine("{")
-            .AppendLine("    /// <summary>Marks a method the runtime calls when its module loads.</summary>")
-            .AppendLine("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]")
-            .AppendLine("    file sealed class ModuleInitializerAttribute : global::System.Attribute")
-            .AppendLine("    {")
-            .AppendLine("    }")
-            .Append('}');
-
-    /// <summary>Emits the generated-file markers, nullable directive, and the enclosing namespace and class declarations.</summary>
-    /// <param name="sb">The string builder to write to.</param>
-    /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    private static void EmitFileHeader(StringBuilder sb, in LanguageFeatures features)
-    {
-        CodeGeneration.CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
-        if (features.SupportsNullable)
-        {
-            _ = sb.AppendLine("#nullable enable");
-        }
-
-        _ = sb.Append("\nnamespace ")
-            .Append(features.GeneratedNamespace)
-            .Append("\n{\n    internal static partial class ")
-            .Append(features.GeneratedClassName)
-            .Append("\n    {");
-    }
+    private static void EmitModuleInitializerAttribute(SourceWriter sb) =>
+        sb.BlankLine()
+            .OpenNamespace("System.Runtime.CompilerServices")
+            .Summary("Marks a method the runtime calls when its module loads.")
+            .Attribute($"{GeneratedTypeNames.AttributeUsage}({GeneratedTypeNames.AttributeTargets}.Method, AllowMultiple = false)")
+            .OpenType($"file sealed class ModuleInitializerAttribute : {GeneratedTypeNames.Attribute}")
+            .CloseBlock()
+            .CloseBlock();
 
     /// <summary>Emits what registers the dispatch function, and the signature of the dispatch function itself.</summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="sb">The writer, at the class's member level; left inside the dispatch function's body.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
     /// <remarks>
     /// From C# 9 the registration is a module initializer, which runs before any code in the assembly, so a
@@ -194,64 +164,70 @@ internal static class ViewLocatorDispatchGenerator
     /// a static constructor, which runs when the class is first used; a field initializer would not do, because
     /// the runtime only runs one when a static field is read, and no generated member reads one.
     /// </remarks>
-    private static void EmitRegistrationHook(StringBuilder sb, in LanguageFeatures features)
+    private static void EmitRegistrationHook(SourceWriter sb, in LanguageFeatures features)
     {
-        _ = sb.AppendLine();
+        _ = sb.OpenSummary()
+            .DocLine("Registers the source-generated view dispatch function with");
 
         if (features.SupportsModuleInitializer)
         {
-            _ = sb.AppendLine(DocCommentOpen)
-                .AppendLine("            /// Registers the source-generated view dispatch function with")
-                .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/> when the module loads.")
-                .AppendLine(DocCommentClose)
-                .AppendLine("            [global::System.Runtime.CompilerServices.ModuleInitializer]")
-                .AppendLine("            internal static void __RegisterViewDispatch()");
+            _ = sb.DocLine($"<see cref=\"{GeneratedTypeNames.DefaultViewLocator}\"/> when the module loads.")
+                .CloseSummary()
+                .Attribute("global::System.Runtime.CompilerServices.ModuleInitializer")
+                .Line("internal static void __RegisterViewDispatch()");
         }
         else
         {
-            _ = sb.AppendLine(DocCommentOpen)
-                .AppendLine("            /// Registers the source-generated view dispatch function with")
-                .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/> when this class is first used.")
-                .AppendLine(DocCommentClose)
-                .Append("            static ").Append(features.GeneratedClassName).AppendLine("()");
+            _ = sb.DocLine($"<see cref=\"{GeneratedTypeNames.DefaultViewLocator}\"/> when this class is first used.")
+                .CloseSummary()
+                .Append("static ").Append(features.GeneratedClassName).Line("()");
         }
 
-        _ = sb.AppendLine("            {")
-            .AppendLine("                global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(")
-            .AppendLine("                    __TryResolveView);")
-            .AppendLine("            }")
-            .AppendLine();
+        _ = sb.OpenBlock()
+            .Line($"{GeneratedTypeNames.DefaultViewLocator}.SetGeneratedViewDispatch(")
+            .Indent()
+            .Line("__TryResolveView);")
+            .Outdent()
+            .CloseBlock()
+            .BlankLine();
 
         EmitDispatchSignature(sb, features.SupportsNullable ? "?" : string.Empty);
     }
 
     /// <summary>Emits the documentation and signature of the dispatch function, and opens its body.</summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="sb">The writer, at the class's member level; left inside the dispatch function's body.</param>
     /// <param name="nullable">The nullable annotation to emit, or an empty string when unsupported.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitDispatchSignature(StringBuilder sb, string nullable) =>
-        sb.AppendLine(DocCommentOpen).AppendLine("            /// Compile-time generated type-switch dispatch for view resolution.")
-            .AppendLine("            /// Attempts to resolve a view for the given view model instance without reflection.")
-            .AppendLine(DocCommentClose)
-            .AppendLine("            /// <param name=\"instance\">The view model instance to resolve a view for.</param>")
-            .AppendLine("            /// <param name=\"contract\">The contract string (empty string for default).</param>")
-            .AppendLine("            /// <returns>The resolved view, or <see langword=\"null\"/> if no generated mapping exists.</returns>")
-            .Append("            private static global::ReactiveUI.Binding.IViewFor").Append(nullable).AppendLine(" __TryResolveView(")
-            .AppendLine("                object instance, string contract)").Append("            {");
+    private static void EmitDispatchSignature(SourceWriter sb, string nullable) =>
+        sb.OpenSummary()
+            .DocLine("Compile-time generated type-switch dispatch for view resolution.")
+            .DocLine("Attempts to resolve a view for the given view model instance without reflection.")
+            .CloseSummary()
+            .DocLine("<param name=\"instance\">The view model instance to resolve a view for.</param>")
+            .DocLine("<param name=\"contract\">The contract string (empty string for default).</param>")
+            .DocLine("<returns>The resolved view, or <see langword=\"null\"/> if no generated mapping exists.</returns>")
+            .Append($"private static {GeneratedTypeNames.IViewFor}").Append(nullable).Line(" __TryResolveView(")
+            .Indent()
+            .Line("object instance, string contract)")
+            .Outdent()
+            .OpenBlock();
 
     /// <summary>Emits the singleton cache fields for <c>[SingleInstanceView]</c> views with a parameterless constructor.</summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="registrations">The deduplicated registrations.</param>
-    private static void EmitSingletonFields(StringBuilder sb, List<ViewRegistrationInfo> registrations)
+    private static void EmitSingletonFields(SourceWriter sb, List<ViewRegistrationInfo> registrations)
     {
         for (var i = 0; i < registrations.Count; i++)
         {
             var reg = registrations[i];
             if (reg.IsSingleInstance && reg.HasParameterlessConstructor)
             {
-                _ = sb.AppendLine().AppendLine(DocCommentOpen).Append("            /// Cached singleton instance for <see cref=\"")
-                    .Append(reg.ViewFullyQualifiedName).AppendLine("\"/> (marked with [SingleInstanceView]).").AppendLine(DocCommentClose)
-                    .Append("            private static ").Append(reg.ViewFullyQualifiedName).Append(" __singletonView_").Append(i).Append(';');
+                _ = sb.OpenSummary()
+                    .BeginDocLine().Append("Cached singleton instance for <see cref=\"").Append(reg.ViewFullyQualifiedName)
+                    .Line("\"/> (marked with [SingleInstanceView]).")
+                    .CloseSummary()
+                    .Append("private static ").Append(reg.ViewFullyQualifiedName).Append(" __singletonView_").Append(i).EndStatement()
+                    .BlankLine();
             }
         }
     }
@@ -262,9 +238,9 @@ internal static class ViewLocatorDispatchGenerator
     /// type-switch block. Without grouping, a default branch emitted first would unconditionally
     /// match and shadow contract-specific branches.
     /// </summary>
-    /// <param name="sb">The string builder to write to.</param>
+    /// <param name="sb">The writer, inside the dispatch function's body.</param>
     /// <param name="registrations">The deduplicated registrations.</param>
-    private static void EmitDispatchBranches(StringBuilder sb, List<ViewRegistrationInfo> registrations)
+    private static void EmitDispatchBranches(SourceWriter sb, List<ViewRegistrationInfo> registrations)
     {
         var viewModelOrder = new List<string>(registrations.Count);
         var viewModelGroupIndices = new Dictionary<string, List<int>>(registrations.Count);
@@ -286,8 +262,6 @@ internal static class ViewLocatorDispatchGenerator
             var viewModelFqn = viewModelOrder[g];
             var indices = viewModelGroupIndices[viewModelFqn];
 
-            _ = sb.AppendLine();
-
             if (indices.Count == 1)
             {
                 // Single registration per VM: emit the compact form.
@@ -305,50 +279,52 @@ internal static class ViewLocatorDispatchGenerator
     /// Emits a dispatch branch for a single registration (one view per VM type).
     /// Preserves the compact output format used by existing tests.
     /// </summary>
-    /// <param name="sb">The string builder.</param>
+    /// <param name="sb">The writer, inside the dispatch function's body.</param>
     /// <param name="registrations">All registrations.</param>
     /// <param name="index">The registration index.</param>
     private static void EmitSingleRegistrationDispatch(
-        StringBuilder sb,
+        SourceWriter sb,
         List<ViewRegistrationInfo> registrations,
         int index)
     {
         var reg = registrations[index];
-        var resolverMethodName = ResolverMethodNamePrefix + index;
 
+        _ = sb.BeginComment().Append(reg.ViewModelFullyQualifiedName).Append(" -> ").Append(reg.ViewFullyQualifiedName);
         if (reg.Contract is not null)
         {
             var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
-            _ = sb.Append(CommentLineOpen).Append(reg.ViewModelFullyQualifiedName).Append(" -> ").Append(reg.ViewFullyQualifiedName)
-                .Append(" [contract: ").Append(escapedLiteral).AppendLine("]").Append(InstanceTypeTestOpen)
-                .Append(reg.ViewModelFullyQualifiedName).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                if (contract == ")
-                .Append(escapedLiteral).AppendLine(")").AppendLine("                {").Append("                    return ").Append(resolverMethodName)
-                .AppendLine(ContractResolverCall).AppendLine("                }").Append(GeneratedSyntax.StatementBlockClose);
+            _ = sb.Append(" [contract: ").Append(escapedLiteral).Line("]")
+                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).CloseCondition()
+                .BeginIf().Append("contract == ").Append(escapedLiteral).CloseCondition();
+            AppendResolverReturn(sb, index);
+            _ = sb.CloseBlock();
         }
         else
         {
-            _ = sb.Append(CommentLineOpen).Append(reg.ViewModelFullyQualifiedName).Append(" -> ").Append(reg.ViewFullyQualifiedName).AppendLine()
-                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return ").Append(resolverMethodName).AppendLine(ContractResolverCall).Append(GeneratedSyntax.StatementBlockClose);
+            _ = sb.EndLine()
+                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).CloseCondition();
+            AppendResolverReturn(sb, index);
         }
+
+        _ = sb.CloseBlock();
     }
 
     /// <summary>
     /// Emits a grouped dispatch branch for a VM type with multiple registrations.
     /// Contract-specific checks are emitted first, with the default (no-contract) branch last.
     /// </summary>
-    /// <param name="sb">The string builder.</param>
+    /// <param name="sb">The writer, inside the dispatch function's body.</param>
     /// <param name="registrations">All registrations.</param>
     /// <param name="viewModelFqn">The fully qualified VM type name.</param>
     /// <param name="indices">The registration indices for this VM type.</param>
     private static void EmitGroupedDispatch(
-        StringBuilder sb,
+        SourceWriter sb,
         List<ViewRegistrationInfo> registrations,
         string viewModelFqn,
         List<int> indices)
     {
-        _ = sb.Append(CommentLineOpen).Append(viewModelFqn).AppendLine(" — multiple views").Append(InstanceTypeTestOpen)
-            .Append(viewModelFqn).AppendLine(")").Append(GeneratedSyntax.StatementBlockOpen);
+        _ = sb.BeginComment().Append(viewModelFqn).Line(" — multiple views")
+            .Append(InstanceTypeTestOpen).Append(viewModelFqn).CloseCondition();
 
         // Contract-specific branches first
         for (var j = 0; j < indices.Count; j++)
@@ -361,10 +337,10 @@ internal static class ViewLocatorDispatchGenerator
             }
 
             var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
-            var resolverMethodName = ResolverMethodNamePrefix + idx;
-            _ = sb.AppendLine().Append("            // -> ").Append(reg.ViewFullyQualifiedName).Append(" [contract: ").Append(escapedLiteral)
-                .AppendLine("]").Append("            if (contract == ").Append(escapedLiteral).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return ").Append(resolverMethodName).AppendLine(ContractResolverCall).Append(GeneratedSyntax.StatementBlockClose);
+            _ = sb.BeginComment().Append("-> ").Append(reg.ViewFullyQualifiedName).Append(" [contract: ").Append(escapedLiteral).Line("]")
+                .BeginIf().Append("contract == ").Append(escapedLiteral).CloseCondition();
+            AppendResolverReturn(sb, idx);
+            _ = sb.CloseBlock();
         }
 
         // Default (no-contract) branch last
@@ -377,85 +353,102 @@ internal static class ViewLocatorDispatchGenerator
                 continue;
             }
 
-            var resolverMethodName = ResolverMethodNamePrefix + idx;
-            _ = sb.AppendLine().Append("            // -> ").Append(reg.ViewFullyQualifiedName).AppendLine(" (default)").Append("            return ")
-                .Append(resolverMethodName).Append(ContractResolverCall);
+            _ = sb.BeginComment().Append("-> ").Append(reg.ViewFullyQualifiedName).Line(" (default)");
+            AppendResolverReturn(sb, idx);
             break; // Only one default per VM (deduplicated earlier)
         }
 
-        _ = sb.AppendLine().Append(GeneratedSyntax.StatementBlockClose);
+        _ = sb.CloseBlock();
     }
 
+    /// <summary>Writes the return that hands the requested contract to one view's resolver.</summary>
+    /// <param name="sb">The writer, inside the branch that matched the view.</param>
+    /// <param name="index">The registration index, which names the resolver.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendResolverReturn(SourceWriter sb, int index) =>
+        _ = sb.BeginReturn().Append(ResolverMethodNamePrefix).Append(index).Line(ContractResolverCall);
+
     /// <summary>Generates a per-view-model resolver method.</summary>
-    /// <param name="sb">The string builder.</param>
+    /// <param name="sb">The writer, at the class's member level.</param>
     /// <param name="reg">The view registration info.</param>
     /// <param name="index">The unique index for method naming.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    private static void GenerateResolverMethod(StringBuilder sb, ViewRegistrationInfo reg, int index, bool supportsNullable)
+    private static void GenerateResolverMethod(SourceWriter sb, ViewRegistrationInfo reg, int index, bool supportsNullable)
     {
-        var methodName = ResolverMethodNamePrefix + index;
         var nullable = supportsNullable ? "?" : string.Empty;
 
         var strategyDoc = (reg.IsSingleInstance, reg.HasParameterlessConstructor) switch
         {
-            (true, true) => "        /// Returns a cached singleton instance (marked with [SingleInstanceView]).",
-            (true, false) =>
-                "        /// Service locator only — [SingleInstanceView] without parameterless constructor.",
-            (false, true) => "        /// Tries the service locator first, then falls back to direct construction.",
-            (false, false) => "        /// Service locator only — no direct construction available."
+            (true, true) => "Returns a cached singleton instance (marked with [SingleInstanceView]).",
+            (true, false) => "Service locator only — [SingleInstanceView] without parameterless constructor.",
+            (false, true) => "Tries the service locator first, then falls back to direct construction.",
+            (false, false) => "Service locator only — no direct construction available."
         };
 
-        _ = sb.AppendLine().AppendLine().AppendLine(DocCommentOpen).Append("            /// Resolves a view for <see cref=\"")
-            .Append(reg.ViewModelFullyQualifiedName).AppendLine("\"/>.").Append(strategyDoc).AppendLine().AppendLine(DocCommentClose)
-            .AppendLine("            /// <param name=\"contract\">The contract string (empty string for default).</param>")
-            .AppendLine("            /// <returns>The resolved view, or <see langword=\"null\"/> if resolution fails.</returns>")
-            .Append("            private static global::ReactiveUI.Binding.IViewFor").Append(nullable).Append(' ').Append(methodName)
-            .AppendLine("(string contract)").AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine("                // Normalize contract: empty string means no contract (null for Splat lookup).").Append("                string")
-            .Append(nullable).AppendLine(" svcContract = contract.Length == 0 ? null : contract;").AppendLine()
-            .AppendLine("                // Prefer service-locator-registered view (supports DI-configured instances).")
-            .AppendLine("                var view = global::Splat.AppLocator.Current")
-            .Append("                    .GetService<global::ReactiveUI.Binding.IViewFor<").Append(reg.ViewModelFullyQualifiedName).AppendLine(">>(")
-            .AppendLine("                        svcContract);").AppendLine("                if (view != null)").AppendLine("                {")
-            .AppendLine("                    return view;").Append("                }");
+        _ = sb.BlankLine()
+            .OpenSummary()
+            .BeginDocLine().Append("Resolves a view for <see cref=\"").Append(reg.ViewModelFullyQualifiedName).Line("\"/>.")
+            .DocLine(strategyDoc)
+            .CloseSummary()
+            .DocLine("<param name=\"contract\">The contract string (empty string for default).</param>")
+            .DocLine("<returns>The resolved view, or <see langword=\"null\"/> if resolution fails.</returns>")
+            .Append($"private static {GeneratedTypeNames.IViewFor}").Append(nullable).Append(' ').Append(ResolverMethodNamePrefix).Append(index)
+            .Line("(string contract)")
+            .OpenBlock()
+            .Comment("Normalize contract: empty string means no contract (null for Splat lookup).")
+            .Append("string").Append(nullable).Line(" svcContract = contract.Length == 0 ? null : contract;")
+            .BlankLine()
+            .Comment("Prefer service-locator-registered view (supports DI-configured instances).")
+            .Line("var view = global::Splat.AppLocator.Current")
+            .Indent()
+            .Append($".GetService<{GeneratedTypeNames.IViewFor}<").Append(reg.ViewModelFullyQualifiedName).Line(">>(")
+            .Indent()
+            .Line("svcContract);")
+            .Outdent()
+            .Outdent()
+            .If("view != null")
+            .Return("view")
+            .CloseBlock();
 
         EmitResolverFallback(sb, reg, index);
 
-        _ = sb.AppendLine().Append(GeneratedSyntax.StatementBlockClose);
+        _ = sb.CloseBlock();
     }
 
     /// <summary>
     /// Emits what the resolver does when the service locator has nothing registered: construct the
     /// view directly, cache a singleton, or give up.
     /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sb">The writer, inside the resolver's body.</param>
     /// <param name="reg">The view registration being emitted.</param>
     /// <param name="index">The registration's index, used to name the singleton field.</param>
-    private static void EmitResolverFallback(StringBuilder sb, ViewRegistrationInfo reg, int index)
+    private static void EmitResolverFallback(SourceWriter sb, ViewRegistrationInfo reg, int index)
     {
+        _ = sb.BlankLine();
         if (!reg.HasParameterlessConstructor)
         {
-            _ = sb.Append("""
-
-                                      return null;
-                      """);
+            _ = sb.Return("null");
             return;
         }
 
         if (!reg.IsSingleInstance)
         {
-            _ = sb.AppendLine().Append("                    // Fallback: direct construction (").Append(reg.ViewFullyQualifiedName)
-                .AppendLine(" has a parameterless constructor).").Append("                    return new ").Append(reg.ViewFullyQualifiedName)
-                .Append("();");
+            _ = sb.BeginComment().Append("Fallback: direct construction (").Append(reg.ViewFullyQualifiedName).Line(" has a parameterless constructor).")
+                .BeginReturn().Append("new ").Append(reg.ViewFullyQualifiedName).Line("();");
             return;
         }
 
         var fieldName = $"__singletonView_{index}";
-        _ = sb.AppendLine().Append("                    // Fallback: singleton construction (").Append(reg.ViewFullyQualifiedName)
-            .AppendLine(" has [SingleInstanceView]).").Append("                    if (").Append(fieldName).AppendLine(" == null)")
-            .AppendLine("                    {").AppendLine("                        System.Threading.Interlocked.CompareExchange(")
-            .Append("                            ref ").Append(fieldName).AppendLine(",").Append("                            new ")
-            .Append(reg.ViewFullyQualifiedName).AppendLine("(),").AppendLine("                            null);").AppendLine("                    }")
-            .AppendLine().Append("                    return ").Append(fieldName).Append(';');
+        _ = sb.BeginComment().Append("Fallback: singleton construction (").Append(reg.ViewFullyQualifiedName).Line(" has [SingleInstanceView]).")
+            .BeginIf().Append(fieldName).Append(" == null").CloseCondition()
+            .Line("System.Threading.Interlocked.CompareExchange(")
+            .Indent()
+            .Append("ref ").Append(fieldName).Line(",")
+            .Append("new ").Append(reg.ViewFullyQualifiedName).Line("(),")
+            .Line("null);")
+            .Outdent()
+            .CloseBlock()
+            .BlankLine()
+            .Return(fieldName);
     }
 }

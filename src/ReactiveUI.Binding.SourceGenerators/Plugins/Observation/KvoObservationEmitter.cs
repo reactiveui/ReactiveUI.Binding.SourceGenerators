@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -20,7 +19,7 @@ internal static class KvoObservationEmitter
     /// <param name="isBeforeChange">Whether to observe before the change.</param>
     /// <param name="includeStartWith">Whether equal consecutive values are suppressed.</param>
     internal static void Emit(
-        StringBuilder sb,
+        SourceWriter sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
@@ -28,8 +27,8 @@ internal static class KvoObservationEmitter
         bool includeStartWith)
     {
         var keyPath = ResolveKeyPath(segment);
-        _ = sb.Append(GeneratedTypeNames.OpenKvoProperty).Append(segment.PropertyTypeFullName).Append(">(").Append("(global::Foundation.NSObject)")
-            .Append(rootVar).Append(", ").Append('"').Append(keyPath).Append("\", ").Append("(global::Foundation.NSObject __o) => ((")
+        _ = sb.Append(GeneratedTypeNames.OpenKvoProperty).Append(segment.PropertyTypeFullName).Append(">(").Append($"({GeneratedTypeNames.NSObject})")
+            .Append(rootVar).Append(", ").Append('"').Append(keyPath).Append("\", ").Append($"({GeneratedTypeNames.NSObject} __o) => ((")
             .Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(", ").Append(BoolLiteral(includeStartWith)).Append(", ")
             .Append(BoolLiteral(isBeforeChange)).Append(')');
     }
