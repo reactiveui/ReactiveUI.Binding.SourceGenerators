@@ -71,14 +71,21 @@ internal static class InterceptorEmitter
             .Append(location.Data)
             .AppendLine("\")]");
 
-    /// <summary>Builds the declaration of the interception attribute.</summary>
-    /// <returns>The source of a file declaring the attribute.</returns>
+    /// <summary>Appends the interception attribute's declaration to a generated file that applies it.</summary>
+    /// <param name="source">The generated file.</param>
+    /// <returns>The file, with a file-local attribute declaration when it intercepts a call site.</returns>
     /// <remarks>
-    /// The attribute is not part of any framework, so the compiler expects the consumer's own compilation to
-    /// declare it. It is emitted once for the whole compilation rather than per dispatch file, which would
-    /// declare the same type repeatedly, and it is written to the rules the oldest supported consumer parses:
-    /// no file-scoped namespace, no file-local type.
+    /// The attribute is not part of any framework, so the compilation that intercepts has to declare it. Each file
+    /// that applies it declares its own file-local copy: a shared internal declaration would be one type visible to
+    /// every assembly granted <c>InternalsVisibleTo</c>, colliding with that assembly's own.
     /// </remarks>
+    internal static string AppendAttributeDeclaration(string source) =>
+        source.IndexOf($"{AttributeName}(", StringComparison.Ordinal) < 0
+            ? source
+            : $"{source}\n{BuildAttributeDeclaration()}";
+
+    /// <summary>Builds the file-local declaration of the interception attribute.</summary>
+    /// <returns>The source declaring the attribute.</returns>
     internal static string BuildAttributeDeclaration()
     {
         var builder = PooledBuilder.Rent(DeclarationCapacity);
@@ -87,7 +94,7 @@ internal static class InterceptorEmitter
             .AppendLine("{")
             .AppendLine("    /// <summary>Binds a generated method to the call site it replaces.</summary>")
             .AppendLine("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]")
-            .AppendLine("    internal sealed class InterceptsLocationAttribute : global::System.Attribute")
+            .AppendLine("    file sealed class InterceptsLocationAttribute : global::System.Attribute")
             .AppendLine("    {")
             .AppendLine("        /// <summary>Initializes a new instance of the <see cref=\"InterceptsLocationAttribute\"/> class.</summary>")
             .AppendLine("        /// <param name=\"version\">The encoding of <paramref name=\"data\"/>.</param>")

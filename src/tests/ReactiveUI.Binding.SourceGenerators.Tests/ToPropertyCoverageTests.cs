@@ -98,7 +98,7 @@ public class ToPropertyCoverageTests
     public async Task OutResult_UnderInterception_ForwardsTheResult()
     {
         var source = SharedSourceReader.ReadScenario("ToProperty/FactoryOutResult");
-        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10);
+        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp11);
         var compilation = TestHelper.CreateCompilation(source, parseOptions, false, "TestAssembly", []);
 
         var result = TestHelper.RunGenerator(compilation, parseOptions, RootNamespace, true);

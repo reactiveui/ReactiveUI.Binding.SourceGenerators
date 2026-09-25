@@ -98,7 +98,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedSource, target, __WinFormsViewThreadInvoker.Instance), value =>
+            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedSource, target, global::ReactiveUI.Binding.WinForms.ControlViewThreadInvoker.Instance), value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Text, value))
                 {

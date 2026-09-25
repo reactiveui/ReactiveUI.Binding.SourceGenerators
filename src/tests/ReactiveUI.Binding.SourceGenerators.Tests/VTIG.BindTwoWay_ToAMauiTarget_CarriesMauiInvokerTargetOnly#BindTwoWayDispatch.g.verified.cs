@@ -175,7 +175,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedForward, target, __MauiViewThreadInvoker.Instance);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedForward, target, global::ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker.Instance);
             var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedReverse, source);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

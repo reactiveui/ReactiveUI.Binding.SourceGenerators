@@ -22,9 +22,6 @@ internal sealed class PocoObservationPlugin : IObservationPlugin
     public bool SupportsBeforeChanged => true;
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => true;
-
-    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) => true;
 
@@ -39,38 +36,8 @@ internal sealed class PocoObservationPlugin : IObservationPlugin
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
-        sb.Append("new __UnchangingPropertyObservable<").Append(observation.SourceType).Append(", ")
+        sb.Append(GeneratedTypeNames.OpenDeferredProperty).Append(observation.SourceType).Append(", ")
             .Append(observation.Segment.PropertyTypeFullName).Append(">(").Append(observation.Source)
             .Append(", __source => ").Append(GeneratedTypeNames.ReadProperty(observation.Segment, observation.SourceType, "__source"))
             .Append(')');
-
-    /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitHelperClasses(StringBuilder sb) => EmitHelper(sb);
-
-    /// <summary>Emits a typed deferred getter without an event subscription or completion notification.</summary>
-    /// <param name="sb">The output builder.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void EmitHelper(StringBuilder sb) =>
-        sb.AppendLine("""
-                private sealed class __UnchangingPropertyObservable<TSource, TValue> : global::System.IObservable<TValue>
-                {
-                    private readonly TSource _source;
-                    private readonly global::System.Func<TSource, TValue> _getter;
-                    internal __UnchangingPropertyObservable(TSource source, global::System.Func<TSource, TValue> getter)
-                    {
-                        _source = source;
-                        _getter = getter;
-                    }
-                    public global::System.IDisposable Subscribe(global::System.IObserver<TValue> observer)
-                    {
-                        if (observer == null)
-                        {
-                            throw new global::System.ArgumentNullException(nameof(observer));
-                        }
-                        observer.OnNext(_getter(_source));
-                        return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                    }
-                }
-        """);
 }

@@ -126,7 +126,7 @@ public class AppleObservationParityTests
         var result = TestHelper.RunGenerator(Scenario(type, property), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", $"\"{property}\", {affinity}, false");
-        await result.HasGeneratedSource("ObservationHelpers.g.cs");
+        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<");
         var (assembly, context) = TestHelper.EmitAndLoad(result);
         try
         {

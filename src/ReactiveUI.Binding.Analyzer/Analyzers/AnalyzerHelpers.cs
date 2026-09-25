@@ -16,6 +16,9 @@ internal static class AnalyzerHelpers
     /// <summary>The index <see cref="ObservedTypeArgumentIndex"/> returns for an API that observes none of its type arguments.</summary>
     internal const int NoObservedTypeArgument = -1;
 
+    /// <summary>The suffix that marks the runtime-reflection twin of an API.</summary>
+    internal const string UnsafeMethodSuffix = "Unsafe";
+
     /// <summary>The API names this package generates bindings for.</summary>
     internal static readonly ImmutableHashSet<string> GeneratedApiNames = new[]
     {
@@ -35,9 +38,6 @@ internal static class AnalyzerHelpers
         SourceGenerators.Constants.ToPropertyMethodName,
     }.ToImmutableHashSet(StringComparer.Ordinal);
 
-    /// <summary>The suffix that marks the runtime-reflection twin of an API.</summary>
-    private const string UnsafeMethodSuffix = "Unsafe";
-
     /// <summary>The name of the argument that carries the view model of a view-first binding.</summary>
     private const string ViewModelParameterName = "viewModel";
 
@@ -46,8 +46,9 @@ internal static class AnalyzerHelpers
     /// <returns>true if the method is from our generated extension class.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsBindingExtensionMethod(IMethodSymbol methodSymbol) =>
-        methodSymbol.ContainingType?.Name is SourceGenerators.Constants.GeneratedExtensionClassName
-            or SourceGenerators.Constants.StubExtensionClassName;
+        methodSymbol.ContainingType?.Name is { } name
+        && (name is SourceGenerators.Constants.GeneratedExtensionClassName or SourceGenerators.Constants.StubExtensionClassName
+            || name.StartsWith($"{SourceGenerators.Constants.GeneratedExtensionClassName}_", StringComparison.Ordinal));
 
     /// <summary>Checks whether an API deliberately resolves notification providers at run time.</summary>
     /// <param name="methodSymbol">The binding method symbol.</param>

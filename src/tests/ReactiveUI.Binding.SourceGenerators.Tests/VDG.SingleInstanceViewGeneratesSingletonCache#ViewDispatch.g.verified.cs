@@ -4,7 +4,7 @@
 
 namespace ReactiveUI.Binding
 {
-    internal static partial class __ReactiveUIGeneratedBindings
+    internal static partial class __ReactiveUIGeneratedBindings_TestAssembly
     {
             /// <summary>
             /// Cached singleton instance for <see cref="global::TestApp.SingletonView"/> (marked with [SingleInstanceView]).
@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding
             /// Registers the source-generated view dispatch function with
             /// <see cref="global::ReactiveUI.Binding.DefaultViewLocator"/> when this class is first used.
             /// </summary>
-            static __ReactiveUIGeneratedBindings()
+            static __ReactiveUIGeneratedBindings_TestAssembly()
             {
                 global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(
                     __TryResolveView);

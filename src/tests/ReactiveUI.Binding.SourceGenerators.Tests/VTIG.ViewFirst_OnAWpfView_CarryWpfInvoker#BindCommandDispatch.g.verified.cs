@@ -55,7 +55,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyViewModel)__o).Save,
                 false,
                 true);
-            var commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__commandChanges, view, __WpfViewThreadInvoker.Instance);
+            var commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__commandChanges, view, global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker.Instance);
             var __controlChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::TestApp.CommandButton>(view, "SaveButton", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyView)__o).SaveButton, true);
         var __controlChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "SaveButton", 5, false);
         var __controlChanges = __controlChangesRegistration == null
@@ -68,7 +68,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyView)__o).SaveButton,
                 false,
                 true);
-            var __controls = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__controlChanges, view, __WpfViewThreadInvoker.Instance);
+            var __controls = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__controlChanges, view, global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker.Instance);
             var __controlBinding = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __controlSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__controls, __control =>
             {

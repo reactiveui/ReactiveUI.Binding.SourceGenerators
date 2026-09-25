@@ -30,6 +30,13 @@
     <BindingMauiTargets>$(BindingMauiTargets);net10.0;net11.0;$(BindingAndroidTargets)</BindingMauiTargets>
     <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
 
+    <!-- The core runtime adds the Apple heads, which carry the key-value observing and AppKit command types that
+         generated Apple bindings reference. Like the MAUI Apple heads, they build only on Windows and macOS.
+         A consumer published for a runtime identifier passes it to this project's restore, and no Apple head
+         restores for a desktop runtime, so the heads are left out of any build that names one. -->
+    <BindingCoreRuntimeTargets>$(BindingRuntimeTargets)</BindingCoreRuntimeTargets>
+    <BindingCoreRuntimeTargets Condition="'$(RuntimeIdentifier)' == '' and ($([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX')))">$(BindingCoreRuntimeTargets);$(BindingAppleTargets)</BindingCoreRuntimeTargets>
+
     <!-- Plain desktop targets (windows7.0) for the WPF and WinForms packages. A net*-windows app cannot consume a
          -windows10.0.19041.0 asset, so without these it falls back to the .NET Framework asset via AssetTargetFallback. -->
     <BindingDesktopTargets>net8.0-windows;net9.0-windows;net10.0-windows;net11.0-windows</BindingDesktopTargets>

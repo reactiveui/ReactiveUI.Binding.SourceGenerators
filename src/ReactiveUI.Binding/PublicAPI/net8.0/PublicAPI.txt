@@ -2231,6 +2231,13 @@ namespace ReactiveUI.Binding.Observables
         public System.IDisposable Subscribe(System.IObserver<ReactiveUI.Binding.BindingChange> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Diagnostics.DebuggerDisplay("CallbackProperty: {_source}, Distinct = {_distinct}")]
+    public sealed class CallbackPropertyObservable<TSource, TValue> : System.IObservable<TValue>
+    {
+        public CallbackPropertyObservable(TSource source, System.Func<TSource, System.Action, System.IDisposable> subscribe, System.Func<TSource, TValue> getter, bool distinct) { }
+        public System.IDisposable Subscribe(System.IObserver<TValue> observer) { }
+    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public static class CombineLatestObservable
     {
@@ -2264,6 +2271,13 @@ namespace ReactiveUI.Binding.Observables
         public static System.IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(System.IObservable<T1> source1, System.IObservable<T2> source2, System.IObservable<T3> source3, System.IObservable<T4> source4, System.IObservable<T5> source5, System.IObservable<T6> source6, System.IObservable<T7> source7, System.IObservable<T8> source8, System.IObservable<T9> source9, System.IObservable<T10> source10, System.IObservable<T11> source11, System.IObservable<T12> source12, System.IObservable<T13> source13, System.IObservable<T14> source14, System.IObservable<T15> source15, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> resultSelector) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(System.IObservable<T1> source1, System.IObservable<T2> source2, System.IObservable<T3> source3, System.IObservable<T4> source4, System.IObservable<T5> source5, System.IObservable<T6> source6, System.IObservable<T7> source7, System.IObservable<T8> source8, System.IObservable<T9> source9, System.IObservable<T10> source10, System.IObservable<T11> source11, System.IObservable<T12> source12, System.IObservable<T13> source13, System.IObservable<T14> source14, System.IObservable<T15> source15, System.IObservable<T16> source16, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> resultSelector) { }
+    }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Diagnostics.DebuggerDisplay("DeferredProperty: {_source}")]
+    public sealed class DeferredPropertyObservable<TSource, TValue> : System.IObservable<TValue>
+    {
+        public DeferredPropertyObservable(TSource source, System.Func<TSource, TValue> getter) { }
+        public System.IDisposable Subscribe(System.IObserver<TValue> observer) { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [System.Diagnostics.DebuggerDisplay("Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]

@@ -24,9 +24,6 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
     public bool SupportsBeforeChanged => true;
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => false;
-
-    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange)
     {
@@ -41,9 +38,6 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
-
-    /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb) {}
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -13,6 +13,9 @@ namespace ReactiveUI.Binding.WinForms;
 /// <summary>Routes writes to a WinForms <c>Control</c> onto the thread that created its handle.</summary>
 public sealed class ControlViewThreadInvoker : IViewThreadInvoker
 {
+    /// <summary>Gets the shared instance, which generated bindings route their WinForms writes through.</summary>
+    public static ControlViewThreadInvoker Instance { get; } = new();
+
     /// <inheritdoc/>
     public bool Claims(object target) => target is Control;
 

@@ -14,6 +14,15 @@ public class DispatcherViewThreadInvokerTests
     /// <summary>A target the invoker does not recognise.</summary>
     private static readonly object UnclaimedTarget = new();
 
+    /// <summary>The shared instance generated bindings route through is one invoker, reused.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Instance_IsSharedAndClaimsABindableObject()
+    {
+        await Assert.That(DispatcherViewThreadInvoker.Instance).IsSameReferenceAs(DispatcherViewThreadInvoker.Instance);
+        await Assert.That(DispatcherViewThreadInvoker.Instance.Claims(new Label())).IsTrue();
+    }
+
     /// <summary>A bindable object is claimed.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]

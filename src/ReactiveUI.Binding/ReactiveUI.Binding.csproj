@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
+    <TargetFrameworks>$(BindingCoreRuntimeTargets)</TargetFrameworks>
     <PackageDescription>Runtime library for ReactiveUI property observation and binding. Provides ICreatesObservableForProperty, expression chain decomposition, and converter infrastructure.</PackageDescription>
     <PackageTags>reactiveui;binding;observableforproperty</PackageTags>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <!-- The .editorconfig sets every IL20xx/IL30xx rule to error; the analysers that raise them only run when
@@ -19,6 +21,8 @@
   <ItemGroup>
     <Compile Include="..\ReactiveUI.Binding.Shared\**\*.cs" Link="ReactiveUI.Binding.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>
+
+  <Import Project="..\ReactiveUI.Binding.Shared\Platforms\Platforms.targets"/>
 
   <ItemGroup>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Tests"/>

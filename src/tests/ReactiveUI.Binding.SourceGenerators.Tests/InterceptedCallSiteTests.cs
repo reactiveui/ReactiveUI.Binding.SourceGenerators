@@ -261,7 +261,7 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_ClaimsEveryGeneratedApi()
     {
-        var result = Generate(EveryApiScenario, LanguageVersion.CSharp10, optIn: true, RootNamespace);
+        var result = Generate(EveryApiScenario, LanguageVersion.CSharp11, optIn: true, RootNamespace);
 
         await Assert.That(result.CompilationErrors).IsEmpty();
 
@@ -279,7 +279,7 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_EmitsWithEveryApiClaimed()
     {
-        var result = Generate(EveryApiScenario, LanguageVersion.CSharp10, optIn: true, RootNamespace);
+        var result = Generate(EveryApiScenario, LanguageVersion.CSharp11, optIn: true, RootNamespace);
 
         var (_, context) = TestHelper.EmitAndLoad(result);
         context.Unload();
@@ -292,7 +292,7 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_EmitsInterceptorsWhereTheCompilerCanDescribeACallSite()
     {
-        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp10, optIn: true);
+        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp11, optIn: true);
 
         await Assert.That(dispatch.Contains(InterceptsAttribute, StringComparison.Ordinal))
             .IsEqualTo(InterceptableLocationReader.IsSupported);
@@ -311,17 +311,21 @@ public class InterceptedCallSiteTests
         await Assert.That(dispatch).Contains(OverloadDeclaration);
     }
 
-    /// <summary>A project below C# 10 is claimed the same way.</summary>
+    /// <summary>
+    /// A project below C# 11 cannot declare the file-local interception attribute, so an opted-in build dispatches
+    /// through the overloads instead.
+    /// </summary>
+    /// <param name="languageVersion">The consumer's language version.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task OptedInBuild_BelowCSharp10_StillClaimsTheCallSite()
+    [Arguments(LanguageVersion.CSharp7_3)]
+    [Arguments(LanguageVersion.CSharp10)]
+    public async Task OptedInBuild_BelowCSharp11_DispatchesThroughTheOverloads(LanguageVersion languageVersion)
     {
-        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp7_3, optIn: true);
+        var dispatch = GenerateDispatch(Scenario, languageVersion, optIn: true);
 
-        await Assert.That(dispatch.Contains(InterceptsAttribute, StringComparison.Ordinal))
-            .IsEqualTo(InterceptableLocationReader.IsSupported);
-        await Assert.That(dispatch.Contains(OverloadDeclaration, StringComparison.Ordinal))
-            .IsEqualTo(!InterceptableLocationReader.IsSupported);
+        await Assert.That(dispatch).DoesNotContain(InterceptsAttribute);
+        await Assert.That(dispatch).Contains(OverloadDeclaration);
     }
 
     /// <summary>A file declared outside the root namespace is claimed although the overloads cannot reach it.</summary>
@@ -329,7 +333,7 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_ClaimsACallSiteOutsideTheRootNamespace()
     {
-        var dispatch = GenerateDispatch(OutOfReachScenario, LanguageVersion.CSharp7_3, optIn: true);
+        var dispatch = GenerateDispatch(OutOfReachScenario, LanguageVersion.CSharp11, optIn: true);
 
         await Assert.That(dispatch.Contains(InterceptsAttribute, StringComparison.Ordinal))
             .IsEqualTo(InterceptableLocationReader.IsSupported);
@@ -340,7 +344,7 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_RunsTheBindingItClaimed()
     {
-        var result = Generate(Scenario, LanguageVersion.CSharp10, optIn: true, RootNamespace);
+        var result = Generate(Scenario, LanguageVersion.CSharp11, optIn: true, RootNamespace);
 
         await Assert.That(result.CompilationErrors).IsEmpty();
 
@@ -380,21 +384,32 @@ public class InterceptedCallSiteTests
     [Test]
     public async Task OptedInBuild_LeavesACallSiteItCannotReadToTheStub()
     {
-        var result = Generate(RuntimeResolvedScenario, LanguageVersion.CSharp10, optIn: true, RootNamespace);
+        var result = Generate(RuntimeResolvedScenario, LanguageVersion.CSharp11, optIn: true, RootNamespace);
 
         await Assert.That(result.CompilationErrors).IsEmpty();
         await result.DoesNotHaveGeneratedSource(BindToDispatchFileName);
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchFileName);
     }
 
-    /// <summary>The generated namespace is what the opt-in has to name.</summary>
+    /// <summary>The generated namespace sits below the one the opt-in names, and belongs to this assembly alone.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OptedInBuild_GeneratesIntoTheInterceptedNamespace()
     {
-        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp10, optIn: true);
+        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp11, optIn: true);
 
-        await Assert.That(dispatch.Contains($"namespace {Constants.InterceptorNamespace}", StringComparison.Ordinal))
+        await Assert.That(dispatch.Contains($"namespace {Constants.InterceptorNamespace}.TestAssembly", StringComparison.Ordinal))
+            .IsEqualTo(InterceptableLocationReader.IsSupported);
+    }
+
+    /// <summary>A file that intercepts declares its own file-local interception attribute.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OptedInBuild_DeclaresTheInterceptionAttributeInTheInterceptingFile()
+    {
+        var dispatch = GenerateDispatch(Scenario, LanguageVersion.CSharp11, optIn: true);
+
+        await Assert.That(dispatch.Contains("file sealed class InterceptsLocationAttribute", StringComparison.Ordinal))
             .IsEqualTo(InterceptableLocationReader.IsSupported);
     }
 

@@ -21,6 +21,12 @@ public class ViewDispatchRegistrationTests
     /// <summary>The attribute that marks a module initializer.</summary>
     private const string ModuleInitializerUse = "[global::System.Runtime.CompilerServices.ModuleInitializer]";
 
+    /// <summary>
+    /// The static constructor a consumer below C# 9 registers with. Such a consumer shares a namespace other assemblies
+    /// may emit into, so its generated class carries the assembly's name.
+    /// </summary>
+    private const string SharedTierStaticConstructor = "static __ReactiveUIGeneratedBindings_TestAssembly()";
+
     /// <summary>The marker in the consumer template that a binding statement replaces.</summary>
     private const string BindingSlot = "//BINDING//";
 
@@ -115,7 +121,7 @@ public class ViewDispatchRegistrationTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp7_3);
 
         await result.CompilationSucceeds();
-        await result.GeneratedSourceContains(DispatchHintName, "static __ReactiveUIGeneratedBindings()");
+        await result.GeneratedSourceContains(DispatchHintName, SharedTierStaticConstructor);
         await result.GeneratedSourceDoesNotContain(DispatchHintName, "ModuleInitializer");
         await AssertUsageResolvesView(result);
     }
@@ -135,10 +141,10 @@ public class ViewDispatchRegistrationTests
 
         var dispatch = result.GeneratedSources[DispatchHintName];
         await Assert.That(dispatch.Contains(ModuleInitializerUse, StringComparison.Ordinal)).IsEqualTo(usesModuleInitializer);
-        await Assert.That(dispatch.Contains("static __ReactiveUIGeneratedBindings()", StringComparison.Ordinal)).IsEqualTo(!usesModuleInitializer);
+        await Assert.That(dispatch.Contains(SharedTierStaticConstructor, StringComparison.Ordinal)).IsEqualTo(!usesModuleInitializer);
     }
 
-    /// <summary>Verifies a framework without the module initializer attribute gets a declaration of it.</summary>
+    /// <summary>Verifies a framework without the module initializer attribute gets a file-local declaration of it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ModuleInitializerAttributeIsDeclaredWhenTheFrameworkLacksIt()
@@ -157,13 +163,13 @@ public class ViewDispatchRegistrationTests
 
         var compilation = TestHelper.CreateCompilation(
             $"{generated}\n{ConsumerViews}",
-            TestHelper.ParseOptionsFor(LanguageVersion.CSharp9),
+            TestHelper.ParseOptionsFor(LanguageVersion.CSharp11),
             false,
             "TestAssembly",
             []);
         var errors = compilation.GetDiagnostics().Where(static d => d.Severity == DiagnosticSeverity.Error).ToArray();
 
-        await Assert.That(generated).Contains("internal sealed class ModuleInitializerAttribute");
+        await Assert.That(generated).Contains("file sealed class ModuleInitializerAttribute");
         await Assert.That(errors.Length).IsEqualTo(0);
     }
 

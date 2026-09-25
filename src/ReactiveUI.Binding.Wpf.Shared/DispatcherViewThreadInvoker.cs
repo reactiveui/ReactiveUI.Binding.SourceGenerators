@@ -14,6 +14,9 @@ namespace ReactiveUI.Binding.Wpf;
 /// <summary>Routes writes to a WPF <c>DispatcherObject</c> onto the thread its dispatcher owns.</summary>
 public sealed class DispatcherViewThreadInvoker : IViewThreadInvoker
 {
+    /// <summary>Gets the shared instance, which generated bindings route their WPF writes through.</summary>
+    public static DispatcherViewThreadInvoker Instance { get; } = new();
+
     /// <inheritdoc/>
     public bool Claims(object target) => target is DispatcherObject;
 

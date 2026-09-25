@@ -537,7 +537,9 @@ public class ViewWriteSchedulingRuntimeTests
     /// <returns>What the entry point reported.</returns>
     private static async Task<string?> RunScenarioAsync(string entryPoint)
     {
-        var result = TestHelper.RunGenerator(SchedulingSource, LanguageVersion.CSharp10);
+        var result = TestHelper.RunGenerator(
+            SchedulingSource + RuntimeInvokerStandIns.Wpf + RuntimeInvokerStandIns.WinForms + RuntimeInvokerStandIns.Maui,
+            LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
 
         var (assembly, context) = TestHelper.EmitAndLoad(result);

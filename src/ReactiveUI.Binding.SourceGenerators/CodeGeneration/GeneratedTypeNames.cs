@@ -79,6 +79,30 @@ internal static class GeneratedTypeNames
     /// <summary>Opens the observation of a property with no change mechanism, which emits the current value and never completes.</summary>
     internal const string OpenUnchangingProperty = "new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
 
+    /// <summary>Opens the observation of a property read when a subscriber arrives, with no change mechanism.</summary>
+    internal const string OpenDeferredProperty = "new global::ReactiveUI.Binding.Observables.DeferredPropertyObservable<";
+
+    /// <summary>Opens the observation of a property through a platform's native change callback.</summary>
+    internal const string OpenCallbackProperty = "new global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<";
+
+    /// <summary>Opens the observation of an Apple property through key-value observing.</summary>
+    internal const string OpenKvoProperty = "new global::ReactiveUI.Binding.Observables.KvoPropertyObservable<";
+
+    /// <summary>The fully qualified AppKit target/action receiver that generated AppKit command bindings install.</summary>
+    internal const string AppKitCommandTarget = "global::ReactiveUI.Binding.CommandBinding.AppKitCommandTarget";
+
+    /// <summary>The metadata name of the key-value observing observable in the lean runtime.</summary>
+    internal const string KvoPropertyObservableMetadataName = "ReactiveUI.Binding.Observables.KvoPropertyObservable`1";
+
+    /// <summary>The metadata name of the key-value observing observable in the System.Reactive runtime.</summary>
+    internal const string ReactiveKvoPropertyObservableMetadataName = "ReactiveUI.Binding.Reactive.Observables.KvoPropertyObservable`1";
+
+    /// <summary>The metadata name of the AppKit command target in the lean runtime.</summary>
+    internal const string AppKitCommandTargetMetadataName = "ReactiveUI.Binding.CommandBinding.AppKitCommandTarget";
+
+    /// <summary>The metadata name of the AppKit command target in the System.Reactive runtime.</summary>
+    internal const string ReactiveAppKitCommandTargetMetadataName = "ReactiveUI.Binding.Reactive.CommandBinding.AppKitCommandTarget";
+
     /// <summary>The scheduler type the generated scheduler-taking overloads declare.</summary>
     internal const string ISequencer = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
 

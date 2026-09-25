@@ -27,7 +27,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     private const string UnsafeMethodSuffix = "Unsafe";
 
     /// <summary>The parameter type a property path arrives as, which marks it out from the other arguments.</summary>
-    private const string ExpressionParameterTypePrefix = "System.Linq.Expressions.Expression<";
+    private const string ExpressionTypeName = "System.Linq.Expressions.Expression`1";
 
     /// <summary>The diagnostics this analyzer reports.</summary>
     private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
@@ -132,8 +132,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             // Check if this is an Expression<Func<...>> parameter
             var parameterType = arg.Parameter!.Type;
 
-            var typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal))
+            if (!NativeTypeIdentity.Matches(parameterType, ExpressionTypeName))
             {
                 continue;
             }
@@ -399,8 +398,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             // Only check Expression<Func<...>> parameters
             var parameterType = arg.Parameter!.Type;
 
-            var typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal))
+            if (!NativeTypeIdentity.Matches(parameterType, ExpressionTypeName))
             {
                 continue;
             }
@@ -577,8 +575,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     {
         lambda = null;
 
-        return argument.Parameter!.Type.ToDisplayString()
-                .StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal)
+        return NativeTypeIdentity.Matches(argument.Parameter!.Type, ExpressionTypeName)
             && (lambda = argument.Value.Syntax as LambdaExpressionSyntax) is not null;
     }
 

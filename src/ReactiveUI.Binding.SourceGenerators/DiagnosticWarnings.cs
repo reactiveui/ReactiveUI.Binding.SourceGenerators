@@ -109,6 +109,16 @@ internal static class DiagnosticWarnings
         true,
         TypeParameterCallDescription);
 
+    /// <summary>RXUIBIND017: a binding writes to a UI object whose platform package, which marshals the write, is not referenced.</summary>
+    internal static readonly DiagnosticDescriptor MissingViewThreadInvoker = new(
+        "RXUIBIND017",
+        "Binding writes to a UI object without its platform package",
+        "'{0}' belongs to a UI thread, but '{1}' is not referenced, so writes from another thread are not marshalled onto it; reference '{1}'",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        MissingViewThreadInvokerDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -262,6 +272,12 @@ internal static class DiagnosticWarnings
     private const string UnreadableToPropertyNameDescription =
         "The generator reads the property's name from the call. A selector has to read one member straight off its "
         + "parameter, as in x => x.Property, and a string has to be a compile-time constant.";
+
+    /// <summary>The string description of the missing view-thread invoker warning.</summary>
+    private const string MissingViewThreadInvokerDescription =
+        "A binding writes to a WPF, WinForms or MAUI object on the thread that owns it, through the invoker the "
+        + "matching ReactiveUI.Binding platform package ships. Without that package the binding has no invoker for "
+        + "the object, and a value arriving on another thread is written on that thread. Reference the platform package.";
 
     /// <summary>The string description of the type parameter call warning.</summary>
     private const string TypeParameterCallDescription =

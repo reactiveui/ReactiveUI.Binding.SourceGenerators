@@ -229,7 +229,7 @@ public class NullableSchedulerDispatchTests
     [Test]
     public async Task SchedulerDispatch_InAnInterceptionBuild_DeclaresTheSchedulerNullable()
     {
-        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10);
+        var parseOptions = TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp11);
         var compilation = TestHelper.CreateCompilation(
             NullableSourceFor(LeanScheduler, LeanSchedulerNamespace),
             parseOptions,

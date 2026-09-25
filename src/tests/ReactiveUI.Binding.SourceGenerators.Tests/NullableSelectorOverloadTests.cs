@@ -134,8 +134,8 @@ public class NullableSelectorOverloadTests
     {
         var source = ScenarioTemplate.Replace("__CALL__", call, StringComparison.Ordinal);
         var parseOptions = optIn
-            ? TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp10)
-            : TestHelper.ParseOptionsFor(LanguageVersion.CSharp10);
+            ? TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp11)
+            : TestHelper.ParseOptionsFor(LanguageVersion.CSharp11);
         var compilation = TestHelper.CreateCompilation(source, parseOptions, false, "TestAssembly", []);
 
         var result = TestHelper.RunGenerator(compilation, parseOptions, RootNamespace, false);

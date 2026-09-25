@@ -23,18 +23,18 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// generated code (e.g. when diagnosing the generator itself).
 /// </param>
 /// <param name="GeneratedNamespace">
-/// The namespace the dispatch overloads are emitted into. From C# 10 this is the consumer's own root namespace,
-/// falling back to <c>ReactiveUI.Binding.Generated.&lt;assembly&gt;</c> when the build exposes no root namespace.
-/// Either way it is reached by a generated <c>global using</c>, which is scoped to the compilation that declares
-/// it, so two assemblies which both run the generator do not see each other's overloads. That matters whenever
-/// one grants the other <c>InternalsVisibleTo</c>: the overloads stay accessible across that boundary, and
-/// identical ones from both assemblies make every matching call site ambiguous (CS0121). A shared namespace
-/// collides even when the class names differ, because extension lookup considers the methods, not the type.
+/// The namespace the generated class is emitted into, always one of this assembly's own. Under interception it is
+/// <c>ReactiveUI.Binding.Generated.Interceptors.&lt;assembly&gt;</c>, below the namespace the consumer opts into
+/// interception. From C# 10 without interception it is <c>ReactiveUI.Binding.Generated.&lt;assembly&gt;</c>,
+/// reached by a generated <c>global using</c>, which is scoped to the compilation that declares it, so two
+/// assemblies which both run the generator do not see each other's overloads - identical ones visible across an
+/// <c>InternalsVisibleTo</c> boundary would make every matching call site ambiguous (CS0121). Below C# 10 there is
+/// no way to scope an import, so the overloads sit in the runtime's namespace, or in the root namespace of an
+/// assembly that grants <c>InternalsVisibleTo</c>.
 /// </param>
 /// <param name="EmitGeneratedNamespaceImport">
-/// Whether to emit the <c>global using</c> that brings <see cref="GeneratedNamespace"/> into scope. Also marks
-/// which dispatch tier applies: when false the consumer predates global usings, no overload is emitted, and
-/// calls reach the generated code through the registry instead.
+/// Whether to emit the <c>global using</c> that brings <see cref="GeneratedNamespace"/> into scope: from C# 10,
+/// when call sites reach the overloads through lookup rather than interception.
 /// </param>
 /// <param name="StubHasExpressionParameters">
 /// Whether the referenced runtime stub carries optional expression parameters. The generated overload must take
@@ -80,6 +80,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Whether generated overloads can carry <c>OverloadResolutionPriorityAttribute</c>: the consumer compiles as C# 13
 /// or later and can reach the attribute, which frameworks from .NET 9 ship.
 /// </param>
+/// <param name="GeneratedClassName">
+/// The name of the generated class. It carries the assembly's name wherever <see cref="GeneratedNamespace"/> is
+/// not the assembly's own, so no two assemblies ever declare a type by the same fully qualified name.
+/// </param>
 internal readonly record struct LanguageFeatures(
     bool SupportsCallerArgExpr,
     bool SupportsNullable,
@@ -93,7 +97,8 @@ internal readonly record struct LanguageFeatures(
     bool SupportsInterceptors = false,
     bool SupportsModuleInitializer = false,
     bool DeclaresModuleInitializerAttribute = false,
-    bool SupportsOverloadResolutionPriority = false)
+    bool SupportsOverloadResolutionPriority = false,
+    string GeneratedClassName = Constants.GeneratedExtensionClassName)
 {
     /// <summary>Gets a value indicating whether call sites a dispatch cannot tell apart collapse to one.</summary>
     /// <remarks>

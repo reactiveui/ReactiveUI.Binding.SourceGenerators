@@ -15,6 +15,17 @@ public class ControlViewThreadInvokerTests
     /// <summary>A target the invoker does not recognise.</summary>
     private static readonly object UnclaimedTarget = new();
 
+    /// <summary>The shared instance generated bindings route through is one invoker, reused.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Instance_IsSharedAndClaimsAControl()
+    {
+        using var control = new Control();
+
+        await Assert.That(ControlViewThreadInvoker.Instance).IsSameReferenceAs(ControlViewThreadInvoker.Instance);
+        await Assert.That(ControlViewThreadInvoker.Instance.Claims(control)).IsTrue();
+    }
+
     /// <summary>A control is claimed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

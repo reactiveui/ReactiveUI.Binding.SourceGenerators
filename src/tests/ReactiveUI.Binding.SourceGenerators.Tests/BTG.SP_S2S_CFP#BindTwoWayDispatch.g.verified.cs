@@ -7,7 +7,7 @@ using System;
 
 namespace ReactiveUI.Binding
 {
-    internal static partial class __ReactiveUIGeneratedBindings
+    internal static partial class __ReactiveUIGeneratedBindings_TestAssembly
     {
         /// <summary>
         /// Concrete typed overload for BindTwoWay from global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyViewModel to global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyView.

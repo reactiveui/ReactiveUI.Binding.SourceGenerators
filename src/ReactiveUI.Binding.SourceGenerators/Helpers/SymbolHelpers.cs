@@ -10,9 +10,6 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// <summary>Provides well-known symbol caching and type-checking helpers shared across all extractors.</summary>
 internal static class SymbolHelpers
 {
-    /// <summary>The number of type arguments on <c>IInteraction&lt;TInput, TOutput&gt;</c>.</summary>
-    private const int InteractionTypeArgumentCount = 2;
-
     /// <summary>The symbol cache for the compilation.</summary>
     private static readonly ConditionalWeakTable<Compilation, WellKnownSymbolsBox> SymbolCache = new();
 
@@ -30,10 +27,33 @@ internal static class SymbolHelpers
                 IReactiveObject = c.GetTypeByMetadataName(Constants.IReactiveObjectMetadataName),
                 WpfDependencyObject = c.GetTypeByMetadataName(Constants.WpfDependencyObjectMetadataName),
                 WinUIDependencyObject = c.GetTypeByMetadataName(Constants.WinUIDependencyObjectMetadataName),
-                NSObject = c.GetTypeByMetadataName(Constants.NSObjectMetadataName),
+                NSObject = ResolveKvoOwner(c),
                 WinFormsComponent = c.GetTypeByMetadataName(Constants.WinFormsComponentMetadataName),
                 AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName),
             });
+
+    /// <summary>Resolves <c>NSObject</c> when the runtime's key-value observing observable is in reach.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns>The <c>NSObject</c> symbol, or null when either it or the runtime's KVO support is missing.</returns>
+    /// <remarks>
+    /// Key-value observing runs through the runtime's Apple heads. Without them there is nothing for a generated
+    /// observation to reference, so no type is treated as observable through KVO.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static INamedTypeSymbol? ResolveKvoOwner(Compilation compilation) =>
+        ResolvesEither(compilation, CodeGeneration.GeneratedTypeNames.KvoPropertyObservableMetadataName, CodeGeneration.GeneratedTypeNames.ReactiveKvoPropertyObservableMetadataName)
+            ? compilation.GetTypeByMetadataName(Constants.NSObjectMetadataName)
+            : null;
+
+    /// <summary>Determines whether a compilation resolves a runtime type in either the lean or the System.Reactive flavour.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="leanMetadataName">The type's metadata name in the lean runtime.</param>
+    /// <param name="reactiveMetadataName">The type's metadata name in the System.Reactive runtime.</param>
+    /// <returns><see langword="true"/> when either flavour declares the type.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool ResolvesEither(Compilation compilation, string leanMetadataName, string reactiveMetadataName) =>
+        compilation.GetTypeByMetadataName(leanMetadataName) is not null
+        || compilation.GetTypeByMetadataName(reactiveMetadataName) is not null;
 
     /// <summary>
     /// Extracts the inner type T from a property whose type is IObservable&lt;T&gt; or IObservable&lt;T&gt;?.
@@ -83,17 +103,15 @@ internal static class SymbolHelpers
     /// <returns>A value indicating whether the type is IObservable&lt;T&gt;.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsIObservable(INamedTypeSymbol type) =>
-        type is { IsGenericType: true, TypeArguments.Length: 1 }
-        && type.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-        == "global::System.IObservable<T>";
+        NativeTypeIdentity.Matches(type, "System.IObservable`1");
 
     /// <summary>Checks if a type is IInteraction&lt;TInput, TOutput&gt;.</summary>
     /// <param name="type">The type symbol to check.</param>
     /// <returns>A value indicating whether the type is IInteraction&lt;TInput, TOutput&gt;.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsInteractionType(INamedTypeSymbol type) =>
-        type is { IsGenericType: true, TypeArguments.Length: InteractionTypeArgumentCount, MetadataName: "IInteraction`2" }
-        && type.ContainingNamespace!.ToDisplayString() is "ReactiveUI.Binding" or Constants.ReactiveRuntimeNamespace;
+        NativeTypeIdentity.Matches(type, "ReactiveUI.Binding.IInteraction`2")
+        || NativeTypeIdentity.Matches(type, $"{Constants.ReactiveRuntimeNamespace}.IInteraction`2");
 
     /// <summary>Extracts TInput and TOutput type arguments from a type that implements IInteraction&lt;TInput, TOutput&gt;.</summary>
     /// <param name="type">The type symbol.</param>
@@ -147,9 +165,7 @@ internal static class SymbolHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool DetectHasConverterOverride(IParameterSymbol parameter) =>
         parameter.Name is "converter" or "sourceToTargetConverter" or "vmToViewConverter" or "viewModelToViewConverter"
-        && parameter.Type is INamedTypeSymbol paramType
-        && paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-            .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
+        && parameter.Type.Name == "IBindingTypeConverter";
 
     /// <summary>Resolves a path's leaf property or field type to its INamedTypeSymbol using the semantic model.</summary>
     /// <param name="semanticModel">The semantic model.</param>

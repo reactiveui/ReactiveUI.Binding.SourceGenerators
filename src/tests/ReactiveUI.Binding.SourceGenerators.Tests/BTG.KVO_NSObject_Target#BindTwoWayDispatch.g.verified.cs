@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.Text")
             {
-                return __BindTwoWay_7FFFD5B3E84DC151(source, target);
+                return __BindTwoWay_7FFFD5B3E84DC3DC(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5B3E84DC151(global::TestApp.MyViewModel source, global::TestApp.MyAppleView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5B3E84DC3DC(global::TestApp.MyViewModel source, global::TestApp.MyAppleView target)
         {
             // BindTwoWay: Name <-> Text
         if (global::ReactiveUI.Binding.BindingHooks.Any)
@@ -83,7 +83,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyViewModel)__o).Name,
                 false,
                 true);
-            var targetObsMechanism = new __KVOObservable<string>((global::Foundation.NSObject)target, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false);
+            var targetObsMechanism = new global::ReactiveUI.Binding.Observables.KvoPropertyObservable<string>((global::Foundation.NSObject)target, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false);
         var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(target.GetType(), "Text", 15, false);
         var targetObs = targetObsRegistration == null
             ? (global::System.IObservable<string>)targetObsMechanism

@@ -75,6 +75,6 @@ public class PlatformAdapterTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.GeneratedSourceContains(DispatchFile, "\"Text\", 1, false");
-        await result.GeneratedSourceContains(DispatchFile, "__UnchangingPropertyObservable");
+        await result.GeneratedSourceContains(DispatchFile, "global::ReactiveUI.Binding.Observables.DeferredPropertyObservable<");
     }
 }

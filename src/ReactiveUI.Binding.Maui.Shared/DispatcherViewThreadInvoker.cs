@@ -14,6 +14,9 @@ namespace ReactiveUI.Binding.Maui;
 /// <summary>Routes writes to a MAUI <c>BindableObject</c> through the dispatcher it carries.</summary>
 public sealed class DispatcherViewThreadInvoker : IViewThreadInvoker
 {
+    /// <summary>Gets the shared instance, which generated bindings route their MAUI writes through.</summary>
+    public static DispatcherViewThreadInvoker Instance { get; } = new();
+
     /// <inheritdoc/>
     public bool Claims(object target) => target is BindableObject;
 

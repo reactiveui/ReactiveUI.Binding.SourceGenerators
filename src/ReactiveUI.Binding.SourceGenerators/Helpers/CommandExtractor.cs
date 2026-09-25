@@ -2,8 +2,10 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -241,10 +243,25 @@ internal static class CommandExtractor
         return new(resolvedEventName, resolvedEventArgsTypeFullName, DetectControlCapabilities(controlLeafType))
         {
             HasExplicitEvent = explicitEvent,
-            NativeCommand = explicitEvent ? null : CommandBindingPluginRegistry.InspectControl(controlLeafType),
+            NativeCommand = explicitEvent ? null : RuntimeSupported(CommandBindingPluginRegistry.InspectControl(controlLeafType), semanticModel.Compilation),
             ViewThreadInvoker = ViewThreadPluginRegistry.InvokerFor(controlLeafType, semanticModel.Compilation),
         };
     }
+
+    /// <summary>Drops a native route whose runtime support the consumer does not reference.</summary>
+    /// <param name="native">The native route the control offers, or null.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns>The route, or null when generated code would name a runtime type the compilation cannot see.</returns>
+    /// <remarks>
+    /// AppKit target/action installs the runtime's <c>AppKitCommandTarget</c>, which only the macOS head of the
+    /// runtime declares. Without it the binding takes the event or property route instead.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static NativeCommandInfo? RuntimeSupported(NativeCommandInfo? native, Compilation compilation) =>
+        native is { Kind: NativeCommandKind.AppKitTargetAction }
+        && !SymbolHelpers.ResolvesEither(compilation, GeneratedTypeNames.AppKitCommandTargetMetadataName, GeneratedTypeNames.ReactiveAppKitCommandTargetMetadataName)
+            ? null
+            : native;
 
     /// <summary>
     /// Inspects the method's <c>withParameter</c> parameter (if any) to determine whether the

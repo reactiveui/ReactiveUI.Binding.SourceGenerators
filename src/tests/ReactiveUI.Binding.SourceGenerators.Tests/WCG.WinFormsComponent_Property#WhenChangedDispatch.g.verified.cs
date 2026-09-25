@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyWinFormsControl)__o).Text,
                 false, false)
                 : (global::System.IObservable<string>)
-                new __WinFormsObservable<global::TestApp.MyWinFormsControl, string>((global::TestApp.MyWinFormsControl)obj, (__source, __notify) =>
+                new global::ReactiveUI.Binding.Observables.CallbackPropertyObservable<global::TestApp.MyWinFormsControl, string>((global::TestApp.MyWinFormsControl)obj, (__source, __notify) =>
                     {
                         global::System.EventHandler __handler0 = (__sender, __args) => __notify();
                         __source.TextChanged += __handler0;

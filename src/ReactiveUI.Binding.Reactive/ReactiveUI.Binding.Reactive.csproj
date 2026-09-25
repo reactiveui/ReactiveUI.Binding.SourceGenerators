@@ -4,7 +4,9 @@
          ISequencer bound to System.Reactive's IScheduler, shifting every shared type to the
          ReactiveUI.Binding.Reactive.* namespace. The alias and the REACTIVE_SHIM define come from
          ReactiveShim.props via the '.Reactive' name suffix. -->
-    <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
+    <TargetFrameworks>$(BindingCoreRuntimeTargets)</TargetFrameworks>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <PackageDescription>ReactiveUI.Binding recompiled against System.Reactive's IScheduler for seamless interop with System.Reactive consumers.</PackageDescription>
     <PackageTags>reactiveui;binding;system.reactive;scheduler</PackageTags>
   </PropertyGroup>
@@ -19,6 +21,8 @@
   <ItemGroup>
     <Compile Include="..\ReactiveUI.Binding.Shared\**\*.cs" Link="ReactiveUI.Binding.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>
+
+  <Import Project="..\ReactiveUI.Binding.Shared\Platforms\Platforms.targets"/>
 
   <ItemGroup>
     <Using Include="System.Diagnostics"/>

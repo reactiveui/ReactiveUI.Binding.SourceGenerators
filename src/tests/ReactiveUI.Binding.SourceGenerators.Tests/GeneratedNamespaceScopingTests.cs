@@ -25,8 +25,14 @@ public class GeneratedNamespaceScopingTests
     /// <summary>The namespace declaration a consumer sharing the runtime library's namespace gets.</summary>
     private const string SharedNamespaceDeclaration = "namespace ReactiveUI.Binding\n";
 
+    /// <summary>The namespace a consumer with no namespace of its own gets.</summary>
+    private const string AssemblyNamespace = "ReactiveUI.Binding.Generated.TestAssembly";
+
     /// <summary>The namespace declaration a consumer with no namespace of its own gets.</summary>
-    private const string AssemblyNamespaceDeclaration = "namespace ReactiveUI.Binding.Generated.TestAssembly\n";
+    private const string AssemblyNamespaceDeclaration = $"namespace {AssemblyNamespace}\n";
+
+    /// <summary>The generated class name wherever another assembly could also emit into the same namespace.</summary>
+    private const string AssemblyQualifiedClassName = "__ReactiveUIGeneratedBindings_TestAssembly";
 
     /// <summary>An assembly-level grant of internals to another assembly.</summary>
     private const string InternalsVisibleTo =
@@ -245,12 +251,19 @@ public class GeneratedNamespaceScopingTests
     /// <param name="result">The generator run to inspect.</param>
     /// <param name="expectedNamespace">The namespace the generated overload is expected to live in.</param>
     /// <returns>A task representing the asynchronous assertion.</returns>
+    /// <remarks>
+    /// Only the assembly's own namespace carries the plain class name; anywhere another assembly could also emit,
+    /// the class name carries the assembly so no two assemblies declare a type by the same name.
+    /// </remarks>
     private static async Task AssertCallSiteResolvesTo(GeneratorTestResult result, string expectedNamespace)
     {
         var symbol = await CallSiteResolution.ResolveAsync(result, Constants.WhenChangedMethodName);
+        var expectedClass = string.Equals(expectedNamespace, AssemblyNamespace, StringComparison.Ordinal)
+            ? Constants.GeneratedExtensionClassName
+            : AssemblyQualifiedClassName;
 
         await Assert.That(symbol).IsNotNull();
-        await Assert.That(symbol!.ContainingType.Name).IsEqualTo(Constants.GeneratedExtensionClassName);
+        await Assert.That(symbol!.ContainingType.Name).IsEqualTo(expectedClass);
         await Assert.That(symbol.ContainingType.ContainingNamespace.ToDisplayString()).IsEqualTo(expectedNamespace);
     }
 }

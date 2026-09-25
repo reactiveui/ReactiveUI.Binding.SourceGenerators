@@ -151,6 +151,10 @@ internal static class ViewLocatorDispatchGenerator
 
     /// <summary>Declares the module initializer attribute for a consumer whose framework does not ship it.</summary>
     /// <param name="sb">The string builder to write to.</param>
+    /// <remarks>
+    /// File-local, so the declaration belongs to this file alone: a shared internal one would be a type visible to
+    /// every assembly granted <c>InternalsVisibleTo</c>, colliding with that assembly's own.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitModuleInitializerAttribute(StringBuilder sb) =>
         sb.AppendLine().AppendLine()
@@ -158,7 +162,7 @@ internal static class ViewLocatorDispatchGenerator
             .AppendLine("{")
             .AppendLine("    /// <summary>Marks a method the runtime calls when its module loads.</summary>")
             .AppendLine("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]")
-            .AppendLine("    internal sealed class ModuleInitializerAttribute : global::System.Attribute")
+            .AppendLine("    file sealed class ModuleInitializerAttribute : global::System.Attribute")
             .AppendLine("    {")
             .AppendLine("    }")
             .Append('}');
@@ -177,7 +181,7 @@ internal static class ViewLocatorDispatchGenerator
         _ = sb.Append("\nnamespace ")
             .Append(features.GeneratedNamespace)
             .Append("\n{\n    internal static partial class ")
-            .Append(Constants.GeneratedExtensionClassName)
+            .Append(features.GeneratedClassName)
             .Append("\n    {");
     }
 
@@ -209,7 +213,7 @@ internal static class ViewLocatorDispatchGenerator
                 .AppendLine("            /// Registers the source-generated view dispatch function with")
                 .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/> when this class is first used.")
                 .AppendLine(DocCommentClose)
-                .Append("            static ").Append(Constants.GeneratedExtensionClassName).AppendLine("()");
+                .Append("            static ").Append(features.GeneratedClassName).AppendLine("()");
         }
 
         _ = sb.AppendLine("            {")

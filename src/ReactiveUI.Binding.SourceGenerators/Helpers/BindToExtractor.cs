@@ -103,7 +103,7 @@ internal static class BindToExtractor
     /// <returns>The observable value type, or null if the receiver is not an observable.</returns>
     internal static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
     {
-        if (receiver is INamedTypeSymbol direct && IsFrameworkObservable(direct))
+        if (receiver is INamedTypeSymbol direct && SymbolHelpers.IsIObservable(direct))
         {
             return direct.TypeArguments[0];
         }
@@ -111,7 +111,7 @@ internal static class BindToExtractor
         // A null receiver has no interfaces, so it returns null like one that implements none.
         foreach (var iface in receiver?.AllInterfaces ?? System.Collections.Immutable.ImmutableArray<INamedTypeSymbol>.Empty)
         {
-            if (IsFrameworkObservable(iface))
+            if (SymbolHelpers.IsIObservable(iface))
             {
                 return iface.TypeArguments[0];
             }
@@ -119,13 +119,6 @@ internal static class BindToExtractor
 
         return null;
     }
-
-    /// <summary>Determines whether a type is the framework's own <c>System.IObservable&lt;T&gt;</c>.</summary>
-    /// <param name="type">The type to judge.</param>
-    /// <returns><see langword="true"/> when it is that interface rather than one of the same name.</returns>
-    private static bool IsFrameworkObservable(INamedTypeSymbol type) =>
-        type is { Name: "IObservable", TypeArguments.Length: 1 }
-        && type.ContainingNamespace.ToDisplayString() == "System";
 
     /// <summary>
     /// Scans the method parameters to detect the presence of a <c>conversionHint</c> parameter
@@ -148,9 +141,7 @@ internal static class BindToExtractor
             {
                 hasConversionHint = true;
             }
-            else if (parameter.Name == "converterOverride"
-                     && parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-                         .EndsWith("IBindingTypeConverter", StringComparison.Ordinal))
+            else if (parameter.Name == "converterOverride" && parameter.Type.Name == "IBindingTypeConverter")
             {
                 hasConverterOverride = true;
             }

@@ -2,22 +2,27 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Plugins;
 
-/// <summary>Covers matching a binding target's type to the invoker a generated binding carries.</summary>
+/// <summary>Covers matching a binding target's type to the runtime invoker a generated binding routes through.</summary>
 public class ViewThreadPluginRegistryTests
 {
-    /// <summary>The WPF invoker class name.</summary>
-    private const string WpfInvoker = "__WpfViewThreadInvoker";
+    /// <summary>The WPF runtime invoker.</summary>
+    private const string WpfInvoker = "global::ReactiveUI.Binding.Wpf.DispatcherViewThreadInvoker";
 
-    /// <summary>The MAUI invoker class name.</summary>
-    private const string MauiInvoker = "__MauiViewThreadInvoker";
+    /// <summary>The metadata name of a WPF view.</summary>
+    private const string WpfView = "TestApp.WpfView";
 
-    /// <summary>A compilation that declares one type from each platform, plus a type from none.</summary>
+    /// <summary>The metadata name of a type from no platform.</summary>
+    private const string PlainViewModel = "TestApp.PlainViewModel";
+
+    /// <summary>
+    /// A compilation that declares one type from each platform, plus a type from none, with each platform's runtime
+    /// invoker. The WinForms invoker is the System.Reactive flavour's, so either flavour's invoker counts.
+    /// </summary>
     private const string PlatformSource = """
                                           namespace System.Windows.Threading
                                           {
@@ -34,6 +39,21 @@ public class ViewThreadPluginRegistryTests
                                               public class BindableObject { }
                                           }
 
+                                          namespace ReactiveUI.Binding.Wpf
+                                          {
+                                              public sealed class DispatcherViewThreadInvoker { }
+                                          }
+
+                                          namespace ReactiveUI.Binding.Reactive.WinForms
+                                          {
+                                              public sealed class ControlViewThreadInvoker { }
+                                          }
+
+                                          namespace ReactiveUI.Binding.Maui
+                                          {
+                                              public sealed class DispatcherViewThreadInvoker { }
+                                          }
+
                                           namespace TestApp
                                           {
                                               public class WpfView : System.Windows.Threading.DispatcherObject { }
@@ -48,6 +68,19 @@ public class ViewThreadPluginRegistryTests
                                           }
                                           """;
 
+    /// <summary>A compilation that references WPF but not the runtime package carrying its invoker.</summary>
+    private const string PlatformWithoutRuntimeSource = """
+                                                        namespace System.Windows.Threading
+                                                        {
+                                                            public class DispatcherObject { }
+                                                        }
+
+                                                        namespace TestApp
+                                                        {
+                                                            public class WpfView : System.Windows.Threading.DispatcherObject { }
+                                                        }
+                                                        """;
+
     /// <summary>A compilation that references no platform.</summary>
     private const string PlainSource = """
                                        namespace TestApp
@@ -56,15 +89,18 @@ public class ViewThreadPluginRegistryTests
                                        }
                                        """;
 
-    /// <summary>A type from a platform, directly or through a base class, names that platform's invoker.</summary>
+    /// <summary>
+    /// A type from a platform, directly or through a base class, names that platform's runtime invoker in the flavour
+    /// the compilation references.
+    /// </summary>
     /// <param name="metadataName">The type to look up.</param>
-    /// <param name="expected">The invoker class name it should carry.</param>
+    /// <param name="expected">The runtime invoker it should route through.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    [Arguments("TestApp.WpfView", WpfInvoker)]
+    [Arguments(WpfView, WpfInvoker)]
     [Arguments("TestApp.DerivedWpfView", WpfInvoker)]
-    [Arguments("TestApp.WinFormsView", "__WinFormsViewThreadInvoker")]
-    [Arguments("TestApp.MauiView", MauiInvoker)]
+    [Arguments("TestApp.WinFormsView", "global::ReactiveUI.Binding.Reactive.WinForms.ControlViewThreadInvoker")]
+    [Arguments("TestApp.MauiView", "global::ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker")]
     public async Task InvokerFor_WithATypeFromAPlatform_NamesItsInvoker(string metadataName, string expected)
     {
         var compilation = TestHelper.CreateCompilation(PlatformSource);
@@ -80,7 +116,7 @@ public class ViewThreadPluginRegistryTests
     {
         var compilation = TestHelper.CreateCompilation(PlatformSource);
 
-        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName("TestApp.PlainViewModel"), compilation))
+        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName(PlainViewModel), compilation))
             .IsNull();
     }
 
@@ -101,66 +137,41 @@ public class ViewThreadPluginRegistryTests
     {
         var compilation = TestHelper.CreateCompilation(PlainSource);
 
-        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName("TestApp.PlainViewModel"), compilation))
+        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName(PlainViewModel), compilation))
             .IsNull();
     }
 
-    /// <summary>Each platform the compilation references gets an invoker, in plugin order.</summary>
+    /// <summary>A platform type whose runtime invoker is out of reach names the package that ships it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task InvokersIn_ListsEachPlatformTheCompilationReferences()
+    public async Task MissingPackageFor_WhenTheRuntimeInvokerIsMissing_NamesThePackage()
+    {
+        var compilation = TestHelper.CreateCompilation(PlatformWithoutRuntimeSource);
+
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation))
+            .IsEqualTo("ReactiveUI.Binding.Wpf");
+    }
+
+    /// <summary>Nothing is missing for a platform whose invoker resolves, for a type from no platform, or for no type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MissingPackageFor_WhenNothingIsMissing_ReturnsNull()
     {
         var compilation = TestHelper.CreateCompilation(PlatformSource);
 
-        await Assert.That(string.Join(",", ViewThreadPluginRegistry.InvokersIn(compilation)))
-            .IsEqualTo("__WpfViewThreadInvoker,__WinFormsViewThreadInvoker,__MauiViewThreadInvoker");
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation)).IsNull();
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(PlainViewModel), compilation)).IsNull();
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(null, compilation)).IsNull();
     }
 
-    /// <summary>A compilation that references no platform gets no invokers.</summary>
+    /// <summary>A platform type whose runtime invoker is out of reach carries no invoker.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task InvokersIn_WhenTheCompilationReferencesNoPlatform_ListsNothing()
+    public async Task InvokerFor_WhenTheRuntimeInvokerIsMissing_ReturnsNull()
     {
-        var compilation = TestHelper.CreateCompilation(PlainSource);
+        var compilation = TestHelper.CreateCompilation(PlatformWithoutRuntimeSource);
 
-        await Assert.That(ViewThreadPluginRegistry.InvokersIn(compilation).Length).IsEqualTo(0);
-    }
-
-    /// <summary>Only the named invokers are declared.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitInvokers_DeclaresOnlyTheNamedInvokers()
-    {
-        var sb = new StringBuilder();
-
-        ViewThreadPluginRegistry.EmitInvokers(sb, new([MauiInvoker]), supportsNullable: true);
-
-        var emitted = sb.ToString();
-        await Assert.That(emitted).Contains($"class {MauiInvoker}");
-        await Assert.That(emitted).DoesNotContain($"class {WpfInvoker}");
-    }
-
-    /// <summary>With nullable reference types the callback and its state are annotated.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitInvokers_WithNullableReferenceTypes_AnnotatesTheState()
-    {
-        var sb = new StringBuilder();
-
-        ViewThreadPluginRegistry.EmitInvokers(sb, new([WpfInvoker]), supportsNullable: true);
-
-        await Assert.That(sb.ToString()).Contains("global::System.Action<object?> callback, object? state");
-    }
-
-    /// <summary>Below C# 8 nothing is annotated.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitInvokers_BelowCSharp8_AnnotatesNothing()
-    {
-        var sb = new StringBuilder();
-
-        ViewThreadPluginRegistry.EmitInvokers(sb, new([WpfInvoker, MauiInvoker]), supportsNullable: false);
-
-        await Assert.That(sb.ToString()).DoesNotContain("?");
+        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName(WpfView), compilation))
+            .IsNull();
     }
 }

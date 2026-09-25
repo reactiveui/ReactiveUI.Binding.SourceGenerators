@@ -27,7 +27,9 @@ internal static class ExtractorValidation
     internal static bool IsRecognizedExtensionClass(string? containingTypeName) =>
         containingTypeName is Constants.StubExtensionClassName
             or Constants.SchedulerExtensionClassName
-            or Constants.GeneratedExtensionClassName;
+            or Constants.GeneratedExtensionClassName
+        || (containingTypeName is not null
+            && containingTypeName.StartsWith($"{Constants.GeneratedExtensionClassName}_", StringComparison.Ordinal));
 
     /// <summary>
     /// Checks whether the type declaring an invoked method is one of the recognized extension classes
