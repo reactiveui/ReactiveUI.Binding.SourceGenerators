@@ -614,13 +614,15 @@ internal static class ObservationCodeGenerator
     /// <param name="propertyTypeFullName">The fully qualified type of the leaf property.</param>
     /// <param name="classInfo">The class binding info for the observed type, or null.</param>
     /// <param name="variableName">The name for the resulting observable variable (e.g., "sourceObs").</param>
+    /// <param name="brokenChainBehavior">What a deep path's leaf emits while a parent on the path is null.</param>
     internal static void EmitInlineObservation(
         StringBuilder sb,
         string rootVar,
         EquatableArray<PropertyPathSegment> propertyPath,
         string propertyTypeFullName,
         ClassBindingInfo? classInfo,
-        string variableName)
+        string variableName,
+        NullParentObservationBehavior brokenChainBehavior = NullParentObservationBehavior.EmitDefault)
     {
         var plugin = ResolveRootPlugin(classInfo, propertyPath[0]);
 
@@ -653,7 +655,7 @@ internal static class ObservationCodeGenerator
         }
         else
         {
-            EmitInlineDeepChain(sb, rootVar, propertyPath, classInfo, plugin, variableName);
+            EmitInlineDeepChain(sb, rootVar, propertyPath, classInfo, plugin, variableName, brokenChainBehavior);
         }
     }
 
@@ -918,14 +920,20 @@ internal static class ObservationCodeGenerator
     /// <param name="classInfo">The root type's binding info, when known.</param>
     /// <param name="plugin">The observation plugin for the root type, when one matched.</param>
     /// <param name="variableName">The name of the variable the chain result is assigned to.</param>
-    /// <remarks>Missing parents emit defaults here so binding consumers can clear their targets.</remarks>
+    /// <param name="brokenChainBehavior">What the leaf emits while its parent is null.</param>
+    /// <remarks>
+    /// Inner segments emit defaults so the stage below re-parents onto null and drops its subscription on the
+    /// detached subtree. The leaf follows <paramref name="brokenChainBehavior"/>: emitting its default lets a consumer
+    /// clear its target, suppressing leaves the target as it was until the path is whole again.
+    /// </remarks>
     private static void EmitInlineDeepChain(
         StringBuilder sb,
         string rootVar,
         EquatableArray<PropertyPathSegment> propertyPath,
         ClassBindingInfo? classInfo,
         IObservationPlugin? plugin,
-        string variableName)
+        string variableName,
+        NullParentObservationBehavior brokenChainBehavior)
     {
         var seg0 = propertyPath[0];
 
@@ -938,23 +946,25 @@ internal static class ObservationCodeGenerator
             var curVar = $"__{variableName}_s{s}";
             var lambdaParam = $"__p{s}";
             var segPlugin = ResolveSegmentPlugin(seg);
+            var nullParentBehavior = s == propertyPath.Length - 1 ? brokenChainBehavior : NullParentObservationBehavior.EmitDefault;
 
             if (segPlugin is not null)
             {
-                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, isBeforeChange: false, nullParentBehavior: NullParentObservationBehavior.EmitDefault);
+                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, isBeforeChange: false, nullParentBehavior);
                 continue;
             }
 
             var segType = seg.PropertyTypeFullName;
             var declType = seg.DeclaringTypeFullName;
+            var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
             _ = sb.AppendLine().Append("    var ").Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
                 .Append("        ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
                 .Append("            ? (global::System.IObservable<").Append(segType).AppendLine(">)")
                 .Append("                new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
                 .Append(declType).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
-                .Append("            : (global::System.IObservable<").Append(segType)
-                .Append(">)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(default(").Append(segType)
-                .AppendLine(")));");
+                .Append("            : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
         }
 
         var lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";

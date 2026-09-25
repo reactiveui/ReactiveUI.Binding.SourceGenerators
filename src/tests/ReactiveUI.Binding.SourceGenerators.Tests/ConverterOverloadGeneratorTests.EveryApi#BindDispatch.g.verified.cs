@@ -93,7 +93,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false, false)
                     : (global::System.IObservable<int>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(__p1, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.Person)__o).Count, false))
-                : (global::System.IObservable<int>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<int>(default(int)));
+                : (global::System.IObservable<int>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<int>.Instance);
         var vmObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<int>(__vmObs_s1, global::System.Collections.Generic.EqualityComparer<int>.Default);
             var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(view, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.PersonView)__o).Text, true);
         var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "Text", 5, false);

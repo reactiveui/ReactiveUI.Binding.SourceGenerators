@@ -17,4 +17,12 @@ public static class OneWayBindCompatScenarios
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IReactiveBinding<TestView, string> StringProperty(TestView view, TestViewModel vm) =>
         view.OneWayBind(vm, x => x.Name, x => x.DisplayName);
+
+    /// <summary>View-first one-way binding through a nullable child using the OneWayBind compat alias.</summary>
+    /// <param name="view">The target view.</param>
+    /// <param name="vm">The source view model.</param>
+    /// <returns>A reactive binding representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IReactiveBinding<TestView, string> ChildName(TestView view, TestViewModel vm) =>
+        view.OneWayBind(vm, x => x.Child!.Name, x => x.DisplayName);
 }

@@ -92,7 +92,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false, false)
                     : (global::System.IObservable<int>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(__p1, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.Person)__o).Count, false))
-                : (global::System.IObservable<int>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<int>(default(int)));
+                : (global::System.IObservable<int>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<int>.Instance);
         var sourceObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<int>(__sourceObs_s1, global::System.Collections.Generic.EqualityComparer<int>.Default);
             global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = converter;
             if (__convertedForwardConverter == null)

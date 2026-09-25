@@ -13,6 +13,9 @@ public class OneWayBindCompatTests
     /// <summary>The initial property value used across the binding tests.</summary>
     private const string InitialPropertyValue = "Hello";
 
+    /// <summary>The value the view model changes to.</summary>
+    private const string ChangedPropertyValue = "World";
+
     /// <summary>Verifies that OneWayBind syncs the initial value from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -36,9 +39,9 @@ public class OneWayBindCompatTests
 
         using var binding = OneWayBindCompatScenarios.StringProperty(view, vm);
 
-        vm.Name = "World";
+        vm.Name = ChangedPropertyValue;
 
-        await Assert.That(view.DisplayName).IsEqualTo("World");
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
     }
 
     /// <summary>Verifies that disposing the OneWayBind binding stops syncing.</summary>
@@ -55,5 +58,23 @@ public class OneWayBindCompatTests
         vm.Name = "AfterDisposal";
 
         await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
+    }
+
+    /// <summary>Verifies that OneWayBind leaves the view untouched while the path passes through null.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OneWayBind_NullIntermediate_LeavesViewUntouched()
+    {
+        var vm = new TestViewModel();
+        var view = new TestView { DisplayName = InitialPropertyValue };
+
+        using var binding = OneWayBindCompatScenarios.ChildName(view, vm);
+        await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
+
+        vm.Child = new() { Name = ChangedPropertyValue };
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
+
+        vm.Child = null;
+        await Assert.That(view.DisplayName).IsEqualTo(ChangedPropertyValue);
     }
 }

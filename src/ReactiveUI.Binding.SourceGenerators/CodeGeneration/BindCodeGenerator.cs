@@ -5,6 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -97,7 +98,8 @@ internal static class BindCodeGenerator
             observation.Path,
             inv.SourcePropertyTypeFullName,
             observation.RootClassInfo,
-            ViewModelObservableName);
+            ViewModelObservableName,
+            NullParentObservationBehavior.SuppressEmission);
 
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
