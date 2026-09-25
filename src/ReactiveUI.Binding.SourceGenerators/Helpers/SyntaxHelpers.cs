@@ -190,11 +190,11 @@ internal static class SyntaxHelpers
     /// <remarks>
     /// Controls named in XAML or by a designer are exposed as fields, so a view binding usually reads through one,
     /// as in <c>v =&gt; v.NameBox.Text</c>. A read-only field is fine along the way but not at the leaf, which a
-    /// two-way binding or <c>BindTo</c> assigns.
+    /// two-way binding or <c>BindTo</c> assigns. A constant counts as static, so the static test excludes it too.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsReadableFieldLink(IFieldSymbol field, bool isLeaf) =>
-        !field.IsStatic && !field.IsConst && (!isLeaf || !field.IsReadOnly);
+        !field.IsStatic && (!isLeaf || !field.IsReadOnly);
 
     /// <summary>Determines whether an expression is the single parameter of a lambda.</summary>
     /// <param name="expression">The expression the member access chain ended at.</param>
