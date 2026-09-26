@@ -19,7 +19,7 @@ public static class ViewContractExamples
     /// <summary>Reads the contract a screen is registered under from its <see cref="ViewContractAttribute"/>.</summary>
     public static void ReadViewContract()
     {
-        var attribute = typeof(AccountStatementView).GetCustomAttribute<ViewContractAttribute>();
+        ViewContractAttribute? attribute = typeof(AccountStatementView).GetCustomAttribute<ViewContractAttribute>();
 
         Console.WriteLine(attribute?.Contract);
 
@@ -30,11 +30,11 @@ public static class ViewContractExamples
     /// <summary>Resolves the account screens by contract: the contract picks the statement, and no contract picks the summary.</summary>
     public static void ResolveViewByContract()
     {
-        var account = CreateAccount();
+        Account account = CreateAccount();
         DefaultViewLocator locator = new();
 
-        var statement = locator.ResolveView(account, AccountViewContracts.Statement);
-        var summary = locator.ResolveView(account, null);
+        IViewFor? statement = locator.ResolveView(account, AccountViewContracts.Statement);
+        IViewFor? summary = locator.ResolveView(account, null);
 
         Console.WriteLine(statement?.GetType().Name);
         Console.WriteLine(summary?.GetType().Name);
@@ -50,8 +50,8 @@ public static class ViewContractExamples
         AccountsViewModel viewModel = new(new InMemoryBankingBackend());
         DefaultViewLocator locator = new();
 
-        var standard = locator.ResolveView(viewModel, null);
-        var compact = locator.ResolveView(viewModel, AccountViewContracts.Compact);
+        IViewFor? standard = locator.ResolveView(viewModel, null);
+        IViewFor? compact = locator.ResolveView(viewModel, AccountViewContracts.Compact);
 
         Console.WriteLine(standard?.GetType().Name);
         Console.WriteLine(compact?.GetType().Name);
@@ -66,10 +66,10 @@ public static class ViewContractExamples
     /// <summary>Resolves with a contract that no screen claims: the screen that has no contract does not answer it, so no view resolves.</summary>
     public static void ResolveUnclaimedContract()
     {
-        var account = CreateAccount();
+        Account account = CreateAccount();
         DefaultViewLocator locator = new();
 
-        var view = locator.ResolveView(account, UnclaimedContract);
+        IViewFor? view = locator.ResolveView(account, UnclaimedContract);
 
         Console.WriteLine(view is null);
 

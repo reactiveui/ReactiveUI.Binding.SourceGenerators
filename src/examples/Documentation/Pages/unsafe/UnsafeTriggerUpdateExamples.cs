@@ -34,7 +34,7 @@ public static class UnsafeTriggerUpdateExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task CommitViewEditOnSignal()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Signal<EventArgs> commit = new();
 
@@ -63,7 +63,7 @@ public static class UnsafeTriggerUpdateExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task RefreshViewOnSignal()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Signal<EventArgs> refresh = new();
 
@@ -92,10 +92,10 @@ public static class UnsafeTriggerUpdateExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task DeliverLatestViewModelValueOnSignal()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Signal<EventArgs> refresh = new();
-        var writes = 0;
+        int writes = 0;
 
         using (view.BindUnsafe(viewModel, x => x.FilterText, v => v.FilterTextBox.Text, refresh, TriggerUpdate.ViewModelToView))
         {
@@ -118,7 +118,7 @@ public static class UnsafeTriggerUpdateExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task DeliverInitialViewModelValue()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         viewModel.FilterText = FilterQuery;
         TodoView view = new() { ViewModel = viewModel };
         Signal<EventArgs> commit = new();
@@ -136,7 +136,7 @@ public static class UnsafeTriggerUpdateExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task ObserveBothPropertiesWithoutSignal()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         IObservable<EventArgs>? noSignal = default;
 

@@ -71,8 +71,8 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task ObserveSelectedIssueAssigneeLogin()
     {
-        var board = await OpenWebshopBoardAsync();
-        var checkoutBug = FindIssue(board, CheckoutBugNumber);
+        IssueBoardViewModel board = await OpenWebshopBoardAsync();
+        Issue checkoutBug = FindIssue(board, CheckoutBugNumber);
 
         List<string> logins = [];
 
@@ -97,9 +97,9 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task ReplaceAssigneeInTheMiddleOfThePath()
     {
-        var board = await OpenWebshopBoardAsync();
-        var checkoutBug = FindIssue(board, CheckoutBugNumber);
-        var previousAssignee = checkoutBug.Assignee!;
+        IssueBoardViewModel board = await OpenWebshopBoardAsync();
+        Issue checkoutBug = FindIssue(board, CheckoutBugNumber);
+        User previousAssignee = checkoutBug.Assignee!;
 
         board.SelectedIssue = checkoutBug;
 
@@ -127,8 +127,8 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task NullInTheMiddleOfThePathEmitsNothing()
     {
-        var board = await OpenWebshopBoardAsync();
-        var giftCards = FindIssue(board, GiftCardNumber);
+        IssueBoardViewModel board = await OpenWebshopBoardAsync();
+        Issue giftCards = FindIssue(board, GiftCardNumber);
 
         List<string> logins = [];
 
@@ -157,8 +157,8 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task NullFinalValueIsEmitted()
     {
-        var board = await OpenWebshopBoardAsync();
-        var giftCards = FindIssue(board, GiftCardNumber);
+        IssueBoardViewModel board = await OpenWebshopBoardAsync();
+        Issue giftCards = FindIssue(board, GiftCardNumber);
         User tomas = new() { Login = TomasLogin };
 
         // The trailing ! only satisfies the compiler: the emitted values include null.
@@ -186,8 +186,8 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task OnlyAChangedFinalValueIsEmitted()
     {
-        var board = await OpenWebshopBoardAsync();
-        var checkoutBug = FindIssue(board, CheckoutBugNumber);
+        IssueBoardViewModel board = await OpenWebshopBoardAsync();
+        Issue checkoutBug = FindIssue(board, CheckoutBugNumber);
 
         board.SelectedIssue = checkoutBug;
 
@@ -220,9 +220,9 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task ObserveSelectedStudentEnrolments()
     {
-        var gradebook = await OpenIntroductionToProgrammingAsync();
-        var aisha = FindStudent(gradebook, AishaId);
-        var chloe = FindStudent(gradebook, ChloeId);
+        GradebookViewModel gradebook = await OpenIntroductionToProgrammingAsync();
+        Student aisha = FindStudent(gradebook, AishaId);
+        Student chloe = FindStudent(gradebook, ChloeId);
 
         List<int> gradeCounts = [];
 
@@ -248,9 +248,9 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task ObserveDraftSourceAvailableBalance()
     {
-        var transfer = await OpenTransferScreenAsync();
-        var everyday = transfer.Accounts[EverydayAccountIndex];
-        var savings = transfer.Accounts[SavingsAccountIndex];
+        TransferViewModel transfer = await OpenTransferScreenAsync();
+        Account everyday = transfer.Accounts[EverydayAccountIndex];
+        Account savings = transfer.Accounts[SavingsAccountIndex];
 
         List<decimal> available = [];
 
@@ -283,9 +283,9 @@ public static class PropertyPathExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task ObserveSelectionOfAnObjectThatRaisesNoNotifications()
     {
-        var browser = await OpenMediaBucketAsync();
-        var launchBanner = browser.Objects[LaunchBannerIndex];
-        var teamOffsite = browser.Objects[TeamOffsiteIndex];
+        StorageBrowserViewModel browser = await OpenMediaBucketAsync();
+        StorageObject launchBanner = browser.Objects[LaunchBannerIndex];
+        StorageObject teamOffsite = browser.Objects[TeamOffsiteIndex];
 
         List<string> keys = [];
 
@@ -312,7 +312,7 @@ public static class PropertyPathExamples
     /// <returns>The issue board.</returns>
     private static async Task<IssueBoardViewModel> OpenWebshopBoardAsync()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueBoardViewModel board = new(server) { Token = InMemoryGitHubServer.PriyaToken };
 
         await board.SignInAsync();
@@ -327,7 +327,7 @@ public static class PropertyPathExamples
     /// <returns>The gradebook.</returns>
     private static async Task<GradebookViewModel> OpenIntroductionToProgrammingAsync()
     {
-        var records = InMemoryStudentRecords.CreateSeeded();
+        InMemoryStudentRecords records = InMemoryStudentRecords.CreateSeeded();
         GradebookViewModel gradebook = new(records);
 
         await gradebook.LoadCoursesAsync();
@@ -354,7 +354,7 @@ public static class PropertyPathExamples
     /// <returns>The storage browser.</returns>
     private static async Task<StorageBrowserViewModel> OpenMediaBucketAsync()
     {
-        var storage = InMemoryObjectStorage.CreateSeeded();
+        InMemoryObjectStorage storage = InMemoryObjectStorage.CreateSeeded();
         StorageBrowserViewModel browser = new(storage);
 
         await browser.LoadBucketsAsync();

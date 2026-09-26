@@ -138,7 +138,7 @@ public sealed class TransferViewModel : ObservableObject
 
         try
         {
-            var receipt = await SendAsync(request).ConfigureAwait(false);
+            TransferReceipt? receipt = await SendAsync(request).ConfigureAwait(false);
             if (receipt is null)
             {
                 ErrorMessage = "The transfer was cancelled.";
@@ -169,7 +169,7 @@ public sealed class TransferViewModel : ObservableObject
         }
         catch (BankingException ex) when (ex.Failure == BankingFailure.ApprovalRequired)
         {
-            var code = await ApproveTransfer.Handle(Draft).ConfigureAwait(false);
+            string code = await ApproveTransfer.Handle(Draft).ConfigureAwait(false);
             return code.Length == 0 ? null : await _backend.SubmitTransferAsync(request, code).ConfigureAwait(false);
         }
     }

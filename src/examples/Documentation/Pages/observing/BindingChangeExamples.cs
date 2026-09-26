@@ -40,7 +40,7 @@ public static class BindingChangeExamples
     {
         BindingChange change = new(RenamedTitle, true);
 
-        var text = change.ToString();
+        string text = change.ToString();
 
         Console.WriteLine($"Change: {text}.");
 

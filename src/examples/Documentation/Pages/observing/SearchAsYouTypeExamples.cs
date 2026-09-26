@@ -57,10 +57,10 @@ public static class SearchAsYouTypeExamples
     {
         const string PaddedCheckout = "  checkout ";
 
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueSearchViewModel viewModel = new(server, Webshop);
 
-        using var subscription = viewModel.WhenChanged(x => x.SearchTerm)
+        using IDisposable subscription = viewModel.WhenChanged(x => x.SearchTerm)
             .Select(static term => term.Trim())
             .DistinctUntilChanged()
             .Where(static term => term.Length > 0)
@@ -80,10 +80,10 @@ public static class SearchAsYouTypeExamples
     public static void ThrottleTypingUntilPause()
     {
         VirtualClock clock = new();
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueSearchViewModel viewModel = new(server, Webshop);
 
-        using var subscription = viewModel.WhenAnyValue(x => x.SearchTerm)
+        using IDisposable subscription = viewModel.WhenAnyValue(x => x.SearchTerm)
             .Throttle(_quietPeriod, clock)
             .Subscribe(Console.WriteLine);
 
@@ -112,12 +112,12 @@ public static class SearchAsYouTypeExamples
     /// <returns>A task that completes when the example has finished.</returns>
     public static async Task SearchWhenTypingPauses()
     {
-        var server = await CreateSignedInServerAsync();
+        InMemoryGitHubServer server = await CreateSignedInServerAsync();
         IssueSearchViewModel viewModel = new(server, Webshop);
 
-        using var subscription = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
+        using IDisposable subscription = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
 
-        var quotaAtStart = server.RateLimitRemaining;
+        int quotaAtStart = server.RateLimitRemaining;
 
         viewModel.SearchTerm = "  checkout ";
         await Task.Delay(_settle);
@@ -150,15 +150,15 @@ public static class SearchAsYouTypeExamples
     /// <returns>A task that completes when the example has finished.</returns>
     public static async Task BindSearchStateToView()
     {
-        var server = await CreateSignedInServerAsync();
+        InMemoryGitHubServer server = await CreateSignedInServerAsync();
         IssueSearchViewModel viewModel = new(server, Webshop);
         IssueSearchView view = new() { ViewModel = viewModel };
 
-        using var search = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
-        using var typing = viewModel.BindTwoWay(view, x => x.SearchTerm, v => v.SearchBox.Text);
-        using var buttonBinding = viewModel.BindOneWay(view, x => x.IsSearching, v => v.SearchButton.IsEnabled, static searching => !searching);
-        using var barBinding = viewModel.BindOneWay(view, x => x.IsSearching, v => v.BusyBar.IsVisible);
-        using var listBinding = viewModel.BindOneWay(view, x => x.Results, v => v.ResultList.ItemsSource, static results => results);
+        using IDisposable search = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
+        using IDisposable typing = viewModel.BindTwoWay(view, x => x.SearchTerm, v => v.SearchBox.Text);
+        using IDisposable buttonBinding = viewModel.BindOneWay(view, x => x.IsSearching, v => v.SearchButton.IsEnabled, static searching => !searching);
+        using IDisposable barBinding = viewModel.BindOneWay(view, x => x.IsSearching, v => v.BusyBar.IsVisible);
+        using IDisposable listBinding = viewModel.BindOneWay(view, x => x.Results, v => v.ResultList.ItemsSource, static results => results);
 
         Console.WriteLine(view.SearchButton.IsEnabled);
         Console.WriteLine(view.BusyBar.IsVisible);
@@ -193,10 +193,10 @@ public static class SearchAsYouTypeExamples
     /// <returns>A task that completes when the example has finished.</returns>
     public static async Task IgnoreStaleSearchResponse()
     {
-        var server = await CreateSignedInServerAsync();
+        InMemoryGitHubServer server = await CreateSignedInServerAsync();
         IssueSearchViewModel viewModel = new(server, Webshop);
 
-        using var subscription = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
+        using IDisposable subscription = viewModel.StartSearching(Sequencer.Default, _quietPeriod);
 
         // The first response takes longer than the second.
         server.Latency = _slowResponse;
@@ -228,7 +228,7 @@ public static class SearchAsYouTypeExamples
         TransferViewModel screen = new(new InMemoryBankingBackend());
         TransferView view = new() { ViewModel = screen };
 
-        using var subscription = view.AmountTextBox.WhenChanged(x => x.Text)
+        using IDisposable subscription = view.AmountTextBox.WhenChanged(x => x.Text)
             .Where(static text => !string.IsNullOrEmpty(text))
             .Throttle(_quietPeriod, clock)
             .Subscribe(text => screen.Draft.Amount = decimal.Parse(text, CultureInfo.InvariantCulture));
@@ -254,7 +254,7 @@ public static class SearchAsYouTypeExamples
     /// <returns>A task whose result is the signed-in server.</returns>
     private static async Task<InMemoryGitHubServer> CreateSignedInServerAsync()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         _ = await server.SignInAsync(InMemoryGitHubServer.PriyaToken);
         return server;
     }

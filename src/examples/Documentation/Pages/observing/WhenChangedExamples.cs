@@ -148,9 +148,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the title of a to-do item; a single property delivers the value itself.</summary>
     public static void ObserveTodoTitle()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item.WhenChanged(x => x.Title).Subscribe(Console.WriteLine);
+        using IDisposable subscription = item.WhenChanged(x => x.Title).Subscribe(Console.WriteLine);
 
         item.Title = RenamedTitle;
 
@@ -162,9 +162,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the title and the done flag of a to-do item together.</summary>
     public static void ObserveTodoTitleAndStatus()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item.WhenChanged(x => x.Title, x => x.IsDone).Subscribe(static values => Console.WriteLine(values.Property2));
+        using IDisposable subscription = item.WhenChanged(x => x.Title, x => x.IsDone).Subscribe(static values => Console.WriteLine(values.Property2));
 
         item.IsDone = true;
 
@@ -176,9 +176,9 @@ public static class WhenChangedExamples
     /// <summary>Turns the title and the done flag into one checklist line with a value selector.</summary>
     public static void ProjectTodoChecklistLine()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.IsDone, static (title, isDone) => (isDone ? DoneMark : OpenMark) + title)
             .Subscribe(Console.WriteLine);
 
@@ -192,9 +192,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the title, the done flag and the priority of a to-do item.</summary>
     public static void ObserveTodoTitleStatusAndPriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.IsDone, x => x.Priority)
             .Subscribe(static values => Console.WriteLine(values.Property3));
 
@@ -208,9 +208,9 @@ public static class WhenChangedExamples
     /// <summary>Works out how urgent a to-do item is from three properties; a finished item is never urgent.</summary>
     public static void ProjectTodoEffectivePriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.IsDone, x => x.Priority, static (_, isDone, priority) => isDone ? TodoPriority.Low : priority)
             .Subscribe(static priority => Console.WriteLine(priority));
 
@@ -226,9 +226,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the title, notes, done flag and deadline of a to-do item.</summary>
     public static void ObserveTodoDeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate)
             .Subscribe(static values => Console.WriteLine(values.Property4));
 
@@ -242,9 +242,9 @@ public static class WhenChangedExamples
     /// <summary>Builds a headline with the deadline from four properties.</summary>
     public static void ProjectTodoHeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -263,9 +263,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the title, notes, done flag, deadline and priority of a to-do item.</summary>
     public static void ObserveTodoWithPriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate, x => x.Priority)
             .Subscribe(static values => Console.WriteLine(values.Property5));
 
@@ -279,9 +279,9 @@ public static class WhenChangedExamples
     /// <summary>Decides from five properties whether a to-do item needs attention now.</summary>
     public static void ProjectTodoNeedsAttention()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -301,9 +301,9 @@ public static class WhenChangedExamples
     /// <summary>Observes every editable property of a to-do item; six properties is the whole form.</summary>
     public static void ObserveWholeTodo()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate, x => x.Priority, x => x.Tags)
             .Subscribe(static values => Console.WriteLine(string.Join(", ", values.Property6)));
 
@@ -317,9 +317,9 @@ public static class WhenChangedExamples
     /// <summary>Lists the labels after the title from six properties.</summary>
     public static void ProjectTodoTitleWithLabels()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -340,9 +340,9 @@ public static class WhenChangedExamples
     /// <summary>Observes the assignee of an issue; the property may be null, and the path needs no null-forgiving operator.</summary>
     public static void ObserveIssueAssignee()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        using var subscription = issue.WhenChanged(x => x.Assignee)
+        using IDisposable subscription = issue.WhenChanged(x => x.Assignee)
             .Subscribe(static assignee => Console.WriteLine(assignee?.Login ?? Unassigned));
 
         issue.Assignee = null;
@@ -357,9 +357,9 @@ public static class WhenChangedExamples
     /// <summary>Observes seven properties of a GitHub issue.</summary>
     public static void ObserveIssueSummary()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanged(x => x.Number, x => x.Title, x => x.State, x => x.Author, x => x.Assignee!, x => x.Labels, x => x.UpdatedAt)
             .Subscribe(static values => Console.WriteLine(values.Property2));
 
@@ -373,9 +373,9 @@ public static class WhenChangedExamples
     /// <summary>Names the number, title and assignee of an issue from seven properties.</summary>
     public static void ProjectIssueAssignment()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanged(
                 x => x.Number,
                 x => x.Title,
@@ -397,9 +397,9 @@ public static class WhenChangedExamples
     /// <summary>Observes eight properties of a GitHub issue.</summary>
     public static void ObserveIssueWithComments()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanged(x => x.Number, x => x.Title, x => x.State, x => x.Author, x => x.Assignee!, x => x.Labels, x => x.UpdatedAt, x => x.Comments)
             .Subscribe(static values => Console.WriteLine(values.Property3));
 
@@ -413,9 +413,9 @@ public static class WhenChangedExamples
     /// <summary>Finds out from eight properties whether an open issue still waits for its first reply.</summary>
     public static void ProjectIssueAwaitsFirstReply()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanged(
                 x => x.Number,
                 x => x.Title,
@@ -438,9 +438,9 @@ public static class WhenChangedExamples
     /// <summary>Observes a transfer draft and the fields of its source account, nine properties in all.</summary>
     public static void ObserveTransferDraftAndSourceAccount()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -463,9 +463,9 @@ public static class WhenChangedExamples
     /// <summary>Checks from nine properties whether the account can cover the amount.</summary>
     public static void ProjectTransferIsAffordable()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -489,9 +489,9 @@ public static class WhenChangedExamples
     /// <summary>Adds the payee to the transfer draft and its source account fields, ten properties in all.</summary>
     public static void ObserveTransferDraftWithPayee()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -515,9 +515,9 @@ public static class WhenChangedExamples
     /// <summary>Checks from ten properties whether the amount fits the account and the payee's limit.</summary>
     public static void ProjectTransferWithinPayeeLimit()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -543,9 +543,9 @@ public static class WhenChangedExamples
     /// <summary>Adds the source account itself, eleven properties in all.</summary>
     public static void ObserveTransferDraftWithSourceAccount()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -570,9 +570,9 @@ public static class WhenChangedExamples
     /// <summary>Checks from eleven properties whether a transfer has an account, a payee and enough money.</summary>
     public static void ProjectTransferIsReady()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -599,9 +599,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ObserveIssueBoardRateLimit()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -628,9 +628,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ProjectBoardAcceptsComments()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -658,10 +658,10 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ObserveIssueBoardErrorMessage()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
-        var issue = board.SelectedIssue!;
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
+        Issue issue = board.SelectedIssue!;
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -689,9 +689,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ProjectBoardAcceptsCommentsWithoutError()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -721,10 +721,10 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ObserveIssueBoardToken()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
-        var issue = board.SelectedIssue!;
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
+        Issue issue = board.SelectedIssue!;
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -753,9 +753,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ProjectBoardHasTokenAndAcceptsComments()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -786,9 +786,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ObserveIssueBoardIssues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -818,9 +818,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ProjectBoardListsIssuesAndAcceptsComments()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -852,9 +852,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ObserveIssueBoardRepositories()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -885,9 +885,9 @@ public static class WhenChangedExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ProjectBoardIsReadyForComments()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        using var subscription = board
+        using IDisposable subscription = board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -963,7 +963,7 @@ public static class WhenChangedExamples
     /// <returns>A task that returns the board once the issue is selected.</returns>
     private static async Task<IssueBoardViewModel> CreateBoardWithSelectedIssueAsync()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueBoardViewModel board = new(server) { Token = InMemoryGitHubServer.PriyaToken };
 
         await board.SignInAsync();

@@ -43,7 +43,7 @@ public static class NotifyPropertyChangedExamples
 
         _ = builder.WithCoreServices().BuildApp();
 
-        foreach (var provider in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
+        foreach (ICreatesObservableForProperty provider in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
         {
             Console.WriteLine(provider.GetType().Name);
         }

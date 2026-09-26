@@ -283,10 +283,10 @@ public sealed class GradebookViewModel : ObservableObject
     /// <returns>A task that completes when the course is loaded.</returns>
     private async Task LoadCourseAsync(Course course)
     {
-        var selectedId = SelectedStudent?.Id;
-        var roster = await _records.GetRosterAsync(course.Code).ConfigureAwait(false);
-        var students = await _records.GetStudentsAsync().ConfigureAwait(false);
-        var assignments = await _records.GetAssignmentsAsync(course.Code).ConfigureAwait(false);
+        int? selectedId = SelectedStudent?.Id;
+        IReadOnlyList<Student> roster = await _records.GetRosterAsync(course.Code).ConfigureAwait(false);
+        IReadOnlyList<Student> students = await _records.GetStudentsAsync().ConfigureAwait(false);
+        IReadOnlyList<Assignment> assignments = await _records.GetAssignmentsAsync(course.Code).ConfigureAwait(false);
 
         Roster = roster;
         Candidates = NotOn(students, roster);
@@ -299,7 +299,7 @@ public sealed class GradebookViewModel : ObservableObject
     /// <summary>Works out the average and the pass flag of the selected student in the selected course.</summary>
     private void RecomputeAverage()
     {
-        var enrolment = SelectedStudent is { } student && SelectedCourse is { } course ? FindEnrolment(student, course.Code) : null;
+        Enrolment? enrolment = SelectedStudent is { } student && SelectedCourse is { } course ? FindEnrolment(student, course.Code) : null;
         if (enrolment is null || enrolment.Grades.Count == 0)
         {
             Average = 0;

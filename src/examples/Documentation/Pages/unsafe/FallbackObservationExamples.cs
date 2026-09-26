@@ -29,7 +29,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes one property after it changes.</summary>
     public static void ObserveOnePropertyAfterChange()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         List<string> titles = [];
 
         using (RuntimeObservationFallback.WhenChanged(item, x => x.Title).Subscribe(titles.Add))
@@ -46,7 +46,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes two properties after they change; each change delivers both values.</summary>
     public static void ObserveTwoPropertiesAfterChange()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
         using (RuntimeObservationFallback.WhenChanged(item, x => x.Title, x => x.IsDone).Subscribe(static values => Console.WriteLine($"{values.Property1} {values.Property2}")))
         {
@@ -61,7 +61,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes three properties after they change; each change delivers all three values.</summary>
     public static void ObserveThreePropertiesAfterChange()
     {
-        var item = new TodoItem { Title = OriginalTitle, Notes = OriginalNotes };
+        TodoItem item = new TodoItem { Title = OriginalTitle, Notes = OriginalNotes };
 
         using (RuntimeObservationFallback
             .WhenChanged(item, x => x.Title, x => x.Notes, x => x.IsDone)
@@ -78,7 +78,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes the value a property held before it changed.</summary>
     public static void ObserveOnePropertyBeforeChange()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle };
         List<string> titles = [];
 
         using (RuntimeObservationFallback.WhenChanging(item, x => x.Title).Subscribe(titles.Add))
@@ -95,7 +95,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes two properties before they change.</summary>
     public static void ObserveTwoPropertiesBeforeChange()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle, Notes = OriginalNotes };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle, Notes = OriginalNotes };
 
         using (RuntimeObservationFallback.WhenChanging(item, x => x.Title, x => x.Notes).Subscribe(static values => Console.WriteLine($"{values.Property1} {values.Property2}")))
         {
@@ -109,7 +109,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes three properties before they change.</summary>
     public static void ObserveThreePropertiesBeforeChange()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle, Notes = OriginalNotes };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle, Notes = OriginalNotes };
 
         using (RuntimeObservationFallback
             .WhenChanging(item, x => x.Title, x => x.Notes, x => x.IsDone)
@@ -125,7 +125,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes one property with <c>WhenAnyValue</c>.</summary>
     public static void ObserveOneAnyValue()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         List<string> titles = [];
 
         using (RuntimeObservationFallback.WhenAnyValue(item, x => x.Title).Subscribe(titles.Add))
@@ -142,7 +142,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes two properties with <c>WhenAnyValue</c>.</summary>
     public static void ObserveTwoAnyValues()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
         using (RuntimeObservationFallback.WhenAnyValue(item, x => x.Title, x => x.Priority).Subscribe(static values => Console.WriteLine($"{values.Property1} {values.Property2}")))
         {
@@ -157,7 +157,7 @@ public static class FallbackObservationExamples
     /// <summary>Observes three properties with <c>WhenAnyValue</c>.</summary>
     public static void ObserveThreeAnyValues()
     {
-        var item = new TodoItem { Title = OriginalTitle, Notes = OriginalNotes };
+        TodoItem item = new TodoItem { Title = OriginalTitle, Notes = OriginalNotes };
 
         using (RuntimeObservationFallback
             .WhenAnyValue(item, x => x.Title, x => x.Notes, x => x.Priority)

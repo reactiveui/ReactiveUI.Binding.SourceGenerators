@@ -28,7 +28,7 @@ public static class AnalyzerPatternExamples
     /// <summary>Writes the property path in the call, as a lambda the generator can read.</summary>
     public static void WritePathInTheCall()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
 
         using (item.WhenChanged(x => x.Title).Subscribe(Console.WriteLine))
         {
@@ -43,7 +43,7 @@ public static class AnalyzerPatternExamples
     /// <summary>Observes a public property; a private or protected property is out of reach of the generated code.</summary>
     public static void ObservePublicProperty()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
 
         viewModel.NewTitle = DentistTitle;
 
@@ -61,7 +61,7 @@ public static class AnalyzerPatternExamples
     /// <returns>A task that completes when the items are loaded.</returns>
     public static async Task ObservePathOfProperties()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
         viewModel.SelectedItem = viewModel.Items[0];
 
@@ -78,7 +78,7 @@ public static class AnalyzerPatternExamples
     /// <summary>Observes a type that raises <c>PropertyChanged</c>; a type that raises nothing never reports a change.</summary>
     public static void ObserveNotifyingType()
     {
-        var item = new TodoItem { Title = "File quarterly tax return" };
+        TodoItem item = new TodoItem { Title = "File quarterly tax return" };
 
         using (item.WhenChanged(x => x.IsDone).Subscribe(Console.WriteLine))
         {
@@ -94,8 +94,8 @@ public static class AnalyzerPatternExamples
     /// <returns>A task that completes when the browser has read the link state.</returns>
     public static async Task ObserveMirroredProperty()
     {
-        var storage = InMemoryObjectStorage.CreateSeeded();
-        var browser = new StorageBrowserViewModel(storage);
+        InMemoryObjectStorage storage = InMemoryObjectStorage.CreateSeeded();
+        StorageBrowserViewModel browser = new StorageBrowserViewModel(storage);
 
         using (browser.WhenChanged(x => x.ConnectionStatus).Subscribe(static state => Console.WriteLine(state)))
         {
@@ -113,7 +113,7 @@ public static class AnalyzerPatternExamples
     /// <summary>Observes a value before it changes on a type that raises <c>PropertyChanging</c>.</summary>
     public static void ObserveBeforeChange()
     {
-        var todo = new EditableTodo { Title = DentistTitle };
+        EditableTodo todo = new EditableTodo { Title = DentistTitle };
 
         using (todo.WhenChanging(x => x.Title).Subscribe(Console.WriteLine))
         {
@@ -128,8 +128,8 @@ public static class AnalyzerPatternExamples
     /// <summary>Binds a command to a button, which raises an event the binding can use.</summary>
     public static void BindCommandToButton()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
-        var view = new TodoView { ViewModel = viewModel };
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoView view = new TodoView { ViewModel = viewModel };
 
         using (view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton))
         {
@@ -148,8 +148,8 @@ public static class AnalyzerPatternExamples
     /// <summary>Binds validation errors that the view model exposes as a property; the generator does not read <c>INotifyDataErrorInfo</c>.</summary>
     public static void BindValidationSummary()
     {
-        var viewModel = new TransferViewModel(new InMemoryBankingBackend());
-        var view = new TransferView { ViewModel = viewModel };
+        TransferViewModel viewModel = new TransferViewModel(new InMemoryBankingBackend());
+        TransferView view = new TransferView { ViewModel = viewModel };
 
         using (viewModel.BindOneWay(view, x => x.ValidationSummary, v => v.ValidationLabel.Text))
         {
@@ -166,8 +166,8 @@ public static class AnalyzerPatternExamples
     /// <returns>A task that completes when the handler has answered.</returns>
     public static async Task BindInteractionProperty()
     {
-        var viewModel = new IssueBoardViewModel(InMemoryGitHubServer.CreateSeeded());
-        var view = new IssueBoardView { ViewModel = viewModel };
+        IssueBoardViewModel viewModel = new IssueBoardViewModel(InMemoryGitHubServer.CreateSeeded());
+        IssueBoardView view = new IssueBoardView { ViewModel = viewModel };
 
         using (view.BindInteraction(viewModel, x => x.ConfirmClose, static context =>
         {
@@ -175,7 +175,7 @@ public static class AnalyzerPatternExamples
             return Task.CompletedTask;
         }))
         {
-            var confirmed = await viewModel.ConfirmClose.Handle(new Issue { Title = "Crash on startup" });
+            bool confirmed = await viewModel.ConfirmClose.Handle(new Issue { Title = "Crash on startup" });
 
             Console.WriteLine(confirmed);
         }
@@ -188,7 +188,7 @@ public static class AnalyzerPatternExamples
     /// <returns>A task that completes when the items are loaded.</returns>
     public static async Task ImportThePackageNamespace()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
 
         using (viewModel.WhenAnyValue(x => x.RemainingCount).Subscribe(Console.WriteLine))
@@ -206,7 +206,7 @@ public static class AnalyzerPatternExamples
     /// <returns>A task that completes when the items are loaded.</returns>
     public static async Task ObserveFromRootNamespace()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
 
         using (viewModel.WhenChanged(x => x.RemainingCount).Subscribe(Console.WriteLine))

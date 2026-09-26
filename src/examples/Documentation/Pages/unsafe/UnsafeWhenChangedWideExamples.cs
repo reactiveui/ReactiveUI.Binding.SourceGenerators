@@ -22,7 +22,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes four properties after they change; each change delivers all four values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFourColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -41,7 +41,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes five properties after they change; each change delivers all five values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFiveColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -61,7 +61,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes six properties after they change; each change delivers all six values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSixColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -82,7 +82,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes seven properties after they change; each change delivers all seven values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSevenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -104,7 +104,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes eight properties after they change; each change delivers all eight values as one group, and the example prints the first and the last.</summary>
     public static void ObserveEightColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -127,7 +127,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes nine properties after they change; each change delivers all nine values as one group, and the example prints the first and the last.</summary>
     public static void ObserveNineColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -151,7 +151,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes ten properties after they change; each change delivers all ten values as one group, and the example prints the first and the last.</summary>
     public static void ObserveTenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -176,7 +176,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes eleven properties after they change; each change delivers all eleven values as one group, and the example prints the first and the last.</summary>
     public static void ObserveElevenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -202,7 +202,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes twelve properties after they change; each change delivers all twelve values as one group, and the example prints the first and the last.</summary>
     public static void ObserveTwelveColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -229,7 +229,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes thirteen properties after they change; each change delivers all thirteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveThirteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -257,7 +257,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes fourteen properties after they change; each change delivers all fourteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFourteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -286,7 +286,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes fifteen properties after they change; each change delivers all fifteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFifteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -316,7 +316,7 @@ public static class UnsafeWhenChangedWideExamples
     /// <summary>Observes sixteen properties after they change; each change delivers all sixteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSixteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,

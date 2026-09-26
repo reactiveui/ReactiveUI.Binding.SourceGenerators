@@ -22,7 +22,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes three properties; the selector receives each change, not only its value.</summary>
     public static void ObserveThreeColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(x => x.Title, x => x.Id, x => x.IsDone, static (c1, c2, c3) => string.Join(Separator, c1.Value, c2.Value, c3.Value)).Subscribe(Console.WriteLine))
         {
@@ -37,7 +37,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes four properties; the selector receives each change, not only its value.</summary>
     public static void ObserveFourColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -58,7 +58,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes five properties; the selector receives each change, not only its value.</summary>
     public static void ObserveFiveColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -80,7 +80,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes six properties; the selector receives each change, not only its value.</summary>
     public static void ObserveSixColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -103,7 +103,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes seven properties; the selector receives each change, not only its value.</summary>
     public static void ObserveSevenColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -127,7 +127,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes eight properties; the selector receives each change, not only its value.</summary>
     public static void ObserveEightColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -152,7 +152,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes nine properties; the selector receives each change, not only its value.</summary>
     public static void ObserveNineColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -178,7 +178,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes ten properties; the selector receives each change, not only its value.</summary>
     public static void ObserveTenColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -205,7 +205,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes eleven properties; the selector receives each change, not only its value.</summary>
     public static void ObserveElevenColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,
@@ -233,7 +233,7 @@ public static class UnsafeWhenAnyWideExamples
     /// <summary>Observes twelve properties; the selector receives each change, not only its value.</summary>
     public static void ObserveTwelveColumnsWithChanges()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyUnsafe(
             x => x.Title,

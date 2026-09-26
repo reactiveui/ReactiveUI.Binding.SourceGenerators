@@ -175,8 +175,8 @@ public static class ObservableTypesExamples
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
         TodoView view = new() { ViewModel = viewModel };
 
-        using var binding = view.Bind(viewModel, x => x.NewTitle, v => v.NewTitleTextBox.Text);
-        using var subscription = binding.Changed.Subscribe(static change => Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}"));
+        using IReactiveBinding<TodoView, BindingChange> binding = view.Bind(viewModel, x => x.NewTitle, v => v.NewTitleTextBox.Text);
+        using IDisposable subscription = binding.Changed.Subscribe(static change => Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}"));
 
         view.NewTitleTextBox.Text = RenamedTitle;
         viewModel.NewTitle = FinalTitle;
@@ -194,7 +194,7 @@ public static class ObservableTypesExamples
     {
         TodoItem item = new() { Title = RegistrationTitle };
         PropertyObservable<bool> isUrgent = new(item, nameof(TodoItem.Priority), static source => ((TodoItem)source).Priority == TodoPriority.High, true);
-        var observer = Witness.Create<bool>(Console.WriteLine);
+        IObserver<bool> observer = Witness.Create<bool>(Console.WriteLine);
 
         using (isUrgent.Subscribe(observer))
         {
@@ -212,7 +212,7 @@ public static class ObservableTypesExamples
     {
         DraftTodo draft = new() { Title = RegistrationTitle };
         PropertyChangingObservable<string> beforeChange = new(draft, nameof(DraftTodo.Title), static source => ((DraftTodo)source).Title);
-        var observer = Witness.Create<string>(Console.WriteLine);
+        IObserver<string> observer = Witness.Create<string>(Console.WriteLine);
 
         using (beforeChange.Subscribe(observer))
         {
@@ -230,7 +230,7 @@ public static class ObservableTypesExamples
         DraftTodo draft = new() { Title = RegistrationTitle };
         Expression<Func<DraftTodo, string>> title = x => x.Title;
         NotifyPropertyChangedObservable afterChange = new(draft, title.Body, nameof(DraftTodo.Title), false);
-        var observer = Witness.Create<IObservedChange<object, object?>>(static change => Console.WriteLine(change.GetPropertyName()));
+        IObserver<IObservedChange<object, object?>> observer = Witness.Create<IObservedChange<object, object?>>(static change => Console.WriteLine(change.GetPropertyName()));
 
         using (afterChange.Subscribe(observer))
         {
@@ -246,9 +246,9 @@ public static class ObservableTypesExamples
     {
         StorageObject file = new() { Key = "photos/2026/launch.png" };
         UnchangingPropertyObservable<string> key = new(file.Key);
-        var observer = Witness.Create<string>(Console.WriteLine);
+        IObserver<string> observer = Witness.Create<string>(Console.WriteLine);
 
-        using var subscription = key.Subscribe(observer);
+        using IDisposable subscription = key.Subscribe(observer);
 
         // Output:
         // photos/2026/launch.png
@@ -258,7 +258,7 @@ public static class ObservableTypesExamples
     public static void ReportAppliedChangesToAnObserver()
     {
         AppliedChangeObservable applied = new();
-        var observer = Witness.Create<BindingChange>(static change => Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}"));
+        IObserver<BindingChange> observer = Witness.Create<BindingChange>(static change => Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}"));
 
         using (applied.Subscribe(observer))
         {
@@ -276,7 +276,7 @@ public static class ObservableTypesExamples
         Expression<Func<TodoItem, bool>> isDone = x => x.IsDone;
         PropertyObservable<bool> generated = new(item, nameof(TodoItem.IsDone), static source => ((TodoItem)source).IsDone, true);
 
-        var chosen = PluginObservationSource.Choose(
+        IObservable<bool> chosen = PluginObservationSource.Choose(
             item,
             isDone.Body,
             nameof(TodoItem.IsDone),
@@ -303,7 +303,7 @@ public static class ObservableTypesExamples
             () => connection.State,
             true);
 
-        var chosen = PluginObservationSource.Choose(
+        IObservable<ConnectionState> chosen = PluginObservationSource.Choose(
             connection,
             state.Body,
             StateName,

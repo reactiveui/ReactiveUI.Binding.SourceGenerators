@@ -68,7 +68,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with four fields.</summary>
     public static void CombineFourFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -82,7 +82,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with five fields.</summary>
     public static void CombineFiveFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -97,7 +97,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with six fields.</summary>
     public static void CombineSixFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -113,7 +113,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with seven fields.</summary>
     public static void CombineSevenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -130,7 +130,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with eight fields.</summary>
     public static void CombineEightFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -148,7 +148,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with nine fields.</summary>
     public static void CombineNineFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -167,7 +167,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with ten fields.</summary>
     public static void CombineTenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -187,7 +187,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with eleven fields.</summary>
     public static void CombineElevenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -208,7 +208,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with twelve fields.</summary>
     public static void CombineTwelveFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -230,7 +230,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with thirteen fields.</summary>
     public static void CombineThirteenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -254,7 +254,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with fourteen fields.</summary>
     public static void CombineFourteenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -279,7 +279,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with fifteen fields.</summary>
     public static void CombineFifteenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),
@@ -305,7 +305,7 @@ public static class CombineLatestExamples
     /// <summary>Counts the completed fields of a form with sixteen fields.</summary>
     public static void CombineSixteenFields()
     {
-        using var counts = CombineLatestObservable.Create(
+        using IDisposable counts = CombineLatestObservable.Create(
             Field(),
             Field(),
             Field(),

@@ -118,7 +118,7 @@ public static class AffinityExamples
 
         foreach (var (name, score) in scores)
         {
-            var outranked = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(TodoItem), NotesPropertyName, score, false);
+            bool outranked = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(TodoItem), NotesPropertyName, score, false);
 
             Console.WriteLine($"{name} ({score}): provider outranks it = {outranked}");
         }
@@ -162,11 +162,11 @@ public static class AffinityExamples
     private static ICreatesObservableForProperty? SelectHighestAffinity(Type type, string propertyName)
     {
         ICreatesObservableForProperty? winner = null;
-        var highest = 0;
+        int highest = 0;
 
-        foreach (var provider in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
+        foreach (ICreatesObservableForProperty provider in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
         {
-            var affinity = provider.GetAffinityForObject(type, propertyName);
+            int affinity = provider.GetAffinityForObject(type, propertyName);
             if (affinity <= highest)
             {
                 continue;

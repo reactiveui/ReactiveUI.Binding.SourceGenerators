@@ -165,7 +165,7 @@ public sealed class IssueBoardViewModel : ObservableObject
     {
         try
         {
-            var user = await _api.SignInAsync(Token).ConfigureAwait(false);
+            User user = await _api.SignInAsync(Token).ConfigureAwait(false);
             CurrentUser = user;
             IsSignedIn = true;
             ErrorMessage = string.Empty;
@@ -199,7 +199,7 @@ public sealed class IssueBoardViewModel : ObservableObject
 
         try
         {
-            var issues = await _api.ListIssuesAsync(repository.FullName, IssueState.Open).ConfigureAwait(false);
+            IReadOnlyList<Issue> issues = await _api.ListIssuesAsync(repository.FullName, IssueState.Open).ConfigureAwait(false);
             ErrorMessage = string.Empty;
             Issues = issues;
             SelectedIssue = null;
@@ -230,7 +230,7 @@ public sealed class IssueBoardViewModel : ObservableObject
 
         try
         {
-            var closed = await _api.CloseIssueAsync(repository.FullName, issue.Number).ConfigureAwait(false);
+            Issue closed = await _api.CloseIssueAsync(repository.FullName, issue.Number).ConfigureAwait(false);
             ErrorMessage = string.Empty;
             issue.UpdateFrom(closed);
             CloseIssueCommand.ChangeCanExecute();
@@ -256,7 +256,7 @@ public sealed class IssueBoardViewModel : ObservableObject
 
         try
         {
-            var updated = await _api.AddCommentAsync(repository.FullName, issue.Number, NewCommentText).ConfigureAwait(false);
+            Issue updated = await _api.AddCommentAsync(repository.FullName, issue.Number, NewCommentText).ConfigureAwait(false);
             ErrorMessage = string.Empty;
             issue.UpdateFrom(updated);
             NewCommentText = string.Empty;

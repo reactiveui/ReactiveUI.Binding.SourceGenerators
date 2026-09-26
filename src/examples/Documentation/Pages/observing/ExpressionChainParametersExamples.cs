@@ -76,9 +76,9 @@ public static class ExpressionChainParametersExamples
         Expression[] links = [amount.Body];
         ExpressionChainParameters<TransferForm> parameters = new(form, amount.Body, links, false, true, true, false);
 
-        var text = parameters.ToString();
+        string text = parameters.ToString();
 
-        foreach (var member in text.TrimEnd(' ', '}').Split(", "))
+        foreach (string member in text.TrimEnd(' ', '}').Split(", "))
         {
             Console.WriteLine(member);
         }

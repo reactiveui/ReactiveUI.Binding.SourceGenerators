@@ -18,7 +18,7 @@ public static class FirstBindingExamples
     /// <returns>A task that completes when the items are loaded.</returns>
     public static async Task LoadTodosAsync()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
 
         await viewModel.LoadAsync();
 
@@ -32,9 +32,9 @@ public static class FirstBindingExamples
     /// <returns>A task that completes when the items are loaded and renamed.</returns>
     public static async Task ObserveTitleWithWhenChangedAsync()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
-        var registration = viewModel.Items[0];
+        TodoItem registration = viewModel.Items[0];
 
         using (registration.WhenChanged(static x => x.Title).Subscribe(Console.WriteLine))
         {
@@ -50,8 +50,8 @@ public static class FirstBindingExamples
     /// <returns>A task that completes when an item is finished.</returns>
     public static async Task ShowRemainingCountWithBindOneWayAsync()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
-        var view = new TodoView();
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoView view = new TodoView();
         await viewModel.LoadAsync();
 
         using (viewModel.BindOneWay(view, static x => x.RemainingCount, static v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture)))
@@ -73,11 +73,11 @@ public static class FirstBindingExamples
     /// <returns>A task that completes when an item is finished.</returns>
     public static async Task StopBindingByDisposingAsync()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
-        var view = new TodoView();
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        TodoView view = new TodoView();
         await viewModel.LoadAsync();
 
-        var binding = viewModel.BindOneWay(view, static x => x.RemainingCount, static v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture));
+        IDisposable binding = viewModel.BindOneWay(view, static x => x.RemainingCount, static v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture));
         binding.Dispose();
 
         viewModel.SelectedItem = viewModel.Items[0];

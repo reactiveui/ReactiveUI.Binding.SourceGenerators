@@ -52,7 +52,7 @@ public static class GroupedChangesExamples
     {
         TodoItem item = new();
 
-        using var subscription = ObserveEdits(item)
+        using IDisposable subscription = ObserveEdits(item)
             .GroupBy(static edit => edit.Field, static edit => edit.Value)
             .SelectMany(static group => group.Scan(0, static (count, _) => count + 1).Select(count => $"{group.Key} edit {count}"))
             .Subscribe(Console.WriteLine);
@@ -74,7 +74,7 @@ public static class GroupedChangesExamples
     {
         TodoItem item = new();
 
-        using var subscription = item.WhenChanged(x => x.Tags)
+        using IDisposable subscription = item.WhenChanged(x => x.Tags)
             .Skip(1)
             .SelectMany(static tags => tags)
             .GroupBy(static tag => tag, ExpectedTagCount, StringComparer.OrdinalIgnoreCase)
@@ -97,7 +97,7 @@ public static class GroupedChangesExamples
         VirtualClock clock = new();
         TodoItem item = new();
 
-        using var subscription = ObserveEdits(item)
+        using IDisposable subscription = ObserveEdits(item)
             .GroupByUntil(static edit => edit.Field, static edit => edit.Value, group => group.Throttle(_quietPeriod, clock))
             .SelectMany(static group => group.ToList().Select(values => $"{group.Key}: {string.Join(Separator, values)}"))
             .Subscribe(Console.WriteLine);
@@ -122,8 +122,8 @@ public static class GroupedChangesExamples
     /// <returns>A stream with the field name and the new text of each edit.</returns>
     private static IObservable<(string Field, string Value)> ObserveEdits(TodoItem item)
     {
-        var titles = item.WhenChanged(x => x.Title).Skip(1).Select(static title => (Field: TitleField, Value: title));
-        var notes = item.WhenChanged(x => x.Notes).Skip(1).Select(static note => (Field: NotesField, Value: note));
+        IObservable<(string Field, string Value)> titles = item.WhenChanged(x => x.Title).Skip(1).Select(static title => (Field: TitleField, Value: title));
+        IObservable<(string Field, string Value)> notes = item.WhenChanged(x => x.Notes).Skip(1).Select(static note => (Field: NotesField, Value: note));
 
         return titles.Merge(notes);
     }

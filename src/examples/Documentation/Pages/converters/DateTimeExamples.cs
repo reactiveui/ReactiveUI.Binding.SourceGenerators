@@ -40,15 +40,15 @@ public static class DateTimeExamples
     /// <summary>Parses a todo item's due date and time that a user typed into the task app.</summary>
     public static void ParseTodoDueDateTime()
     {
-        var converter = new StringToDateTimeTypeConverter();
+        StringToDateTimeTypeConverter converter = new StringToDateTimeTypeConverter();
 
         // Success case: valid date-time
-        var success = converter.TryConvert("2025-12-25T10:30:00", conversionHint: null, out var dueDateTime);
+        bool success = converter.TryConvert("2025-12-25T10:30:00", conversionHint: null, out var dueDateTime);
         Console.WriteLine(success);
         Console.WriteLine(dueDateTime);
 
         // Failure case: invalid date format
-        var failure = converter.TryConvert("not-a-date", conversionHint: null, out _);
+        bool failure = converter.TryConvert("not-a-date", conversionHint: null, out _);
         Console.WriteLine(failure);
 
         // Output:
@@ -60,9 +60,9 @@ public static class DateTimeExamples
     /// <summary>Formats a todo item's due date-time for display in a task list.</summary>
     public static void FormatTodoDueDateTime()
     {
-        var converter = new DateTimeToStringTypeConverter();
+        DateTimeToStringTypeConverter converter = new DateTimeToStringTypeConverter();
 
-        var success = converter.TryConvert(TodoDueDateTime, conversionHint: null, out var formatted);
+        bool success = converter.TryConvert(TodoDueDateTime, conversionHint: null, out var formatted);
         Console.WriteLine(success);
         Console.WriteLine(formatted);
 
@@ -74,15 +74,15 @@ public static class DateTimeExamples
     /// <summary>Parses a cloud storage file's last modified time that includes timezone information.</summary>
     public static void ParseCloudStorageModificationTime()
     {
-        var converter = new StringToDateTimeOffsetTypeConverter();
+        StringToDateTimeOffsetTypeConverter converter = new StringToDateTimeOffsetTypeConverter();
 
         // Success case: valid date-time with timezone
-        var success = converter.TryConvert("2025-09-21T10:30:00+00:00", conversionHint: null, out var modifiedTime);
+        bool success = converter.TryConvert("2025-09-21T10:30:00+00:00", conversionHint: null, out var modifiedTime);
         Console.WriteLine(success);
         Console.WriteLine(modifiedTime);
 
         // Failure case: invalid timezone format
-        var failure = converter.TryConvert("invalid-date-time", conversionHint: null, out _);
+        bool failure = converter.TryConvert("invalid-date-time", conversionHint: null, out _);
         Console.WriteLine(failure);
 
         // Output:
@@ -94,9 +94,9 @@ public static class DateTimeExamples
     /// <summary>Formats a cloud storage file's modification time for display.</summary>
     public static void FormatCloudStorageModificationTime()
     {
-        var converter = new DateTimeOffsetToStringTypeConverter();
+        DateTimeOffsetToStringTypeConverter converter = new DateTimeOffsetToStringTypeConverter();
 
-        var success = converter.TryConvert(FileLastModifiedTime, conversionHint: null, out var formatted);
+        bool success = converter.TryConvert(FileLastModifiedTime, conversionHint: null, out var formatted);
         Console.WriteLine(success);
         Console.WriteLine(formatted);
 
@@ -108,15 +108,15 @@ public static class DateTimeExamples
     /// <summary>Parses a todo item's due date that a user typed in the date picker.</summary>
     public static void ParseTodoDueDate()
     {
-        var converter = new StringToDateOnlyTypeConverter();
+        StringToDateOnlyTypeConverter converter = new StringToDateOnlyTypeConverter();
 
         // Success case: valid date
-        var success = converter.TryConvert("2025-12-25", conversionHint: null, out var dueDate);
+        bool success = converter.TryConvert("2025-12-25", conversionHint: null, out var dueDate);
         Console.WriteLine(success);
         Console.WriteLine(dueDate);
 
         // Failure case: invalid date
-        var failure = converter.TryConvert("32/13/2025", conversionHint: null, out _);
+        bool failure = converter.TryConvert("32/13/2025", conversionHint: null, out _);
         Console.WriteLine(failure);
 
         // Output:
@@ -128,9 +128,9 @@ public static class DateTimeExamples
     /// <summary>Formats a todo item's due date for display in the task list.</summary>
     public static void FormatTodoDueDate()
     {
-        var converter = new DateOnlyToStringTypeConverter();
+        DateOnlyToStringTypeConverter converter = new DateOnlyToStringTypeConverter();
 
-        var success = converter.TryConvert(TodoDueDate, conversionHint: null, out var formatted);
+        bool success = converter.TryConvert(TodoDueDate, conversionHint: null, out var formatted);
         Console.WriteLine(success);
         Console.WriteLine(formatted);
 
@@ -142,15 +142,15 @@ public static class DateTimeExamples
     /// <summary>Parses an appointment start time from a calendar text field.</summary>
     public static void ParseAppointmentStartTime()
     {
-        var converter = new StringToTimeOnlyTypeConverter();
+        StringToTimeOnlyTypeConverter converter = new StringToTimeOnlyTypeConverter();
 
         // Success case: valid time
-        var success = converter.TryConvert("14:30:00", conversionHint: null, out var startTime);
+        bool success = converter.TryConvert("14:30:00", conversionHint: null, out var startTime);
         Console.WriteLine(success);
         Console.WriteLine(startTime);
 
         // Failure case: invalid time format
-        var failure = converter.TryConvert("25:00:00", conversionHint: null, out _);
+        bool failure = converter.TryConvert("25:00:00", conversionHint: null, out _);
         Console.WriteLine(failure);
 
         // Output:
@@ -162,9 +162,9 @@ public static class DateTimeExamples
     /// <summary>Formats an appointment start time for display in a calendar event.</summary>
     public static void FormatAppointmentStartTime()
     {
-        var converter = new TimeOnlyToStringTypeConverter();
+        TimeOnlyToStringTypeConverter converter = new TimeOnlyToStringTypeConverter();
 
-        var success = converter.TryConvert(AppointmentStartTime, conversionHint: null, out var formatted);
+        bool success = converter.TryConvert(AppointmentStartTime, conversionHint: null, out var formatted);
         Console.WriteLine(success);
         Console.WriteLine(formatted);
 
@@ -176,15 +176,15 @@ public static class DateTimeExamples
     /// <summary>Parses a project duration that a user typed into a task estimate field.</summary>
     public static void ParseProjectDuration()
     {
-        var converter = new StringToTimeSpanTypeConverter();
+        StringToTimeSpanTypeConverter converter = new StringToTimeSpanTypeConverter();
 
         // Success case: valid duration
-        var success = converter.TryConvert("01:30:00", conversionHint: null, out var duration);
+        bool success = converter.TryConvert("01:30:00", conversionHint: null, out var duration);
         Console.WriteLine(success);
         Console.WriteLine(duration);
 
         // Failure case: invalid duration format
-        var failure = converter.TryConvert("not-a-duration", conversionHint: null, out _);
+        bool failure = converter.TryConvert("not-a-duration", conversionHint: null, out _);
         Console.WriteLine(failure);
 
         // Output:
@@ -196,9 +196,9 @@ public static class DateTimeExamples
     /// <summary>Formats a project duration for display in task management views.</summary>
     public static void FormatProjectDuration()
     {
-        var converter = new TimeSpanToStringTypeConverter();
+        TimeSpanToStringTypeConverter converter = new TimeSpanToStringTypeConverter();
 
-        var success = converter.TryConvert(ProjectDuration, conversionHint: null, out var formatted);
+        bool success = converter.TryConvert(ProjectDuration, conversionHint: null, out var formatted);
         Console.WriteLine(success);
         Console.WriteLine(formatted);
 
@@ -210,19 +210,19 @@ public static class DateTimeExamples
     /// <summary>Converts a todo due date and time to and from text with all four DateTime converters and shows their affinity.</summary>
     public static void ConvertTodoDueDateTimeBothWays()
     {
-        var toDateTime = new StringToDateTimeTypeConverter();
+        StringToDateTimeTypeConverter toDateTime = new StringToDateTimeTypeConverter();
         _ = toDateTime.TryConvert(DueDateTimeText, conversionHint: null, out var dueDateTime);
         Console.WriteLine($"{dueDateTime} affinity {toDateTime.GetAffinityForObjects()}");
 
-        var fromDateTime = new DateTimeToStringTypeConverter();
+        DateTimeToStringTypeConverter fromDateTime = new DateTimeToStringTypeConverter();
         _ = fromDateTime.TryConvert(TodoDueDateTime, conversionHint: null, out var dueDateTimeText);
         Console.WriteLine($"{dueDateTimeText} affinity {fromDateTime.GetAffinityForObjects()}");
 
-        var toOptionalDateTime = new StringToNullableDateTimeTypeConverter();
+        StringToNullableDateTimeTypeConverter toOptionalDateTime = new StringToNullableDateTimeTypeConverter();
         _ = toOptionalDateTime.TryConvert(DueDateTimeText, conversionHint: null, out var optionalDueDateTime);
         Console.WriteLine($"{optionalDueDateTime} affinity {toOptionalDateTime.GetAffinityForObjects()}");
 
-        var fromOptionalDateTime = new NullableDateTimeToStringTypeConverter();
+        NullableDateTimeToStringTypeConverter fromOptionalDateTime = new NullableDateTimeToStringTypeConverter();
         _ = fromOptionalDateTime.TryConvert((DateTime?)TodoDueDateTime, conversionHint: null, out var optionalDueDateTimeText);
         Console.WriteLine($"{optionalDueDateTimeText} affinity {fromOptionalDateTime.GetAffinityForObjects()}");
 
@@ -236,19 +236,19 @@ public static class DateTimeExamples
     /// <summary>Converts a file modification time to and from text with all four DateTimeOffset converters and shows their affinity.</summary>
     public static void ConvertCloudStorageModificationTimeBothWays()
     {
-        var toOffset = new StringToDateTimeOffsetTypeConverter();
+        StringToDateTimeOffsetTypeConverter toOffset = new StringToDateTimeOffsetTypeConverter();
         _ = toOffset.TryConvert(ModifiedTimeText, conversionHint: null, out var modifiedTime);
         Console.WriteLine($"{modifiedTime} affinity {toOffset.GetAffinityForObjects()}");
 
-        var fromOffset = new DateTimeOffsetToStringTypeConverter();
+        DateTimeOffsetToStringTypeConverter fromOffset = new DateTimeOffsetToStringTypeConverter();
         _ = fromOffset.TryConvert(FileLastModifiedTime, conversionHint: null, out var modifiedTimeText);
         Console.WriteLine($"{modifiedTimeText} affinity {fromOffset.GetAffinityForObjects()}");
 
-        var toOptionalOffset = new StringToNullableDateTimeOffsetTypeConverter();
+        StringToNullableDateTimeOffsetTypeConverter toOptionalOffset = new StringToNullableDateTimeOffsetTypeConverter();
         _ = toOptionalOffset.TryConvert(ModifiedTimeText, conversionHint: null, out var optionalModifiedTime);
         Console.WriteLine($"{optionalModifiedTime} affinity {toOptionalOffset.GetAffinityForObjects()}");
 
-        var fromOptionalOffset = new NullableDateTimeOffsetToStringTypeConverter();
+        NullableDateTimeOffsetToStringTypeConverter fromOptionalOffset = new NullableDateTimeOffsetToStringTypeConverter();
         _ = fromOptionalOffset.TryConvert((DateTimeOffset?)FileLastModifiedTime, conversionHint: null, out var optionalModifiedTimeText);
         Console.WriteLine($"{optionalModifiedTimeText} affinity {fromOptionalOffset.GetAffinityForObjects()}");
 
@@ -262,19 +262,19 @@ public static class DateTimeExamples
     /// <summary>Converts a todo due date to and from text with all four DateOnly converters and shows their affinity.</summary>
     public static void ConvertTodoDueDateBothWays()
     {
-        var toDate = new StringToDateOnlyTypeConverter();
+        StringToDateOnlyTypeConverter toDate = new StringToDateOnlyTypeConverter();
         _ = toDate.TryConvert(DueDateText, conversionHint: null, out var dueDate);
         Console.WriteLine($"{dueDate} affinity {toDate.GetAffinityForObjects()}");
 
-        var fromDate = new DateOnlyToStringTypeConverter();
+        DateOnlyToStringTypeConverter fromDate = new DateOnlyToStringTypeConverter();
         _ = fromDate.TryConvert(TodoDueDate, conversionHint: null, out var dueDateText);
         Console.WriteLine($"{dueDateText} affinity {fromDate.GetAffinityForObjects()}");
 
-        var toOptionalDate = new StringToNullableDateOnlyTypeConverter();
+        StringToNullableDateOnlyTypeConverter toOptionalDate = new StringToNullableDateOnlyTypeConverter();
         _ = toOptionalDate.TryConvert(DueDateText, conversionHint: null, out var optionalDueDate);
         Console.WriteLine($"{optionalDueDate} affinity {toOptionalDate.GetAffinityForObjects()}");
 
-        var fromOptionalDate = new NullableDateOnlyToStringTypeConverter();
+        NullableDateOnlyToStringTypeConverter fromOptionalDate = new NullableDateOnlyToStringTypeConverter();
         _ = fromOptionalDate.TryConvert((DateOnly?)TodoDueDate, conversionHint: null, out var optionalDueDateText);
         Console.WriteLine($"{optionalDueDateText} affinity {fromOptionalDate.GetAffinityForObjects()}");
 
@@ -288,19 +288,19 @@ public static class DateTimeExamples
     /// <summary>Converts an appointment start time to and from text with all four TimeOnly converters and shows their affinity.</summary>
     public static void ConvertAppointmentStartTimeBothWays()
     {
-        var toTime = new StringToTimeOnlyTypeConverter();
+        StringToTimeOnlyTypeConverter toTime = new StringToTimeOnlyTypeConverter();
         _ = toTime.TryConvert(StartTimeText, conversionHint: null, out var startTime);
         Console.WriteLine($"{startTime} affinity {toTime.GetAffinityForObjects()}");
 
-        var fromTime = new TimeOnlyToStringTypeConverter();
+        TimeOnlyToStringTypeConverter fromTime = new TimeOnlyToStringTypeConverter();
         _ = fromTime.TryConvert(AppointmentStartTime, conversionHint: null, out var startTimeText);
         Console.WriteLine($"{startTimeText} affinity {fromTime.GetAffinityForObjects()}");
 
-        var toOptionalTime = new StringToNullableTimeOnlyTypeConverter();
+        StringToNullableTimeOnlyTypeConverter toOptionalTime = new StringToNullableTimeOnlyTypeConverter();
         _ = toOptionalTime.TryConvert(StartTimeText, conversionHint: null, out var optionalStartTime);
         Console.WriteLine($"{optionalStartTime} affinity {toOptionalTime.GetAffinityForObjects()}");
 
-        var fromOptionalTime = new NullableTimeOnlyToStringTypeConverter();
+        NullableTimeOnlyToStringTypeConverter fromOptionalTime = new NullableTimeOnlyToStringTypeConverter();
         _ = fromOptionalTime.TryConvert((TimeOnly?)AppointmentStartTime, conversionHint: null, out var optionalStartTimeText);
         Console.WriteLine($"{optionalStartTimeText} affinity {fromOptionalTime.GetAffinityForObjects()}");
 
@@ -314,19 +314,19 @@ public static class DateTimeExamples
     /// <summary>Converts a project duration to and from text with all four TimeSpan converters and shows their affinity.</summary>
     public static void ConvertProjectDurationBothWays()
     {
-        var toSpan = new StringToTimeSpanTypeConverter();
+        StringToTimeSpanTypeConverter toSpan = new StringToTimeSpanTypeConverter();
         _ = toSpan.TryConvert(DurationText, conversionHint: null, out var duration);
         Console.WriteLine($"{duration} affinity {toSpan.GetAffinityForObjects()}");
 
-        var fromSpan = new TimeSpanToStringTypeConverter();
+        TimeSpanToStringTypeConverter fromSpan = new TimeSpanToStringTypeConverter();
         _ = fromSpan.TryConvert(ProjectDuration, conversionHint: null, out var durationText);
         Console.WriteLine($"{durationText} affinity {fromSpan.GetAffinityForObjects()}");
 
-        var toOptionalSpan = new StringToNullableTimeSpanTypeConverter();
+        StringToNullableTimeSpanTypeConverter toOptionalSpan = new StringToNullableTimeSpanTypeConverter();
         _ = toOptionalSpan.TryConvert(DurationText, conversionHint: null, out var optionalDuration);
         Console.WriteLine($"{optionalDuration} affinity {toOptionalSpan.GetAffinityForObjects()}");
 
-        var fromOptionalSpan = new NullableTimeSpanToStringTypeConverter();
+        NullableTimeSpanToStringTypeConverter fromOptionalSpan = new NullableTimeSpanToStringTypeConverter();
         _ = fromOptionalSpan.TryConvert((TimeSpan?)ProjectDuration, conversionHint: null, out var optionalDurationText);
         Console.WriteLine($"{optionalDurationText} affinity {fromOptionalSpan.GetAffinityForObjects()}");
 

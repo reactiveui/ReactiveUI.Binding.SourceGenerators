@@ -18,7 +18,7 @@ public sealed class TodoItemTitleConverter : BindingTypeConverter<TodoItem, stri
     /// <inheritdoc/>
     public override bool TryConvert(TodoItem? from, object? conversionHint, out string? result)
     {
-        var title = from?.Title ?? string.Empty;
+        string title = from?.Title ?? string.Empty;
         result = Equals(conversionHint, UpperCaseHint) ? title.ToUpperInvariant() : title;
         return true;
     }

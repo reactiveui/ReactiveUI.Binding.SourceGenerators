@@ -45,8 +45,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes one chain named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveOneChain()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -65,8 +65,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes one chain named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveOneChainEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -86,8 +86,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes two chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveTwoChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -107,8 +107,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes two chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveTwoChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -129,8 +129,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes three chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveThreeChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -151,8 +151,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes three chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveThreeChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -174,8 +174,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes four chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveFourChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -197,8 +197,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes four chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveFourChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -221,8 +221,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes five chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveFiveChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -245,8 +245,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes five chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveFiveChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -270,8 +270,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes six chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveSixChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -295,8 +295,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes six chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveSixChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -321,8 +321,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes seven chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveSevenChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -347,8 +347,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes seven chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveSevenChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -374,8 +374,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes eight chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveEightChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -401,8 +401,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes eight chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveEightChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -429,8 +429,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes nine chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveNineChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -457,8 +457,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes nine chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveNineChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -486,8 +486,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes ten chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveTenChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -515,8 +515,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes ten chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveTenChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -545,8 +545,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes eleven chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveElevenChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -575,8 +575,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes eleven chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveElevenChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -606,8 +606,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes twelve chains named by expressions and reports a value only when the chain changes it.</summary>
     public static void ObserveTwelveChains()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(
@@ -637,8 +637,8 @@ public static class WhenAnyDynamicExamples
     /// <summary>Observes twelve chains named by expressions and reports every notification, including a repeated value.</summary>
     public static void ObserveTwelveChainsEveryTime()
     {
-        var form = CreateTransferForm();
-        var root = Expression.Parameter(typeof(TransferForm), "x");
+        TransferForm form = CreateTransferForm();
+        ParameterExpression root = Expression.Parameter(typeof(TransferForm), "x");
 
         using (form
             .WhenAnyDynamic(

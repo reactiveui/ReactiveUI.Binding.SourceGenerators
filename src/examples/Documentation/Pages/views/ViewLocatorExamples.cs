@@ -6,6 +6,7 @@ using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Documentation.Banking;
 using ReactiveUI.Binding.Documentation.GitHub;
 using ReactiveUI.Binding.Documentation.Todo;
+using Splat;
 
 namespace ReactiveUI.Binding.Documentation.Views;
 
@@ -25,7 +26,7 @@ public static class ViewLocatorExamples
     /// <exception cref="ViewLocatorNotFoundException">No screen is registered for the view model.</exception>
     public static IViewFor RequireView(IViewLocator locator, object viewModel)
     {
-        var view = locator.ResolveView(viewModel);
+        IViewFor? view = locator.ResolveView(viewModel);
         return view ?? throw new ViewLocatorNotFoundException($"No screen is registered for {viewModel.GetType().Name}.");
     }
 
@@ -71,10 +72,10 @@ public static class ViewLocatorExamples
     /// <summary>Registers the core services, which include the default view locator, and reads it back from <see cref="ViewLocator"/>.</summary>
     public static void RegisterDefaultLocator()
     {
-        var builder = (IReactiveUIBindingBuilder)RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        IReactiveUIBindingBuilder builder = (IReactiveUIBindingBuilder)RxBindingBuilder.CreateReactiveUIBindingBuilder();
         _ = builder.WithCoreServices().BuildApp();
 
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
 
         Console.WriteLine(locator is DefaultViewLocator);
 
@@ -86,9 +87,9 @@ public static class ViewLocatorExamples
     public static void ResolveTodoView()
     {
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
 
-        var view = locator.ResolveView(viewModel);
+        IViewFor? view = locator.ResolveView(viewModel);
 
         Console.WriteLine(view?.GetType().Name);
         Console.WriteLine(ReferenceEquals(view?.ViewModel, viewModel));
@@ -102,9 +103,9 @@ public static class ViewLocatorExamples
     public static void ResolveGitHubViewFromObject()
     {
         object viewModel = new IssueBoardViewModel(InMemoryGitHubServer.CreateSeeded());
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
 
-        var view = locator.ResolveView(viewModel);
+        IViewFor? view = locator.ResolveView(viewModel);
 
         Console.WriteLine(view?.GetType().Name);
         Console.WriteLine(ReferenceEquals(view?.ViewModel, viewModel));
@@ -120,7 +121,7 @@ public static class ViewLocatorExamples
         object viewModel = new TransferViewModel(new InMemoryBankingBackend());
         DefaultViewLocator locator = new();
 
-        var view = locator.ResolveView(viewModel, null);
+        IViewFor? view = locator.ResolveView(viewModel, null);
 
         Console.WriteLine(view?.GetType().Name);
 
@@ -142,8 +143,8 @@ public static class ViewLocatorExamples
         object viewModel = new AccountsViewModel(new InMemoryBankingBackend());
         DefaultViewLocator locator = new();
 
-        var standard = ResolveForContract(locator, viewModel, null);
-        var compact = ResolveForContract(locator, viewModel, AccountViewContracts.Compact);
+        IViewFor? standard = ResolveForContract(locator, viewModel, null);
+        IViewFor? compact = ResolveForContract(locator, viewModel, AccountViewContracts.Compact);
 
         Console.WriteLine(standard?.GetType().Name);
         Console.WriteLine(compact?.GetType().Name);
@@ -157,10 +158,10 @@ public static class ViewLocatorExamples
     public static void ResolveMissingView()
     {
         TodoItem note = new() { Title = NoteTitle };
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
         ViewLocatorNotFoundException? failure = null;
 
-        var view = locator.ResolveView(note);
+        IViewFor? view = locator.ResolveView(note);
 
         try
         {
@@ -179,12 +180,68 @@ public static class ViewLocatorExamples
         // No screen is registered for TodoItem.
     }
 
+    /// <summary>
+    /// Resolves a screen registered only in the service locator, from a view model held as an object. <c>ResolveView</c>
+    /// does not ask the service locator, so it finds nothing and logs a warning that names <c>ResolveViewUnsafe</c>.
+    /// <c>ResolveViewUnsafe</c> asks it, and finds the screen. The build reports the registration as RXUIBIND020.
+    /// </summary>
+    public static void ResolveServiceLocatorViewFromObject()
+    {
+        object viewModel = new TodoItem { Title = NoteTitle };
+        DefaultViewLocator locator = new DefaultViewLocator();
+        AppLocator.CurrentMutable.Register<IViewFor<TodoItem>>(static () => new TodoItemDetailView());
+
+        try
+        {
+            IViewFor? aheadOfTimeSafe = locator.ResolveView(viewModel);
+            IViewFor? reflective = locator.ResolveViewUnsafe(viewModel);
+
+            Console.WriteLine(aheadOfTimeSafe is null);
+            Console.WriteLine(reflective?.GetType().Name);
+        }
+        finally
+        {
+            AppLocator.CurrentMutable.UnregisterAll<IViewFor<TodoItem>>();
+        }
+
+        // Output:
+        // True
+        // TodoItemDetailView
+    }
+
+    /// <summary>
+    /// Maps a screen registered in the service locator, so <c>ResolveView</c> finds it from a view model held as an object
+    /// without reflection. This is the fix RXUIBIND020 suggests.
+    /// </summary>
+    public static void MapServiceLocatorViewForObjects()
+    {
+        object viewModel = new TodoItem { Title = NoteTitle };
+        DefaultViewLocator locator = new DefaultViewLocator();
+        AppLocator.CurrentMutable.Register<IViewFor<TodoItem>>(static () => new TodoItemDetailView());
+
+        try
+        {
+            locator.CreateMappingBuilder().MapFromServiceLocator<TodoItem, IViewFor<TodoItem>>();
+
+            IViewFor? view = locator.ResolveView(viewModel);
+
+            Console.WriteLine(view?.GetType().Name);
+        }
+        finally
+        {
+            AppLocator.CurrentMutable.UnregisterAll<IViewFor<TodoItem>>();
+        }
+
+        // Output:
+        // TodoItemDetailView
+    }
+
     /// <summary>Resolves nothing for a missing view model.</summary>
     public static void ResolveNullViewModel()
     {
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
 
-        var view = locator.ResolveView((object?)null);
+        IViewFor? view = locator.ResolveView((object?)null);
 
         Console.WriteLine(view is null);
 
@@ -234,8 +291,8 @@ public static class ViewLocatorExamples
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
         TodoViewLocator locator = new();
 
-        var view = locator.ResolveView(viewModel, null);
-        var missing = locator.ResolveView(new TodoItem(), null);
+        IViewFor? view = locator.ResolveView(viewModel, null);
+        IViewFor? missing = locator.ResolveView(new TodoItem(), null);
 
         Console.WriteLine(view?.GetType().Name);
         Console.WriteLine(ReferenceEquals(view?.ViewModel, viewModel));

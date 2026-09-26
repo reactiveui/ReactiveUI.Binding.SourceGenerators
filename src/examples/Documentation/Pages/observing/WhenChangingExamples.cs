@@ -182,9 +182,9 @@ public static class WhenChangingExamples
     /// <summary>Observes the title of a to-do item; a single property delivers the value itself.</summary>
     public static void ObserveTodoTitle()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item.WhenChanging(x => x.Title).Subscribe(Console.WriteLine);
+        using IDisposable subscription = item.WhenChanging(x => x.Title).Subscribe(Console.WriteLine);
 
         item.Title = RenamedTitle;
 
@@ -199,9 +199,9 @@ public static class WhenChangingExamples
     /// <summary>Observes the title and the done flag of a to-do item together.</summary>
     public static void ObserveTodoTitleAndStatus()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item.WhenChanging(x => x.Title, x => x.IsDone).Subscribe(static values => Console.WriteLine(values.Property2));
+        using IDisposable subscription = item.WhenChanging(x => x.Title, x => x.IsDone).Subscribe(static values => Console.WriteLine(values.Property2));
 
         item.IsDone = true;
 
@@ -216,9 +216,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the status line a to-do item had before its done flag changed, with a value selector.</summary>
     public static void ProjectTodoStatusLine()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.IsDone, static (title, isDone) => $"{title} ({(isDone ? DoneText : OpenText)})")
             .Subscribe(Console.WriteLine);
 
@@ -232,9 +232,9 @@ public static class WhenChangingExamples
     /// <summary>Observes the title, the done flag and the priority of a to-do item.</summary>
     public static void ObserveTodoTitleStatusAndPriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.IsDone, x => x.Priority)
             .Subscribe(static values => Console.WriteLine(values.Property3));
 
@@ -251,9 +251,9 @@ public static class WhenChangingExamples
     /// <summary>Prints how urgent a to-do item was before its priority changed; a finished item is never urgent.</summary>
     public static void ProjectTodoEffectivePriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.IsDone, x => x.Priority, static (_, isDone, priority) => isDone ? TodoPriority.Low : priority)
             .Subscribe(static priority => Console.WriteLine(priority));
 
@@ -267,9 +267,9 @@ public static class WhenChangingExamples
     /// <summary>Observes the title, notes, done flag and deadline of a to-do item.</summary>
     public static void ObserveTodoDeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate)
             .Subscribe(static values => Console.WriteLine(values.Property4));
 
@@ -286,9 +286,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the headline a to-do item had before its deadline moved.</summary>
     public static void ProjectTodoHeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(
                 x => x.Title,
                 x => x.Notes,
@@ -307,9 +307,9 @@ public static class WhenChangingExamples
     /// <summary>Observes the title, notes, done flag, deadline and priority of a to-do item.</summary>
     public static void ObserveTodoWithPriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate, x => x.Priority)
             .Subscribe(static values => Console.WriteLine(values.Property5));
 
@@ -326,11 +326,11 @@ public static class WhenChangingExamples
     /// <summary>Prints whether a high-priority item needed attention before it was finished.</summary>
     public static void ProjectTodoNeedsAttention()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
         item.Priority = TodoPriority.High;
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(
                 x => x.Title,
                 x => x.Notes,
@@ -350,9 +350,9 @@ public static class WhenChangingExamples
     /// <summary>Observes every editable property of a to-do item; six properties is the whole form.</summary>
     public static void ObserveWholeTodo()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(x => x.Title, x => x.Notes, x => x.IsDone, x => x.DueDate, x => x.Priority, x => x.Tags)
             .Subscribe(static values => Console.WriteLine(string.Join(", ", values.Property6)));
 
@@ -369,9 +369,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the title with its labels as it was before the labels changed.</summary>
     public static void ProjectTodoTitleWithLabels()
     {
-        var item = CreateRegistrationTask();
+        TodoItemDraft item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenChanging(
                 x => x.Title,
                 x => x.Notes,
@@ -392,9 +392,9 @@ public static class WhenChangingExamples
     /// <summary>Observes seven properties of an issue.</summary>
     public static void ObserveIssueSummary()
     {
-        var issue = CreateCheckoutIssue();
+        IssueDraft issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanging(x => x.Number, x => x.Title, x => x.State, x => x.Author, x => x.Assignee!, x => x.Labels, x => x.UpdatedAt)
             .Subscribe(static values => Console.WriteLine(values.Property7));
 
@@ -411,9 +411,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the assignment line an issue had before it was reassigned, from seven properties.</summary>
     public static void ProjectIssueAssignment()
     {
-        var issue = CreateCheckoutIssue();
+        IssueDraft issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanging(
                 x => x.Number,
                 x => x.Title,
@@ -438,9 +438,9 @@ public static class WhenChangingExamples
     /// <summary>Observes eight properties of an issue.</summary>
     public static void ObserveIssueWithComments()
     {
-        var issue = CreateCheckoutIssue();
+        IssueDraft issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanging(x => x.Number, x => x.Title, x => x.State, x => x.Author, x => x.Assignee!, x => x.Labels, x => x.UpdatedAt, x => x.Comments)
             .Subscribe(static values => Console.WriteLine(values.Property8.Count));
 
@@ -457,9 +457,9 @@ public static class WhenChangingExamples
     /// <summary>Prints whether an open issue still waited for its first reply before the reply arrived.</summary>
     public static void ProjectIssueAwaitsFirstReply()
     {
-        var issue = CreateCheckoutIssue();
+        IssueDraft issue = CreateCheckoutIssue();
 
-        using var subscription = issue
+        using IDisposable subscription = issue
             .WhenChanging(
                 x => x.Number,
                 x => x.Title,
@@ -482,9 +482,9 @@ public static class WhenChangingExamples
     /// <summary>Observes a transfer and the fields of its source account, nine properties in all.</summary>
     public static void ObserveTransferAndSourceAccount()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -510,9 +510,9 @@ public static class WhenChangingExamples
     /// <summary>Prints whether the account could cover the amount before the amount changed.</summary>
     public static void ProjectTransferIsAffordable()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -536,9 +536,9 @@ public static class WhenChangingExamples
     /// <summary>Adds the payee to the transfer and its source account fields, ten properties in all.</summary>
     public static void ObserveTransferWithPayee()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -565,9 +565,9 @@ public static class WhenChangingExamples
     /// <summary>Prints whether the amount fitted the account and the payee's limit before the amount changed.</summary>
     public static void ProjectTransferWithinPayeeLimit()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -593,9 +593,9 @@ public static class WhenChangingExamples
     /// <summary>Adds the day the transfer is sent, eleven properties in all.</summary>
     public static void ObserveTransferSchedule()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -623,9 +623,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the statement line the transfer had before it was rescheduled.</summary>
     public static void ProjectTransferStatementLine()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -651,9 +651,9 @@ public static class WhenChangingExamples
     /// <summary>Adds whether the transfer repeats, twelve properties in all.</summary>
     public static void ObserveTransferRecurrence()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -682,9 +682,9 @@ public static class WhenChangingExamples
     /// <summary>Prints how the transfer was described before it stopped repeating.</summary>
     public static void ProjectTransferRecurrenceLabel()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -711,9 +711,9 @@ public static class WhenChangingExamples
     /// <summary>Adds whether the payee is told, thirteen properties in all.</summary>
     public static void ObserveTransferNotification()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -743,9 +743,9 @@ public static class WhenChangingExamples
     /// <summary>Prints whether the payee was going to be told before the customer switched the notice off.</summary>
     public static void ProjectTransferNotifiesPayee()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -773,9 +773,9 @@ public static class WhenChangingExamples
     /// <summary>Adds the private note, fourteen properties in all.</summary>
     public static void ObserveTransferMemo()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -806,9 +806,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the note the customer was about to replace, or the reference when there was none.</summary>
     public static void ProjectTransferNote()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -837,9 +837,9 @@ public static class WhenChangingExamples
     /// <summary>Adds what the transfer pays for, fifteen properties in all.</summary>
     public static void ObserveTransferPurpose()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -871,9 +871,9 @@ public static class WhenChangingExamples
     /// <summary>Prints the purpose and reference the transfer had before the purpose changed.</summary>
     public static void ProjectTransferPurposeLine()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -903,9 +903,9 @@ public static class WhenChangingExamples
     /// <summary>Observes sixteen properties of the transfer screen, the most one call accepts.</summary>
     public static void ObserveTransferFee()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,
@@ -938,9 +938,9 @@ public static class WhenChangingExamples
     /// <summary>Prints whether the amount and fee fitted the account before the fee changed.</summary>
     public static void ProjectTransferTotalIsAffordable()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        using var subscription = form
+        using IDisposable subscription = form
             .WhenChanging(
                 x => x.Amount,
                 x => x.Reference,

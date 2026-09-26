@@ -31,19 +31,19 @@ public static class NullableWrapperExamples
     /// <summary>Wraps whole numbers in their nullable types and shows each converter's type pair and affinity.</summary>
     public static void WrapWholeNumbers()
     {
-        var wrapByte = new ByteToNullableByteTypeConverter();
+        ByteToNullableByteTypeConverter wrapByte = new ByteToNullableByteTypeConverter();
         _ = wrapByte.TryConvertTyped(ColorChannelValue, conversionHint: null, out var colorChannel);
         Console.WriteLine($"{wrapByte.FromType} -> {wrapByte.ToType}: {colorChannel} (affinity {wrapByte.GetAffinityForObjects()})");
 
-        var wrapShort = new ShortToNullableShortTypeConverter();
+        ShortToNullableShortTypeConverter wrapShort = new ShortToNullableShortTypeConverter();
         _ = wrapShort.TryConvertTyped(PortNumber, conversionHint: null, out var portNumber);
         Console.WriteLine($"{wrapShort.FromType} -> {wrapShort.ToType}: {portNumber} (affinity {wrapShort.GetAffinityForObjects()})");
 
-        var wrapInteger = new IntegerToNullableIntegerTypeConverter();
+        IntegerToNullableIntegerTypeConverter wrapInteger = new IntegerToNullableIntegerTypeConverter();
         _ = wrapInteger.TryConvertTyped(IssueNumber, conversionHint: null, out var issueNumber);
         Console.WriteLine($"{wrapInteger.FromType} -> {wrapInteger.ToType}: {issueNumber} (affinity {wrapInteger.GetAffinityForObjects()})");
 
-        var wrapLong = new LongToNullableLongTypeConverter();
+        LongToNullableLongTypeConverter wrapLong = new LongToNullableLongTypeConverter();
         _ = wrapLong.TryConvertTyped(FileSize, conversionHint: null, out var fileSize);
         Console.WriteLine($"{wrapLong.FromType} -> {wrapLong.ToType}: {fileSize} (affinity {wrapLong.GetAffinityForObjects()})");
 
@@ -57,15 +57,15 @@ public static class NullableWrapperExamples
     /// <summary>Wraps fractional numbers in their nullable types and shows each converter's type pair and affinity.</summary>
     public static void WrapFractionalNumbers()
     {
-        var wrapSingle = new SingleToNullableSingleTypeConverter();
+        SingleToNullableSingleTypeConverter wrapSingle = new SingleToNullableSingleTypeConverter();
         _ = wrapSingle.TryConvertTyped(Pi, conversionHint: null, out var pi);
         Console.WriteLine($"{wrapSingle.FromType} -> {wrapSingle.ToType}: {pi} (affinity {wrapSingle.GetAffinityForObjects()})");
 
-        var wrapDouble = new DoubleToNullableDoubleTypeConverter();
+        DoubleToNullableDoubleTypeConverter wrapDouble = new DoubleToNullableDoubleTypeConverter();
         _ = wrapDouble.TryConvertTyped(EulersNumber, conversionHint: null, out var eulersNumber);
         Console.WriteLine($"{wrapDouble.FromType} -> {wrapDouble.ToType}: {eulersNumber} (affinity {wrapDouble.GetAffinityForObjects()})");
 
-        var wrapDecimal = new DecimalToNullableDecimalTypeConverter();
+        DecimalToNullableDecimalTypeConverter wrapDecimal = new DecimalToNullableDecimalTypeConverter();
         _ = wrapDecimal.TryConvertTyped(TransferAmount, conversionHint: null, out var transferAmount);
         Console.WriteLine($"{wrapDecimal.FromType} -> {wrapDecimal.ToType}: {transferAmount} (affinity {wrapDecimal.GetAffinityForObjects()})");
 
@@ -78,19 +78,19 @@ public static class NullableWrapperExamples
     /// <summary>Unwraps nullable whole numbers and shows each converter's type pair and affinity.</summary>
     public static void UnwrapWholeNumbers()
     {
-        var unwrapByte = new NullableByteToByteTypeConverter();
+        NullableByteToByteTypeConverter unwrapByte = new NullableByteToByteTypeConverter();
         _ = unwrapByte.TryConvertTyped((byte?)ColorChannelValue, conversionHint: null, out var colorChannel);
         Console.WriteLine($"{unwrapByte.FromType} -> {unwrapByte.ToType}: {colorChannel} (affinity {unwrapByte.GetAffinityForObjects()})");
 
-        var unwrapShort = new NullableShortToShortTypeConverter();
+        NullableShortToShortTypeConverter unwrapShort = new NullableShortToShortTypeConverter();
         _ = unwrapShort.TryConvertTyped((short?)PortNumber, conversionHint: null, out var portNumber);
         Console.WriteLine($"{unwrapShort.FromType} -> {unwrapShort.ToType}: {portNumber} (affinity {unwrapShort.GetAffinityForObjects()})");
 
-        var unwrapInteger = new NullableIntegerToIntegerTypeConverter();
+        NullableIntegerToIntegerTypeConverter unwrapInteger = new NullableIntegerToIntegerTypeConverter();
         _ = unwrapInteger.TryConvertTyped((int?)IssueNumber, conversionHint: null, out var issueNumber);
         Console.WriteLine($"{unwrapInteger.FromType} -> {unwrapInteger.ToType}: {issueNumber} (affinity {unwrapInteger.GetAffinityForObjects()})");
 
-        var unwrapLong = new NullableLongToLongTypeConverter();
+        NullableLongToLongTypeConverter unwrapLong = new NullableLongToLongTypeConverter();
         _ = unwrapLong.TryConvertTyped((long?)FileSize, conversionHint: null, out var fileSize);
         Console.WriteLine($"{unwrapLong.FromType} -> {unwrapLong.ToType}: {fileSize} (affinity {unwrapLong.GetAffinityForObjects()})");
 
@@ -104,15 +104,15 @@ public static class NullableWrapperExamples
     /// <summary>Unwraps nullable fractional numbers and shows each converter's type pair and affinity.</summary>
     public static void UnwrapFractionalNumbers()
     {
-        var unwrapSingle = new NullableSingleToSingleTypeConverter();
+        NullableSingleToSingleTypeConverter unwrapSingle = new NullableSingleToSingleTypeConverter();
         _ = unwrapSingle.TryConvertTyped((float?)Pi, conversionHint: null, out var pi);
         Console.WriteLine($"{unwrapSingle.FromType} -> {unwrapSingle.ToType}: {pi} (affinity {unwrapSingle.GetAffinityForObjects()})");
 
-        var unwrapDouble = new NullableDoubleToDoubleTypeConverter();
+        NullableDoubleToDoubleTypeConverter unwrapDouble = new NullableDoubleToDoubleTypeConverter();
         _ = unwrapDouble.TryConvertTyped((double?)EulersNumber, conversionHint: null, out var eulersNumber);
         Console.WriteLine($"{unwrapDouble.FromType} -> {unwrapDouble.ToType}: {eulersNumber} (affinity {unwrapDouble.GetAffinityForObjects()})");
 
-        var unwrapDecimal = new NullableDecimalToDecimalTypeConverter();
+        NullableDecimalToDecimalTypeConverter unwrapDecimal = new NullableDecimalToDecimalTypeConverter();
         _ = unwrapDecimal.TryConvertTyped((decimal?)TransferAmount, conversionHint: null, out var transferAmount);
         Console.WriteLine($"{unwrapDecimal.FromType} -> {unwrapDecimal.ToType}: {transferAmount} (affinity {unwrapDecimal.GetAffinityForObjects()})");
 

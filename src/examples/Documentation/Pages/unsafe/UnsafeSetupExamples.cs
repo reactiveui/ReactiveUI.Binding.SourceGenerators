@@ -22,12 +22,12 @@ public static class UnsafeSetupExamples
     /// <summary>Calls a plain method with a property path held in a variable; the generator cannot read it, so the stub throws.</summary>
     public static void PlainCallWithStoredPathThrows()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
 
         try
         {
-            using var subscription = item.WhenChanged(titleColumn).Subscribe(Console.WriteLine);
+            using IDisposable subscription = item.WhenChanged(titleColumn).Subscribe(Console.WriteLine);
         }
         catch (InvalidOperationException ex)
         {
@@ -41,12 +41,12 @@ public static class UnsafeSetupExamples
     /// <summary>Calls an <c>Unsafe</c> method before the application registers its services; the fallback finds no way to observe the property.</summary>
     public static void UnsafeCallBeforeBuildFails()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
 
         try
         {
-            using var subscription = item.WhenChangedUnsafe(titleColumn).Subscribe(Console.WriteLine);
+            using IDisposable subscription = item.WhenChangedUnsafe(titleColumn).Subscribe(Console.WriteLine);
         }
         catch (InvalidOperationException ex)
         {
@@ -72,10 +72,10 @@ public static class UnsafeSetupExamples
     /// <summary>Calls an <c>Unsafe</c> method after the services are registered; the fallback reads the path and observes the property.</summary>
     public static void UnsafeCallAfterBuildObserves()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
 
-        using var subscription = item.WhenChangedUnsafe(titleColumn).Subscribe(Console.WriteLine);
+        using IDisposable subscription = item.WhenChangedUnsafe(titleColumn).Subscribe(Console.WriteLine);
 
         // Output:
         // Renew car registration

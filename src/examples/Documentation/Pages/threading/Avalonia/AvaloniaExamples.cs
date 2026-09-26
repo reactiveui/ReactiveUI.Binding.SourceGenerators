@@ -46,7 +46,7 @@ public static class AvaloniaExamples
     public static void RaisePropertyChangedFromControl()
     {
         AvaloniaTodoView view = new();
-        var notifying = (INotifyPropertyChanged)view.FilterTextBox;
+        INotifyPropertyChanged notifying = (INotifyPropertyChanged)view.FilterTextBox;
         notifying.PropertyChanged += static (_, e) => Console.WriteLine(e.PropertyName);
 
         view.FilterTextBox.Text = CarFilter;
@@ -79,7 +79,7 @@ public static class AvaloniaExamples
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
         AvaloniaTodoView view = new() { ViewModel = viewModel };
-        var allItems = viewModel.Items.Count;
+        int allItems = viewModel.Items.Count;
         viewModel.SelectedItem = viewModel.Items[0];
 
         using (viewModel.BindTwoWay(view, x => x.FilterText, v => v.FilterTextBox.Text))
@@ -140,7 +140,7 @@ public static class AvaloniaExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         await viewModel.LoadAsync();
-        using var confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
+        using IDisposable confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
         AvaloniaTransferView view = new() { ViewModel = viewModel };
         viewModel.Draft.Source = viewModel.Accounts[0];
         viewModel.Draft.Payee = viewModel.Payees[0];
@@ -181,11 +181,11 @@ public static class AvaloniaExamples
     {
         AvaloniaTodoView view = new();
         TodoItem item = new() { Title = OriginalTitle };
-        var failure = string.Empty;
+        string? failure = string.Empty;
 
         using (item.BindOneWay(view, x => x.Title, v => v.RemainingLabel.Text))
         {
-            var worker = new Thread(() =>
+            Thread worker = new Thread(() =>
             {
                 try
                 {

@@ -18,7 +18,7 @@ CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 if (args is ["winforms"])
 {
     // A Windows Forms application runs its message loop on a single-threaded apartment thread; awaits return to it.
-    var winForms = new Thread(static () =>
+    Thread? winForms = new Thread(static () =>
     {
         SynchronizationContext.SetSynchronizationContext(new System.Windows.Forms.WindowsFormsSynchronizationContext());
         _ = RunWinFormsExamplesAsync();
@@ -31,7 +31,7 @@ if (args is ["winforms"])
 else
 {
     // A WPF application runs its dispatcher on a single-threaded apartment thread; awaits return to it.
-    var wpf = new Thread(static () =>
+    Thread? wpf = new Thread(static () =>
     {
         _ = Dispatcher.CurrentDispatcher.InvokeAsync(RunWpfExamplesAsync);
         Dispatcher.Run();
@@ -150,7 +150,7 @@ static async Task RunWinFormsExamplesAsync()
 // The Avalonia examples run inside Avalonia's dispatcher on this thread, so an await returns to the UI thread.
 using CancellationTokenSource stop = new();
 
-var avaloniaExamples = Dispatcher.UIThread.InvokeAsync(async () =>
+Task avaloniaExamples = Dispatcher.UIThread.InvokeAsync(async () =>
 {
     try
     {

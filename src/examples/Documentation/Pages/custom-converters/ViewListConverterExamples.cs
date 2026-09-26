@@ -19,10 +19,11 @@ public static class ViewListConverterExamples
         AccountsViewModel viewModel = new(new InMemoryBankingBackend());
         view.ViewModel = viewModel;
 
-        using var binding = view.OneWayBind(viewModel, x => x.Accounts, v => v.AccountList.ItemsSource, new AccountsToViewsConverter(locator));
+        using IReactiveBinding<AccountsView, System.Collections.IEnumerable> binding =
+            view.OneWayBind(viewModel, x => x.Accounts, v => v.AccountList.ItemsSource, new AccountsToViewsConverter(locator));
         await viewModel.LoadAccountsAsync();
 
-        foreach (var row in view.AccountList.ItemsSource.OfType<AccountSummaryView>())
+        foreach (AccountSummaryView row in view.AccountList.ItemsSource.OfType<AccountSummaryView>())
         {
             Console.WriteLine(row.ViewModel!.Name);
         }

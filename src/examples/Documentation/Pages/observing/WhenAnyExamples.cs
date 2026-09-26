@@ -123,9 +123,9 @@ public static class WhenAnyExamples
     /// <summary>Observes the title of a to-do item and prints each change as it arrives.</summary>
     public static void ObserveTodoTitleChange()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item.WhenAny(x => x.Title, static change => change).Subscribe(static change => Console.WriteLine(change.Value));
+        using IDisposable subscription = item.WhenAny(x => x.Title, static change => change).Subscribe(static change => Console.WriteLine(change.Value));
 
         item.Title = RenamedTitle;
 
@@ -137,9 +137,9 @@ public static class WhenAnyExamples
     /// <summary>Turns the title of a to-do item into its length, as a character counter does.</summary>
     public static void ProjectTodoTitleLength()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item.WhenAny(x => x.Title, static title => title.Value.Length).Subscribe(Console.WriteLine);
+        using IDisposable subscription = item.WhenAny(x => x.Title, static title => title.Value.Length).Subscribe(Console.WriteLine);
 
         item.Title = RenamedTitle;
 
@@ -151,9 +151,9 @@ public static class WhenAnyExamples
     /// <summary>Turns the title and the done flag into one checklist line.</summary>
     public static void ProjectTodoChecklistLine()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(x => x.Title, x => x.IsDone, static (title, isDone) => (isDone.Value ? DoneMark : OpenMark) + title.Value)
             .Subscribe(Console.WriteLine);
 
@@ -167,9 +167,9 @@ public static class WhenAnyExamples
     /// <summary>Works out how urgent a to-do item is from three properties; a finished item is never urgent.</summary>
     public static void ProjectTodoEffectivePriority()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(x => x.Title, x => x.IsDone, x => x.Priority, static (_, isDone, priority) => isDone.Value ? TodoPriority.Low : priority.Value)
             .Subscribe(static priority => Console.WriteLine(priority));
 
@@ -185,9 +185,9 @@ public static class WhenAnyExamples
     /// <summary>Builds a headline with the deadline from four properties.</summary>
     public static void ProjectTodoHeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(
                 x => x.Title,
                 x => x.Notes,
@@ -207,9 +207,9 @@ public static class WhenAnyExamples
     /// <summary>Decides from five properties whether a to-do item needs attention now.</summary>
     public static void ProjectTodoNeedsAttention()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(
                 x => x.Title,
                 x => x.Notes,
@@ -229,9 +229,9 @@ public static class WhenAnyExamples
     /// <summary>Lists the labels after the title from six properties.</summary>
     public static void ProjectTodoTitleWithLabels()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(
                 x => x.Title,
                 x => x.Notes,
@@ -252,9 +252,9 @@ public static class WhenAnyExamples
     /// <summary>Numbers a to-do item from seven properties, every editable property of the item.</summary>
     public static void ProjectTodoNumberedHeadline()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        using var subscription = item
+        using IDisposable subscription = item
             .WhenAny(
                 x => x.Id,
                 x => x.Title,
@@ -278,9 +278,9 @@ public static class WhenAnyExamples
     /// <summary>Works out from eight properties of a transfer how much money the account keeps after it.</summary>
     public static void ProjectTransferRemainingBalance()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenAny(
                 x => x.Amount,
                 x => x.Reference,
@@ -303,9 +303,9 @@ public static class WhenAnyExamples
     /// <summary>Checks from nine properties whether the account can cover the amount and the payee can receive it.</summary>
     public static void ProjectTransferIsPayable()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenAny(
                 x => x.Amount,
                 x => x.Reference,
@@ -329,9 +329,9 @@ public static class WhenAnyExamples
     /// <summary>Checks from ten properties whether the amount fits the account and the payee's limit.</summary>
     public static void ProjectTransferWithinPayeeLimit()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenAny(
                 x => x.Amount,
                 x => x.Reference,
@@ -357,9 +357,9 @@ public static class WhenAnyExamples
     /// <summary>Writes the statement line from eleven properties: the account, the payee and the reference. The payee is replaced as a whole.</summary>
     public static void ProjectTransferStatementLine()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        using var subscription = draft
+        using IDisposable subscription = draft
             .WhenAny(
                 x => x.Amount,
                 x => x.Reference,
@@ -386,13 +386,13 @@ public static class WhenAnyExamples
     public static void ProjectTransferNeedsReview()
     {
         TransferViewModel screen = new(new InMemoryBankingBackend());
-        var draft = screen.Draft;
+        TransferDraft draft = screen.Draft;
         draft.Source = CreateEverydayAccount();
         draft.Payee = _landlord;
         draft.Amount = RentAmount;
         draft.Reference = RentReference;
 
-        using var subscription = screen
+        using IDisposable subscription = screen
             .WhenAny(
                 x => x.Draft.Amount,
                 x => x.Draft.Reference,
@@ -419,10 +419,10 @@ public static class WhenAnyExamples
     /// <summary>Jumps to the issue number the user types. A number that does not parse throws in the selector, and Catch replaces the failure with a value and ends the pipeline.</summary>
     public static void CatchEndsThePipelineAfterOneFailure()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueSearchViewModel viewModel = new(server, Webshop) { SearchTerm = FirstIssueNumber };
 
-        using var subscription = viewModel
+        using IDisposable subscription = viewModel
             .WhenAny(x => x.SearchTerm, static term => int.Parse(term.Value, CultureInfo.InvariantCulture))
             .Catch<int, FormatException>(static _ => Signal.Return(NotANumber))
             .Subscribe(Console.WriteLine);
@@ -442,10 +442,10 @@ public static class WhenAnyExamples
     /// <summary>Jumps to the issue number the user types. Handling a number that does not parse inside the selector keeps the pipeline alive.</summary>
     public static void HandleFailuresInsideTheSelector()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueSearchViewModel viewModel = new(server, Webshop) { SearchTerm = FirstIssueNumber };
 
-        using var subscription = viewModel
+        using IDisposable subscription = viewModel
             .WhenAny(x => x.SearchTerm, static term => int.TryParse(term.Value, CultureInfo.InvariantCulture, out var number) ? number : NotANumber)
             .Subscribe(Console.WriteLine);
 

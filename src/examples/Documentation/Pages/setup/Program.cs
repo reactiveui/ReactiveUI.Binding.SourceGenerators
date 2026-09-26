@@ -15,7 +15,7 @@ TodoItemObservableForProperty provider = new();
 
 ButtonCommandBinder binder = new();
 
-var app = BuilderExamples.BuildTodoApplication(provider, binder);
+ReactiveUI.Binding.Builder.IReactiveUIBindingInstance app = BuilderExamples.BuildTodoApplication(provider, binder);
 
 BuilderExamples.EnsureInitializedAfterBuildApp(app);
 
@@ -23,7 +23,7 @@ ServiceRegistrationExamples.ListObservationProviders(app);
 
 ServiceRegistrationExamples.ResolveMauiViewThreadInvoker(app);
 
-var store = ServiceRegistrationExamples.ResolveModuleService(app);
+ITodoStore store = ServiceRegistrationExamples.ResolveModuleService(app);
 
 TodoListViewModel viewModel = new(store);
 

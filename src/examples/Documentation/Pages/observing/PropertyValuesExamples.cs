@@ -104,7 +104,7 @@ public static class PropertyValuesExamples
     /// <summary>Handles each emission in a subscription that reads the members it needs.</summary>
     public static void SubscribeAndReadTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
         List<string> lines = [];
 
         using (item
@@ -124,12 +124,12 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareTodoValues()
     {
-        var first = CreateRegistrationTask();
-        var second = CreateRegistrationTask();
+        TodoItem first = CreateRegistrationTask();
+        TodoItem second = CreateRegistrationTask();
 
-        var left = await first.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
-        var right = await second.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
-        var boxed = (object)right;
+        PropertyValues<string, bool> left = await first.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        PropertyValues<string, bool> right = await second.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        object boxed = (object)right;
 
         Console.WriteLine(left == right);
         Console.WriteLine(left != right);
@@ -138,7 +138,7 @@ public static class PropertyValuesExamples
         Console.WriteLine(left.GetHashCode() == right.GetHashCode());
 
         second.IsDone = true;
-        var finished = await second.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        PropertyValues<string, bool> finished = await second.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
 
         Console.WriteLine(left == finished);
 
@@ -155,10 +155,10 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are printed.</returns>
     public static async Task ReplaceOneTodoValue()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var original = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
-        var finished = original with { Property2 = true };
+        PropertyValues<string, bool> original = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        PropertyValues<string, bool> finished = original with { Property2 = true };
 
         Console.WriteLine(original.Property2);
         Console.WriteLine(finished.Property2);
@@ -172,9 +172,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are printed.</returns>
     public static async Task PrintTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        PropertyValues<string, bool> values = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
 
         Console.WriteLine($"Emission: {values}.");
 
@@ -186,9 +186,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadTwoTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
+        PropertyValues<string, bool> values = await item.WhenChanged(x => x.Title, x => x.IsDone).FirstAsync();
 
         Console.WriteLine(values.Property1);
         Console.WriteLine(values.Property2);
@@ -207,9 +207,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadThreeTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item.WhenChanged(x => x.Title, x => x.IsDone, x => x.Priority).FirstAsync();
+        PropertyValues<string, bool, TodoPriority> values = await item.WhenChanged(x => x.Title, x => x.IsDone, x => x.Priority).FirstAsync();
 
         Console.WriteLine(values.Property1);
         Console.WriteLine(values.Property2);
@@ -230,9 +230,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadFourTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item
+        PropertyValues<string, string, bool, DateOnly?> values = await item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -261,9 +261,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadFiveTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item
+        PropertyValues<string, string, bool, DateOnly?, TodoPriority> values = await item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -295,9 +295,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadSixTodoValues()
     {
-        var item = CreateRegistrationTask();
+        TodoItem item = CreateRegistrationTask();
 
-        var values = await item
+        PropertyValues<string, string, bool, DateOnly?, TodoPriority, IReadOnlyList<string>> values = await item
             .WhenChanged(
                 x => x.Title,
                 x => x.Notes,
@@ -332,9 +332,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadSevenIssueValues()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        var values = await issue
+        PropertyValues<int, string, IssueState, User, User, IReadOnlyList<string>, DateTimeOffset> values = await issue
             .WhenChanged(
                 x => x.Number,
                 x => x.Title,
@@ -372,9 +372,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadEightIssueValues()
     {
-        var issue = CreateCheckoutIssue();
+        Issue issue = CreateCheckoutIssue();
 
-        var values = await issue
+        PropertyValues<int, string, IssueState, User, User, IReadOnlyList<string>, DateTimeOffset, IReadOnlyList<IssueComment>> values = await issue
             .WhenChanged(
                 x => x.Number,
                 x => x.Title,
@@ -415,9 +415,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadNineTransferValues()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        var values = await draft
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal?, decimal> values = await draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -461,9 +461,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadTenTransferValues()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        var values = await draft
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal?, decimal, Payee> values = await draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -510,9 +510,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the values are read.</returns>
     public static async Task ReadElevenTransferValues()
     {
-        var draft = CreateTransferDraft();
+        TransferDraft draft = CreateTransferDraft();
 
-        var values = await draft
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal?, decimal, Payee, Account> values = await draft
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -562,9 +562,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ReadTwelveIssueBoardValues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        var values = await board
+        PropertyValues<bool, string, string, int, string, IssueState, string, string, IReadOnlyList<string>, DateTimeOffset, string, int> values = await board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -617,9 +617,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ReadThirteenIssueBoardValues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        var values = await board
+        PropertyValues<bool, string, string, int, string, IssueState, string, string, IReadOnlyList<string>, DateTimeOffset, string, int, string> values = await board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -675,9 +675,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ReadFourteenIssueBoardValues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        var values = await board
+        PropertyValues<bool, string, string, int, string, IssueState, string, string, IReadOnlyList<string>, DateTimeOffset, string, int, string, string> values = await board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -736,9 +736,9 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ReadFifteenIssueBoardValues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        var values = await board
+        PropertyValues<bool, string, string, int, string, IssueState, string, string, IReadOnlyList<string>, DateTimeOffset, string, int, string, string, IReadOnlyList<Issue>> values = await board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -800,9 +800,25 @@ public static class PropertyValuesExamples
     /// <returns>A task that completes when the checks finish.</returns>
     public static async Task ReadSixteenIssueBoardValues()
     {
-        var board = await CreateBoardWithSelectedIssueAsync();
+        IssueBoardViewModel board = await CreateBoardWithSelectedIssueAsync();
 
-        var values = await board
+        PropertyValues<
+            bool,
+            string,
+            string,
+            int,
+            string,
+            IssueState,
+            string,
+            string,
+            IReadOnlyList<string>,
+            DateTimeOffset,
+            string,
+            int,
+            string,
+            string,
+            IReadOnlyList<Issue>,
+            IReadOnlyList<Repository>> values = await board
             .WhenChanged(
                 x => x.IsSignedIn,
                 x => x.CurrentUser!.Login,
@@ -910,7 +926,7 @@ public static class PropertyValuesExamples
     /// <returns>A task that returns the board once the issue is selected.</returns>
     private static async Task<IssueBoardViewModel> CreateBoardWithSelectedIssueAsync()
     {
-        var server = InMemoryGitHubServer.CreateSeeded();
+        InMemoryGitHubServer server = InMemoryGitHubServer.CreateSeeded();
         IssueBoardViewModel board = new(server) { Token = InMemoryGitHubServer.PriyaToken };
 
         await board.SignInAsync();

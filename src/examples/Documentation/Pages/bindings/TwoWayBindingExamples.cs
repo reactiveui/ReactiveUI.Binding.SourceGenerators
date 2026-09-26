@@ -70,7 +70,7 @@ public static class TwoWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindTodoFilterToTextBox()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new();
 
         using (list.BindTwoWay(view, x => x.FilterText, v => v.FilterTextBox.Text))
@@ -309,7 +309,7 @@ public static class TwoWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindFilterToPickerSelection()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoTagFilterView view = new() { ViewModel = list };
 
         // No converter is registered from object to string; a string in SelectedItem passes through as it is.
@@ -331,7 +331,7 @@ public static class TwoWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindTodoFilterInView()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
         List<BindingChange> changes = [];
 
@@ -348,7 +348,7 @@ public static class TwoWayBindingExamples
         }
 
         // FromViewModel tells an edit apart from the echo of the binding's own write.
-        foreach (var change in changes)
+        foreach (BindingChange change in changes)
         {
             Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}");
         }
@@ -515,7 +515,7 @@ public static class TwoWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindTodoFilterWithNullScheduler()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new();
 
         using (list.BindTwoWay(view, x => x.FilterText, v => v.FilterTextBox.Text, scheduler: null))

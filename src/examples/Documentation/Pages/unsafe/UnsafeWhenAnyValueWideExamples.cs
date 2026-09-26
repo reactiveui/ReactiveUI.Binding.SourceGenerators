@@ -22,7 +22,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes three properties; each change delivers all three values as one group, and the example prints the first and the last.</summary>
     public static void ObserveThreeColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(x => x.Title, x => x.Id, x => x.IsDone).Subscribe(static values => Console.WriteLine($"{values.Property1}{Separator}{values.Property3}")))
         {
@@ -37,7 +37,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes four properties; each change delivers all four values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFourColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -56,7 +56,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes five properties; each change delivers all five values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFiveColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -76,7 +76,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes six properties; each change delivers all six values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSixColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -97,7 +97,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes seven properties; each change delivers all seven values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSevenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -119,7 +119,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes eight properties; each change delivers all eight values as one group, and the example prints the first and the last.</summary>
     public static void ObserveEightColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -142,7 +142,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes nine properties; each change delivers all nine values as one group, and the example prints the first and the last.</summary>
     public static void ObserveNineColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -166,7 +166,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes ten properties; each change delivers all ten values as one group, and the example prints the first and the last.</summary>
     public static void ObserveTenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -191,7 +191,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes eleven properties; each change delivers all eleven values as one group, and the example prints the first and the last.</summary>
     public static void ObserveElevenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -217,7 +217,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes twelve properties; each change delivers all twelve values as one group, and the example prints the first and the last.</summary>
     public static void ObserveTwelveColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -244,7 +244,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes thirteen properties; each change delivers all thirteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveThirteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -272,7 +272,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes fourteen properties; each change delivers all fourteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFourteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -301,7 +301,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes fifteen properties; each change delivers all fifteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveFifteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -331,7 +331,7 @@ public static class UnsafeWhenAnyValueWideExamples
     /// <summary>Observes sixteen properties; each change delivers all sixteen values as one group, and the example prints the first and the last.</summary>
     public static void ObserveSixteenColumns()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,

@@ -31,9 +31,9 @@ public static class ObservedChangeExamples
     /// <summary>Reads the sender and the value of each change to a to-do title.</summary>
     public static void ReadSenderAndValueOfEachChange()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
 
-        using var subscription = item.WhenAny(x => x.Title, static change => change)
+        using IDisposable subscription = item.WhenAny(x => x.Title, static change => change)
             .Subscribe(static change => Console.WriteLine($"Item {change.Sender.Id} is now '{change.Value}'"));
 
         item.Title = RenamedTitle;
@@ -46,9 +46,9 @@ public static class ObservedChangeExamples
     /// <summary>Reads the expression of a change; an observation the generator wrote has no expression tree to report.</summary>
     public static void ReadExpressionOfAGeneratedChange()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
 
-        using var subscription = item.WhenAny(x => x.Title, static change => change)
+        using IDisposable subscription = item.WhenAny(x => x.Title, static change => change)
             .Subscribe(static change => Console.WriteLine(change.Expression is null));
 
         // Output:
@@ -58,10 +58,10 @@ public static class ObservedChangeExamples
     /// <summary>Creates a change by hand with its expression, to describe a value that was read from an object.</summary>
     public static void CreateAChange()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
         Expression<Func<TodoItem, string>> expression = x => x.Title;
 
-        var change = new ObservedChange<TodoItem, string>(item, expression.Body, item.Title);
+        ObservedChange<TodoItem, string> change = new ObservedChange<TodoItem, string>(item, expression.Body, item.Title);
 
         Console.WriteLine(change.Sender.Title);
         Console.WriteLine(change.Expression);
@@ -76,9 +76,9 @@ public static class ObservedChangeExamples
     /// <summary>Creates a change without an expression, as an observation that needs no expression tree does.</summary>
     public static void CreateAChangeWithoutAnExpression()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
 
-        var change = new ObservedChange<TodoItem, string>(item, null, item.Title);
+        ObservedChange<TodoItem, string> change = new ObservedChange<TodoItem, string>(item, null, item.Title);
 
         Console.WriteLine(change.Sender.Title);
         Console.WriteLine(change.Value);
@@ -93,7 +93,7 @@ public static class ObservedChangeExamples
     /// <summary>Names the property a change describes, including every step of a path.</summary>
     public static void NameThePropertyOfAChange()
     {
-        var issue = new Issue { Number = CheckoutNumber, Title = CheckoutTitle, Assignee = new User { Login = "priya-nair" } };
+        Issue issue = new Issue { Number = CheckoutNumber, Title = CheckoutTitle, Assignee = new User { Login = "priya-nair" } };
         Expression<Func<Issue, string>> title = x => x.Title;
         Expression<Func<Issue, string>> assigneeLogin = x => x.Assignee!.Login;
 
@@ -111,7 +111,7 @@ public static class ObservedChangeExamples
     /// <summary>Reads the value of a change; a change that carries the default value reads it from the sender again.</summary>
     public static void ReadTheValueOfAChange()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
         Expression<Func<TodoItem, string>> expression = x => x.Title;
 
         ObservedChange<TodoItem, string> carried = new(item, expression.Body, RenamedTitle);
@@ -128,7 +128,7 @@ public static class ObservedChangeExamples
     /// <summary>Reads the value of a path that breaks halfway: <c>GetValue</c> reports it and <c>GetValueOrDefault</c> returns null.</summary>
     public static void ReadTheValueOfABrokenPath()
     {
-        var issue = new Issue { Number = CheckoutNumber, Title = CheckoutTitle, Assignee = null };
+        Issue issue = new Issue { Number = CheckoutNumber, Title = CheckoutTitle, Assignee = null };
         Expression<Func<Issue, string>> assigneeLogin = x => x.Assignee!.Login;
 
         ObservedChange<Issue, string> change = new(issue, assigneeLogin.Body, default!);
@@ -152,9 +152,9 @@ public static class ObservedChangeExamples
     /// <summary>Turns a stream of changes back into a stream of values.</summary>
     public static void ProjectChangesToValues()
     {
-        var item = new TodoItem { Id = 1, Title = ReviewPrTitle };
+        TodoItem item = new TodoItem { Id = 1, Title = ReviewPrTitle };
 
-        using var subscription = item.WhenAny(x => x.Title, static change => change)
+        using IDisposable subscription = item.WhenAny(x => x.Title, static change => change)
             .Value()
             .Subscribe(Console.WriteLine);
 

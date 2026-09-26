@@ -52,7 +52,7 @@ public static class WinFormsExamples
     /// <summary>Builds the application with the WinForms module, which adds event-based observation and the control invoker.</summary>
     public static void BuildWinFormsApplication()
     {
-        var app = RxBindingBuilder.CreateReactiveUIBindingBuilder()
+        IReactiveUIBindingInstance? app = RxBindingBuilder.CreateReactiveUIBindingBuilder()
             .WithCoreServices()
             .WithWinForms()
             .BuildApp();
@@ -72,7 +72,7 @@ public static class WinFormsExamples
         using ModernDependencyResolver resolver = new();
         IAppBuilder appBuilder = resolver.CreateReactiveUIBindingBuilder();
 
-        var chained = appBuilder.WithWinForms();
+        IReactiveUIBindingBuilder? chained = appBuilder.WithWinForms();
 
         Console.WriteLine(ReferenceEquals(appBuilder, chained));
 
@@ -84,9 +84,9 @@ public static class WinFormsExamples
     public static void ChainWithWinFormsThroughBindingBuilder()
     {
         using ModernDependencyResolver resolver = new();
-        var builder = (IReactiveUIBindingBuilder)resolver.CreateReactiveUIBindingBuilder();
+        IReactiveUIBindingBuilder? builder = (IReactiveUIBindingBuilder)resolver.CreateReactiveUIBindingBuilder();
 
-        var chained = builder.WithWinForms();
+        IReactiveUIBindingBuilder? chained = builder.WithWinForms();
 
         Console.WriteLine(ReferenceEquals(builder, chained));
 
@@ -142,7 +142,7 @@ public static class WinFormsExamples
     {
         WinFormsCreatesObservableForProperty observer = new();
         using WinFormsTodoForm view = new();
-        var expression = Expression.Constant(view.FilterTextBox);
+        ConstantExpression? expression = Expression.Constant(view.FilterTextBox);
         List<string> texts = [];
 
         using (observer.GetNotificationForProperty(view.FilterTextBox, expression, TextPropertyName, false, false).Subscribe(change => texts.Add(((TextBox)change.Sender).Text)))
@@ -164,8 +164,8 @@ public static class WinFormsExamples
     {
         WinFormsCreatesObservableForProperty observer = new();
         using WinFormsTodoForm view = new();
-        var expression = Expression.Constant(view.FilterTextBox);
-        var rejected = false;
+        ConstantExpression? expression = Expression.Constant(view.FilterTextBox);
+        bool rejected = false;
 
         try
         {
@@ -266,7 +266,7 @@ public static class WinFormsExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         await viewModel.LoadAsync();
-        using var confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
+        using IDisposable? confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
         using WinFormsTransferForm view = new() { ViewModel = viewModel };
         viewModel.Draft.Source = viewModel.Accounts[0];
         viewModel.Draft.Payee = viewModel.Payees[0];
@@ -316,7 +316,7 @@ public static class WinFormsExamples
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
         using WinFormsTodoForm view = new() { ViewModel = viewModel };
-        var allItems = viewModel.Items.Count;
+        int allItems = viewModel.Items.Count;
         viewModel.SelectedItem = viewModel.Items[0];
 
         using (viewModel.BindTwoWay(view, x => x.FilterText, v => v.FilterTextBox.Text))
@@ -353,13 +353,13 @@ public static class WinFormsExamples
     {
         ControlViewThreadInvoker invoker = new();
         using WinFormsUploadForm view = new();
-        var progressBar = view.UploadProgressBar;
+        System.Windows.Forms.ProgressBar? progressBar = view.UploadProgressBar;
         _ = progressBar.Handle;
         List<string> log = [];
         object unclaimed = new();
-        var accessFromWorker = true;
+        bool accessFromWorker = true;
 
-        var worker = new Thread(() =>
+        Thread? worker = new Thread(() =>
         {
             accessFromWorker = invoker.CheckAccess(progressBar);
             invoker.Post(progressBar, static state => ((List<string>)state!).Add(PostedText), log);
@@ -392,9 +392,9 @@ public static class WinFormsExamples
         ControlViewThreadInvoker invoker = new();
         using WinFormsUploadForm view = new();
         List<string> log = [];
-        var accessFromWorker = false;
+        bool accessFromWorker = false;
 
-        var worker = new Thread(() => accessFromWorker = invoker.CheckAccess(view.UploadProgressBar));
+        Thread? worker = new Thread(() => accessFromWorker = invoker.CheckAccess(view.UploadProgressBar));
         worker.Start();
         worker.Join();
         invoker.Post(view.UploadProgressBar, static state => ((List<string>)state!).Add(PostedText), log);
@@ -412,7 +412,7 @@ public static class WinFormsExamples
     {
         ControlViewThreadInvoker invoker = new();
         using WinFormsUploadForm view = new();
-        var rejected = false;
+        bool rejected = false;
 
         try
         {
@@ -434,10 +434,10 @@ public static class WinFormsExamples
     {
         using WinFormsUploadForm view = new();
         _ = view.UploadProgressBar.Handle;
-        var refused = false;
+        bool refused = false;
         Control.CheckForIllegalCrossThreadCalls = true;
 
-        var worker = new Thread(() =>
+        Thread? worker = new Thread(() =>
         {
             try
             {

@@ -123,7 +123,7 @@ public static class BindingErrorExamples
 
         try
         {
-            using var second = draft.BindOneWay(field, x => x.Reference, v => v.Reference);
+            using IDisposable second = draft.BindOneWay(field, x => x.Reference, v => v.Reference);
         }
         catch (ArgumentException ex)
         {

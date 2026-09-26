@@ -28,9 +28,9 @@ public static class CustomConvertersExamples
     {
         BindingConverters.Current.TypedConverters.Register(new TodoPriorityToColorConverter());
 
-        var converter = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
+        IBindingTypeConverter? converter = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
 
-        var success = converter!.TryConvertTyped(TodoPriority.High, null, out var highColor);
+        bool success = converter!.TryConvertTyped(TodoPriority.High, null, out var highColor);
         Console.WriteLine(success);
         Console.WriteLine(highColor);
 
@@ -48,11 +48,11 @@ public static class CustomConvertersExamples
     /// <summary>Demonstrates looking up color names for all priority levels.</summary>
     public static void DisplayPriorityColors()
     {
-        var converter = new TodoPriorityToColorConverter();
+        TodoPriorityToColorConverter converter = new TodoPriorityToColorConverter();
 
-        foreach (var priority in Enum.GetValues<TodoPriority>())
+        foreach (TodoPriority priority in Enum.GetValues<TodoPriority>())
         {
-            var success = converter.TryConvert(priority, null, out var colorName);
+            bool success = converter.TryConvert(priority, null, out var colorName);
             Console.WriteLine($"{priority}: {success} {colorName}");
         }
 
@@ -65,7 +65,7 @@ public static class CustomConvertersExamples
     /// <summary>Writes a converter from scratch by implementing <c>IBindingTypeConverter</c>, and calls it without a binding.</summary>
     public static void WriteConverterFromScratch()
     {
-        var converter = new PriorityColourConverter();
+        PriorityColourConverter converter = new PriorityColourConverter();
 
         Console.WriteLine($"{converter.FromType.Name} -> {converter.ToType.Name}");
         Console.WriteLine(converter.GetAffinityForObjects());
@@ -86,8 +86,8 @@ public static class CustomConvertersExamples
     /// <summary>Converts the tags of a task to text and back with a pair of converters.</summary>
     public static void ConvertTagsBothWays()
     {
-        var toText = new TagListToTextConverter();
-        var toTags = new TextToTagListConverter();
+        TagListToTextConverter toText = new TagListToTextConverter();
+        TextToTagListConverter toTags = new TextToTagListConverter();
         TodoItem item = new() { Title = CarRegistrationTitle, Tags = ["car", "admin"] };
 
         Console.WriteLine(toText.TryConvert(item.Tags, null, out var text));
@@ -109,7 +109,7 @@ public static class CustomConvertersExamples
 
         service.TypedConverters.Register(new PriorityColourConverter());
 
-        var resolved = service.ResolveConverter(typeof(TodoPriority), typeof(string));
+        object? resolved = service.ResolveConverter(typeof(TodoPriority), typeof(string));
 
         Console.WriteLine(resolved!.GetType().Name);
 
@@ -123,7 +123,7 @@ public static class CustomConvertersExamples
         TodoItem item = new() { Title = CarRegistrationTitle, Priority = TodoPriority.High };
         Label badge = new();
 
-        using var binding = item.BindOneWay(badge, x => x.Priority, x => x.Text, new PriorityColourConverter());
+        using IDisposable binding = item.BindOneWay(badge, x => x.Priority, x => x.Text, new PriorityColourConverter());
         Console.WriteLine(badge.Text);
 
         item.Priority = TodoPriority.Low;
@@ -140,7 +140,7 @@ public static class CustomConvertersExamples
         TodoItem item = new() { Title = CarRegistrationTitle, Tags = ["car", "admin"] };
         Entry tagsBox = new();
 
-        using var binding = item.BindTwoWay(tagsBox, x => x.Tags, x => x.Text, new TagListToTextConverter(), new TextToTagListConverter());
+        using IDisposable binding = item.BindTwoWay(tagsBox, x => x.Tags, x => x.Text, new TagListToTextConverter(), new TextToTagListConverter());
         Console.WriteLine(tagsBox.Text);
 
         tagsBox.Text = TypedTags;
@@ -162,7 +162,7 @@ public static class CustomConvertersExamples
             .WithSetMethodConverter(new DemoSetMethodConverter())
             .BuildApp();
 
-        var service = BindingConverters.Current;
+        ConverterService service = BindingConverters.Current;
 
         Console.WriteLine(service.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string))!.GetType().Name);
         Console.WriteLine(service.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string))!.GetType().Name);
@@ -197,8 +197,8 @@ public static class CustomConvertersExamples
         ConverterService service = new();
         service.TypedConverters.Register(new CurrencyTextConverter(DollarSymbol));
 
-        var untyped = service.TypedConverters.TryGetConverter(typeof(decimal), typeof(string))!;
-        var typed = (IBindingTypeConverter<decimal, string>)untyped;
+        IBindingTypeConverter untyped = service.TypedConverters.TryGetConverter(typeof(decimal), typeof(string))!;
+        IBindingTypeConverter<decimal, string> typed = (IBindingTypeConverter<decimal, string>)untyped;
 
         Console.WriteLine($"{untyped.FromType.Name} -> {untyped.ToType.Name}");
         Console.WriteLine(typed.TryConvert(TransferAmount, conversionHint: null, out var amountText));

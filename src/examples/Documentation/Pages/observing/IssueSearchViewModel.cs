@@ -61,7 +61,7 @@ public sealed class IssueSearchViewModel(IGitHubApi api, string repository) : Ob
     /// <returns>The matching issues, newest first.</returns>
     public async Task<IReadOnlyList<Issue>> SearchAsync(string term)
     {
-        var open = await api.ListIssuesAsync(repository, IssueState.Open);
+        IReadOnlyList<Issue> open = await api.ListIssuesAsync(repository, IssueState.Open);
 
         return open.Where(issue => issue.Title.Contains(term, StringComparison.OrdinalIgnoreCase)).ToList();
     }

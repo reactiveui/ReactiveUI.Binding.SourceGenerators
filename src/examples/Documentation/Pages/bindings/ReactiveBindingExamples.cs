@@ -92,7 +92,7 @@ public static class ReactiveBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task ReadTwoWayBinding()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
         List<BindingChange> changes = [];
 
@@ -106,7 +106,7 @@ public static class ReactiveBindingExamples
             view.FilterTextBox.Text = DentistFilter;
         }
 
-        foreach (var change in changes)
+        foreach (BindingChange change in changes)
         {
             Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}");
         }
@@ -115,7 +115,7 @@ public static class ReactiveBindingExamples
         var (value, fromViewModel) = changes[0];
         Console.WriteLine(value);
         Console.WriteLine(fromViewModel);
-        var copy = changes[0] with { FromViewModel = false };
+        BindingChange copy = changes[0] with { FromViewModel = false };
         Console.WriteLine($"{copy.Value}, from the view model: {copy.FromViewModel}");
 
         // Output:
@@ -132,10 +132,10 @@ public static class ReactiveBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task ReadBindingExpressions()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
 
-        using var binding = view.Bind(list, x => x.FilterText, v => v.FilterTextBox.Text);
+        using IReactiveBinding<TodoView, BindingChange> binding = view.Bind(list, x => x.FilterText, v => v.FilterTextBox.Text);
 
         Console.WriteLine(binding.ViewModelExpression is null);
         Console.WriteLine(binding.ViewExpression is null);
@@ -149,14 +149,14 @@ public static class ReactiveBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task CreateReactiveBinding()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
         Signal<int> remainingChanges = new();
-        var subscription = Scope.Create(static () => Console.WriteLine("subscription disposed"));
+        IDisposable subscription = Scope.Create(static () => Console.WriteLine("subscription disposed"));
 
         ReactiveBinding<TodoView, int> binding = new(view, remainingChanges, BindingDirection.AsyncOneWay, subscription);
         List<int> seen = [];
-        using var reader = binding.Changed.Subscribe(seen.Add);
+        using IDisposable reader = binding.Changed.Subscribe(seen.Add);
 
         remainingChanges.OnNext(list.RemainingCount);
 
@@ -270,7 +270,7 @@ public static class ReactiveBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task RefreshFilterOnSignal()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
         Signal<RxVoid> refresh = new();
 
@@ -296,7 +296,7 @@ public static class ReactiveBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task ObserveBothWithoutStream()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
 
         using (view.BindUnsafe(list, x => x.FilterText, v => v.FilterTextBox.Text, (IObservable<RxVoid>?)null))

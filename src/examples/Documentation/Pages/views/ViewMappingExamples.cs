@@ -31,12 +31,12 @@ public static class ViewMappingExamples
     /// <summary>Registers a preview screen for a to-do item with its parameterless constructor.</summary>
     public static void MapView()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         locator.Map<TodoItem, TodoItemPreviewView>();
 
-        var view = locator.ResolveView(item);
+        IViewFor? view = locator.ResolveView(item);
 
         Console.WriteLine(view?.GetType().Name);
         Console.WriteLine(ReferenceEquals(view?.ViewModel, item));
@@ -49,13 +49,13 @@ public static class ViewMappingExamples
     /// <summary>Registers a preview screen under a contract, so it answers only to that contract.</summary>
     public static void MapViewWithContract()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         locator.Map<TodoItem, TodoItemPreviewView>(PreviewContract);
 
-        var preview = locator.ResolveView(item, PreviewContract);
-        var plain = locator.ResolveView(item, null);
+        IViewFor? preview = locator.ResolveView(item, PreviewContract);
+        IViewFor? plain = locator.ResolveView(item, null);
 
         Console.WriteLine(preview?.GetType().Name);
         Console.WriteLine(plain is null);
@@ -68,12 +68,12 @@ public static class ViewMappingExamples
     /// <summary>Registers a factory, for a screen that needs setup before it is shown.</summary>
     public static void MapViewWithFactory()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         locator.Map<TodoItem>(static () => new TodoItemPreviewView { IsCompact = true });
 
-        var view = (TodoItemPreviewView?)locator.ResolveView(item);
+        TodoItemPreviewView? view = (TodoItemPreviewView?)locator.ResolveView(item);
 
         Console.WriteLine(view?.IsCompact);
         Console.WriteLine(ReferenceEquals(view?.ViewModel, item));
@@ -86,12 +86,12 @@ public static class ViewMappingExamples
     /// <summary>Registers a factory under a contract.</summary>
     public static void MapViewWithFactoryAndContract()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         locator.Map<TodoItem>(static () => new TodoItemPreviewView { IsCompact = true }, CompactContract);
 
-        var view = (TodoItemPreviewView?)locator.ResolveView(item, CompactContract);
+        TodoItemPreviewView? view = (TodoItemPreviewView?)locator.ResolveView(item, CompactContract);
 
         Console.WriteLine(view?.IsCompact);
         Console.WriteLine(locator.ResolveView(item, null) is null);
@@ -104,14 +104,14 @@ public static class ViewMappingExamples
     /// <summary>Removes a registration, with and without a contract; the result says whether one existed.</summary>
     public static void UnmapView()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
         locator.Map<TodoItem, TodoItemPreviewView>();
         locator.Map<TodoItem, TodoItemPreviewView>(PreviewContract);
 
-        var removedDefault = locator.Unmap<TodoItem>();
-        var removedAgain = locator.Unmap<TodoItem>();
-        var removedContract = locator.Unmap<TodoItem>(PreviewContract);
+        bool removedDefault = locator.Unmap<TodoItem>();
+        bool removedAgain = locator.Unmap<TodoItem>();
+        bool removedContract = locator.Unmap<TodoItem>(PreviewContract);
 
         Console.WriteLine(removedDefault);
         Console.WriteLine(removedAgain);
@@ -128,7 +128,7 @@ public static class ViewMappingExamples
     /// <summary>Registers views in a chain with the fluent builder of a locator.</summary>
     public static void MapViewsWithFluentBuilder()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         _ = locator.CreateMappingBuilder()
@@ -136,9 +136,9 @@ public static class ViewMappingExamples
             .Map<TodoItem, TodoItemDetailView>(DetailContract)
             .Map<TodoItem>(static () => new TodoItemPreviewView { IsCompact = true }, CompactContract);
 
-        var standard = locator.ResolveView(item, null);
-        var detail = locator.ResolveView(item, DetailContract);
-        var compact = (TodoItemPreviewView?)locator.ResolveView(item, CompactContract);
+        IViewFor? standard = locator.ResolveView(item, null);
+        IViewFor? detail = locator.ResolveView(item, DetailContract);
+        TodoItemPreviewView? compact = (TodoItemPreviewView?)locator.ResolveView(item, CompactContract);
 
         Console.WriteLine(standard?.GetType().Name);
         Console.WriteLine(detail?.GetType().Name);
@@ -153,12 +153,12 @@ public static class ViewMappingExamples
     /// <summary>Registers a factory for the default contract in a chain.</summary>
     public static void MapFactoryWithFluentBuilder()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
 
         _ = locator.CreateMappingBuilder().Map<TodoItem>(static () => new TodoItemPreviewView { IsCompact = true });
 
-        var view = (TodoItemPreviewView?)locator.ResolveView(item);
+        TodoItemPreviewView? view = (TodoItemPreviewView?)locator.ResolveView(item);
 
         Console.WriteLine(view?.IsCompact);
 
@@ -173,8 +173,8 @@ public static class ViewMappingExamples
         locator.Map<TodoItem, TodoItemPreviewView>();
         locator.Map<TodoItem, TodoItemDetailView>(DetailContract);
 
-        var preview = locator.ResolveView<TodoItem>();
-        var detail = locator.ResolveView<TodoItem>(DetailContract);
+        IViewFor<TodoItem>? preview = locator.ResolveView<TodoItem>();
+        IViewFor<TodoItem>? detail = locator.ResolveView<TodoItem>(DetailContract);
 
         Console.WriteLine(preview?.GetType().Name);
         Console.WriteLine(detail?.GetType().Name);
@@ -189,7 +189,7 @@ public static class ViewMappingExamples
     /// <summary>Maps a view model to a screen the service locator builds, so the container decides how it is created.</summary>
     public static void MapViewFromServiceLocator()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
         DefaultViewLocator locator = new();
         AppLocator.CurrentMutable.Register(static () => new TodoItemDetailView());
 
@@ -197,7 +197,7 @@ public static class ViewMappingExamples
         {
             _ = locator.CreateMappingBuilder().MapFromServiceLocator<TodoItem, TodoItemDetailView>();
 
-            var view = locator.ResolveView(item);
+            IViewFor? view = locator.ResolveView(item);
 
             Console.WriteLine(view?.GetType().Name);
             Console.WriteLine(ReferenceEquals(view?.ViewModel, item));
@@ -215,8 +215,8 @@ public static class ViewMappingExamples
     /// <summary>Registers the mappings while the application starts, before the locator is first used.</summary>
     public static void ConfigureViewLocatorInBuilder()
     {
-        var item = CreateItem();
-        var builder = (IReactiveUIBindingBuilder)RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        TodoItem item = CreateItem();
+        IReactiveUIBindingBuilder builder = (IReactiveUIBindingBuilder)RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
         _ = builder
             .WithCoreServices()
@@ -225,10 +225,10 @@ public static class ViewMappingExamples
                 .Map<TodoItem, TodoItemDetailView>(DetailContract))
             .BuildApp();
 
-        var locator = ViewLocator.GetCurrent();
+        IViewLocator locator = ViewLocator.GetCurrent();
 
-        var standard = locator.ResolveView(item);
-        var detail = locator.ResolveView(item, DetailContract);
+        IViewFor? standard = locator.ResolveView(item);
+        IViewFor? detail = locator.ResolveView(item, DetailContract);
 
         Console.WriteLine(standard?.GetType().Name);
         Console.WriteLine(detail?.GetType().Name);
@@ -241,14 +241,14 @@ public static class ViewMappingExamples
     /// <summary>Registers the mappings in a chain that goes through the Splat builder, where <c>ReactiveUI.Binding.Mixins</c> supplies the call.</summary>
     public static void ConfigureViewLocatorFromAppBuilder()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         _ = RxBindingBuilder.CreateReactiveUIBindingBuilder()
             .WithCoreServices()
             .ConfigureViewLocator(static mappings => mappings.Map<TodoItem, TodoItemPreviewView>())
             .BuildApp();
 
-        var view = ViewLocator.GetCurrent().ResolveView(item);
+        IViewFor? view = ViewLocator.GetCurrent().ResolveView(item);
 
         Console.WriteLine(view?.GetType().Name);
 
@@ -259,8 +259,8 @@ public static class ViewMappingExamples
     /// <summary>Resolves with the locator's three sources registered: the generated lookup comes first, then <c>Map</c>, then the service locator.</summary>
     public static void ResolveInOrder()
     {
-        var item = CreateItem();
-        var account = CreateAccount();
+        TodoItem item = CreateItem();
+        Account account = CreateAccount();
         DefaultViewLocator locator = new();
         locator.Map<Account, AccountStatementView>();
         locator.Map<TodoItem, TodoItemPreviewView>();
@@ -268,10 +268,10 @@ public static class ViewMappingExamples
 
         try
         {
-            var generated = locator.ResolveView(account);
-            var mapped = locator.ResolveView(item);
+            IViewFor? generated = locator.ResolveView(account);
+            IViewFor? mapped = locator.ResolveView(item);
             _ = locator.Unmap<TodoItem>();
-            var registered = locator.ResolveView(item);
+            IViewFor? registered = locator.ResolveView(item);
 
             Console.WriteLine(generated?.GetType().Name);
             Console.WriteLine(mapped?.GetType().Name);

@@ -47,7 +47,7 @@ public static class BindCommandExamples
         await viewModel.LoadAsync();
         TodoView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton);
 
         Console.WriteLine(view.AddButton.IsEnabled);
 
@@ -56,7 +56,7 @@ public static class BindCommandExamples
         Console.WriteLine(view.AddButton.IsEnabled);
 
         // The command starts the work and returns, so start listening for the new selection before the click.
-        var added = viewModel.WhenChanged(x => x.SelectedItem).Where(static item => item is not null).FirstAsync();
+        Task<TodoItem> added = viewModel.WhenChanged(x => x.SelectedItem).Where(static item => item is not null).FirstAsync();
         ((IButtonController)view.AddButton).SendClicked();
         await added;
 
@@ -80,16 +80,16 @@ public static class BindCommandExamples
         await viewModel.LoadAsync();
         TodoView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, x => x.CompleteCommand, v => v.CompleteButton, toEvent: ClickedEventName);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.CompleteCommand, v => v.CompleteButton, toEvent: ClickedEventName);
 
         // No item is selected, so the command refuses the click.
         ((IButtonController)view.CompleteButton).SendClicked();
 
         Console.WriteLine(viewModel.RemainingCount);
 
-        var item = viewModel.Items[0];
+        TodoItem item = viewModel.Items[0];
         viewModel.SelectedItem = item;
-        var completed = item.WhenChanged(x => x.IsDone).Where(static done => done).FirstAsync();
+        Task<bool> completed = item.WhenChanged(x => x.IsDone).Where(static done => done).FirstAsync();
         ((IButtonController)view.CompleteButton).SendClicked();
         await completed;
 
@@ -111,8 +111,8 @@ public static class BindCommandExamples
         StatementExportViewModel viewModel = new() { HasStatement = true };
         StatementExportView view = new() { ViewModel = viewModel };
 
-        var attached = view.BindCommand(viewModel, x => x.ExportCommand, v => v.ExportButton);
-        var clicked = view.BindCommand(viewModel, x => x.ExportCommand, v => v.ExportButton, toEvent: ClickedEventName);
+        IDisposable attached = view.BindCommand(viewModel, x => x.ExportCommand, v => v.ExportButton);
+        IDisposable clicked = view.BindCommand(viewModel, x => x.ExportCommand, v => v.ExportButton, toEvent: ClickedEventName);
 
         Console.WriteLine(ReferenceEquals(viewModel.ExportCommand, view.ExportButton.Command));
 
@@ -147,7 +147,7 @@ public static class BindCommandExamples
         IssueBoardViewModel viewModel = new(InMemoryGitHubServer.CreateSeeded());
         IssueBoardView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, x => x.SignInCommand, v => v.SignInButton);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.SignInCommand, v => v.SignInButton);
 
         Console.WriteLine(view.SignInButton.IsEnabled);
 
@@ -155,7 +155,7 @@ public static class BindCommandExamples
 
         Console.WriteLine(view.SignInButton.IsEnabled);
 
-        var loaded = viewModel.WhenChanged(x => x.Repositories).Where(static repositories => repositories.Count > 0).FirstAsync();
+        Task<IReadOnlyList<Repository>> loaded = viewModel.WhenChanged(x => x.Repositories).Where(static repositories => repositories.Count > 0).FirstAsync();
         ((IButtonController)view.SignInButton).SendClicked();
         await loaded;
 
@@ -173,20 +173,20 @@ public static class BindCommandExamples
     /// <returns>A task that completes when the issue is closed.</returns>
     public static async Task BindCloseIssueButton()
     {
-        var viewModel = await OpenWebshopIssuesAsync();
+        IssueBoardViewModel viewModel = await OpenWebshopIssuesAsync();
         IssueBoardView view = new() { ViewModel = viewModel };
-        using var confirmation = viewModel.ConfirmClose.RegisterHandler(static context => context.SetOutput(true));
+        using IDisposable confirmation = viewModel.ConfirmClose.RegisterHandler(static context => context.SetOutput(true));
 
-        using var binding = view.BindCommand(viewModel, x => x.CloseIssueCommand, v => v.CloseIssueButton);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.CloseIssueCommand, v => v.CloseIssueButton);
 
         Console.WriteLine(view.CloseIssueButton.IsEnabled);
 
-        var issue = viewModel.Issues[0];
+        Issue issue = viewModel.Issues[0];
         viewModel.SelectedIssue = issue;
 
         Console.WriteLine(view.CloseIssueButton.IsEnabled);
 
-        var requestFinished = viewModel.WhenChanged(x => x.RateLimitRemaining).Skip(1).FirstAsync();
+        Task<int> requestFinished = viewModel.WhenChanged(x => x.RateLimitRemaining).Skip(1).FirstAsync();
         ((IButtonController)view.CloseIssueButton).SendClicked();
         await requestFinished;
 
@@ -206,10 +206,10 @@ public static class BindCommandExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         await viewModel.LoadAsync();
-        using var confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
+        using IDisposable confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
         TransferView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, x => x.TransferCommand, v => v.TransferButton);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.TransferCommand, v => v.TransferButton);
 
         Console.WriteLine(view.TransferButton.IsEnabled);
 
@@ -223,7 +223,7 @@ public static class BindCommandExamples
         Console.WriteLine(view.TransferButton.IsEnabled);
 
         // The transfer resets the amount once the bank has answered.
-        var sent = viewModel.Draft.WhenChanged(x => x.Amount).Where(static amount => amount == 0M).FirstAsync();
+        Task<decimal> sent = viewModel.Draft.WhenChanged(x => x.Amount).Where(static amount => amount == 0M).FirstAsync();
         ((IButtonController)view.TransferButton).SendClicked();
         await sent;
 
@@ -249,7 +249,7 @@ public static class BindCommandExamples
         GradebookView view = new() { ViewModel = viewModel };
         view.CandidateList.ItemsSource = viewModel.Candidates.ToList();
 
-        using var binding = view.BindCommand(viewModel, x => x.EnrolCommand, v => v.EnrolButton, view.CandidateList.WhenChanged(x => x.SelectedItem));
+        using IDisposable binding = view.BindCommand(viewModel, x => x.EnrolCommand, v => v.EnrolButton, view.CandidateList.WhenChanged(x => x.SelectedItem));
 
         Console.WriteLine(view.EnrolButton.IsEnabled);
 
@@ -257,7 +257,7 @@ public static class BindCommandExamples
 
         Console.WriteLine(view.EnrolButton.IsEnabled);
 
-        var rosterLoaded = viewModel.WhenChanged(x => x.Roster).Skip(1).FirstAsync();
+        Task<IReadOnlyList<Student>> rosterLoaded = viewModel.WhenChanged(x => x.Roster).Skip(1).FirstAsync();
         ((IButtonController)view.EnrolButton).SendClicked();
         await rosterLoaded;
 
@@ -273,14 +273,14 @@ public static class BindCommandExamples
     /// <returns>A task that completes when the file is stored.</returns>
     public static async Task BindUploadButtonWithObservableParameterOnNamedEvent()
     {
-        var browser = await OpenPhotosFolderAsync();
+        StorageBrowserViewModel browser = await OpenPhotosFolderAsync();
         StorageBrowserView view = new() { ViewModel = browser };
         Signal<UploadRequest> pickedFiles = new();
 
-        using var binding = view.BindCommand(browser, x => x.UploadCommand, v => v.UploadButton, pickedFiles, toEvent: ClickedEventName);
+        using IDisposable binding = view.BindCommand(browser, x => x.UploadCommand, v => v.UploadButton, pickedFiles, toEvent: ClickedEventName);
 
         pickedFiles.OnNext(SpringCampaign());
-        var uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
+        Task<bool> uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
         ((IButtonController)view.UploadButton).SendClicked();
         await uploaded;
 
@@ -294,14 +294,14 @@ public static class BindCommandExamples
     /// <returns>A task that completes when the file is stored.</returns>
     public static async Task BindUploadButtonWithParameterExpressionOnNamedEvent()
     {
-        var browser = await OpenPhotosFolderAsync();
+        StorageBrowserViewModel browser = await OpenPhotosFolderAsync();
         UploadPanelViewModel viewModel = new(browser);
         UploadPanelView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, panel => panel.UploadCommand, v => v.UploadButton, panel => panel.PendingUpload, toEvent: ClickedEventName);
+        using IDisposable binding = view.BindCommand(viewModel, panel => panel.UploadCommand, v => v.UploadButton, panel => panel.PendingUpload, toEvent: ClickedEventName);
 
         viewModel.PendingUpload = SpringCampaign();
-        var uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
+        Task<bool> uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
         ((IButtonController)view.UploadButton).SendClicked();
         await uploaded;
 
@@ -315,11 +315,11 @@ public static class BindCommandExamples
     /// <returns>A task that completes when the file is stored.</returns>
     public static async Task BindUploadButtonWithParameterExpression()
     {
-        var browser = await OpenPhotosFolderAsync();
+        StorageBrowserViewModel browser = await OpenPhotosFolderAsync();
         UploadPanelViewModel viewModel = new(browser);
         UploadPanelView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindCommand(viewModel, x => x.UploadCommand, v => v.UploadButton, x => x.PendingUpload);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.UploadCommand, v => v.UploadButton, x => x.PendingUpload);
 
         Console.WriteLine(view.UploadButton.IsEnabled);
 
@@ -327,7 +327,7 @@ public static class BindCommandExamples
 
         Console.WriteLine(view.UploadButton.IsEnabled);
 
-        var uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
+        Task<bool> uploaded = browser.WhenChanged(x => x.IsUploading).Skip(1).Where(static uploading => !uploading).FirstAsync();
         ((IButtonController)view.UploadButton).SendClicked();
         await uploaded;
 

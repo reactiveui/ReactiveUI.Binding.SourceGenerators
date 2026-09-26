@@ -27,7 +27,7 @@ public sealed class PriorityColourConverter : BindingTypeConverter<TodoPriority,
     /// <inheritdoc/>
     public override bool TryConvert(TodoPriority from, object? conversionHint, [NotNullWhen(true)] out Color? result)
     {
-        var dark = conversionHint is DarkTheme;
+        bool dark = conversionHint is DarkTheme;
 
         result = Color.FromArgb(from switch
         {
