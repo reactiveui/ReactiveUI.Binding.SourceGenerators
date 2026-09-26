@@ -481,6 +481,14 @@ attribute argument. When one changes, update `SourceGeneratorsMemberExtractor` a
 both runtime flavours, with and without interceptors. The baseline test project pins 4.0.0 with a `VersionOverride`,
 and the Roslyn 4.13 project runs the same tests against the current release from `Directory.Packages.props`.
 
+The other direction is `ObservedProperty` (`Mixins/ObservedProperty.cs`): a public entry point for code another
+generator writes, which cannot rely on this generator to bind a `WhenAnyValue` call. It composes the runtime types the
+generated observation uses (`PropertyObservable`, `PluginPropertyObservable`, `SwitchMapSignal`, `UniqueSignal`,
+`CombineLatestSignal`), so its values match; `ObservedPropertyParityTests` compares the two in both flavours. It
+chooses the mechanism from the source's runtime type: an `INotifyPropertyChanged` source at INPC's affinity, any
+other read once, and a higher-scoring registered provider wins either way. ReactiveUI.SourceGenerators detects it by
+metadata name and uses it in its WinForms hosts.
+
 A member any other generator adds stays invisible. `NoGeneratedBindingAnalyzer` reports RXUIBIND021 on any call that
 still resolves to a throwing runtime stub with no interceptor: analyzers see every generator's output, so that is
 exactly the set of calls nothing was generated for, whatever the cause.

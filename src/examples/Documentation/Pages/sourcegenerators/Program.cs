@@ -11,3 +11,5 @@ SourceGeneratorsExamples.ObserveAClassMarkedIReactiveObject();
 SourceGeneratorsExamples.BindAPropertyWrittenFromAField();
 
 SourceGeneratorsExamples.BindAButtonToAGeneratedCommand();
+
+SourceGeneratorsExamples.ObserveFromGeneratedCode();
