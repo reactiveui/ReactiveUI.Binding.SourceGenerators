@@ -208,12 +208,13 @@ namespace ReactiveUI.Binding.Reactive
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Map<TViewModel, TView>() where TViewModel : class where TView : ReactiveUI.Binding.Reactive.IViewFor, new() { }
         public void Map<TViewModel, TView>(string? contract) where TViewModel : class where TView : ReactiveUI.Binding.Reactive.IViewFor, new() { }
-        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
         public ReactiveUI.Binding.Reactive.IViewFor? ResolveView(object? viewModel, string? contract) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public ReactiveUI.Binding.Reactive.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
         public ReactiveUI.Binding.Reactive.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
         public ReactiveUI.Binding.Reactive.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("ResolveViewUnsafe closes IViewFor<> over the view model's runtime type to ask the service locator. Use ResolveView with a generated view or a Map registration to stay ahead-of-time safe.")]
+        public ReactiveUI.Binding.Reactive.IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Unmap<TViewModel>() where TViewModel : class { }
         public bool Unmap<TViewModel>(string? contract) where TViewModel : class { }
@@ -359,9 +360,10 @@ namespace ReactiveUI.Binding.Reactive
     }
     public interface IViewLocator : Splat.IEnableLogger
     {
-        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
         ReactiveUI.Binding.Reactive.IViewFor? ResolveView(object? viewModel, string? contract) { }
         ReactiveUI.Binding.Reactive.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("ResolveViewUnsafe closes IViewFor<> over the view model's runtime type to ask the service locator. Use ResolveView with a generated view or a Map registration to stay ahead-of-time safe.")]
+        ReactiveUI.Binding.Reactive.IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) { }
     }
     public interface IViewThreadInvoker
     {
@@ -1920,12 +1922,13 @@ namespace ReactiveUI.Binding.Reactive
     {
         extension(ReactiveUI.Binding.Reactive.IViewLocator locator)
         {
-            [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
             public ReactiveUI.Binding.Reactive.IViewFor? ResolveView(object? viewModel) { }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public ReactiveUI.Binding.Reactive.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
             public ReactiveUI.Binding.Reactive.IViewFor? ResolveView<TViewModel>(TViewModel viewModel) where TViewModel : class { }
             public ReactiveUI.Binding.Reactive.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
+            [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("ResolveViewUnsafe closes IViewFor<> over the view model's runtime type to ask the service locator. Use ResolveView with a generated view or a Map registration to stay ahead-of-time safe.")]
+            public ReactiveUI.Binding.Reactive.IViewFor? ResolveViewUnsafe(object? viewModel) { }
         }
     }
     public class ViewLocatorNotFoundException : System.Exception

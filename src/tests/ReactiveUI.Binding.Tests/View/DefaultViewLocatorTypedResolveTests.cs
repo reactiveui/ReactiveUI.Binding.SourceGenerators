@@ -249,5 +249,10 @@ public class DefaultViewLocatorTypedResolveTests
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IViewFor? ResolveView(object? viewModel, string? contract) => null;
+
+        /// <inheritdoc/>
+        [RequiresDynamicCode("Part of IViewLocator. This locator builds no type at run time.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) => null;
     }
 }

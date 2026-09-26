@@ -18,4 +18,8 @@ public sealed class TodoViewLocator : IViewLocator
     public IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract)
         where TViewModel : class =>
         viewModel is TodoListViewModel todoList ? new TodoView { ViewModel = todoList } : null;
+
+    /// <inheritdoc/>
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Part of IViewLocator. This locator builds no type at run time, so it answers as ResolveView does.")]
+    public IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) => ResolveView(viewModel, contract);
 }

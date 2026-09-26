@@ -194,6 +194,7 @@ namespace ReactiveUI.Binding
         public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
         public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
         public ReactiveUI.Binding.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
+        public ReactiveUI.Binding.IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Unmap<TViewModel>() where TViewModel : class { }
         public bool Unmap<TViewModel>(string? contract) where TViewModel : class { }
@@ -341,6 +342,7 @@ namespace ReactiveUI.Binding
     {
         ReactiveUI.Binding.IViewFor? ResolveView(object? viewModel, string? contract) { }
         ReactiveUI.Binding.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
+        ReactiveUI.Binding.IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) { }
     }
     public interface IViewThreadInvoker
     {
@@ -1596,6 +1598,7 @@ namespace ReactiveUI.Binding
             public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>() where TViewModel : class { }
             public ReactiveUI.Binding.IViewFor? ResolveView<TViewModel>(TViewModel viewModel) where TViewModel : class { }
             public ReactiveUI.Binding.IViewFor<TViewModel>? ResolveView<TViewModel>(string? contract) where TViewModel : class { }
+            public ReactiveUI.Binding.IViewFor? ResolveViewUnsafe(object? viewModel) { }
         }
     }
     [System.Serializable]

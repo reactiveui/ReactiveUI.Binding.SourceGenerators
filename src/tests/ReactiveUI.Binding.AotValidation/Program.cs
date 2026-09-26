@@ -66,6 +66,7 @@ internal static class Program
         ValidateBindCommandToNamedEvent();
         ValidateWhenAny();
         ValidateWhenAnyObservable();
+        ValidateResolveViewFromObject();
 
         Report(string.Empty);
         Report($"AOT Validation: {_passed} passed, {_failed} failed");
@@ -253,6 +254,22 @@ internal static class Program
         AssertEqual("WhenAnyObservable first value", InitialName, last);
         stream.OnNext(ReplacementName);
         AssertEqual("WhenAnyObservable second value", ReplacementName, last);
+    }
+
+    /// <summary>ResolveView on a view model held as an object finds the generated view and a mapping keyed by the runtime type.</summary>
+    private static void ValidateResolveViewFromObject()
+    {
+        const string MappedContract = "mapped";
+        object viewModel = new AotViewModel();
+        var locator = new DefaultViewLocator();
+        var mappedView = new AotView();
+        locator.Map<AotViewModel>(() => mappedView, MappedContract);
+
+        var generated = locator.ResolveView(viewModel);
+        var mapped = locator.ResolveView(viewModel, MappedContract);
+
+        AssertEqual("ResolveView(object) generated view", true, generated is AotView && ReferenceEquals(generated.ViewModel, viewModel));
+        AssertEqual("ResolveView(object) mapped view", true, ReferenceEquals(mapped, mappedView) && ReferenceEquals(mappedView.ViewModel, viewModel));
     }
 
     /// <summary>Compares an expected and actual value, recording a pass or failure to the console.</summary>

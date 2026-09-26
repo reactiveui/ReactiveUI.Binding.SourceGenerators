@@ -16,6 +16,10 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public static class ViewLocatorMixins
 {
+    /// <summary>The reason <c>ResolveViewUnsafe</c> needs dynamic code, reported at each call site.</summary>
+    internal const string ResolveViewUnsafeMessage =
+        "ResolveViewUnsafe closes IViewFor<> over the view model's runtime type to ask the service locator. Use ResolveView with a generated view or a Map registration to stay ahead-of-time safe.";
+
     /// <summary>Provides ResolveView extension members for <paramref name="locator"/>.</summary>
     /// <param name="locator">The view locator.</param>
     extension(IViewLocator locator)
@@ -59,14 +63,44 @@ public static class ViewLocatorMixins
                 : AppLocator.Current.GetService<IViewFor<TViewModel>>(string.IsNullOrEmpty(contract) ? null : contract);
         }
 
-        /// <summary>Resolves a view for the specified view model instance using the default contract.</summary>
+        /// <summary>Resolves a view for a view model instance under the default contract, without building any type at run time.</summary>
         /// <param name="viewModel">The view model instance to resolve a view for.</param>
         /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
-        [RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
+        /// <remarks>
+        /// This calls <see cref="IViewLocator.ResolveView(object?, string?)"/> with a null contract. It is safe to call
+        /// from a trimmed or native AOT application.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// object viewModel = navigationStack.Peek();
+        /// var view = ViewLocator.GetCurrent().ResolveView(viewModel);
+        /// </code>
+        /// </example>
         public IViewFor? ResolveView(object? viewModel)
         {
             ArgumentExceptionHelper.ThrowIfNull(locator);
             return locator.ResolveView(viewModel, null);
+        }
+
+        /// <summary>Resolves a view for a view model instance under the default contract, and falls back to steps that build a type at run time.</summary>
+        /// <param name="viewModel">The view model instance to resolve a view for.</param>
+        /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
+        /// <remarks>
+        /// This calls <see cref="IViewLocator.ResolveViewUnsafe(object?, string?)"/> with a null contract. Prefer
+        /// <c>ResolveView(object?)</c> with a generated view or a <c>Map</c> registration.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// // The view is registered only as IViewFor&lt;TodoViewModel&gt; in the service locator.
+        /// object viewModel = new TodoViewModel();
+        /// var view = ViewLocator.GetCurrent().ResolveViewUnsafe(viewModel);
+        /// </code>
+        /// </example>
+        [RequiresDynamicCode(ResolveViewUnsafeMessage)]
+        public IViewFor? ResolveViewUnsafe(object? viewModel)
+        {
+            ArgumentExceptionHelper.ThrowIfNull(locator);
+            return locator.ResolveViewUnsafe(viewModel, null);
         }
     }
 }
