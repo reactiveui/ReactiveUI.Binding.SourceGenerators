@@ -25,7 +25,7 @@ internal static class BindingExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A BindingInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
-    internal static BindingInvocationInfo? ExtractBindInvocation(GeneratorSyntaxContext context, CancellationToken ct)
+    internal static BindingInvocationInfo? ExtractBindInvocation(CallSiteContext context, CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
         var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;

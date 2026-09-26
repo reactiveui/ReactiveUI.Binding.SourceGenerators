@@ -21,7 +21,7 @@ internal static class BindToExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A <see cref="BindToInvocationInfo"/> POCO, or null if the invocation is not analyzable.</returns>
-    internal static BindToInvocationInfo? ExtractBindToInvocation(GeneratorSyntaxContext context, CancellationToken ct)
+    internal static BindToInvocationInfo? ExtractBindToInvocation(CallSiteContext context, CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
         var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;

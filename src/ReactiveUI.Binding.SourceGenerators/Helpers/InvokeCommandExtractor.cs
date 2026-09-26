@@ -19,7 +19,7 @@ internal static class InvokeCommandExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An <see cref="InvokeCommandInvocationInfo"/> POCO, or null if the invocation is not analyzable.</returns>
     internal static InvokeCommandInvocationInfo? ExtractInvokeCommandInvocation(
-        GeneratorSyntaxContext context,
+        CallSiteContext context,
         CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;

@@ -21,7 +21,7 @@ internal static class WhenAnyObservableExtractor
     /// <returns>A WhenAnyObservableInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
     internal static WhenAnyObservableInvocationInfo? ExtractWhenAnyObservableInvocation(
-        GeneratorSyntaxContext context,
+        CallSiteContext context,
         CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;

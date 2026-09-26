@@ -17,7 +17,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static InvocationInfo? ExtractWhenChangedInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+    internal static InvocationInfo? ExtractWhenChangedInvocation(CallSiteContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenChangedMethodName, ct);
 
     /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenChanging invocation.</summary>
@@ -25,7 +25,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static InvocationInfo? ExtractWhenChangingInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+    internal static InvocationInfo? ExtractWhenChangingInvocation(CallSiteContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, true, Constants.WhenChangingMethodName, ct);
 
     /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenAnyValue invocation.</summary>
@@ -33,7 +33,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static InvocationInfo? ExtractWhenAnyValueInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+    internal static InvocationInfo? ExtractWhenAnyValueInvocation(CallSiteContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyValueMethodName, ct);
 
     /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenAny invocation (with IObservedChange selector).</summary>
@@ -41,7 +41,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+    internal static InvocationInfo? ExtractWhenAnyInvocation(CallSiteContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 
     /// <summary>Determines whether a parameter is the overload's projection over the observed values.</summary>
@@ -63,7 +63,7 @@ internal static class ObservationExtractor
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
     internal static InvocationInfo? ExtractInvocationInfo(
-        GeneratorSyntaxContext context,
+        CallSiteContext context,
         bool isBeforeChange,
         string expectedMethodName,
         CancellationToken ct)

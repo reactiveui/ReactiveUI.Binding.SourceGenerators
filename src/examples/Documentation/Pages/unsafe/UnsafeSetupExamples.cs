@@ -19,23 +19,19 @@ public static class UnsafeSetupExamples
     /// <summary>The title of the first seeded item.</summary>
     private const string OriginalTitle = "Renew car registration";
 
-    /// <summary>Calls a plain method with a property path held in a variable; the generator cannot read it, so the stub throws.</summary>
-    public static void PlainCallWithStoredPathThrows()
+    /// <summary>
+    /// Calls a plain method with the property path written in the call, which the generator reads. Given a path held in a
+    /// variable, as in <c>item.WhenChanged(titleColumn)</c>, the plain method has no generated binding: the build reports
+    /// RXUIBIND021, and the call throws when it runs. Such a path needs an <c>Unsafe</c> method.
+    /// </summary>
+    public static void PlainCallNeedsAPathWrittenInTheCall()
     {
         TodoItem item = new TodoItem { Title = OriginalTitle };
-        Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
 
-        try
-        {
-            using IDisposable subscription = item.WhenChanged(titleColumn).Subscribe(Console.WriteLine);
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        using IDisposable subscription = item.WhenChanged(x => x.Title).Subscribe(Console.WriteLine);
 
         // Output:
-        // No generated WhenChanged dispatch matched this call site. Use WhenChangedUnsafe to resolve the expression at run time.
+        // Renew car registration
     }
 
     /// <summary>Calls an <c>Unsafe</c> method before the application registers its services; the fallback finds no way to observe the property.</summary>

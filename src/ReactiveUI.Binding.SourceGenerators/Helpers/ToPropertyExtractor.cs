@@ -38,7 +38,7 @@ internal static class ToPropertyExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The call-site model, or null when the call cannot be generated.</returns>
-    internal static ToPropertyInvocationInfo? ExtractToPropertyInvocation(GeneratorSyntaxContext context, CancellationToken ct)
+    internal static ToPropertyInvocationInfo? ExtractToPropertyInvocation(CallSiteContext context, CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
         var args = invocation.ArgumentList.Arguments;

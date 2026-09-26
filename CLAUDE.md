@@ -270,6 +270,7 @@ src/
 │   ├── Generators/                              # Whole-compilation outputs
 │   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
 │   │   ├── ViewThreadInvokerGenerator.cs        # Declares the WPF/WinForms/MAUI invoker classes, once per compilation
+│   │   ├── SourceGeneratorsCompilation.cs       # The compilation call sites are read from, with ReactiveUI.SourceGenerators' members declared
 │   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
 │   ├── Invocations/                             # Per-invocation generators (Pipeline B)
 │   │   ├── WhenChangedInvocationGenerator.cs    # After-change observation
@@ -281,6 +282,8 @@ src/
 │   │   └── ToPropertyInvocationGenerator.cs     # Observable-backed read-only property
 │   ├── Helpers/                                 # Extraction and validation helpers
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
+│   │   ├── SourceGeneratorsMemberExtractor.cs   # ReactiveUI.SourceGenerators' naming and typing rules
+│   │   ├── CallSiteContext.cs                   # A call site and the semantic model it is read with
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
 │   └── CodeGeneration/
 │       ├── SourceWriter.cs                      # Indentation-aware writer every generated file goes through
@@ -297,6 +300,7 @@ src/
 │   ├── Analyzers/
 │   │   ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
 │   │   ├── DispatchReachAnalyzer.cs              # RXUIBIND009
+│   │   ├── NoGeneratedBindingAnalyzer.cs         # RXUIBIND021
 │   │   ├── ObservableAsPropertyAnalyzer.cs       # RXUIBIND018, 019
 │   │   ├── ServiceLocatorViewAnalyzer.cs         # RXUIBIND020
 │   │   ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
@@ -454,6 +458,32 @@ compiler:
 
 The generator tests use an empty file path, so snapshots never show the separator test.
 `CallerFilePathSeparatorTests` gives the file a Windows path and runs a chained call below C# 10.
+
+### Members ReactiveUI.SourceGenerators Writes
+
+No generator sees another generator's output. A call site that binds a property ReactiveUI.SourceGenerators writes
+from a field names a member that does not exist in the compilation this generator reads, so the call has no symbol
+and nothing is generated. A class marked `[IReactiveObject]` looks as if it raised no notification.
+
+`SourceGeneratorsCompilation` closes that gap:
+
+- It reads `[Reactive]`, `[ReactiveCollection]`, `[BindableDerivedList]`, `[ReactiveCommand]` and `[IReactiveObject]`
+  by metadata name. `SourceGeneratorsMemberExtractor` turns each into a declaration with the name, type and
+  accessibility ReactiveUI.SourceGenerators gives the member. Accessor bodies are `throw null;`; they never run.
+- The declarations go into one file, parsed once per change to them, and added to a private copy of the compilation.
+  The file is never emitted.
+- `BindingGenerator.Detect` reads every call site from that copy, through `CallSiteContext`. A compilation that uses
+  none of the attributes gets no copy, and its call sites are read from the consumer's compilation as before.
+
+The rules mirror ReactiveUI.SourceGenerators 4.0.0. Its session agreed to announce any change to a name, type or
+attribute argument. When one changes, update `SourceGeneratorsMemberExtractor` and `SourceGeneratorsDeclarationTests`.
+`SourceGeneratorsContractTests` runs that package's real generators beside this one and executes every binding kind in
+both runtime flavours, with and without interceptors. The baseline test project pins 4.0.0 with a `VersionOverride`,
+and the Roslyn 4.13 project runs the same tests against the current release from `Directory.Packages.props`.
+
+A member any other generator adds stays invisible. `NoGeneratedBindingAnalyzer` reports RXUIBIND021 on any call that
+still resolves to a throwing runtime stub with no interceptor: analyzers see every generator's output, so that is
+exactly the set of calls nothing was generated for, whatever the cause.
 
 ### Where the Dispatch Overloads Live
 
@@ -909,6 +939,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND018 | Warning | ObservableAsProperty needs a partial get-only property |
 | RXUIBIND019 | Warning | ObservableAsProperty method takes parameters |
 | RXUIBIND020 | Info | View is registered only in the service locator |
+| RXUIBIND021 | Warning | Binding call has no generated binding |
 
 ## Code Style & Quality Requirements
 

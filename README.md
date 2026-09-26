@@ -35,6 +35,7 @@ or another property. This library lets you say that in one line. It writes the c
 - [Trimming and NativeAOT](#trimming-and-nativeaot)
 - [Compiler requirements](#compiler-requirements)
 - [When nothing claims the call](#when-nothing-claims-the-call)
+- [Members written by another source generator](#members-written-by-another-source-generator)
 - [Installing](#installing)
 - [Supported frameworks](#supported-frameworks)
 - [Packages](#packages)
@@ -323,7 +324,8 @@ Fourteen methods have an `Unsafe` twin.
 
 Every `Unsafe` overload carries `[RequiresUnreferencedCode]`. The plain overloads carry none. So a
 `PublishTrimmed` or `PublishAot` build warns about each call that uses reflection, and about nothing else.
-RXUIBIND001, RXUIBIND006 and RXUIBIND009 point out those call sites when you build, before anything throws.
+RXUIBIND021 reports every plain call that nothing was generated for, whatever the reason. RXUIBIND001, RXUIBIND006
+and RXUIBIND009 name some of the reasons.
 
 The scheduler overloads split the same way. Both kinds live on `ReactiveSchedulerExtensions`.
 
@@ -331,6 +333,42 @@ Two members always use reflection, so their plain names carry the attribute.
 
 - `WhenAnyDynamic`. See [Observing a path built at run time](#observing-a-path-built-at-run-time).
 - The object-typed `ResolveView` on the view locator. See [The view locator](#the-view-locator).
+
+## Members written by another source generator
+
+The generator reads your code as you wrote it. It never sees what another source generator adds, because no
+generator sees another's output. A call that binds such a member has nothing to read, so nothing is generated for it.
+
+The members ReactiveUI.SourceGenerators writes are the exception. The generator reads that package's attributes and
+follows its rules for what each one writes, so these members bind like any other.
+
+| Attribute | What the generator reads |
+|-----------|--------------------------|
+| `[Reactive]` on a field | A public property named from the field: `_name`, `name` and `m_name` become `Name`. Its setter follows `SetModifier`. |
+| `[Reactive]` on a partial property | The property you declared. |
+| `[ReactiveCollection]` on a field | A public read-write property, named the same way. |
+| `[BindableDerivedList]` on a field | A read-only property, named the same way, with the accessibility `AccessModifier` gives it. |
+| `[ReactiveCommand]` on a method | A `ReactiveCommand<TInput, TOutput>` property named from the method, with `Async` dropped and `Command` added. |
+| `[IReactiveObject]` on a class | The class implements `IReactiveObject`, so its properties raise change notifications. |
+
+```csharp
+public partial class ProfileViewModel : ReactiveObject
+{
+    [Reactive]
+    private string _displayName = "Ada";
+
+    [ReactiveCommand]
+    private void Save() => Saves++;
+
+    public int Saves { get; private set; }
+}
+
+profile.WhenAnyValue(x => x.DisplayName);                  // generated
+view.BindCommand(profile, x => x.SaveCommand, v => v.Save); // generated
+```
+
+A member any other source generator adds is not seen. RXUIBIND021 reports each call that binds one, because the call
+throws when it runs. Declare the member yourself as a partial property, or call the `Unsafe` overload.
 
 ## Installing
 
@@ -839,6 +877,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND018 | Warning | `[ObservableAsProperty]` marks something other than a partial get-only instance property, so nothing is generated. For a field, a method or an observable property, a code fix rewrites it as a partial property (C# 13). |
 | RXUIBIND019 | Warning | A method marked `[ObservableAsProperty]` takes parameters, so it cannot supply a property's values. |
 | RXUIBIND020 | Info | A view is registered as `IViewFor<T>` in the service locator, and this project has no generated view and no `Map` for `T`. `ResolveView` with a view model held as an `object` does not find it. Add it with `Map`, or call `ResolveViewUnsafe`. |
+| RXUIBIND021 | Warning | Nothing was generated for the call, so it throws when it runs. A lambda the generator cannot read, or a member another source generator adds, are common causes. Name each member directly, declare a generated member as a partial property, or call the `Unsafe` overload. |
 
 The package's build targets report one error of their own.
 
