@@ -14,15 +14,16 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 namespace ReactiveUI.Binding.SourceGenerators.Generators;
 
 /// <summary>
-/// Builds the compilation call sites are read from when the consumer uses ReactiveUI.SourceGenerators: the consumer's
-/// compilation, plus declarations of the members that generator adds.
+/// Builds the compilation call sites are read from when the consumer uses ReactiveUI.SourceGenerators or a XAML source
+/// generator: the consumer's compilation, plus declarations of the members those generators add.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Every generator reads the compilation as the consumer wrote it, without any generator's output. A call site that
 /// binds a property ReactiveUI.SourceGenerators writes, such as the one <c>[Reactive]</c> writes for a field, names a
 /// member that does not exist yet, so it cannot be read at all. A class marked <c>[IReactiveObject]</c> looks as if it
-/// raised no notification.
+/// raised no notification. A control named in a MAUI or Avalonia page is a field those platforms' generators write, so a
+/// binding to it cannot be read either.
 /// </para>
 /// <para>
 /// This pipeline declares those members and interfaces in one file that is never emitted, and adds it to a private copy
@@ -50,13 +51,25 @@ internal static class SourceGeneratorsCompilation
         var commands = Collect(in context, Constants.SourceGeneratorsReactiveCommandAttributeMetadataName, isMethod, SourceGeneratorsMemberExtractor.ExtractReactiveCommand);
         var reactiveObjects = Collect(in context, Constants.SourceGeneratorsIReactiveObjectAttributeMetadataName, isType, SourceGeneratorsMemberExtractor.ExtractIReactiveObject);
 
+        // XAML pages are read once per change to the file; their types are resolved against the compilation.
+        var xamlFields = context.AdditionalTextsProvider
+            .Combine(context.AnalyzerConfigOptionsProvider)
+            .Select(static (data, ct) => XamlPageReader.Read(data.Left, data.Right.GetOptions(data.Left), data.Right.GlobalOptions, ct))
+            .Where(static page => page is not null)
+            .Select(static (page, _) => page!)
+            .Collect()
+            .Combine(context.CompilationProvider)
+            .Select(static (data, ct) => XamlMemberResolver.Resolve(data.Left, data.Right, ct));
+
         var declarations = reactiveObjects
             .Combine(reactive)
             .Combine(collections)
             .Combine(derivedLists)
             .Combine(commands)
+            .Combine(xamlFields)
             .Select(static (data, _) => WriteDeclarations(
-                data.Left.Left.Left.Left,
+                data.Left.Left.Left.Left.Left,
+                data.Left.Left.Left.Left.Right,
                 data.Left.Left.Left.Right,
                 data.Left.Left.Right,
                 data.Left.Right,

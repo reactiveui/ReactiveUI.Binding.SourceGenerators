@@ -21,5 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Wpf\ReactiveUI.Binding.Wpf.csproj"/>
+    <!-- XamlPage binds controls WPF's markup compiler declares, so the binding generator runs over this project. -->
+    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 </Project>

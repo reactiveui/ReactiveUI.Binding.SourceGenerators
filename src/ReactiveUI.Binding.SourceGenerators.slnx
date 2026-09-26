@@ -42,6 +42,7 @@
         <Project Path="examples/Documentation/Pages/setup/aot/aot.csproj" />
         <Project Path="examples/Documentation/Pages/unsafe/unsafe.csproj" />
         <Project Path="examples/Documentation/Pages/sourcegenerators/sourcegenerators.csproj" />
+        <Project Path="examples/Documentation/Pages/xaml/xaml.csproj" />
         <Project Path="examples/Platforms/PlatformBindingsVerification/PlatformBindingsVerification.csproj" />
         <Project Path="examples/Platforms/ToPropertyVerification/ToPropertyVerification.csproj" />
     </Folder>
