@@ -12,6 +12,9 @@
     <Compile Include="..\ReactiveUI.Binding.Maui.Tests\**\*.cs"
              Exclude="..\ReactiveUI.Binding.Maui.Tests\obj\**\*.cs;..\ReactiveUI.Binding.Maui.Tests\bin\**\*.cs"
              Link="%(RecursiveDir)%(Filename)%(Extension)"/>
+    <MauiXaml Include="..\ReactiveUI.Binding.Maui.Tests\**\*.xaml"
+              Exclude="..\ReactiveUI.Binding.Maui.Tests\obj\**;..\ReactiveUI.Binding.Maui.Tests\bin\**"
+              Link="%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -30,5 +33,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Maui.Reactive\ReactiveUI.Binding.Maui.Reactive.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 </Project>

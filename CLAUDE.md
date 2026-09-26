@@ -283,6 +283,8 @@ src/
 │   ├── Helpers/                                 # Extraction and validation helpers
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
 │   │   ├── SourceGeneratorsMemberExtractor.cs   # ReactiveUI.SourceGenerators' naming and typing rules
+│   │   ├── XamlPageReader.cs                    # Named elements of MAUI and Avalonia XAML pages
+│   │   ├── XamlMemberResolver.cs                # Those elements' types, as fields of the code-behind class
 │   │   ├── CallSiteContext.cs                   # A call site and the semantic model it is read with
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
 │   └── CodeGeneration/
@@ -488,6 +490,15 @@ generated observation uses (`PropertyObservable`, `PluginPropertyObservable`, `S
 chooses the mechanism from the source's runtime type: an `INotifyPropertyChanged` source at INPC's affinity, any
 other read once, and a higher-scoring registered provider wins either way. ReactiveUI.SourceGenerators detects it by
 metadata name and uses it in its WinForms hosts.
+
+XAML named controls go through the same declarations file. MAUI and Avalonia declare a field per named element with a
+source generator, and both pass their XAML to every generator as additional files: MAUI marks them `GenKind=Xaml`,
+Avalonia `SourceItemGroup=AvaloniaXaml`. `XamlPageReader` reads the pages they mark (`x:Class`, `x:Name`, Avalonia's
+`Name`, `x:FieldModifier`, skipping templates and `x:TypeArguments`), cached per file. `XamlMemberResolver` resolves each
+element's type against the compilation, through `clr-namespace:` / `using:` or any assembly's `XmlnsDefinitionAttribute`
+(matched by name, since MAUI and Avalonia each declare one), and skips a field the class already declares. WPF and
+WinUI write their fields before the compiler runs, so their XAML is not read; `NamedControlsViewTests` shows WPF's
+fields bind as they are.
 
 A member any other generator adds stays invisible. `NoGeneratedBindingAnalyzer` reports RXUIBIND021 on any call that
 still resolves to a throwing runtime stub with no interceptor: analyzers see every generator's output, so that is
