@@ -26,7 +26,7 @@ public sealed class CurrencyTextConverter : BindingTypeConverter<decimal, string
     /// <inheritdoc/>
     public override bool TryConvert(decimal from, object? conversionHint, [NotNullWhen(true)] out string? result)
     {
-        var format = conversionHint as string ?? DefaultFormat;
+        string format = conversionHint as string ?? DefaultFormat;
         result = $"${from.ToString(format, CultureInfo.InvariantCulture)}";
         return true;
     }

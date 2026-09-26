@@ -26,8 +26,8 @@ public static class ToPropertyExamples
     /// </summary>
     public static void BackPropertiesOnATypeWithItsOwnEvent()
     {
-        var item = new TodoItem { Title = "Renew car registration", Notes = "Bring the insurance certificate" };
-        var viewModel = new PartialOwnEventViewModel(item);
+        TodoItem item = new TodoItem { Title = "Renew car registration", Notes = "Bring the insurance certificate" };
+        PartialOwnEventViewModel viewModel = new PartialOwnEventViewModel(item);
 
         Console.WriteLine(viewModel.Title);
         Console.WriteLine(viewModel.Notes);
@@ -46,8 +46,8 @@ public static class ToPropertyExamples
     /// </summary>
     public static void BackPropertiesOnATypeWithAPublicRaiseMethod()
     {
-        var item = new TodoItem { IsDone = false, Priority = TodoPriority.High };
-        var viewModel = new RaiseMethodViewModel(item);
+        TodoItem item = new TodoItem { IsDone = false, Priority = TodoPriority.High };
+        RaiseMethodViewModel viewModel = new RaiseMethodViewModel(item);
 
         Console.WriteLine(viewModel.RemainingLabel);
         Console.WriteLine(viewModel.Priority);
@@ -67,9 +67,9 @@ public static class ToPropertyExamples
     /// </summary>
     public static void BackPropertiesWithDeferredSubscriptionAndAScheduler()
     {
-        var item = new TodoItem { IsDone = false, DueDate = RegistrationDue };
+        TodoItem item = new TodoItem { IsDone = false, DueDate = RegistrationDue };
         VirtualClock scheduler = new();
-        var viewModel = new PartialProtectedBaseViewModel(item, scheduler);
+        PartialProtectedBaseViewModel viewModel = new PartialProtectedBaseViewModel(item, scheduler);
 
         item.IsDone = true;
 

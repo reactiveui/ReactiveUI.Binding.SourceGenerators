@@ -19,7 +19,7 @@ public static class UnsafeToPropertyExamples
     public static void BackAPropertyOnATypeThatIsNotPartial()
     {
         BehaviorSignal<string> titles = new(OriginalTitle);
-        var viewModel = new TodoHeadlineViewModel(titles);
+        TodoHeadlineViewModel viewModel = new TodoHeadlineViewModel(titles);
         List<string> raised = [];
         viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName ?? string.Empty);
 

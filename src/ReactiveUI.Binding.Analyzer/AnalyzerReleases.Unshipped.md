@@ -21,3 +21,4 @@
  RXUIBIND017 | Usage    | Warning  | Binding writes to a UI object without its platform package
  RXUIBIND018 | Usage    | Warning  | ObservableAsProperty needs a partial get-only property
  RXUIBIND019 | Usage    | Warning  | ObservableAsProperty method takes parameters
+ RXUIBIND020 | Usage    | Info     | View is registered only in the service locator

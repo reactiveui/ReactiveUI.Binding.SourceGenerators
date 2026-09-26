@@ -12,19 +12,19 @@ const string MediaBucket = "acme-media";
 
 const string PhotoFolder = "photos/2026/";
 
-var todoStore = InMemoryTodoStore.CreateSeeded();
+InMemoryTodoStore todoStore = InMemoryTodoStore.CreateSeeded();
 
 TodoListViewModel todoViewModel = new(todoStore);
 
 await todoViewModel.LoadAsync();
 
-var item = todoViewModel.Items[0];
+TodoItem item = todoViewModel.Items[0];
 
 TodoView todoView = new() { ViewModel = todoViewModel };
 
-var storage = InMemoryObjectStorage.CreateSeeded();
+InMemoryObjectStorage storage = InMemoryObjectStorage.CreateSeeded();
 
-var photos = await storage.ListObjectsAsync(MediaBucket, PhotoFolder);
+IReadOnlyList<StorageObject> photos = await storage.ListObjectsAsync(MediaBucket, PhotoFolder);
 
 StorageBrowserViewModel browser = new(storage);
 

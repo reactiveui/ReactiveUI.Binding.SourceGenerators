@@ -22,7 +22,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes four properties after they change and combines them with a selector.</summary>
     public static void ObserveFourColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -43,7 +43,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes five properties after they change and combines them with a selector.</summary>
     public static void ObserveFiveColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -65,7 +65,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes six properties after they change and combines them with a selector.</summary>
     public static void ObserveSixColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -88,7 +88,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes seven properties after they change and combines them with a selector.</summary>
     public static void ObserveSevenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -112,7 +112,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes eight properties after they change and combines them with a selector.</summary>
     public static void ObserveEightColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -137,7 +137,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes nine properties after they change and combines them with a selector.</summary>
     public static void ObserveNineColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -163,7 +163,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes ten properties after they change and combines them with a selector.</summary>
     public static void ObserveTenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -190,7 +190,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes eleven properties after they change and combines them with a selector.</summary>
     public static void ObserveElevenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -218,7 +218,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes twelve properties after they change and combines them with a selector.</summary>
     public static void ObserveTwelveColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -247,7 +247,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes thirteen properties after they change and combines them with a selector.</summary>
     public static void ObserveThirteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -277,7 +277,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes fourteen properties after they change and combines them with a selector.</summary>
     public static void ObserveFourteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -308,7 +308,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes fifteen properties after they change and combines them with a selector.</summary>
     public static void ObserveFifteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,
@@ -340,7 +340,7 @@ public static class UnsafeWhenChangedWideSelectorExamples
     /// <summary>Observes sixteen properties after they change and combines them with a selector.</summary>
     public static void ObserveSixteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenChangedUnsafe(
             x => x.Title,

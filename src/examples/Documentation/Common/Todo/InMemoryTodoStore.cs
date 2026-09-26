@@ -59,7 +59,7 @@ public sealed class InMemoryTodoStore : ITodoStore
         await EnterAsync().ConfigureAwait(false);
 
         List<TodoItem> matches = [];
-        foreach (var row in _rows)
+        foreach (TodoItem row in _rows)
         {
             if (row.Matches(text))
             {
@@ -88,7 +88,7 @@ public sealed class InMemoryTodoStore : ITodoStore
             throw new TodoStoreException("A to-do item needs a title.");
         }
 
-        var row = item.Clone();
+        TodoItem row = item.Clone();
         row.Id = _nextId;
         _nextId++;
         _rows.Add(row);
@@ -100,7 +100,7 @@ public sealed class InMemoryTodoStore : ITodoStore
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var index = _rows.FindIndex(row => row.Id == item.Id);
+        int index = _rows.FindIndex(row => row.Id == item.Id);
         if (index < 0)
         {
             throw new TodoStoreException($"There is no to-do item {item.Id}.");

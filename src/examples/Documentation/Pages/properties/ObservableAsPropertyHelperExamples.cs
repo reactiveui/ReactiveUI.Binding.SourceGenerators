@@ -23,10 +23,10 @@ public static class ObservableAsPropertyHelperExamples
     /// </summary>
     public static void ConstructAHelperWithChangeCallbacks()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
-        var titles = item.WhenChanged(x => x.Title);
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
+        IObservable<string> titles = item.WhenChanged(x => x.Title);
 
-        using var helper = new ObservableAsPropertyHelper<string>(
+        using ObservableAsPropertyHelper<string> helper = new ObservableAsPropertyHelper<string>(
             titles,
             onChanged: static value => Console.WriteLine($"Now: {value}"),
             onChanging: static value => Console.WriteLine($"Was: {value}"));
@@ -41,14 +41,14 @@ public static class ObservableAsPropertyHelperExamples
     /// </summary>
     public static void ReadThrownExceptions()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
-        var titles = item.WhenChanged(x => x.Title);
-        var failure = new InvalidOperationException("The title source failed.");
-        var withFailure = Signal.Concat(titles, Signal.Fail<string>(failure));
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
+        IObservable<string> titles = item.WhenChanged(x => x.Title);
+        InvalidOperationException failure = new InvalidOperationException("The title source failed.");
+        IObservable<string> withFailure = Signal.Concat(titles, Signal.Fail<string>(failure));
 
-        var helper = new ObservableAsPropertyHelper<string>(withFailure, Console.WriteLine);
+        ObservableAsPropertyHelper<string> helper = new ObservableAsPropertyHelper<string>(withFailure, Console.WriteLine);
 
-        using var subscription = helper.ThrownExceptions.Subscribe(static ex => Console.WriteLine(ex.Message));
+        using IDisposable subscription = helper.ThrownExceptions.Subscribe(static ex => Console.WriteLine(ex.Message));
 
         item.Title = "Renew car registration online";
 
@@ -62,7 +62,7 @@ public static class ObservableAsPropertyHelperExamples
     /// </summary>
     public static void CreateAHelperThatNeverChanges()
     {
-        using var helper = ObservableAsPropertyHelper<string>.Default("Not connected");
+        using ObservableAsPropertyHelper<string> helper = ObservableAsPropertyHelper<string>.Default("Not connected");
 
         Console.WriteLine(helper.Value);
         Console.WriteLine(helper.IsSubscribed);

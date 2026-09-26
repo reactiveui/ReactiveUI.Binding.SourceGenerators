@@ -12,8 +12,8 @@ public static class StringAndEqualityExamples
     /// <summary>Demonstrates the StringConverter for identity string-to-string binding.</summary>
     public static void DemonstrateStringConverter()
     {
-        var converter = new StringConverter();
-        var success = converter.TryConvertTyped("Renew car registration", null, out var result);
+        StringConverter converter = new StringConverter();
+        bool success = converter.TryConvertTyped("Renew car registration", null, out var result);
 
         Console.WriteLine(success);
         Console.WriteLine(result);
@@ -30,10 +30,10 @@ public static class StringAndEqualityExamples
     /// <summary>Demonstrates the EqualityTypeConverter for comparing values to a hint.</summary>
     public static void DemonstrateEqualityConverter()
     {
-        var converter = new EqualityTypeConverter();
+        EqualityTypeConverter converter = new EqualityTypeConverter();
         TodoItem item = new() { Title = "Renew car registration", Priority = TodoPriority.High };
 
-        var success = converter.TryConvertTyped(item.Priority, TodoPriority.High, out var isHigh);
+        bool success = converter.TryConvertTyped(item.Priority, TodoPriority.High, out var isHigh);
 
         Console.WriteLine(success);
         Console.WriteLine(isHigh);
@@ -53,24 +53,24 @@ public static class StringAndEqualityExamples
     /// <summary>Demonstrates boolean-to-string and string-to-boolean converters.</summary>
     public static void DemonstrateBooleanConverters()
     {
-        var boolToStringConverter = new BooleanToStringTypeConverter();
-        var trueSuccess = boolToStringConverter.TryConvertTyped(true, null, out var trueResult);
+        BooleanToStringTypeConverter boolToStringConverter = new BooleanToStringTypeConverter();
+        bool trueSuccess = boolToStringConverter.TryConvertTyped(true, null, out var trueResult);
 
         Console.WriteLine(trueSuccess);
         Console.WriteLine(trueResult);
 
-        var falseSuccess = boolToStringConverter.TryConvertTyped(false, null, out var falseResult);
+        bool falseSuccess = boolToStringConverter.TryConvertTyped(false, null, out var falseResult);
 
         Console.WriteLine(falseSuccess);
         Console.WriteLine(falseResult);
 
-        var stringToBoolConverter = new StringToBooleanTypeConverter();
-        var stringTrueSuccess = stringToBoolConverter.TryConvertTyped("True", null, out var parsedTrue);
+        StringToBooleanTypeConverter stringToBoolConverter = new StringToBooleanTypeConverter();
+        bool stringTrueSuccess = stringToBoolConverter.TryConvertTyped("True", null, out var parsedTrue);
 
         Console.WriteLine(stringTrueSuccess);
         Console.WriteLine(parsedTrue);
 
-        var stringFalseSuccess = stringToBoolConverter.TryConvertTyped("False", null, out var parsedFalse);
+        bool stringFalseSuccess = stringToBoolConverter.TryConvertTyped("False", null, out var parsedFalse);
 
         Console.WriteLine(stringFalseSuccess);
         Console.WriteLine(parsedFalse);
@@ -89,7 +89,7 @@ public static class StringAndEqualityExamples
     /// <summary>Shows the affinity of the string converter, which a string-to-string binding uses.</summary>
     public static void ShowStringConverterAffinity()
     {
-        var converter = new StringConverter();
+        StringConverter converter = new StringConverter();
 
         Console.WriteLine(converter.GetAffinityForObjects());
 
@@ -100,7 +100,7 @@ public static class StringAndEqualityExamples
     /// <summary>Shows the type pair and the affinity of the equality converter; a built-in converter for the same pair outranks it.</summary>
     public static void ShowEqualityConverterTypePair()
     {
-        var converter = new EqualityTypeConverter();
+        EqualityTypeConverter converter = new EqualityTypeConverter();
 
         Console.WriteLine($"{converter.FromType} -> {converter.ToType}");
         Console.WriteLine(converter.GetAffinityForObjects());

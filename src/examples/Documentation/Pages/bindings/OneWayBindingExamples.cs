@@ -69,7 +69,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindSelectedIssueTitleToLabel()
     {
-        var board = await OpenIssueBoardAsync();
+        IssueBoardViewModel board = await OpenIssueBoardAsync();
         IssueBoardView view = new();
 
         using (board.BindOneWay(view, x => x.SelectedIssue!.Title, v => v.IssueTitleLabel.Text))
@@ -94,7 +94,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindSelectedIssueAssigneeToLabel()
     {
-        var board = await OpenIssueBoardAsync();
+        IssueBoardViewModel board = await OpenIssueBoardAsync();
         IssueBoardView view = new();
 
         using (board.BindOneWay(view, x => x.SelectedIssue!.Assignee!.Login, v => v.AssigneeLabel.Text))
@@ -119,7 +119,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindSelectedIssueStateToLabel()
     {
-        var board = await OpenIssueBoardAsync();
+        IssueBoardViewModel board = await OpenIssueBoardAsync();
         IssueBoardView view = new();
 
         using (board.BindOneWay(view, x => x.SelectedIssue!.State, v => v.StateLabel.Text, static state => state == IssueState.Open ? OpenText : ClosedText))
@@ -140,7 +140,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindRemainingCountToLabel()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new();
 
         using (list.BindOneWay(view, x => x.RemainingCount, v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture)))
@@ -167,7 +167,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindBalanceToLabelWithCurrencyFormat()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new();
 
         using (accounts.BindOneWay(view, x => x.SelectedAccount!.Balance, v => v.BalanceLabel.Text, FormatBalance))
@@ -192,7 +192,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindFilterTextToBox()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = list };
 
         using (view.OneWayBind(list, x => x.FilterText, v => v.FilterTextBox.Text))
@@ -209,7 +209,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindIntoNamedControl()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoHeadingView view = new() { ViewModel = list };
 
         // TitleLabel is a field, like every x:Name control; the path runs through it.
@@ -231,7 +231,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindKeepsViewWhilePathIsBroken()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoHeadingView view = new() { ViewModel = list };
 
         using (view.OneWayBind(list, x => x.SelectedItem!.Title, v => v.TitleLabel.Text))
@@ -257,7 +257,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindUploadPercentToProgressBar()
     {
-        var browser = await OpenBucketAsync();
+        StorageBrowserViewModel browser = await OpenBucketAsync();
         StorageBrowserView view = new() { ViewModel = browser };
 
         // A view-first binding reads its view model from the view's ViewModel property.
@@ -279,7 +279,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindAvailableBalanceWithSelector()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new() { ViewModel = accounts };
 
         using (view.OneWayBind(accounts, x => x.SelectedAccount!.AvailableBalance, v => v.AvailableBalanceLabel.Text, FormatBalance))
@@ -298,7 +298,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayOnSequencer()
     {
-        var board = await OpenIssueBoardAsync();
+        IssueBoardViewModel board = await OpenIssueBoardAsync();
         IssueBoardView view = new();
         VirtualClock uiThread = new();
 
@@ -322,7 +322,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayConvertedOnSequencer()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new();
         VirtualClock uiThread = new();
 
@@ -344,7 +344,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayWithConverterObject()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new();
 
         using (accounts.BindOneWay(view, x => x.TotalBalance, v => v.TotalBalanceLabel.Text, new CurrencyTextConverter()))
@@ -360,7 +360,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayWithConverterObjectAndHint()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new();
 
         using (accounts.BindOneWay(view, x => x.TotalBalance, v => v.TotalBalanceLabel.Text, new CurrencyTextConverter(), GroupedFormat))
@@ -376,7 +376,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayWithConverterObjectOnSequencer()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new();
         VirtualClock uiThread = new();
 
@@ -457,7 +457,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindWithSelectorOnSequencer()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new() { ViewModel = accounts };
         VirtualClock uiThread = new();
 
@@ -479,7 +479,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayUnsafeWithConverterObject()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new();
         VirtualClock uiThread = new();
 
@@ -507,7 +507,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindUnsafeWithConverterObject()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new() { ViewModel = accounts };
         VirtualClock uiThread = new();
 
@@ -530,7 +530,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayWithNullScheduler()
     {
-        var board = await OpenIssueBoardAsync();
+        IssueBoardViewModel board = await OpenIssueBoardAsync();
         IssueBoardView view = new();
 
         using (board.BindOneWay(view, x => x.SelectedIssue!.Title, v => v.IssueTitleLabel.Text, scheduler: null))
@@ -551,7 +551,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindOneWayConvertedWithNullScheduler()
     {
-        var list = await OpenTodoListAsync();
+        TodoListViewModel list = await OpenTodoListAsync();
         TodoView view = new();
 
         using (list.BindOneWay(view, x => x.RemainingCount, v => v.RemainingLabel.Text, static count => count.ToString(CultureInfo.InvariantCulture), scheduler: null))
@@ -572,7 +572,7 @@ public static class OneWayBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task OneWayBindWithSelectorAndNullScheduler()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountsView view = new() { ViewModel = accounts };
 
         using (view.OneWayBind(accounts, x => x.SelectedAccount!.Balance, v => v.BalanceLabel.Text, FormatBalance, scheduler: null))

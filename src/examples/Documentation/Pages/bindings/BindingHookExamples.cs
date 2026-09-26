@@ -17,7 +17,7 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindWithoutHook()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new();
 
         Console.WriteLine(BindingHooks.Any);
@@ -36,7 +36,7 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task LogEveryBinding()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new() { ViewModel = accounts };
 
         AppLocator.CurrentMutable.RegisterConstant<IPropertyBindingHook>(new LoggingBindingHook("log"));
@@ -67,9 +67,9 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task VetoTwoWayBinding()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new();
-        var everydayName = accounts.SelectedAccount!.Name;
+        string everydayName = accounts.SelectedAccount!.Name;
 
         AppLocator.CurrentMutable.RegisterConstant<IPropertyBindingHook>(new ReadOnlyAccountHook());
         BindingHooks.Refresh();
@@ -110,14 +110,14 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task VetoViewFirstBinding()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new() { ViewModel = accounts };
 
         AppLocator.CurrentMutable.RegisterConstant<IPropertyBindingHook>(new ReadOnlyAccountHook());
         BindingHooks.Refresh();
 
-        var refused = view.Bind(accounts, x => x.SelectedAccount!.Name, v => v.NameTextBox.Text);
-        using var allowed = view.OneWayBind(accounts, x => x.SelectedAccount!.Name, v => v.NameTextBox.Text);
+        IReactiveBinding<AccountNameView, BindingChange> refused = view.Bind(accounts, x => x.SelectedAccount!.Name, v => v.NameTextBox.Text);
+        using IReactiveBinding<AccountNameView, string> allowed = view.OneWayBind(accounts, x => x.SelectedAccount!.Name, v => v.NameTextBox.Text);
 
         Console.WriteLine(refused is null);
         Console.WriteLine(allowed is null);
@@ -136,7 +136,7 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task AskHooksDirectly()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new();
 
         AppLocator.CurrentMutable.RegisterConstant<IPropertyBindingHook>(new LoggingBindingHook("first"));
@@ -144,8 +144,8 @@ public static class BindingHookExamples
         AppLocator.CurrentMutable.RegisterConstant<IPropertyBindingHook>(new LoggingBindingHook("last"));
         BindingHooks.Refresh();
 
-        var oneWay = BindingHooks.ShouldBind(accounts, view, Observed(accounts), Observed(view), BindingDirection.OneWay);
-        var twoWay = BindingHooks.ShouldBind(accounts, view, Observed(accounts), Observed(view), BindingDirection.TwoWay);
+        bool oneWay = BindingHooks.ShouldBind(accounts, view, Observed(accounts), Observed(view), BindingDirection.OneWay);
+        bool twoWay = BindingHooks.ShouldBind(accounts, view, Observed(accounts), Observed(view), BindingDirection.TwoWay);
 
         Console.WriteLine(oneWay);
         Console.WriteLine(twoWay);
@@ -165,7 +165,7 @@ public static class BindingHookExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task RefreshAfterLateRegistration()
     {
-        var accounts = await OpenAccountsAsync();
+        AccountsViewModel accounts = await OpenAccountsAsync();
         AccountNameView view = new();
 
         Console.WriteLine(BindingHooks.Any);

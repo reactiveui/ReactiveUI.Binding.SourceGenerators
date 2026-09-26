@@ -28,7 +28,7 @@ public static class CustomProviderExamples
     /// <param name="provider">The provider to register.</param>
     public static void RegisterProviderThroughBuilder(StorageConnectionObservableForProperty provider)
     {
-        var outranksBefore = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(StorageConnection), StatePropertyName, BindingAffinity.Fallback, false);
+        bool outranksBefore = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(StorageConnection), StatePropertyName, BindingAffinity.Fallback, false);
 
         Console.WriteLine($"Provider outranks the fallback before registering: {outranksBefore}");
 
@@ -42,7 +42,7 @@ public static class CustomProviderExamples
         ObservationAffinityChecker.Refresh();
 
         Console.WriteLine($"Provider is registered: {AppLocator.Current.GetServices<ICreatesObservableForProperty>().Contains(provider)}");
-        var outranksAfter = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(StorageConnection), StatePropertyName, BindingAffinity.Fallback, false);
+        bool outranksAfter = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(StorageConnection), StatePropertyName, BindingAffinity.Fallback, false);
 
         Console.WriteLine($"Provider outranks the fallback after registering: {outranksAfter}");
 
@@ -141,7 +141,7 @@ public static class CustomProviderExamples
     /// <param name="connection">The connection to observe.</param>
     public static void CallProviderThroughItsInterface(StorageConnection connection)
     {
-        var registered = AppLocator.Current
+        ICreatesObservableForProperty registered = AppLocator.Current
             .GetServices<ICreatesObservableForProperty>()
             .MaxBy(static candidate => candidate.GetAffinityForObject(typeof(StorageConnection), StatePropertyName, false))!;
         Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
@@ -164,24 +164,24 @@ public static class CustomProviderExamples
     /// <summary>Asks which registered provider outranks a mechanism the generator picked, at several generated scores.</summary>
     public static void FindProviderThatOutranksGeneratedMechanism()
     {
-        var connectionType = typeof(StorageConnection);
+        Type connectionType = typeof(StorageConnection);
 
-        var outranksFallback = ObservationAffinityChecker.HasHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Fallback, false);
-        var winnerOverPropertyChanged = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Explicit, false);
+        bool outranksFallback = ObservationAffinityChecker.HasHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Fallback, false);
+        ICreatesObservableForProperty? winnerOverPropertyChanged = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Explicit, false);
 
         Console.WriteLine($"Outranks the fallback: {outranksFallback}");
         Console.WriteLine($"Outranks the PropertyChanged provider: {winnerOverPropertyChanged?.GetType().Name}");
 
         // A tie goes to the generated mechanism, and so does a higher generated score.
-        var outranksEqual = ObservationAffinityChecker.HasHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.WinFormsEvent, false);
-        var winnerOverHigher = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Kvo, false);
+        bool outranksEqual = ObservationAffinityChecker.HasHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.WinFormsEvent, false);
+        ICreatesObservableForProperty? winnerOverHigher = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Kvo, false);
 
         Console.WriteLine($"Outranks an equal score: {outranksEqual}");
         Console.WriteLine($"Nothing outranks a higher score: {winnerOverHigher is null}");
 
         // The provider answers for one property and only after a change.
-        var forEndpoint = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, nameof(StorageConnection.Endpoint), BindingAffinity.Fallback, false);
-        var beforeChange = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Fallback, true);
+        ICreatesObservableForProperty? forEndpoint = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, nameof(StorageConnection.Endpoint), BindingAffinity.Fallback, false);
+        ICreatesObservableForProperty? beforeChange = ObservationAffinityChecker.FindHigherAffinityPlugin(connectionType, StatePropertyName, BindingAffinity.Fallback, true);
 
         Console.WriteLine($"Nothing answers for Endpoint: {forEndpoint is null}");
         Console.WriteLine($"Nothing answers before a change: {beforeChange is null}");
@@ -237,7 +237,7 @@ public static class CustomProviderExamples
             static source => ((StorageConnection)source).State,
             false,
             true);
-        var observer = Witness.Create<ConnectionState>(static state => Console.WriteLine(state));
+        IObserver<ConnectionState> observer = Witness.Create<ConnectionState>(static state => Console.WriteLine(state));
 
         using (observable.Subscribe(observer))
         {
@@ -259,7 +259,7 @@ public static class CustomProviderExamples
         Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
         UnchangingPropertyObservable<ConnectionState> generated = new(connection.State);
 
-        var lowGenerated = PluginObservationSource.Choose(
+        IObservable<ConnectionState> lowGenerated = PluginObservationSource.Choose(
             connection,
             property.Body,
             StatePropertyName,
@@ -267,7 +267,7 @@ public static class CustomProviderExamples
             BindingAffinity.Fallback,
             static source => ((StorageConnection)source).State,
             generated);
-        var highGenerated = PluginObservationSource.Choose(
+        IObservable<ConnectionState> highGenerated = PluginObservationSource.Choose(
             connection,
             property.Body,
             StatePropertyName,
@@ -330,7 +330,8 @@ public static class CustomProviderExamples
         Expression<Func<StorageBrowserViewModel, ConnectionState>> property = x => x.Connection.State;
         Expression[] links = [.. Reflection.Rewrite(property.Body).GetExpressionChain()];
         ExpressionChainSink<StorageBrowserViewModel, ConnectionState> sink = new(browser, property.Body, links, false, false, true, true);
-        var observer = Witness.Create<IObservedChange<StorageBrowserViewModel, ConnectionState>>(static change => Console.WriteLine(change.Value));
+        IObserver<IObservedChange<StorageBrowserViewModel, ConnectionState>> observer =
+            Witness.Create<IObservedChange<StorageBrowserViewModel, ConnectionState>>(static change => Console.WriteLine(change.Value));
 
         using (sink.Subscribe(observer))
         {
@@ -351,7 +352,7 @@ public static class CustomProviderExamples
     public static void ObserveThroughObservableForPropertySink(StorageConnection connection, StorageConnectionObservableForProperty provider)
     {
         Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
-        var notifications = provider.GetNotificationForProperty(connection, property.Body, StatePropertyName);
+        IObservable<IObservedChange<object, object?>> notifications = provider.GetNotificationForProperty(connection, property.Body, StatePropertyName);
         ObservableForPropertySink<StorageConnection, ConnectionState> sink = new(
             connection,
             property.Body,
@@ -379,7 +380,7 @@ public static class CustomProviderExamples
     public static void ObserveThroughObservableForPropertySinkWithAnObserver(StorageConnection connection, StorageConnectionObservableForProperty provider)
     {
         Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
-        var notifications = provider.GetNotificationForProperty(connection, property.Body, StatePropertyName);
+        IObservable<IObservedChange<object, object?>> notifications = provider.GetNotificationForProperty(connection, property.Body, StatePropertyName);
         ObservableForPropertySink<StorageConnection, ConnectionState> sink = new(
             connection,
             property.Body,
@@ -387,7 +388,7 @@ public static class CustomProviderExamples
             () => connection.State,
             false,
             true);
-        var observer = Witness.Create<IObservedChange<StorageConnection, ConnectionState>>(static change => Console.WriteLine(change.Value));
+        IObserver<IObservedChange<StorageConnection, ConnectionState>> observer = Witness.Create<IObservedChange<StorageConnection, ConnectionState>>(static change => Console.WriteLine(change.Value));
 
         using (sink.Subscribe(observer))
         {

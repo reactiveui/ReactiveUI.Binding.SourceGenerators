@@ -41,7 +41,7 @@ public static class FallbackConvertersExamples
         ConverterService service = new();
         service.FallbackConverters.Register(new CustomFallbackConverter());
 
-        var fallback = service.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
+        IBindingFallbackConverter? fallback = service.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
 
         Console.WriteLine(fallback!.GetAffinityForObjects(typeof(TodoPriority), typeof(string)));
         Console.WriteLine(fallback.GetAffinityForObjects(typeof(TodoPriority), typeof(int)));
@@ -62,9 +62,9 @@ public static class FallbackConvertersExamples
         DefaultConverterRegistration.RegisterDefaults(service);
         service.FallbackConverters.Register(new CustomFallbackConverter());
 
-        var forInteger = service.ResolveConverter(typeof(int), typeof(string));
-        var forPriority = service.ResolveConverter(typeof(TodoPriority), typeof(string));
-        var forGuid = service.ResolveConverter(typeof(TodoPriority), typeof(Guid));
+        object? forInteger = service.ResolveConverter(typeof(int), typeof(string));
+        object? forPriority = service.ResolveConverter(typeof(TodoPriority), typeof(string));
+        object? forGuid = service.ResolveConverter(typeof(TodoPriority), typeof(Guid));
 
         Console.WriteLine(forInteger!.GetType().Name);
         Console.WriteLine(forPriority!.GetType().Name);
@@ -82,7 +82,7 @@ public static class FallbackConvertersExamples
         ConverterService service = new();
         service.SetMethodConverters.Register(new DemoSetMethodConverter());
 
-        var converter = service.ResolveSetMethodConverter(typeof(string), typeof(string));
+        ISetMethodBindingConverter? converter = service.ResolveSetMethodConverter(typeof(string), typeof(string));
 
         Console.WriteLine(converter!.GetType().Name);
         Console.WriteLine(converter.PerformSet(null, "Renew car registration", null));
@@ -98,7 +98,7 @@ public static class FallbackConvertersExamples
         ConverterService service = new();
         service.SetMethodConverters.Register(new LegacyTagListSetMethodConverter());
 
-        var converter = service.ResolveSetMethodConverter(typeof(IReadOnlyList<string>), typeof(List<string>))!;
+        ISetMethodBindingConverter converter = service.ResolveSetMethodConverter(typeof(IReadOnlyList<string>), typeof(List<string>))!;
 
         Console.WriteLine(converter.GetAffinityForObjects(typeof(IReadOnlyList<string>), typeof(List<string>)));
         Console.WriteLine(converter.GetAffinityForObjects(typeof(string), typeof(string)));

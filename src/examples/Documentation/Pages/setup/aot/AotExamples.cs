@@ -26,7 +26,7 @@ public static class AotExamples
     /// <summary>Observes the title of an item with <c>WhenChanged</c>.</summary>
     public static void ObserveTitleChange()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
 
         using (item.WhenChanged(x => x.Title).Subscribe(Console.WriteLine))
         {
@@ -41,8 +41,8 @@ public static class AotExamples
     /// <summary>Binds the finished flag of an item to the status text of a row, turning the flag into words.</summary>
     public static void BindDoneFlagOneWay()
     {
-        var item = new TodoItem { Title = "File quarterly tax return" };
-        var row = new TodoRowView();
+        TodoItem item = new TodoItem { Title = "File quarterly tax return" };
+        TodoRowView row = new TodoRowView();
 
         using (item.BindOneWay(row, x => x.IsDone, v => v.StatusText, static done => done ? DoneText : OpenText))
         {
@@ -61,8 +61,8 @@ public static class AotExamples
     /// <summary>Carries the title both ways between an item and the title text of a row.</summary>
     public static void BindTitleTwoWay()
     {
-        var item = new TodoItem { Title = "Book dentist appointment" };
-        var row = new TodoRowView();
+        TodoItem item = new TodoItem { Title = "Book dentist appointment" };
+        TodoRowView row = new TodoRowView();
 
         using (item.BindTwoWay(row, x => x.Title, v => v.TitleText))
         {

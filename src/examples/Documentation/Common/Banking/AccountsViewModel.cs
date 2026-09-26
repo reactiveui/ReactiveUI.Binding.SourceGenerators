@@ -80,8 +80,8 @@ public sealed class AccountsViewModel : ObservableObject
     {
         try
         {
-            var accounts = await _backend.GetAccountsAsync().ConfigureAwait(false);
-            var selectedId = SelectedAccount?.Id;
+            IReadOnlyList<Account> accounts = await _backend.GetAccountsAsync().ConfigureAwait(false);
+            string? selectedId = SelectedAccount?.Id;
 
             ErrorMessage = string.Empty;
             Accounts = accounts;

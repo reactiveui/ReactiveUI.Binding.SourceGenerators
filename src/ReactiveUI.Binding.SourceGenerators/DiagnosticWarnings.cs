@@ -129,6 +129,20 @@ internal static class DiagnosticWarnings
         true,
         ObservableAsPropertyNeedsPartialPropertyDescription);
 
+    /// <summary>
+    /// RXUIBIND020: a view is registered only in the service locator, which <c>ResolveView(object)</c> does not ask.
+    /// Reported when the compilation ends, once every registration, view and mapping is known.
+    /// </summary>
+    internal static readonly DiagnosticDescriptor ServiceLocatorOnlyView = new(
+        "RXUIBIND020",
+        "View is registered only in the service locator",
+        "IViewFor<{0}> is registered only in the service locator, so ResolveView with a view model held as an object does not find it; add it with Map, or call ResolveViewUnsafe",
+        UsageCategory,
+        DiagnosticSeverity.Info,
+        true,
+        ServiceLocatorOnlyViewDescription,
+        customTags: WellKnownDiagnosticTags.CompilationEnd);
+
     /// <summary>RXUIBIND019: a method marked <c>[ObservableAsProperty]</c> takes parameters.</summary>
     internal static readonly DiagnosticDescriptor ObservableAsPropertyMethodHasParameters = new(
         "RXUIBIND019",
@@ -288,6 +302,13 @@ internal static class DiagnosticWarnings
         + "the build can see the property. A field, a method or an observable property marked with the attribute, as "
         + "ReactiveUI's older source generator allowed, gets nothing. The code fix rewrites those as partial properties, "
         + "which needs C# 13.";
+
+    /// <summary>The string description of the service-locator-only view information.</summary>
+    private const string ServiceLocatorOnlyViewDescription =
+        "ResolveView with a view model held as an object asks the generated view lookup and then the Map registrations. It "
+        + "does not ask the service locator, because that needs a type built at run time. A view model whose view is "
+        + "registered only in the service locator, with no generated view and no Map in this project, resolves to null "
+        + "there. ResolveView<T> and ResolveViewUnsafe still ask the service locator.";
 
     /// <summary>The string description of the ObservableAsProperty method parameters warning.</summary>
     private const string ObservableAsPropertyMethodHasParametersDescription =

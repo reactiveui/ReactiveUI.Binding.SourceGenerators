@@ -86,7 +86,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
         server.AddUser(MariaLogin, "Maria Santos", MariaToken);
 
         server.AddRepository("acme", "webshop", "Storefront and checkout");
-        var safari = server.Seed(Webshop, "Checkout button unresponsive on Safari", IssueState.Open, MariaLogin, PriyaLogin, "bug", "checkout");
+        Issue safari = server.Seed(Webshop, "Checkout button unresponsive on Safari", IssueState.Open, MariaLogin, PriyaLogin, "bug", "checkout");
         safari.Comments = (List<IssueComment>)
         [
             new IssueComment(TomasLogin, "Reproduced on Safari 17.", new DateTimeOffset(2026, 3, 2, 14, 20, 0, TimeSpan.Zero)),
@@ -124,7 +124,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
         await EnterAsync(requiresSignIn: true).ConfigureAwait(false);
 
         List<Repository> repositories = [];
-        foreach (var repository in _repositories)
+        foreach (Repository repository in _repositories)
         {
             repositories.Add(repository with { OpenIssueCount = CountOpen(repository.FullName) });
         }
@@ -137,7 +137,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     {
         await EnterAsync(requiresSignIn: true).ConfigureAwait(false);
 
-        var stored = IssuesOf(repository);
+        List<Issue> stored = IssuesOf(repository);
         List<Issue> matches = [];
         for (var index = stored.Count - 1; index >= 0; index--)
         {
@@ -155,8 +155,8 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     {
         await EnterAsync(requiresSignIn: true).ConfigureAwait(false);
 
-        var stored = IssuesOf(repository);
-        var assignee = assigneeLogin is null ? null : FindUser(assigneeLogin);
+        List<Issue> stored = IssuesOf(repository);
+        User? assignee = assigneeLogin is null ? null : FindUser(assigneeLogin);
 
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -174,7 +174,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     {
         await EnterAsync(requiresSignIn: true).ConfigureAwait(false);
 
-        var issue = FindIssue(repository, number);
+        Issue issue = FindIssue(repository, number);
         if (issue.State == IssueState.Closed)
         {
             throw new GitHubApiException(HttpStatusCode.UnprocessableEntity, $"Issue {number} is already closed.", null);
@@ -190,13 +190,13 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     {
         await EnterAsync(requiresSignIn: true).ConfigureAwait(false);
 
-        var issue = FindIssue(repository, number);
+        Issue issue = FindIssue(repository, number);
         if (string.IsNullOrWhiteSpace(body))
         {
             throw new GitHubApiException(HttpStatusCode.UnprocessableEntity, "Validation failed: the comment body is required.", null);
         }
 
-        var stamp = Stamp();
+        DateTimeOffset stamp = Stamp();
         issue.Comments = issue.Comments.Append(new(_signedIn!.Login, body.Trim(), stamp)).ToList();
         issue.UpdatedAt = stamp;
         return issue.Clone();
@@ -243,7 +243,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     /// <returns>The time of the change.</returns>
     private DateTimeOffset Stamp()
     {
-        var stamp = _now;
+        DateTimeOffset stamp = _now;
         _now = _now.AddMinutes(1);
         return stamp;
     }
@@ -253,8 +253,8 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     /// <returns>The number of open issues.</returns>
     private int CountOpen(string repository)
     {
-        var open = 0;
-        foreach (var issue in _issues[repository])
+        int open = 0;
+        foreach (Issue issue in _issues[repository])
         {
             if (issue.State == IssueState.Open)
             {
@@ -281,7 +281,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     /// <exception cref="GitHubApiException">The repository or the issue does not exist (404).</exception>
     private Issue FindIssue(string repository, int number)
     {
-        foreach (var issue in IssuesOf(repository))
+        foreach (Issue issue in IssuesOf(repository))
         {
             if (issue.Number == number)
             {
@@ -298,7 +298,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     /// <exception cref="GitHubApiException">The account does not exist (404).</exception>
     private User FindUser(string login)
     {
-        foreach (var user in _users)
+        foreach (User user in _users)
         {
             if (user.Login == login)
             {
@@ -340,7 +340,7 @@ public sealed class InMemoryGitHubServer : IGitHubApi
     /// <returns>The stored issue, so the caller can add comments.</returns>
     private Issue Seed(string repository, string title, IssueState state, string author, string? assignee, params string[] labels)
     {
-        var stored = _issues[repository];
+        List<Issue> stored = _issues[repository];
         Issue issue = new()
         {
             Number = FirstIssueNumber + stored.Count,

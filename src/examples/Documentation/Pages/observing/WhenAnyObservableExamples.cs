@@ -83,7 +83,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
+        using IDisposable subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
 
         webshop.IssueOpened.OnNext(IssueOpenedEvent);
 
@@ -99,7 +99,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
+        using IDisposable subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
 
         Console.WriteLine(webshop.IssueOpened.HasObservers);
 
@@ -125,7 +125,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
+        using IDisposable subscription = feed.WhenAnyObservable(x => x.IssueOpened).Subscribe(Console.WriteLine);
 
         feed.Unfollow();
 
@@ -148,7 +148,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed.WhenAnyObservable(x => x.IssueOpened, x => x.ReleasePublished).Subscribe(Console.WriteLine);
+        using IDisposable subscription = feed.WhenAnyObservable(x => x.IssueOpened, x => x.ReleasePublished).Subscribe(Console.WriteLine);
 
         Console.WriteLine(webshop.SubscribedStreamCount);
 
@@ -163,7 +163,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(x => x.IssueOpened, x => x.IssueClosed)
             .Subscribe(Console.WriteLine);
 
@@ -182,7 +182,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(x => x.IssueOpened, x => x.IssueClosed, x => x.IssueReopened)
             .Subscribe(Console.WriteLine);
 
@@ -201,7 +201,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -224,7 +224,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -248,7 +248,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -273,7 +273,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -299,7 +299,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -326,7 +326,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -354,7 +354,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -383,7 +383,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -413,7 +413,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -444,7 +444,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(x => x.IssueOpened, x => x.IssueClosed, static (first, last) => $"{first} / {last}")
             .Subscribe(Console.WriteLine);
 
@@ -463,7 +463,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(x => x.IssueOpened, x => x.IssueClosed, x => x.IssueReopened, static (first, _, last) => $"{first} / {last}")
             .Subscribe(Console.WriteLine);
 
@@ -482,7 +482,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -506,7 +506,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -531,7 +531,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -557,7 +557,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -584,7 +584,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -612,7 +612,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -641,7 +641,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -671,7 +671,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,
@@ -702,7 +702,7 @@ public static class WhenAnyObservableExamples
         RepositoryFeedViewModel feed = new();
         feed.Follow(webshop);
 
-        using var subscription = feed
+        using IDisposable subscription = feed
             .WhenAnyObservable(
                 x => x.IssueOpened,
                 x => x.IssueClosed,

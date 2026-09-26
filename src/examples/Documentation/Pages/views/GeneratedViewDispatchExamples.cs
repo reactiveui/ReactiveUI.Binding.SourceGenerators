@@ -41,12 +41,12 @@ public static class GeneratedViewDispatchExamples
     /// <summary>Resolves two accounts: a view marked as a single instance is built once and shared, and each resolve gives it the latest view model.</summary>
     public static void ResolveSingleInstanceView()
     {
-        var everyday = CreateAccount(EverydayId, EverydayName);
-        var savings = CreateAccount(SavingsId, SavingsName);
+        Account everyday = CreateAccount(EverydayId, EverydayName);
+        Account savings = CreateAccount(SavingsId, SavingsName);
         DefaultViewLocator locator = new();
 
-        var first = locator.ResolveView(everyday);
-        var second = locator.ResolveView(savings);
+        IViewFor? first = locator.ResolveView(everyday);
+        IViewFor? second = locator.ResolveView(savings);
 
         Console.WriteLine(first?.GetType().Name);
         Console.WriteLine(ReferenceEquals(first, second));
@@ -61,12 +61,12 @@ public static class GeneratedViewDispatchExamples
     /// <summary>Resolves a view that leaves the generated lookup out: nothing answers until the application maps it.</summary>
     public static void ResolveViewLeftOutOfRegistration()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
         DefaultViewLocator locator = new();
 
-        var before = locator.ResolveView(item);
+        IViewFor? before = locator.ResolveView(item);
         locator.Map<TodoItem, TodoItemPreviewView>();
-        var after = locator.ResolveView(item);
+        IViewFor? after = locator.ResolveView(item);
 
         Console.WriteLine(before is null);
         Console.WriteLine(after?.GetType().Name);
@@ -82,12 +82,12 @@ public static class GeneratedViewDispatchExamples
         TransferReceipt receipt = new("RCPT-000001", TransferAmount, AccountBalance - TransferAmount, DateTimeOffset.UnixEpoch);
         DefaultViewLocator locator = new();
 
-        var before = locator.ResolveView(receipt);
+        IViewFor? before = locator.ResolveView(receipt);
         AppLocator.CurrentMutable.Register<IViewFor<TransferReceipt>>(static () => new ReceiptView(ReceiptHeading));
 
         try
         {
-            var after = (ReceiptView?)locator.ResolveView(receipt);
+            ReceiptView? after = (ReceiptView?)locator.ResolveView(receipt);
 
             Console.WriteLine(before is null);
             Console.WriteLine(after?.HeadingLabel.Text);
@@ -111,8 +111,8 @@ public static class GeneratedViewDispatchExamples
         ClosedAccountListViewModel closed = new([]);
         DefaultViewLocator locator = new();
 
-        var currentView = locator.ResolveView(current);
-        var closedView = locator.ResolveView(closed);
+        IViewFor? currentView = locator.ResolveView(current);
+        IViewFor? closedView = locator.ResolveView(closed);
 
         Console.WriteLine(currentView?.GetType().Name);
         Console.WriteLine(closedView?.GetType().Name);
@@ -134,7 +134,7 @@ public static class GeneratedViewDispatchExamples
         AccountListViewModel current = new([CreateAccount(EverydayId, EverydayName)]);
         DefaultViewLocator locator = new();
 
-        var view = locator.ResolveView(current);
+        IViewFor? view = locator.ResolveView(current);
 
         Console.WriteLine(view?.GetType().Name);
         Console.WriteLine(view is DetailedAccountListView);
@@ -147,16 +147,16 @@ public static class GeneratedViewDispatchExamples
     /// <summary>Registers a lookup of your own, in the form the generator registers for each assembly: it answers for the view models and contracts it knows and returns null for the rest.</summary>
     public static void RegisterHandWrittenDispatch()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
         DefaultViewLocator locator = new();
 
-        var before = locator.ResolveView(item, PreviewCardContract);
+        IViewFor? before = locator.ResolveView(item, PreviewCardContract);
 
         DefaultViewLocator.SetGeneratedViewDispatch(static (viewModel, contract) =>
             viewModel is TodoItem && contract == PreviewCardContract ? new TodoItemPreviewView() : null);
 
-        var after = locator.ResolveView(item, PreviewCardContract);
-        var otherContract = locator.ResolveView(item, null);
+        IViewFor? after = locator.ResolveView(item, PreviewCardContract);
+        IViewFor? otherContract = locator.ResolveView(item, null);
 
         Console.WriteLine(before is null);
         Console.WriteLine(after?.GetType().Name);

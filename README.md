@@ -644,15 +644,21 @@ var compact = ViewLocator.GetCurrent().ResolveView(vm, "compact");
 var full = ViewLocator.GetCurrent().ResolveView(vm);
 ```
 
-`ResolveView` looks in three places, in order.
+`ResolveView` looks in these places, in order.
 
 1. The generated lookup. It is a type switch with no reflection.
 2. A mapping you added at run time with `Map<TViewModel, TView>()`.
-3. The service locator, `Splat.AppLocator.Current`.
+3. The service locator, `Splat.AppLocator.Current`. Only the generic `ResolveView<T>` and `ResolveViewUnsafe` ask it.
+
+`ResolveView` with a view model held as an `object` stops after the mappings. Asking the service locator would close
+`IViewFor<>` over the view model's runtime type, which an ahead-of-time build cannot do. So a view registered only as
+`IViewFor<T>` in the service locator is not found there. When it finds nothing, it logs a warning that says so.
+`ResolveViewUnsafe` adds the service locator step, and carries `[RequiresDynamicCode]`. RXUIBIND020 points out a
+registration that only the service locator knows about.
 
 In the generated lookup, a view registered under the requested contract comes before the default view. The default
 view answers only a request with no contract. A request under a contract that no view claims moves on to your
-mappings and the service locator. The view instance comes from the first of these that has one.
+mappings. The view instance comes from the first of these that has one.
 
 1. The service locator.
 2. The cached instance, when the view is marked `[SingleInstanceView]`. The first resolution creates it.
@@ -660,8 +666,7 @@ mappings and the service locator. The view instance comes from the first of thes
 
 The cache is set with `Interlocked.CompareExchange`. So two threads resolving at once share one instance.
 
-Use the generic `ResolveView` overload where you can. The object-typed overload closes `IViewFor<>` over a type
-known only at run time. So it carries `[RequiresDynamicCode]` and is not safe for ahead-of-time publishing.
+Both `ResolveView` overloads are safe for ahead-of-time publishing. `ResolveViewUnsafe` is not.
 
 ## Which mechanism wins
 
@@ -833,6 +838,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND017 | Warning | The binding writes to a WPF, WinForms or MAUI object, but the matching `ReactiveUI.Binding.Wpf`, `.WinForms` or `.Maui` package is not referenced, so writes from another thread are not marshalled onto the object's thread. Reference the platform package. |
 | RXUIBIND018 | Warning | `[ObservableAsProperty]` marks something other than a partial get-only instance property, so nothing is generated. For a field, a method or an observable property, a code fix rewrites it as a partial property (C# 13). |
 | RXUIBIND019 | Warning | A method marked `[ObservableAsProperty]` takes parameters, so it cannot supply a property's values. |
+| RXUIBIND020 | Info | A view is registered as `IViewFor<T>` in the service locator, and this project has no generated view and no `Map` for `T`. `ResolveView` with a view model held as an `object` does not find it. Add it with `Map`, or call `ResolveViewUnsafe`. |
 
 The package's build targets report one error of their own.
 

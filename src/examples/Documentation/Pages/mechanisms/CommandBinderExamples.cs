@@ -120,7 +120,7 @@ public static class CommandBinderExamples
     /// <returns>A task that completes when the added item is stored.</returns>
     public static async Task BindButtonWithRegisteredBinder(TodoListViewModel viewModel, TodoView view)
     {
-        var added = viewModel.WhenChanged(x => x.SelectedItem).Where(static item => item is not null).Take(1).GetAwaiter();
+        IAwaitSignal<TodoItem> added = viewModel.WhenChanged(x => x.SelectedItem).Where(static item => item is not null).Take(1).GetAwaiter();
 
         using (view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton))
         {
@@ -137,7 +137,7 @@ public static class CommandBinderExamples
             Console.WriteLine(viewModel.Items[^1].Title);
         }
 
-        var itemCount = viewModel.Items.Count;
+        int itemCount = viewModel.Items.Count;
 
         viewModel.NewTitle = PlumberTitle;
         ((IButtonController)view.AddButton).SendClicked();
@@ -160,7 +160,7 @@ public static class CommandBinderExamples
     /// <returns>A task that completes when the file is stored.</returns>
     public static async Task BindButtonWithParameterStream(StorageBrowserViewModel browser, StorageBrowserView view, Signal<UploadRequest> uploads)
     {
-        var stored = browser.WhenChanged(x => x.Objects).Where(static objects => objects.Any(static item => item.Key == ScreenshotName)).Take(1).GetAwaiter();
+        IAwaitSignal<IReadOnlyList<StorageObject>> stored = browser.WhenChanged(x => x.Objects).Where(static objects => objects.Any(static item => item.Key == ScreenshotName)).Take(1).GetAwaiter();
 
         using (view.BindCommand(browser, x => x.UploadCommand, v => v.UploadButton, uploads))
         {
@@ -193,7 +193,7 @@ public static class CommandBinderExamples
     {
         browser.CurrentPrefix = PhotoFolder;
 
-        var listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
+        IAwaitSignal<IReadOnlyList<StorageObject>> listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
 
         using (view.BindCommand(browser, x => x.RefreshCommand, v => v.RefreshButton, nameof(Button.Clicked)))
         {
@@ -218,7 +218,7 @@ public static class CommandBinderExamples
     {
         browser.CurrentPrefix = string.Empty;
 
-        var listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
+        IAwaitSignal<IReadOnlyList<StorageObject>> listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
 
         using (binder.BindCommandToObject(browser.RefreshCommand, view.RefreshButton, ImmutableEmptySignal<object>.Instance))
         {
@@ -245,10 +245,10 @@ public static class CommandBinderExamples
         InMemoryObjectStorage storage,
         ClickCommandBinder binder)
     {
-        var button = view.ConnectButton;
+        Button button = view.ConnectButton;
         storage.Disconnect();
 
-        var connected = browser.WhenChanged(x => x.ConnectionStatus).Where(static state => state == ConnectionState.Connected).Take(1).GetAwaiter();
+        IAwaitSignal<ConnectionState> connected = browser.WhenChanged(x => x.ConnectionStatus).Where(static state => state == ConnectionState.Connected).Take(1).GetAwaiter();
 
         using (binder.BindCommandToObject<Button, EventArgs>(
             browser.ConnectCommand,
@@ -278,7 +278,7 @@ public static class CommandBinderExamples
     {
         browser.CurrentPrefix = string.Empty;
 
-        var listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
+        IAwaitSignal<IReadOnlyList<StorageObject>>? listed = browser.WhenChanged(x => x.Objects).Skip(1).Take(1).GetAwaiter();
 
         using (CommandInvoker.Invoke(browser.WhenChanged(x => x.CurrentPrefix), browser.RefreshCommand))
         {
@@ -313,8 +313,11 @@ public static class CommandBinderExamples
         browser.CurrentPrefix = string.Empty;
         await browser.LoadObjectsAsync().ConfigureAwait(false);
 
-        var objectCount = browser.Objects.Count;
-        var stored = browser.WhenChanged(x => x.Objects).Where(static objects => objects.Any(static item => item.Key == ThirdScreenshotName)).Take(1).GetAwaiter();
+        int objectCount = browser.Objects.Count;
+        IAwaitSignal<IReadOnlyList<StorageObject>> stored = browser.WhenChanged(x => x.Objects)
+            .Where(static objects => objects.Any(static item => item.Key == ThirdScreenshotName))
+            .Take(1)
+            .GetAwaiter();
 
         using (CommandInvoker.Invoke(uploads, commands))
         {

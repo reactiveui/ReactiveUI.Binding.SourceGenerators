@@ -48,10 +48,10 @@ public static class MauiExamples
     /// <summary>Builds the application with the MAUI module, which registers the Visibility converters with the resolver; importing them makes them available to bindings.</summary>
     public static void BuildMauiApplication()
     {
-        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var app = builder.WithCoreServices().WithMaui().BuildApp();
+        ReactiveUIBindingBuilder builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        IReactiveUIBindingInstance app = builder.WithCoreServices().WithMaui().BuildApp();
         ViewThreadInvokers.Refresh();
-        var converters = app.Current!.GetServices<IBindingTypeConverter>().ToArray();
+        IBindingTypeConverter[] converters = app.Current!.GetServices<IBindingTypeConverter>().ToArray();
 
         Console.WriteLine(app.Current!.GetServices<IViewThreadInvoker>().OfType<DispatcherViewThreadInvoker>().Any());
         Console.WriteLine(converters.OfType<BooleanToVisibilityTypeConverter>().Any());
@@ -78,7 +78,7 @@ public static class MauiExamples
         using ModernDependencyResolver resolver = new();
         IAppBuilder appBuilder = resolver.CreateReactiveUIBindingBuilder();
 
-        var chained = appBuilder.WithMaui();
+        IReactiveUIBindingBuilder chained = appBuilder.WithMaui();
 
         Console.WriteLine(ReferenceEquals(appBuilder, chained));
 
@@ -94,7 +94,7 @@ public static class MauiExamples
 
         module.Configure(resolver);
 
-        var converters = resolver.GetServices<IBindingTypeConverter>().ToArray();
+        IBindingTypeConverter[] converters = resolver.GetServices<IBindingTypeConverter>().ToArray();
 
         Console.WriteLine(resolver.GetServices<IViewThreadInvoker>().OfType<DispatcherViewThreadInvoker>().Any());
         Console.WriteLine(converters.OfType<BooleanToVisibilityTypeConverter>().Any());
@@ -201,7 +201,7 @@ public static class MauiExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         await viewModel.LoadAsync();
-        using var confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
+        using IDisposable confirmation = viewModel.ConfirmTransfer.RegisterHandler(static context => context.SetOutput(true));
         MauiTransferPage view = new() { ViewModel = viewModel };
         viewModel.Draft.Source = viewModel.Accounts[0];
         viewModel.Draft.Payee = viewModel.Payees[0];
@@ -251,7 +251,7 @@ public static class MauiExamples
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
         await viewModel.LoadAsync();
         MauiTodoPage view = new() { ViewModel = viewModel };
-        var allItems = viewModel.Items.Count;
+        int allItems = viewModel.Items.Count;
         viewModel.SelectedItem = viewModel.Items[0];
 
         using (viewModel.BindTwoWay(view, x => x.FilterText, v => v.FilterEntry.Text))
@@ -345,12 +345,12 @@ public static class MauiExamples
     {
         DispatcherViewThreadInvoker invoker = new();
         StorageBrowserView view = new();
-        var progressBar = view.UploadProgressBar;
+        ProgressBar progressBar = view.UploadProgressBar;
         List<string> log = [];
         object unclaimed = new();
-        var accessFromWorker = false;
+        bool accessFromWorker = false;
 
-        var worker = new Thread(() => accessFromWorker = invoker.CheckAccess(progressBar));
+        Thread worker = new Thread(() => accessFromWorker = invoker.CheckAccess(progressBar));
         worker.Start();
         worker.Join();
         invoker.Post(progressBar, static state => ((List<string>)state!).Add(PostedText), log);
@@ -374,11 +374,11 @@ public static class MauiExamples
     public static void CallInvokerThroughInterface(IViewThreadInvoker invoker)
     {
         StorageBrowserView view = new();
-        var progressBar = view.UploadProgressBar;
+        ProgressBar progressBar = view.UploadProgressBar;
         List<string> log = [];
 
-        var claimed = invoker.Claims(progressBar);
-        var mayWrite = invoker.CheckAccess(progressBar);
+        bool claimed = invoker.Claims(progressBar);
+        bool mayWrite = invoker.CheckAccess(progressBar);
         invoker.Post(progressBar, static state => ((List<string>)state!).Add(PostedText), log);
 
         Console.WriteLine(claimed);
@@ -411,7 +411,7 @@ public static class MauiExamples
     {
         DispatcherViewThreadInvoker invoker = new();
         StorageBrowserView view = new();
-        var rejected = false;
+        bool rejected = false;
 
         try
         {
@@ -469,7 +469,7 @@ public static class MauiExamples
         await viewModel.LoadBucketsAsync();
         viewModel.SelectedBucket = viewModel.Buckets[0];
         UploadRequest photo = new(OffsitePhotoName, OffsitePhotoSize, JpegType);
-        var writtenOnPoolThread = false;
+        bool writtenOnPoolThread = false;
 
         using (view.UploadProgressBar.WhenChanged(x => x.Progress).Subscribe(_ => writtenOnPoolThread |= Thread.CurrentThread.IsThreadPoolThread))
         using (viewModel.BindOneWay(view, x => x.UploadPercent, v => v.UploadProgressBar.Progress, static percent => percent / FullPercent))

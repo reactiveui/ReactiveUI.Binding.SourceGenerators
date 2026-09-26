@@ -25,6 +25,11 @@ namespace ReactiveUI.Binding;
 [DebuggerDisplay("DefaultViewLocator: Mappings = {_mappings.Count}")]
 public sealed class DefaultViewLocator : IViewLocator
 {
+    /// <summary>The warning logged when a view model held as an object has no generated or mapped view.</summary>
+    private const string UnresolvedObjectViewMessage =
+        "Found no generated or mapped view for {0}. A view registered in the service locator as IViewFor<{0}> is only "
+        + "found by ResolveViewUnsafe; add it with Map, or let the generator register it.";
+
     /// <summary>
     /// The source-generated lookups registered by the assemblies that contain views, in registration order.
     /// Signature of each: (viewModelInstance, contract) returns IViewFor or null.
@@ -244,6 +249,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// This asks the source-generated lookups, then the mappings added with <c>Map</c> for the view model's runtime
     /// type. Both are safe in a trimmed or native AOT application. It never asks the service locator: a view
     /// registered there only as <see cref="IViewFor{T}"/> needs <see cref="ResolveViewUnsafe(object?, string?)"/>.
+    /// When neither finds a view, a warning is logged that says so.
     /// </remarks>
     /// <example>
     /// <code>
@@ -261,24 +267,12 @@ public sealed class DefaultViewLocator : IViewLocator
             return null;
         }
 
-        var normalizedContract = contract ?? string.Empty;
-
-        // 1. Source-generated dispatch (AOT-safe type-switch)
-        var result = TryResolveFromGeneratedDispatches(viewModel, normalizedContract);
-        if (result is not null)
-        {
-            SetViewModelOnView(result, viewModel);
-            return result;
-        }
-
-        // 2. Explicit runtime mappings (AOT-safe)
-        var view = TryResolveFromMappings(viewModel.GetType(), normalizedContract);
+        var view = ResolveGeneratedOrMapped(viewModel, contract ?? string.Empty);
         if (view is null)
         {
-            return null;
+            this.Log().Warn(CultureInfo.InvariantCulture, UnresolvedObjectViewMessage, viewModel.GetType().Name);
         }
 
-        SetViewModelOnView(view, viewModel);
         return view;
     }
 
@@ -300,10 +294,16 @@ public sealed class DefaultViewLocator : IViewLocator
     /// </code>
     /// </example>
     [RequiresDynamicCode(ViewLocatorMixins.ResolveViewUnsafeMessage)]
-    public IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) =>
-        viewModel is null
-            ? null
-            : ResolveView(viewModel, contract) ?? TryResolveViaReflection(viewModel, contract ?? string.Empty);
+    public IViewFor? ResolveViewUnsafe(object? viewModel, string? contract)
+    {
+        if (viewModel is null)
+        {
+            return null;
+        }
+
+        var normalizedContract = contract ?? string.Empty;
+        return ResolveGeneratedOrMapped(viewModel, normalizedContract) ?? TryResolveViaReflection(viewModel, normalizedContract);
+    }
 
     /// <summary>Creates a new <see cref="ViewMappingBuilder"/> for fluent registration of view-to-view-model mappings.</summary>
     /// <returns>A new <see cref="ViewMappingBuilder"/> targeting this locator instance.</returns>
@@ -369,6 +369,21 @@ public sealed class DefaultViewLocator : IViewLocator
         }
 
         return null;
+    }
+
+    /// <summary>Resolves a view from the generated lookups, then the explicit mappings, and sets its view model.</summary>
+    /// <param name="viewModel">The view model instance.</param>
+    /// <param name="contract">The normalized contract string.</param>
+    /// <returns>The view, or <see langword="null"/> when neither tier has one.</returns>
+    private IViewFor? ResolveGeneratedOrMapped(object viewModel, string contract)
+    {
+        var view = TryResolveFromGeneratedDispatches(viewModel, contract) ?? TryResolveFromMappings(viewModel.GetType(), contract);
+        if (view is not null)
+        {
+            SetViewModelOnView(view, viewModel);
+        }
+
+        return view;
     }
 
     /// <summary>Tries to resolve a view from the explicit runtime mappings dictionary.</summary>

@@ -73,7 +73,7 @@ public static class EventNotificationExamples
             handler => connection.StateChanged -= handler,
             () => connection.State == ConnectionState.Connected,
             true);
-        var observer = Witness.Create<bool>(Console.WriteLine);
+        IObserver<bool> observer = Witness.Create<bool>(Console.WriteLine);
 
         using (isOpen.Subscribe(observer))
         {

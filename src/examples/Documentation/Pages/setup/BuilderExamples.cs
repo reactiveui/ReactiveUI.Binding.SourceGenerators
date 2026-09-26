@@ -17,7 +17,7 @@ public static class BuilderExamples
     /// <summary>Creates a builder over the application-wide Splat locator.</summary>
     public static void CreateBuilder()
     {
-        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
         Console.WriteLine(builder.ConverterService.TypedConverters.TryGetConverter(typeof(int), typeof(string)) is null);
 
@@ -29,7 +29,7 @@ public static class BuilderExamples
     public static void CreateBuilderForResolver()
     {
         using ModernDependencyResolver resolver = new();
-        var fromResolver = resolver.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder fromResolver = resolver.CreateReactiveUIBindingBuilder();
 
         Console.WriteLine(ReferenceEquals(resolver, fromResolver.CurrentMutable));
 
@@ -84,19 +84,19 @@ public static class BuilderExamples
     public static void BuildWithBuilderMembers()
     {
         using ModernDependencyResolver resolver = new();
-        var builder = resolver.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder builder = resolver.CreateReactiveUIBindingBuilder();
         TodoItemObservableForProperty provider = new();
         ButtonCommandBinder binder = new();
 
-        var core = ((IReactiveUIBindingBuilder)builder).WithCoreServices();
-        var module = builder.WithPlatformModule(new TodoModule());
+        IReactiveUIBindingBuilder core = ((IReactiveUIBindingBuilder)builder).WithCoreServices();
+        IReactiveUIBindingBuilder module = builder.WithPlatformModule(new TodoModule());
         _ = builder.WithFallbackConverter(new EnumNameFallbackConverter());
         _ = builder.WithSetMethodConverter(new TagListSetMethodConverter());
         _ = builder.WithCommandBinder(binder);
         _ = builder.WithRegistration(registry => registry.RegisterLazySingleton<ICreatesObservableForProperty>(() => provider));
         _ = builder.ConfigureViewLocator(static mappings => mappings.Map<TodoListViewModel, TodoView>());
 
-        var app = builder.BuildApp();
+        IReactiveUIBindingInstance app = builder.BuildApp();
 
         TodoListViewModel viewModel = new(InMemoryTodoStore.CreateSeeded());
 
@@ -140,7 +140,7 @@ public static class BuilderExamples
         using ModernDependencyResolver resolver = new();
         IAppBuilder appBuilder = resolver.CreateReactiveUIBindingBuilder();
 
-        var app = appBuilder.BuildApp();
+        IReactiveUIBindingInstance app = appBuilder.BuildApp();
 
         Console.WriteLine(app.Current is not null);
 

@@ -49,6 +49,18 @@ internal static class CodeFixRunner
         return await DiagnosticsAsync(document).ConfigureAwait(false);
     }
 
+    /// <summary>Returns the diagnostics another analyzer reports for a source.</summary>
+    /// <param name="source">The consumer source.</param>
+    /// <param name="languageVersion">The consumer's language version.</param>
+    /// <param name="analyzer">The analyzer to run.</param>
+    /// <param name="runtime">The runtime package the project references.</param>
+    /// <returns>The diagnostics, in source order.</returns>
+    internal static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, LanguageVersion languageVersion, DiagnosticAnalyzer analyzer, Runtime runtime = Runtime.Lean)
+    {
+        var document = CreateDocument(source, languageVersion, runtime);
+        return await DiagnosticsAsync(document, analyzer).ConfigureAwait(false);
+    }
+
     /// <summary>Applies the code fix offered for the first fixable diagnostic.</summary>
     /// <param name="source">The consumer source.</param>
     /// <param name="languageVersion">The consumer's language version.</param>
@@ -124,13 +136,15 @@ internal static class CodeFixRunner
         return solution.AddDocument(documentId, DocumentName, source).GetDocument(documentId)!;
     }
 
-    /// <summary>Runs the analyzer over a document's project.</summary>
+    /// <summary>Runs an analyzer over a document's project.</summary>
     /// <param name="document">The document.</param>
+    /// <param name="analyzer">The analyzer, or null for the <c>[ObservableAsProperty]</c> one.</param>
     /// <returns>The analyzer's diagnostics, in source order.</returns>
-    private static async Task<ImmutableArray<Diagnostic>> DiagnosticsAsync(Document document)
+    private static async Task<ImmutableArray<Diagnostic>> DiagnosticsAsync(Document document, DiagnosticAnalyzer? analyzer = null)
     {
         var compilation = (await document.Project.GetCompilationAsync().ConfigureAwait(false))!;
-        var diagnostics = await compilation.WithAnalyzers([new analyzer::ReactiveUI.Binding.Analyzer.Analyzers.ObservableAsPropertyAnalyzer()]).GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
+        analyzer ??= new analyzer::ReactiveUI.Binding.Analyzer.Analyzers.ObservableAsPropertyAnalyzer();
+        var diagnostics = await compilation.WithAnalyzers([analyzer]).GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
         return [.. diagnostics.OrderBy(static d => d.Location.SourceSpan.Start)];
     }
 

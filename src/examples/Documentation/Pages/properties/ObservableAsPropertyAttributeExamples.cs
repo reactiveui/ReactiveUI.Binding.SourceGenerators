@@ -13,8 +13,8 @@ public static class ObservableAsPropertyAttributeExamples
     /// <summary>Constructs <see cref="SummaryViewModel"/> and reads both of its generated properties.</summary>
     public static void DeclareAPropertyWithTheAttribute()
     {
-        var item = new TodoItem { Title = "Renew car registration" };
-        var summary = new SummaryViewModel(item);
+        TodoItem item = new TodoItem { Title = "Renew car registration" };
+        SummaryViewModel summary = new SummaryViewModel(item);
 
         Console.WriteLine(summary.Title);
         Console.WriteLine(summary.IsDone);
@@ -27,8 +27,8 @@ public static class ObservableAsPropertyAttributeExamples
     /// <summary>Reads a property before and after its helper is assigned: until then it returns its initial value.</summary>
     public static void StartFromAnInitialValue()
     {
-        var waiting = new StatusViewModel(null);
-        var ready = new StatusViewModel(Signal.Return("Ready"));
+        StatusViewModel waiting = new StatusViewModel(null);
+        StatusViewModel ready = new StatusViewModel(Signal.Return("Ready"));
 
         Console.WriteLine(waiting.Status);
         Console.WriteLine(ready.Status);

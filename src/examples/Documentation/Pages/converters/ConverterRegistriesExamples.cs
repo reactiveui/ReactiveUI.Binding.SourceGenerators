@@ -17,7 +17,7 @@ public static class ConverterRegistriesExamples
         IReactiveUIBindingBuilder builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         _ = builder.WithCoreServices().BuildApp();
 
-        var converter = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(int), typeof(string));
+        IBindingTypeConverter? converter = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(int), typeof(string));
 
         Console.WriteLine(BindingConverters.Current.TypedConverters.GetAllConverters().Any());
         Console.WriteLine(converter!.GetType().Name);
@@ -31,7 +31,7 @@ public static class ConverterRegistriesExamples
     /// <summary>Looks up the built-in converter of several type pairs in the shared converter service.</summary>
     public static void ResolveBuiltInConverters()
     {
-        var registry = BindingConverters.Current.TypedConverters;
+        BindingTypeConverterRegistry registry = BindingConverters.Current.TypedConverters;
 
         Console.WriteLine(registry.TryGetConverter(typeof(bool), typeof(string))!.GetType().Name);
         Console.WriteLine(registry.TryGetConverter(typeof(string), typeof(Guid))!.GetType().Name);

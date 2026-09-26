@@ -104,7 +104,7 @@ public sealed class InMemoryObjectStorage : IObjectStorage
         await EnterAsync().ConfigureAwait(false);
 
         List<StorageObject> matches = [];
-        foreach (var stored in ObjectsOf(bucket))
+        foreach (StorageObject stored in ObjectsOf(bucket))
         {
             if (stored.Key.StartsWith(prefix, StringComparison.Ordinal))
             {
@@ -152,7 +152,7 @@ public sealed class InMemoryObjectStorage : IObjectStorage
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var stored = ObjectsOf(bucket);
+        List<StorageObject> stored = ObjectsOf(bucket);
         long sent = 0;
         while (sent < sizeBytes)
         {

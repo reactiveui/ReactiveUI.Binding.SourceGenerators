@@ -32,7 +32,7 @@ public static class BindingConverterOverloadsExamples
         TodoItem item = new() { Title = CarRegistrationTitle, Priority = TodoPriority.High };
         Label badge = new();
 
-        using var binding = item.BindOneWay(badge, x => x.Priority, x => x.Text, new TodoPriorityToColorConverter());
+        using IDisposable binding = item.BindOneWay(badge, x => x.Priority, x => x.Text, new TodoPriorityToColorConverter());
         Console.WriteLine(badge.Text);
 
         item.Priority = TodoPriority.Low;
@@ -49,7 +49,7 @@ public static class BindingConverterOverloadsExamples
         TodoItem item = new() { Title = CarRegistrationTitle, Priority = TodoPriority.High };
         CheckBox highPriorityBox = new();
 
-        using var binding = item.BindOneWay(highPriorityBox, x => x.Priority, x => x.IsChecked, new PriorityMatchesHintConverter(), TodoPriority.High);
+        using IDisposable binding = item.BindOneWay(highPriorityBox, x => x.Priority, x => x.IsChecked, new PriorityMatchesHintConverter(), TodoPriority.High);
         Console.WriteLine(highPriorityBox.IsChecked);
 
         item.Priority = TodoPriority.Low;
@@ -64,11 +64,11 @@ public static class BindingConverterOverloadsExamples
     /// <returns>A task that completes when the example has run.</returns>
     public static async Task BindTwoWayWithConverters()
     {
-        var store = InMemoryTodoStore.CreateSeeded();
-        var item = (await store.GetAsync(DentistTaskId))!;
+        InMemoryTodoStore store = InMemoryTodoStore.CreateSeeded();
+        TodoItem item = (await store.GetAsync(DentistTaskId))!;
         Entry dueDateBox = new();
 
-        using var binding = item.BindTwoWay(
+        using IDisposable binding = item.BindTwoWay(
             dueDateBox,
             x => x.DueDate,
             x => x.Text,
@@ -92,7 +92,7 @@ public static class BindingConverterOverloadsExamples
         AccountsViewModel viewModel = new(new InMemoryBankingBackend());
         view.ViewModel = viewModel;
 
-        using var binding = view.OneWayBind(viewModel, x => x.TotalBalance, v => v.TotalBalanceLabel.Text, new DecimalToStringTypeConverter());
+        using IReactiveBinding<AccountsView, string> binding = view.OneWayBind(viewModel, x => x.TotalBalance, v => v.TotalBalanceLabel.Text, new DecimalToStringTypeConverter());
         await viewModel.LoadAccountsAsync();
 
         Console.WriteLine(view.TotalBalanceLabel.Text);
@@ -108,7 +108,7 @@ public static class BindingConverterOverloadsExamples
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         view.ViewModel = viewModel;
 
-        using var binding = view.Bind(
+        using IReactiveBinding<TransferView, BindingChange> binding = view.Bind(
             viewModel,
             x => x.Draft.Amount,
             v => v.AmountTextBox.Text,

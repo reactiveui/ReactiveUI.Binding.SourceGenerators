@@ -31,14 +31,14 @@ public static class BindingSchedulersExamples
     {
         TextBlock titleLabel = new();
         TodoItem item = new() { Title = OriginalTitle };
-        var sequencer = AvaloniaScheduler.Instance;
+        AvaloniaScheduler sequencer = AvaloniaScheduler.Instance;
         BindingSchedulers.MainThread = sequencer;
 
         try
         {
             using (item.BindOneWay(titleLabel, x => x.Title, x => x.Text))
             {
-                var worker = new Thread(() => item.Title = SyncedTitle);
+                Thread worker = new Thread(() => item.Title = SyncedTitle);
                 worker.Start();
                 worker.Join();
 
@@ -97,7 +97,7 @@ public static class BindingSchedulersExamples
         {
             using (item.BindOneWay(titleLabel, x => x.Title, x => x.Text))
             {
-                var worker = new Thread(() => item.Title = SyncedTitle);
+                Thread worker = new Thread(() => item.Title = SyncedTitle);
                 worker.Start();
                 worker.Join();
 
@@ -126,7 +126,7 @@ public static class BindingSchedulersExamples
 
             using (item.BindOneWay(titleLabel, x => x.Title, x => x.Text))
             {
-                var worker = new Thread(() => item.Title = SyncedTitle);
+                Thread worker = new Thread(() => item.Title = SyncedTitle);
                 worker.Start();
                 worker.Join();
 
@@ -158,11 +158,11 @@ public static class BindingSchedulersExamples
         TodoItem item = new() { Title = OriginalTitle };
         List<string> delivered = [];
 
-        var routed = BindingSchedulers.ObserveOnViewThread(item.WhenChanged(x => x.Title), titleLabel);
+        IObservable<string> routed = BindingSchedulers.ObserveOnViewThread(item.WhenChanged(x => x.Title), titleLabel);
 
         using (routed.Subscribe(delivered.Add))
         {
-            var worker = new Thread(() => item.Title = SyncedTitle);
+            Thread worker = new Thread(() => item.Title = SyncedTitle);
             worker.Start();
             worker.Join();
 
@@ -186,11 +186,11 @@ public static class BindingSchedulersExamples
         AvaloniaViewThreadInvoker fallback = new();
         List<string> delivered = [];
 
-        var routed = BindingSchedulers.ObserveOnViewThread(item.WhenChanged(x => x.Title), titleLabel, fallback);
+        IObservable<string> routed = BindingSchedulers.ObserveOnViewThread(item.WhenChanged(x => x.Title), titleLabel, fallback);
 
         using (routed.Subscribe(delivered.Add))
         {
-            var worker = new Thread(() => item.Title = SyncedTitle);
+            Thread worker = new Thread(() => item.Title = SyncedTitle);
             worker.Start();
             worker.Join();
 
@@ -210,10 +210,10 @@ public static class BindingSchedulersExamples
     public static void ObserveOnSequencer()
     {
         TodoItem item = new() { Title = OriginalTitle };
-        var sequencer = AvaloniaScheduler.Instance;
+        AvaloniaScheduler sequencer = AvaloniaScheduler.Instance;
         List<string> delivered = [];
 
-        var routed = BindingSchedulers.ObserveOnSequencer(item.WhenChanged(x => x.Title), sequencer);
+        IObservable<string> routed = BindingSchedulers.ObserveOnSequencer(item.WhenChanged(x => x.Title), sequencer);
 
         using (routed.Subscribe(delivered.Add))
         {

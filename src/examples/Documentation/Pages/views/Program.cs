@@ -34,6 +34,10 @@ ViewLocatorExamples.ResolveObjectThroughInterface();
 
 ViewLocatorExamples.ResolveMissingView();
 
+ViewLocatorExamples.ResolveServiceLocatorViewFromObject();
+
+ViewLocatorExamples.MapServiceLocatorViewForObjects();
+
 ViewLocatorExamples.ResolveNullViewModel();
 
 ViewLocatorExamples.ExplainScreenThatFailsToBuild();

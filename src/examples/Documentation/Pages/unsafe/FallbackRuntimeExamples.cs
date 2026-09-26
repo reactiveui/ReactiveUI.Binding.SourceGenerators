@@ -62,7 +62,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayBetweenProperties()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
 
         using (RuntimeBindingFallback.BindOneWay(viewModel, view, x => x.FilterText, v => v.FilterTextBox.Text, null, FilterExpression))
@@ -80,7 +80,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         VirtualClock sequencer = new();
 
@@ -104,7 +104,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayWithConversion()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
 
         using (RuntimeBindingFallback.BindOneWay(
@@ -127,7 +127,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindTwoWayBetweenProperties()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
 
         using (RuntimeBindingFallback.BindTwoWay(viewModel, view, x => x.FilterText, v => v.FilterTextBox.Text, null, FilterExpression))
@@ -167,7 +167,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindToView()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
 
         using (RuntimeBindingFallback.OneWayBind(view, viewModel, x => x.FilterText, v => v.FilterTextBox.Text, null, FilterExpression))
@@ -185,7 +185,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindToViewWithConversion()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
 
         using (RuntimeBindingFallback.OneWayBind(
@@ -208,7 +208,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindViewAndViewModel()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
 
         using (RuntimeBindingFallback.Bind(view, viewModel, x => x.FilterText, v => v.FilterTextBox.Text, null, FilterExpression))
@@ -243,7 +243,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindViewAndViewModelOnSignal()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Signal<EventArgs> commit = new();
 
@@ -290,9 +290,9 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindStreamToProperty()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
-        var selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
+        IObservable<TodoItem?> selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
 
         using (RuntimeBindingFallback.BindTo(selected, view, v => v.SelectedTitleTextBox.Text, null, null, null, SelectedTitleExpression))
         {
@@ -309,9 +309,9 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindStreamToPropertyWithHintAndConverter()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
-        var selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
+        IObservable<TodoItem?> selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
 
         using (RuntimeBindingFallback.BindTo(
             selected,
@@ -335,8 +335,8 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindStreamToNullTarget()
     {
-        var viewModel = await LoadTodoAsync();
-        var selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
+        TodoListViewModel viewModel = await LoadTodoAsync();
+        IObservable<TodoItem?> selected = RuntimeObservationFallback.WhenChanged(viewModel, x => x.SelectedItem);
         TodoView? missing = default;
 
         using (RuntimeBindingFallback.BindTo(selected, missing, v => v.SelectedTitleTextBox.Text, null, null, null, SelectedTitleExpression))
@@ -353,9 +353,9 @@ public static class FallbackRuntimeExamples
     /// <summary>Converts a value with the converter registered for the two types.</summary>
     public static void ConvertWithRegisteredConverter()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
-        var converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, null, null, out var text);
+        bool converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, null, null, out var text);
 
         Console.WriteLine(converted);
         Console.WriteLine(text);
@@ -368,9 +368,9 @@ public static class FallbackRuntimeExamples
     /// <summary>Converts a value with a conversion hint that the converter reads.</summary>
     public static void ConvertWithConversionHint()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
-        var converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, TodoItemTitleConverter.UpperCaseHint, null, out var text);
+        bool converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, TodoItemTitleConverter.UpperCaseHint, null, out var text);
 
         Console.WriteLine(converted);
         Console.WriteLine(text);
@@ -383,9 +383,9 @@ public static class FallbackRuntimeExamples
     /// <summary>Converts a value with a converter you name, which takes precedence over the registered ones.</summary>
     public static void ConvertWithConverterOverride()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
-        var converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, TodoItemTitleConverter.UpperCaseHint, new TodoItemTitleConverter(), out var text);
+        bool converted = RuntimeBindingConverter.TryConvert<TodoItem, string>(item, TodoItemTitleConverter.UpperCaseHint, new TodoItemTitleConverter(), out var text);
 
         Console.WriteLine(converted);
         Console.WriteLine(text);
@@ -398,9 +398,9 @@ public static class FallbackRuntimeExamples
     /// <summary>Reports failure when no converter is registered for the two types.</summary>
     public static void ConvertWithoutConverterFails()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
 
-        var converted = RuntimeBindingConverter.TryConvert<TodoItem, int>(item, null, null, out var number);
+        bool converted = RuntimeBindingConverter.TryConvert<TodoItem, int>(item, null, null, out var number);
 
         Console.WriteLine(converted);
         Console.WriteLine(number);
@@ -416,7 +416,7 @@ public static class FallbackRuntimeExamples
         object status = DraftStatus;
 
         // Nothing converts object to string, but the value is a string, so it passes through as it is.
-        var converted = RuntimeBindingConverter.TryConvert<object, string>(status, null, null, out var text);
+        bool converted = RuntimeBindingConverter.TryConvert<object, string>(status, null, null, out var text);
 
         Console.WriteLine(converted);
         Console.WriteLine(text);
@@ -429,7 +429,7 @@ public static class FallbackRuntimeExamples
     /// <summary>Pairs a forward and a reverse conversion with <see cref="TwoWayConverters.Create"/>, which infers both types.</summary>
     public static void CreateConverterPairWithFactory()
     {
-        var pair = TwoWayConverters.Create<decimal, string>(
+        TwoWayConverterPair<decimal, string> pair = TwoWayConverters.Create<decimal, string>(
             static amount => amount.ToString("F2", CultureInfo.InvariantCulture),
             static text => decimal.Parse(text, CultureInfo.InvariantCulture));
 
@@ -448,7 +448,7 @@ public static class FallbackRuntimeExamples
         Func<string, decimal> reverse = static text => decimal.Parse(text, CultureInfo.InvariantCulture);
         TwoWayConverterPair<decimal, string> pair = new(forward, reverse);
         TwoWayConverterPair<decimal, string> same = new(forward, reverse);
-        var swapped = pair with { Forward = static amount => amount.ToString("F0", CultureInfo.InvariantCulture) };
+        TwoWayConverterPair<decimal, string> swapped = pair with { Forward = static amount => amount.ToString("F0", CultureInfo.InvariantCulture) };
 
         Console.WriteLine(pair.Equals(same));
         Console.WriteLine(pair.Equals(swapped));
@@ -464,7 +464,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task BindCommandToButton()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         TaskCompletionSource itemAdded = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -493,7 +493,7 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task BindCommandToButtonEvent()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         TaskCompletionSource itemAdded = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -537,8 +537,8 @@ public static class FallbackRuntimeExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task InvokeCommandForStream()
     {
-        var viewModel = await LoadTodoAsync();
-        var selected = RuntimeObservationFallback.WhenAnyValue(viewModel, x => x.SelectedItem);
+        TodoListViewModel viewModel = await LoadTodoAsync();
+        IObservable<TodoItem?> selected = RuntimeObservationFallback.WhenAnyValue(viewModel, x => x.SelectedItem);
         TaskCompletionSource completed = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         viewModel.PropertyChanged += (_, e) =>
@@ -577,7 +577,7 @@ public static class FallbackRuntimeExamples
             }),
             "x => x.ConfirmTransfer"))
         {
-            var confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
+            bool confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
 
             Console.WriteLine(confirmed);
         }

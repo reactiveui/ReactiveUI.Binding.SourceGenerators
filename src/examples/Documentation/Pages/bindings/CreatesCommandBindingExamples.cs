@@ -23,7 +23,7 @@ public static class CreatesCommandBindingExamples
     /// <summary>Asks a binder how well it fits two controls: the score is positive for a button and zero for an entry box.</summary>
     public static void AskBinderForAffinity()
     {
-        var binder = ChooseBinder();
+        ICreatesCommandBinding binder = ChooseBinder();
 
         Console.WriteLine(binder.GetAffinityForObject<Button>(hasEventTarget: false));
         Console.WriteLine(binder.GetAffinityForObject<Entry>(hasEventTarget: false));
@@ -38,7 +38,7 @@ public static class CreatesCommandBindingExamples
     {
         StatementExportViewModel viewModel = new() { HasStatement = true };
         StatementExportView view = new();
-        var binder = ChooseBinder();
+        ICreatesCommandBinding binder = ChooseBinder();
 
         using (binder.BindCommandToObject(viewModel.ExportCommand, view.ExportButton, Signal.Never<object?>()))
         {
@@ -61,10 +61,10 @@ public static class CreatesCommandBindingExamples
     {
         StatementExportViewModel viewModel = new() { HasStatement = true };
         StatementExportView view = new();
-        var binder = ChooseBinder();
+        ICreatesCommandBinding binder = ChooseBinder();
 
-        using var clicked = binder.BindCommandToObject<Button, EventArgs>(viewModel.ExportCommand, view.ExportButton, Signal.Never<object?>(), ClickedEventName);
-        var pressed = binder.BindCommandToObject<Button, EventArgs>(viewModel.ExportCommand, view.ExportButton, Signal.Never<object?>(), PressedEventName);
+        using IDisposable? clicked = binder.BindCommandToObject<Button, EventArgs>(viewModel.ExportCommand, view.ExportButton, Signal.Never<object?>(), ClickedEventName);
+        IDisposable? pressed = binder.BindCommandToObject<Button, EventArgs>(viewModel.ExportCommand, view.ExportButton, Signal.Never<object?>(), PressedEventName);
 
         ((IButtonController)view.ExportButton).SendClicked();
 
@@ -82,9 +82,9 @@ public static class CreatesCommandBindingExamples
     public static void BindSearchToTextChangedEvent()
     {
         TodoView view = new();
-        var binder = ChooseBinder();
+        ICreatesCommandBinding binder = ChooseBinder();
         Command search = new(static () => Console.WriteLine("search"));
-        var entry = view.FilterTextBox;
+        Entry entry = view.FilterTextBox;
 
         using (binder.BindCommandToObject<Entry, TextChangedEventArgs>(
             search,

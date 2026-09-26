@@ -34,15 +34,15 @@ public static class BindInteractionExamples
     /// <returns>A task that completes when the issue is closed.</returns>
     public static async Task ConfirmCloseWithTaskHandler()
     {
-        var viewModel = await OpenWebshopIssuesAsync();
+        IssueBoardViewModel viewModel = await OpenWebshopIssuesAsync();
         IssueBoardView view = new() { ViewModel = viewModel };
         TaskCompletionSource<bool> dialog = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        using var binding = view.BindInteraction(viewModel, x => x.ConfirmClose, async context => context.SetOutput(await dialog.Task));
+        using IDisposable binding = view.BindInteraction(viewModel, x => x.ConfirmClose, async context => context.SetOutput(await dialog.Task));
 
-        var issue = viewModel.Issues[0];
+        Issue issue = viewModel.Issues[0];
         viewModel.SelectedIssue = issue;
-        var closing = viewModel.CloseIssueAsync();
+        Task closing = viewModel.CloseIssueAsync();
 
         Console.WriteLine(closing.IsCompleted);
         Console.WriteLine(issue.State);
@@ -68,9 +68,9 @@ public static class BindInteractionExamples
         await viewModel.OpenCourseAsync();
         viewModel.SelectedStudent = viewModel.Roster[BenRosterIndex];
         GradebookView view = new() { ViewModel = viewModel };
-        var teacherConfirms = false;
+        bool teacherConfirms = false;
 
-        using var binding = view.BindInteraction(viewModel, x => x.ConfirmDrop, context =>
+        using IDisposable binding = view.BindInteraction(viewModel, x => x.ConfirmDrop, context =>
         {
             context.SetOutput(teacherConfirms);
             return Signal.Return(context.Input.Student.Id);
@@ -94,17 +94,17 @@ public static class BindInteractionExamples
     /// <returns>A task that completes when the issue is closed.</returns>
     public static async Task ConfirmCloseThroughInterfaceProperty()
     {
-        var board = await OpenWebshopIssuesAsync();
+        IssueBoardViewModel board = await OpenWebshopIssuesAsync();
         IssueTriageViewModel viewModel = new(board);
         IssueTriageView view = new() { ViewModel = viewModel };
 
-        using var binding = view.BindInteraction(viewModel, x => x.ConfirmClose, static context =>
+        using IDisposable binding = view.BindInteraction(viewModel, x => x.ConfirmClose, static context =>
         {
             context.SetOutput(context.Input.State == IssueState.Open);
             return Task.CompletedTask;
         });
 
-        var issue = board.Issues[0];
+        Issue issue = board.Issues[0];
         board.SelectedIssue = issue;
         await board.CloseIssueAsync();
 
@@ -120,14 +120,14 @@ public static class BindInteractionExamples
     {
         var (viewModel, view) = await OpenTransferScreenAsync();
 
-        using var confirmation = view.BindInteraction(viewModel, x => x.ConfirmTransfer, static context =>
+        using IDisposable confirmation = view.BindInteraction(viewModel, x => x.ConfirmTransfer, static context =>
         {
             Console.WriteLine("confirm");
             context.SetOutput(true);
             return Task.CompletedTask;
         });
 
-        using var approval = view.BindInteraction(viewModel, x => x.ApproveTransfer, static context =>
+        using IDisposable approval = view.BindInteraction(viewModel, x => x.ApproveTransfer, static context =>
         {
             Console.WriteLine("approve");
             context.SetOutput(InMemoryBankingBackend.ApprovalCode);
@@ -151,13 +151,13 @@ public static class BindInteractionExamples
     {
         var (viewModel, view) = await OpenTransferScreenAsync();
 
-        using var confirmation = view.BindInteraction(viewModel, x => x.ConfirmTransfer, static context =>
+        using IDisposable confirmation = view.BindInteraction(viewModel, x => x.ConfirmTransfer, static context =>
         {
             context.SetOutput(true);
             return Task.CompletedTask;
         });
 
-        using var approval = view.BindInteraction(viewModel, x => x.ApproveTransfer, static context =>
+        using IDisposable approval = view.BindInteraction(viewModel, x => x.ApproveTransfer, static context =>
         {
             context.SetOutput(string.Empty);
             return Task.CompletedTask;
@@ -180,9 +180,9 @@ public static class BindInteractionExamples
     {
         Interaction<TransferDraft, string> approval = new();
         TransferDraft draft = new();
-        using var first = approval.RegisterHandler(static context => context.SetOutput(FirstAnswer));
-        using var ignoring = approval.RegisterHandler(static context => Signal.Return(context.IsHandled));
-        var latest = approval.RegisterHandler(static context =>
+        using IDisposable first = approval.RegisterHandler(static context => context.SetOutput(FirstAnswer));
+        using IDisposable ignoring = approval.RegisterHandler(static context => Signal.Return(context.IsHandled));
+        IDisposable latest = approval.RegisterHandler(static context =>
         {
             context.SetOutput(LatestAnswer);
             return Task.CompletedTask;
@@ -206,20 +206,20 @@ public static class BindInteractionExamples
         Interaction<Issue, bool> confirmClose = new();
         Issue issue = new() { Number = CheckoutIssueNumber };
         Issue? receivedInput = null;
-        var handledBefore = true;
-        var handledAfter = false;
-        var isInteractionContext = false;
-        var earlyReadRefused = false;
-        var readBack = false;
-        var secondAnswerRefused = false;
+        bool handledBefore = true;
+        bool handledAfter = false;
+        bool isInteractionContext = false;
+        bool earlyReadRefused = false;
+        bool readBack = false;
+        bool secondAnswerRefused = false;
 
-        using var registration = confirmClose.RegisterHandler(context =>
+        using IDisposable registration = confirmClose.RegisterHandler(context =>
         {
             receivedInput = context.Input;
             handledBefore = context.IsHandled;
             isInteractionContext = context is InteractionContext<Issue, bool>;
 
-            var output = (IOutputContext<Issue, bool>)context;
+            IOutputContext<Issue, bool> output = (IOutputContext<Issue, bool>)context;
             earlyReadRefused = RefusesWithInvalidOperation(() => output.GetOutput());
 
             context.SetOutput(true);
@@ -228,7 +228,7 @@ public static class BindInteractionExamples
             secondAnswerRefused = RefusesWithInvalidOperation(() => context.SetOutput(false));
         });
 
-        var answer = await confirmClose.Handle(issue);
+        bool answer = await confirmClose.Handle(issue);
 
         Console.WriteLine(ReferenceEquals(issue, receivedInput));
         Console.WriteLine(handledBefore);
@@ -257,9 +257,9 @@ public static class BindInteractionExamples
         Interaction<Issue, bool> confirmClose = new();
         Issue issue = new() { Number = CheckoutIssueNumber };
 
-        using var registration = confirmClose.RegisterHandler(static context =>
+        using IDisposable registration = confirmClose.RegisterHandler(static context =>
         {
-            var answer = (InteractionContext<Issue, bool>)context;
+            InteractionContext<Issue, bool> answer = (InteractionContext<Issue, bool>)context;
 
             Console.WriteLine(answer.Input.Number);
             Console.WriteLine(answer.IsHandled);
@@ -284,8 +284,8 @@ public static class BindInteractionExamples
     /// <returns>A task that completes when the failure has been read.</returns>
     public static async Task CloseIssueWithoutHandler()
     {
-        var viewModel = await OpenWebshopIssuesAsync();
-        var issue = viewModel.Issues[0];
+        IssueBoardViewModel viewModel = await OpenWebshopIssuesAsync();
+        Issue issue = viewModel.Issues[0];
         viewModel.SelectedIssue = issue;
         UnhandledInteractionException<Issue, bool>? failure = null;
 
@@ -320,10 +320,10 @@ public static class BindInteractionExamples
     public static async Task AuditApprovalWithDerivedInteraction()
     {
         AuditedInteraction<decimal, string> approval = new();
-        using var issuer = approval.RegisterHandler(static context => context.SetOutput(InMemoryBankingBackend.ApprovalCode));
-        using var observer = approval.RegisterHandler(static context => Signal.Return(context.IsHandled));
+        using IDisposable issuer = approval.RegisterHandler(static context => context.SetOutput(InMemoryBankingBackend.ApprovalCode));
+        using IDisposable observer = approval.RegisterHandler(static context => Signal.Return(context.IsHandled));
 
-        var code = await approval.Handle(LargeTransferAmount);
+        string code = await approval.Handle(LargeTransferAmount);
 
         Console.WriteLine(code);
 
@@ -337,10 +337,10 @@ public static class BindInteractionExamples
     /// <returns>A task that completes when the second question has failed.</returns>
     public static async Task DisposeBindingRemovesHandler()
     {
-        var viewModel = await OpenWebshopIssuesAsync();
+        IssueBoardViewModel viewModel = await OpenWebshopIssuesAsync();
         IssueBoardView view = new() { ViewModel = viewModel };
-        var issue = viewModel.Issues[0];
-        var binding = view.BindInteraction(viewModel, x => x.ConfirmClose, static context =>
+        Issue issue = viewModel.Issues[0];
+        IDisposable binding = view.BindInteraction(viewModel, x => x.ConfirmClose, static context =>
         {
             context.SetOutput(false);
             return Task.CompletedTask;
@@ -350,7 +350,7 @@ public static class BindInteractionExamples
 
         binding.Dispose();
 
-        var unanswered = false;
+        bool unanswered = false;
         try
         {
             _ = await viewModel.ConfirmClose.Handle(issue);
@@ -372,9 +372,9 @@ public static class BindInteractionExamples
     {
         IssueBoardView view = new();
         IssueBoardViewModel? viewModel = null;
-        var handlerRuns = 0;
+        int handlerRuns = 0;
 
-        var binding = view.BindInteraction(viewModel, x => x.ConfirmClose, context =>
+        IDisposable binding = view.BindInteraction(viewModel, x => x.ConfirmClose, context =>
         {
             handlerRuns++;
             context.SetOutput(true);
@@ -422,11 +422,11 @@ public static class BindInteractionExamples
     public static async Task HandleThroughInterface()
     {
         IssueTriageViewModel triage = new(new(InMemoryGitHubServer.CreateSeeded()));
-        var confirmClose = triage.ConfirmClose;
+        Interaction<Issue, bool> confirmClose = triage.ConfirmClose;
         Issue issue = new() { Number = CheckoutIssueNumber };
-        using var declines = confirmClose.RegisterHandler(static context => context.SetOutput(false));
-        using var asksAgain = confirmClose.RegisterHandler(static context => Signal.Return(context.IsHandled));
-        var confirms = confirmClose.RegisterHandler(static context =>
+        using IDisposable declines = confirmClose.RegisterHandler(static context => context.SetOutput(false));
+        using IDisposable asksAgain = confirmClose.RegisterHandler(static context => Signal.Return(context.IsHandled));
+        IDisposable confirms = confirmClose.RegisterHandler(static context =>
         {
             context.SetOutput(true);
             return Task.CompletedTask;

@@ -14,9 +14,9 @@ public static class MigrationExamples
     /// <summary>Reads the converters out of the older app's Splat resolver.</summary>
     public static void ExtractConvertersFromLegacyResolver()
     {
-        using var legacyResolver = LegacyAppDependencyResolver.Create();
+        using Splat.ModernDependencyResolver legacyResolver = LegacyAppDependencyResolver.Create();
 
-        var extracted = ConverterMigrationHelper.ExtractConverters(legacyResolver);
+        ExtractedConverters extracted = ConverterMigrationHelper.ExtractConverters(legacyResolver);
 
         Console.WriteLine(extracted.TypedConverters.Count);
         Console.WriteLine(extracted.FallbackConverters.Count);
@@ -37,20 +37,20 @@ public static class MigrationExamples
     /// <summary>Copies the older app's converters into a converter service and uses each one.</summary>
     public static void ImportLegacyConvertersIntoService()
     {
-        using var legacyResolver = LegacyAppDependencyResolver.Create();
+        using Splat.ModernDependencyResolver legacyResolver = LegacyAppDependencyResolver.Create();
         ConverterService service = new();
 
         service.ImportFrom(legacyResolver);
 
-        var typed = service.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
+        IBindingTypeConverter? typed = service.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
         Console.WriteLine(typed!.TryConvertTyped(TodoPriority.High, null, out var highColour));
         Console.WriteLine(highColour);
 
-        var fallback = service.FallbackConverters.TryGetConverter(typeof(IssueState), typeof(string));
+        IBindingFallbackConverter? fallback = service.FallbackConverters.TryGetConverter(typeof(IssueState), typeof(string));
         Console.WriteLine(fallback!.TryConvert(typeof(IssueState), IssueState.Closed, typeof(string), null, out var stateText));
         Console.WriteLine(stateText);
 
-        var setMethod = service.SetMethodConverters.TryGetConverter(typeof(IReadOnlyList<string>), typeof(List<string>));
+        ISetMethodBindingConverter? setMethod = service.SetMethodConverters.TryGetConverter(typeof(IReadOnlyList<string>), typeof(List<string>));
         List<string> tagList = ["draft"];
         List<string> newTags = ["travel", "admin"];
 
@@ -69,11 +69,11 @@ public static class MigrationExamples
     /// <summary>Binds a priority badge with the converter the older app registered, passed to the binding as the converter override.</summary>
     public static void BindToWithMigratedConverterOverride()
     {
-        using var legacyResolver = LegacyAppDependencyResolver.Create();
+        using Splat.ModernDependencyResolver legacyResolver = LegacyAppDependencyResolver.Create();
 
         BindingConverters.Current.ImportFrom(legacyResolver);
 
-        var migrated = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
+        IBindingTypeConverter? migrated = BindingConverters.Current.TypedConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
         TodoItem item = new() { Title = "Renew passport", Priority = TodoPriority.High };
         Label priorityBadge = new();
 
@@ -94,7 +94,7 @@ public static class MigrationExamples
     /// <summary>Binds a priority badge and lets the binding find the migrated converter in the service.</summary>
     public static void BindToResolvesMigratedConverter()
     {
-        using var legacyResolver = LegacyAppDependencyResolver.Create();
+        using Splat.ModernDependencyResolver legacyResolver = LegacyAppDependencyResolver.Create();
 
         BindingConverters.Current.ImportFrom(legacyResolver);
 
@@ -138,10 +138,10 @@ public static class MigrationExamples
     /// <summary>Compares extracted converters; two results are equal when they hold the same three groups.</summary>
     public static void CompareExtractedConverters()
     {
-        using var legacyResolver = LegacyAppDependencyResolver.Create();
-        var extracted = ConverterMigrationHelper.ExtractConverters(legacyResolver);
-        var same = extracted with { };
-        var withoutFallback = extracted with { FallbackConverters = [] };
+        using Splat.ModernDependencyResolver legacyResolver = LegacyAppDependencyResolver.Create();
+        ExtractedConverters extracted = ConverterMigrationHelper.ExtractConverters(legacyResolver);
+        ExtractedConverters same = extracted with { };
+        ExtractedConverters withoutFallback = extracted with { FallbackConverters = [] };
         object boxedSame = same;
 
         Console.WriteLine(extracted == same);

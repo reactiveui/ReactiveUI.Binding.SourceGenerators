@@ -32,7 +32,7 @@ public static class WindowExamples
         VirtualClock clock = new();
         TodoItem item = new();
 
-        using var subscription = item.WhenChanged(x => x.Notes)
+        using IDisposable subscription = item.WhenChanged(x => x.Notes)
             .Skip(1)
             .Window(_windowLength, clock)
             .SelectMany(static window => window.Count())
@@ -57,7 +57,7 @@ public static class WindowExamples
     {
         TodoItem item = new();
 
-        using var subscription = item.WhenChanged(x => x.Notes)
+        using IDisposable subscription = item.WhenChanged(x => x.Notes)
             .Skip(1)
             .Window(() => item.WhenChanged(x => x.IsDone).Skip(1))
             .SelectMany(static window => window.Count())

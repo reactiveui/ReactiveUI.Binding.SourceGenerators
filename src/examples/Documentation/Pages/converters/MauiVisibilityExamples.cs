@@ -12,7 +12,7 @@ public static class MauiVisibilityExamples
     /// <summary>Shows a completed-task mark for a finished to-do item and hides it for an open one.</summary>
     public static void ConvertIsDoneToVisibility()
     {
-        var converter = new BooleanToVisibilityTypeConverter();
+        BooleanToVisibilityTypeConverter converter = new BooleanToVisibilityTypeConverter();
 
         _ = converter.TryConvert(true, conversionHint: null, out var doneMark);
         Console.WriteLine(doneMark);
@@ -32,7 +32,7 @@ public static class MauiVisibilityExamples
     /// <summary>Reads whether a completed-task mark is showing; only Visible counts as showing.</summary>
     public static void ConvertVisibilityToIsDone()
     {
-        var converter = new VisibilityToBooleanTypeConverter();
+        VisibilityToBooleanTypeConverter converter = new VisibilityToBooleanTypeConverter();
 
         _ = converter.TryConvert(Microsoft.Maui.Visibility.Visible, conversionHint: null, out var isDone);
         Console.WriteLine(isDone);

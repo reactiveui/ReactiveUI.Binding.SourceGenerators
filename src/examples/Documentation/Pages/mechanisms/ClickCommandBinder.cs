@@ -80,9 +80,9 @@ public sealed class ClickCommandBinder : ICreatesCommandBinding
     {
         Console.WriteLine($"The click binder is attached to the {button.Text} button");
 
-        var wasEnabled = button.IsEnabled;
+        bool wasEnabled = button.IsEnabled;
         BehaviorSignal<object?> parameter = new(null);
-        var canExecuteChanged = Signal.FromEventPattern(handler => command.CanExecuteChanged += handler, handler => command.CanExecuteChanged -= handler);
+        IObservable<EventPattern<EventArgs>> canExecuteChanged = Signal.FromEventPattern(handler => command.CanExecuteChanged += handler, handler => command.CanExecuteChanged -= handler);
 
         return new(
             commandParameter.Subscribe(parameter.OnNext),

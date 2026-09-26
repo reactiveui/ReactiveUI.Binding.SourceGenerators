@@ -62,9 +62,9 @@ public static class ViewThreadInvokerExamples
         MauiLabel unclaimed = new();
         AvaloniaViewThreadInvoker invoker = new();
         List<string> log = [];
-        var accessFromWorker = true;
+        bool accessFromWorker = true;
 
-        var worker = new Thread(() => accessFromWorker = invoker.CheckAccess(titleLabel));
+        Thread worker = new Thread(() => accessFromWorker = invoker.CheckAccess(titleLabel));
         worker.Start();
         worker.Join();
         invoker.Post(titleLabel, static state => ((List<string>)state!).Add(PostedText), log);
@@ -92,9 +92,9 @@ public static class ViewThreadInvokerExamples
     public static void RefuseWriteFromWorkerThread()
     {
         TextBlock titleLabel = new();
-        var refused = false;
+        bool refused = false;
 
-        var worker = new Thread(() =>
+        Thread worker = new Thread(() =>
         {
             try
             {
@@ -144,7 +144,7 @@ public static class ViewThreadInvokerExamples
 
         using (item.BindOneWay(titleLabel, x => x.Title, x => x.Text))
         {
-            var worker = new Thread(() => item.Title = FirstSyncedTitle);
+            Thread worker = new Thread(() => item.Title = FirstSyncedTitle);
             worker.Start();
             worker.Join();
 
@@ -170,7 +170,7 @@ public static class ViewThreadInvokerExamples
         using (titleLabel.WhenChanged(x => x.Text).Subscribe(writes.Add))
         using (item.BindOneWay(titleLabel, x => x.Title, x => x.Text))
         {
-            var worker = new Thread(() =>
+            Thread worker = new Thread(() =>
             {
                 item.Title = FirstSyncedTitle;
                 item.Title = SecondSyncedTitle;

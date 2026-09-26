@@ -47,7 +47,7 @@ public static class ExpressionEngineExamples
     {
         Expression<Func<TransferViewModel, decimal>> path = x => x.Draft.Amount;
 
-        var chain = new List<Expression>(path.Body.GetExpressionChain());
+        List<Expression> chain = new List<Expression>(path.Body.GetExpressionChain());
 
         Console.WriteLine(chain.Count);
         Console.WriteLine(((MemberExpression)chain[0]).Member.Name);
@@ -77,7 +77,7 @@ public static class ExpressionEngineExamples
     {
         Expression<Func<TransferViewModel, decimal>> path = x => x.Draft.Amount;
 
-        var parent = (MemberExpression)path.Body.GetParent()!;
+        MemberExpression parent = (MemberExpression)path.Body.GetParent()!;
 
         Console.WriteLine(parent.Member.Name);
 
@@ -90,8 +90,8 @@ public static class ExpressionEngineExamples
     {
         Expression<Func<TodoItem, string>> path = x => x.Tags[0];
 
-        var indexer = Reflection.Rewrite(path.Body);
-        var arguments = indexer.GetArgumentsArray();
+        Expression indexer = Reflection.Rewrite(path.Body);
+        object?[]? arguments = indexer.GetArgumentsArray();
 
         Console.WriteLine(indexer.NodeType);
         Console.WriteLine(arguments!.Length);
@@ -129,10 +129,10 @@ public static class ExpressionEngineExamples
     /// <summary>Builds a function that reads a property, and reports none for a member that is not a property or a field.</summary>
     public static void ReadAPropertyWithAFetcher()
     {
-        var item = new TodoItem { Title = OriginalTitle };
-        var title = typeof(TodoItem).GetProperty(TitleName);
+        TodoItem item = new TodoItem { Title = OriginalTitle };
+        PropertyInfo? title = typeof(TodoItem).GetProperty(TitleName);
 
-        var fetcher = Reflection.GetValueFetcherForProperty(title);
+        Func<object?, object?[]?, object?>? fetcher = Reflection.GetValueFetcherForProperty(title);
 
         Console.WriteLine((string)fetcher!(item, null)!);
         Console.WriteLine(Reflection.GetValueFetcherForProperty(typeof(TodoItem).GetMethod(nameof(TodoItem.Clone))) is null);
@@ -145,8 +145,8 @@ public static class ExpressionEngineExamples
     /// <summary>Builds a function that reads a property, and throws for a member that is not a property or a field.</summary>
     public static void ReadAPropertyWithAFetcherOrThrow()
     {
-        var item = new TodoItem { Title = OriginalTitle };
-        var fetcher = Reflection.GetValueFetcherOrThrow(typeof(TodoItem).GetProperty(TitleName));
+        TodoItem item = new TodoItem { Title = OriginalTitle };
+        Func<object?, object?[]?, object?> fetcher = Reflection.GetValueFetcherOrThrow(typeof(TodoItem).GetProperty(TitleName));
 
         Console.WriteLine((string)fetcher(item, null)!);
         Console.WriteLine(Throws<ArgumentException>(static () => Reflection.GetValueFetcherOrThrow(typeof(TodoItem).GetMethod(nameof(TodoItem.Clone)))));
@@ -159,8 +159,8 @@ public static class ExpressionEngineExamples
     /// <summary>Builds a function that writes a property, and reports none for a member that is not a property or a field.</summary>
     public static void WriteAPropertyWithASetter()
     {
-        var item = new TodoItem { Title = OriginalTitle };
-        var setter = Reflection.GetValueSetterForProperty(typeof(TodoItem).GetProperty(TitleName));
+        TodoItem item = new TodoItem { Title = OriginalTitle };
+        Action<object?, object?, object?[]?>? setter = Reflection.GetValueSetterForProperty(typeof(TodoItem).GetProperty(TitleName));
 
         setter!(item, RenamedTitle, null);
 
@@ -175,8 +175,8 @@ public static class ExpressionEngineExamples
     /// <summary>Builds a function that writes a property, and throws for a member that is not a property or a field.</summary>
     public static void WriteAPropertyWithASetterOrThrow()
     {
-        var item = new TodoItem { Title = OriginalTitle };
-        var setter = Reflection.GetValueSetterOrThrow(typeof(TodoItem).GetProperty(TitleName));
+        TodoItem item = new TodoItem { Title = OriginalTitle };
+        Action<object?, object?, object?[]?> setter = Reflection.GetValueSetterOrThrow(typeof(TodoItem).GetProperty(TitleName));
 
         setter(item, RenamedTitle, null);
 
@@ -193,9 +193,9 @@ public static class ExpressionEngineExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         viewModel.Draft.Amount = AmountValue;
-        var chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
+        List<Expression> chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
 
-        var found = Reflection.TryGetValueForPropertyChain<decimal>(out var amount, viewModel, chain);
+        bool found = Reflection.TryGetValueForPropertyChain<decimal>(out var amount, viewModel, chain);
 
         Console.WriteLine(found);
         Console.WriteLine(amount);
@@ -208,10 +208,10 @@ public static class ExpressionEngineExamples
     /// <summary>Reports that a path has no value when a link along it is null.</summary>
     public static void ReadThroughANullLink()
     {
-        var viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
-        var chain = CreateChain<TodoListViewModel, string>(static x => x.SelectedItem!.Title);
+        TodoListViewModel viewModel = new TodoListViewModel(InMemoryTodoStore.CreateSeeded());
+        List<Expression> chain = CreateChain<TodoListViewModel, string>(static x => x.SelectedItem!.Title);
 
-        var found = Reflection.TryGetValueForPropertyChain<string>(out var title, viewModel, chain);
+        bool found = Reflection.TryGetValueForPropertyChain<string>(out var title, viewModel, chain);
 
         Console.WriteLine(found);
         Console.WriteLine(title is null);
@@ -226,9 +226,9 @@ public static class ExpressionEngineExamples
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
         viewModel.Draft.Amount = AmountValue;
-        var chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
+        List<Expression> chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
 
-        var found = Reflection.TryGetAllValuesForPropertyChain(out var changes, viewModel, chain);
+        bool found = Reflection.TryGetAllValuesForPropertyChain(out var changes, viewModel, chain);
 
         Console.WriteLine(found);
         Console.WriteLine(changes.Length);
@@ -250,9 +250,9 @@ public static class ExpressionEngineExamples
     public static void WriteTheValueAtTheEndOfAPath()
     {
         TransferViewModel viewModel = new(new InMemoryBankingBackend());
-        var chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
+        List<Expression> chain = CreateChain<TransferViewModel, decimal>(static x => x.Draft.Amount);
 
-        var written = Reflection.TrySetValueToPropertyChain(viewModel, chain, AmountValue);
+        bool written = Reflection.TrySetValueToPropertyChain(viewModel, chain, AmountValue);
 
         Console.WriteLine(written);
         Console.WriteLine(viewModel.Draft.Amount);
@@ -265,10 +265,10 @@ public static class ExpressionEngineExamples
     /// <summary>Writes the value at the end of a path and chooses whether a missing member throws.</summary>
     public static void WriteTheValueAtTheEndOfAPathWithoutThrowing()
     {
-        var item = new TodoItem { Tags = [FirstTag] };
-        var chain = CreateChain<TodoItem, string>(static x => x.Title);
+        TodoItem item = new TodoItem { Tags = [FirstTag] };
+        List<Expression> chain = CreateChain<TodoItem, string>(static x => x.Title);
 
-        var written = Reflection.TrySetValueToPropertyChain(item, chain, RenamedTitle, false);
+        bool written = Reflection.TrySetValueToPropertyChain(item, chain, RenamedTitle, false);
 
         Console.WriteLine(written);
         Console.WriteLine(item.Title);

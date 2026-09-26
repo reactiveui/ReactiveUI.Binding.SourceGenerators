@@ -43,9 +43,9 @@ public static class UnsafeObservationExamples
     /// <summary>Observes one property whose path is built from a name that is only known while the app runs.</summary>
     public static void ObserveTitleChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
-        var row = Expression.Parameter(typeof(TodoItem), "row");
-        var titleColumn = Expression.Lambda<Func<TodoItem, string>>(Expression.Property(row, nameof(TodoItem.Title)), row);
+        TodoItem item = new TodoItem { Title = OriginalTitle };
+        ParameterExpression row = Expression.Parameter(typeof(TodoItem), "row");
+        Expression<Func<TodoItem, string>> titleColumn = Expression.Lambda<Func<TodoItem, string>>(Expression.Property(row, nameof(TodoItem.Title)), row);
         List<string> titles = [];
 
         using (item.WhenChangedUnsafe(titleColumn).Subscribe(titles.Add))
@@ -62,7 +62,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties; each change delivers both values.</summary>
     public static void ObserveTwoColumnsChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, bool>> doneColumn = x => x.IsDone;
 
@@ -79,7 +79,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties and combines them with a selector.</summary>
     public static void ObserveTwoColumnsWithSelector()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, bool>> doneColumn = x => x.IsDone;
         List<string> lines = [];
@@ -98,7 +98,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes three properties; each change delivers all three values.</summary>
     public static void ObserveThreeColumnsChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle, Notes = SeededNotes };
+        TodoItem item = new TodoItem { Title = OriginalTitle, Notes = SeededNotes };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, string>> notesColumn = x => x.Notes;
         Expression<Func<TodoItem, bool>> doneColumn = x => x.IsDone;
@@ -116,7 +116,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes three properties and combines them with a selector.</summary>
     public static void ObserveThreeColumnsWithSelector()
     {
-        var item = new TodoItem { Title = OriginalTitle, Notes = SeededNotes };
+        TodoItem item = new TodoItem { Title = OriginalTitle, Notes = SeededNotes };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, string>> notesColumn = x => x.Notes;
         Expression<Func<TodoItem, bool>> doneColumn = x => x.IsDone;
@@ -136,7 +136,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes the value a property held before it changed.</summary>
     public static void ObserveTitleBeforeChange()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle };
         Expression<Func<EditableTodoItem, string>> titleColumn = x => x.Title;
         List<string> titles = [];
 
@@ -155,7 +155,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties before they change.</summary>
     public static void ObserveTwoColumnsBeforeChange()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle, Notes = SeededNotes };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle, Notes = SeededNotes };
         Expression<Func<EditableTodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<EditableTodoItem, string>> notesColumn = x => x.Notes;
 
@@ -173,7 +173,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties before they change and combines them with a selector.</summary>
     public static void ObserveTwoColumnsBeforeChangeWithSelector()
     {
-        var item = new EditableTodoItem { Title = OriginalTitle, Notes = SeededNotes };
+        EditableTodoItem item = new EditableTodoItem { Title = OriginalTitle, Notes = SeededNotes };
         Expression<Func<EditableTodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<EditableTodoItem, string>> notesColumn = x => x.Notes;
         List<string> lines = [];
@@ -193,7 +193,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes one property with <c>WhenAnyValueUnsafe</c>.</summary>
     public static void ObserveAnyValueChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         List<string> titles = [];
 
@@ -211,7 +211,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes one property with <c>WhenAnyValueUnsafe</c> and maps each value with a selector.</summary>
     public static void ObserveAnyValueWithSelector()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         List<int> lengths = [];
 
@@ -229,7 +229,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties with <c>WhenAnyValueUnsafe</c>.</summary>
     public static void ObserveTwoAnyValuesChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, TodoPriority>> priorityColumn = x => x.Priority;
 
@@ -246,7 +246,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties with <c>WhenAnyValueUnsafe</c> and combines them with a selector.</summary>
     public static void ObserveTwoAnyValuesWithSelector()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, TodoPriority>> priorityColumn = x => x.Priority;
         List<string> lines = [];
@@ -265,7 +265,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes one property with <c>WhenAnyUnsafe</c>; the selector receives the change, not only its value.</summary>
     public static void ObserveAnyChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         List<string> lines = [];
 
@@ -283,7 +283,7 @@ public static class UnsafeObservationExamples
     /// <summary>Observes two properties with <c>WhenAnyUnsafe</c>.</summary>
     public static void ObserveTwoAnyChosenAtRunTime()
     {
-        var item = new TodoItem { Title = OriginalTitle };
+        TodoItem item = new TodoItem { Title = OriginalTitle };
         Expression<Func<TodoItem, string>> titleColumn = x => x.Title;
         Expression<Func<TodoItem, bool>> doneColumn = x => x.IsDone;
         List<string> lines = [];

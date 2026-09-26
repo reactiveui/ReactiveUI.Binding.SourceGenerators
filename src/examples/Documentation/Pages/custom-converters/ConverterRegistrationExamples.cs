@@ -38,7 +38,7 @@ public static class ConverterRegistrationExamples
         service.TypedConverters.Register(new DemoIntToStringConverter(LowAffinityScore));
         service.TypedConverters.Register(new DemoIntToStringConverter(HighAffinityScore));
 
-        var resolved = service.TypedConverters.TryGetConverter(typeof(int), typeof(string));
+        IBindingTypeConverter? resolved = service.TypedConverters.TryGetConverter(typeof(int), typeof(string));
 
         Console.WriteLine(resolved!.GetAffinityForObjects());
 
@@ -52,13 +52,13 @@ public static class ConverterRegistrationExamples
         ConverterService service = new();
         DefaultConverterRegistration.RegisterDefaults(service);
 
-        var builtIn = service.TypedConverters.TryGetConverter(typeof(bool), typeof(string));
+        IBindingTypeConverter? builtIn = service.TypedConverters.TryGetConverter(typeof(bool), typeof(string));
         Console.WriteLine(builtIn!.GetType().Name);
 
         service.TypedConverters.Register(new CustomBoolToStringConverter());
 
-        var resolved = service.TypedConverters.TryGetConverter(typeof(bool), typeof(string));
-        var success = resolved!.TryConvertTyped(true, null, out var result);
+        IBindingTypeConverter? resolved = service.TypedConverters.TryGetConverter(typeof(bool), typeof(string));
+        bool success = resolved!.TryConvertTyped(true, null, out var result);
 
         Console.WriteLine(resolved.GetType().Name);
         Console.WriteLine(success);

@@ -36,7 +36,7 @@ public static class ListSelectionBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindBusyIndicator()
     {
-        var browser = await OpenBucketAsync();
+        StorageBrowserViewModel browser = await OpenBucketAsync();
         StorageBrowserView view = new();
 
         using (browser.BindOneWay(view, x => x.IsUploading, v => v.UploadProgressBar.IsVisible))
@@ -46,7 +46,7 @@ public static class ListSelectionBindingExamples
             Console.WriteLine(view.UploadButton.IsEnabled);
 
             // The upload flags itself as running before its first wait, so the task is still pending here.
-            var upload = browser.UploadAsync(new("launch-video.mp4", UploadSizeBytes, "video/mp4"));
+            Task upload = browser.UploadAsync(new("launch-video.mp4", UploadSizeBytes, "video/mp4"));
 
             Console.WriteLine(view.UploadProgressBar.IsVisible);
             Console.WriteLine(view.UploadButton.IsEnabled);
@@ -70,7 +70,7 @@ public static class ListSelectionBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindFilterTextBoxesTwoWay()
     {
-        var viewModel = await OpenTodoListAsync();
+        TodoListViewModel viewModel = await OpenTodoListAsync();
         viewModel.FilterText = BookFilter;
         TodoView view = new() { ViewModel = viewModel };
 
@@ -101,7 +101,7 @@ public static class ListSelectionBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindFilteredItemsToList()
     {
-        var viewModel = await OpenTodoListAsync();
+        TodoListViewModel viewModel = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = viewModel };
 
         using (view.OneWayBind(viewModel, x => x.Items, v => v.ItemsList.ItemsSource))
@@ -127,7 +127,7 @@ public static class ListSelectionBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindSelectedItemTwoWay()
     {
-        var viewModel = await OpenTodoListAsync();
+        TodoListViewModel viewModel = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = viewModel };
         view.ItemsList.ItemsSource = viewModel.Items;
 
@@ -138,14 +138,14 @@ public static class ListSelectionBindingExamples
             Console.WriteLine(view.SelectedTitleTextBox.Text ?? NothingSelectedText);
 
             // The user clicks the second row.
-            var dentist = viewModel.Items[DentistIndex];
+            TodoItem dentist = viewModel.Items[DentistIndex];
             view.ItemsList.SelectedItem = dentist;
 
             Console.WriteLine(ReferenceEquals(viewModel.SelectedItem, dentist));
             Console.WriteLine(view.SelectedTitleTextBox.Text);
 
             // Code selects the first item, and the list follows.
-            var renew = viewModel.Items[0];
+            TodoItem renew = viewModel.Items[0];
             viewModel.SelectedItem = renew;
 
             Console.WriteLine(ReferenceEquals(view.ItemsList.SelectedItem, renew));
@@ -176,20 +176,20 @@ public static class ListSelectionBindingExamples
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task BindCommandFollowsSelection()
     {
-        var viewModel = await OpenTodoListAsync();
+        TodoListViewModel viewModel = await OpenTodoListAsync();
         TodoView view = new() { ViewModel = viewModel };
 
         using (view.BindCommand(viewModel, x => x.CompleteCommand, v => v.CompleteButton))
         {
             Console.WriteLine(view.CompleteButton.IsEnabled);
 
-            var renew = viewModel.Items[0];
+            TodoItem renew = viewModel.Items[0];
             viewModel.SelectedItem = renew;
 
             Console.WriteLine(view.CompleteButton.IsEnabled);
 
             // Pressing the button runs the command, which finishes the item and disables the button again.
-            var completed = renew.WhenChanged(x => x.IsDone).Where(static done => done).FirstAsync();
+            Task<bool> completed = renew.WhenChanged(x => x.IsDone).Where(static done => done).FirstAsync();
             ((IButtonController)view.CompleteButton).SendClicked();
             await completed;
 

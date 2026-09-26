@@ -24,7 +24,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes three properties before they change and combines them with a selector.</summary>
     public static void ObserveThreeColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(x => x.Title, x => x.Notes, x => x.IsDone, static (c1, c2, c3) => string.Join(Separator, c1, c2, c3)).Subscribe(Console.WriteLine))
         {
@@ -38,7 +38,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes four properties before they change and combines them with a selector.</summary>
     public static void ObserveFourColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -58,7 +58,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes five properties before they change and combines them with a selector.</summary>
     public static void ObserveFiveColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -79,7 +79,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes six properties before they change and combines them with a selector.</summary>
     public static void ObserveSixColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -101,7 +101,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes seven properties before they change and combines them with a selector.</summary>
     public static void ObserveSevenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -124,7 +124,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes eight properties before they change and combines them with a selector.</summary>
     public static void ObserveEightColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -148,7 +148,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes nine properties before they change and combines them with a selector.</summary>
     public static void ObserveNineColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -173,7 +173,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes ten properties before they change and combines them with a selector.</summary>
     public static void ObserveTenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -199,7 +199,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes eleven properties before they change and combines them with a selector.</summary>
     public static void ObserveElevenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -226,7 +226,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes twelve properties before they change and combines them with a selector.</summary>
     public static void ObserveTwelveColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -254,7 +254,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes thirteen properties before they change and combines them with a selector.</summary>
     public static void ObserveThirteenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -283,7 +283,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes fourteen properties before they change and combines them with a selector.</summary>
     public static void ObserveFourteenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -313,7 +313,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes fifteen properties before they change and combines them with a selector.</summary>
     public static void ObserveFifteenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,
@@ -344,7 +344,7 @@ public static class UnsafeWhenChangingWideSelectorExamples
     /// <summary>Observes sixteen properties before they change and combines them with a selector.</summary>
     public static void ObserveSixteenColumnsBeforeChangeWithSelector()
     {
-        var item = CreateItem();
+        EditableTodoItem item = CreateItem();
 
         using (item.WhenChangingUnsafe(
             x => x.Title,

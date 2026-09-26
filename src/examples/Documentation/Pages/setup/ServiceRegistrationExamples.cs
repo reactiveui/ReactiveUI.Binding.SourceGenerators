@@ -78,7 +78,7 @@ public static class ServiceRegistrationExamples
     {
         viewModel.SelectedItem = viewModel.Items[0];
 
-        using var binding = view.OneWayBind(viewModel, x => x.SelectedItem!.Tags, v => v.TagsLabel.Text);
+        using IReactiveBinding<TodoView, string> binding = view.OneWayBind(viewModel, x => x.SelectedItem!.Tags, v => v.TagsLabel.Text);
 
         Console.WriteLine(view.TagsLabel.Text);
 
@@ -89,7 +89,7 @@ public static class ServiceRegistrationExamples
     /// <summary>Converts an enumeration with the fallback converter the builder registered.</summary>
     public static void ConvertPriorityWithRegisteredFallbackConverter()
     {
-        var converter = BindingConverters.Current.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
+        IBindingFallbackConverter? converter = BindingConverters.Current.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string));
 
         Console.WriteLine(converter is EnumNameFallbackConverter);
 
@@ -105,7 +105,7 @@ public static class ServiceRegistrationExamples
     /// <summary>Writes a tag by index with the set-method converter the builder registered.</summary>
     public static void SetIndexedTagWithRegisteredSetMethodConverter()
     {
-        var converter = BindingConverters.Current.ResolveSetMethodConverter(typeof(List<string>), typeof(string));
+        ISetMethodBindingConverter? converter = BindingConverters.Current.ResolveSetMethodConverter(typeof(List<string>), typeof(string));
 
         Console.WriteLine(converter is TagListSetMethodConverter);
 
@@ -125,7 +125,7 @@ public static class ServiceRegistrationExamples
     /// <param name="binder">The binder registered by <see cref="BuilderExamples.BuildTodoApplication"/>.</param>
     public static void AttachCommandWithRegisteredBinder(TodoListViewModel viewModel, TodoView view, ButtonCommandBinder binder)
     {
-        using var binding = view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton);
+        using IDisposable binding = view.BindCommand(viewModel, x => x.AddCommand, v => v.AddButton);
 
         Console.WriteLine(binder.BindCount);
         Console.WriteLine(ReferenceEquals(viewModel.AddCommand, view.AddButton.Command));
@@ -139,7 +139,7 @@ public static class ServiceRegistrationExamples
     /// <param name="viewModel">The view model to find a view for.</param>
     public static void ResolveMappedView(TodoListViewModel viewModel)
     {
-        var view = ViewLocator.GetCurrent().ResolveView(viewModel);
+        IViewFor? view = ViewLocator.GetCurrent().ResolveView(viewModel);
 
         Console.WriteLine(view is TodoView);
 
@@ -155,7 +155,7 @@ public static class ServiceRegistrationExamples
 
         module.Configure(resolver);
 
-        var providers = resolver.GetServices<ICreatesObservableForProperty>().Select(static service => service.GetType()).ToList();
+        List<Type> providers = resolver.GetServices<ICreatesObservableForProperty>().Select(static service => service.GetType()).ToList();
 
         Console.WriteLine(providers.Count);
         Console.WriteLine(providers.Contains(typeof(INPCObservableForProperty)));
@@ -171,7 +171,7 @@ public static class ServiceRegistrationExamples
     public static void RegisterConvertersThroughAppBuilder()
     {
         using ModernDependencyResolver resolver = new();
-        var builder = resolver.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder builder = resolver.CreateReactiveUIBindingBuilder();
         IAppBuilder appBuilder = builder;
 
         _ = appBuilder
@@ -193,11 +193,11 @@ public static class ServiceRegistrationExamples
     public static void RegisterFallbackAndSetMethodConvertersThroughAppBuilder()
     {
         using ModernDependencyResolver resolver = new();
-        var builder = resolver.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder builder = resolver.CreateReactiveUIBindingBuilder();
         IAppBuilder appBuilder = builder;
 
-        var fallback = appBuilder.WithFallbackConverter(new EnumNameFallbackConverter());
-        var setMethod = appBuilder.WithSetMethodConverter(new TagListSetMethodConverter());
+        IReactiveUIBindingBuilder fallback = appBuilder.WithFallbackConverter(new EnumNameFallbackConverter());
+        IReactiveUIBindingBuilder setMethod = appBuilder.WithSetMethodConverter(new TagListSetMethodConverter());
 
         Console.WriteLine(ReferenceEquals(builder, fallback));
         Console.WriteLine(ReferenceEquals(builder, setMethod));
@@ -215,7 +215,7 @@ public static class ServiceRegistrationExamples
     public static void ConfigureThroughAppBuilder()
     {
         using ModernDependencyResolver resolver = new();
-        var builder = resolver.CreateReactiveUIBindingBuilder();
+        ReactiveUIBindingBuilder builder = resolver.CreateReactiveUIBindingBuilder();
         IAppBuilder appBuilder = builder;
 
         Console.WriteLine(ReferenceEquals(builder, appBuilder.WithPlatformModule(new TodoModule())));
@@ -224,7 +224,7 @@ public static class ServiceRegistrationExamples
             .WithRegistration(static registry => registry.RegisterConstant(InMemoryTodoStore.CreateSeeded()))
             .ConfigureViewLocator(static mappings => mappings.Map<TodoListViewModel, TodoView>());
 
-        var locator = resolver.GetService<IViewLocator>();
+        IViewLocator? locator = resolver.GetService<IViewLocator>();
         TodoListViewModel viewModel = new(resolver.GetService<InMemoryTodoStore>()!);
 
         Console.WriteLine(locator!.ResolveView(viewModel) is TodoView);

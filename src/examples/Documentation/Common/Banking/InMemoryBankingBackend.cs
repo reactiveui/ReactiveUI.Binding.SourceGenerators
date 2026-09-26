@@ -83,7 +83,7 @@ public sealed class InMemoryBankingBackend : IBankingBackend
         await EnterAsync().ConfigureAwait(false);
 
         List<Account> accounts = [];
-        foreach (var account in _accounts)
+        foreach (Account account in _accounts)
         {
             accounts.Add(account.Clone());
         }
@@ -98,7 +98,7 @@ public sealed class InMemoryBankingBackend : IBankingBackend
 
         _ = FindAccount(accountId);
         List<Transaction> transactions = [];
-        foreach (var transaction in _transactions)
+        foreach (Transaction transaction in _transactions)
         {
             if (transaction.AccountId == accountId)
             {
@@ -142,7 +142,7 @@ public sealed class InMemoryBankingBackend : IBankingBackend
     private static List<Account> CopySeedAccounts()
     {
         List<Account> accounts = [];
-        foreach (var account in _seedAccounts)
+        foreach (Account account in _seedAccounts)
         {
             accounts.Add(account.Clone());
         }
@@ -156,7 +156,7 @@ public sealed class InMemoryBankingBackend : IBankingBackend
     /// <exception cref="BankingException">The payee does not exist.</exception>
     private static Payee FindPayee(int payeeId)
     {
-        foreach (var payee in _seedPayees)
+        foreach (Payee payee in _seedPayees)
         {
             if (payee.Id == payeeId)
             {
@@ -176,13 +176,13 @@ public sealed class InMemoryBankingBackend : IBankingBackend
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var violations = Violations(request);
+        List<(BankingFailure Failure, string Message)> violations = Violations(request);
         if (violations.Count > 0)
         {
             throw new BankingException(violations[0].Failure, violations[0].Message);
         }
 
-        var payee = FindPayee(request.PayeeId);
+        Payee payee = FindPayee(request.PayeeId);
         if (payee.AccountNumber == FlaggedAccountNumber)
         {
             throw new BankingException(BankingFailure.FraudHold, $"The transfer to {payee.Name} is held for a fraud review.");
@@ -193,8 +193,8 @@ public sealed class InMemoryBankingBackend : IBankingBackend
             RequireApproval(approvalCode);
         }
 
-        var account = FindAccount(request.SourceAccountId);
-        var day = DateOnly.FromDateTime(Now.UtcDateTime);
+        Account account = FindAccount(request.SourceAccountId);
+        DateOnly day = DateOnly.FromDateTime(Now.UtcDateTime);
         account.Balance -= request.Amount;
         _sentByDay[day] = SentOn(day) + request.Amount;
         _transactions.Insert(0, new(_transactions.Count + 1, account.Id, Now, $"Transfer to {payee.Name}", -request.Amount, account.Balance));
@@ -244,8 +244,8 @@ public sealed class InMemoryBankingBackend : IBankingBackend
     /// <exception cref="BankingException">The account or payee does not exist.</exception>
     private List<(BankingFailure Failure, string Message)> Violations(TransferRequest request)
     {
-        var account = FindAccount(request.SourceAccountId);
-        var payee = FindPayee(request.PayeeId);
+        Account account = FindAccount(request.SourceAccountId);
+        Payee payee = FindPayee(request.PayeeId);
         List<(BankingFailure, string)> violations = [];
 
         if (request.Amount <= 0)
@@ -264,7 +264,7 @@ public sealed class InMemoryBankingBackend : IBankingBackend
             violations.Add((BankingFailure.InsufficientFunds, $"{account.Name} has {account.AvailableBalance} available."));
         }
 
-        var day = DateOnly.FromDateTime(Now.UtcDateTime);
+        DateOnly day = DateOnly.FromDateTime(Now.UtcDateTime);
         if (SentOn(day) + request.Amount > DailyLimit)
         {
             violations.Add((BankingFailure.DailyLimitExceeded, $"The daily limit is {DailyLimit}."));

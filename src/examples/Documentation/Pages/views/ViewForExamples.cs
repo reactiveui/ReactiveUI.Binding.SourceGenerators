@@ -44,7 +44,7 @@ public static class ViewForExamples
 
         Console.WriteLine(view.ViewModel is null);
 
-        var shown = Present(view, viewModel);
+        TodoListViewModel? shown = Present(view, viewModel);
 
         Console.WriteLine(ReferenceEquals(shown, viewModel));
         Console.WriteLine(ReferenceEquals(view.ViewModel, viewModel));
@@ -82,7 +82,7 @@ public static class ViewForExamples
     {
         IssueBoardView view = new();
         IssueBoardViewModel viewModel = new(InMemoryGitHubServer.CreateSeeded());
-        var screen = (IViewFor)view;
+        IViewFor screen = (IViewFor)view;
 
         screen.ViewModel = viewModel;
 
@@ -97,9 +97,9 @@ public static class ViewForExamples
     /// <summary>Shows that a screen refuses a view model of the wrong type when it is assigned through <see cref="IViewFor"/>.</summary>
     public static void RejectWrongViewModelType()
     {
-        var screen = (IViewFor)new IssueBoardView();
+        IViewFor screen = (IViewFor)new IssueBoardView();
         TodoListViewModel wrongViewModel = new(InMemoryTodoStore.CreateSeeded());
-        var refused = false;
+        bool refused = false;
 
         try
         {

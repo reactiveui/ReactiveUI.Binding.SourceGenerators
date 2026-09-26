@@ -56,7 +56,7 @@ public sealed class ButtonClickCommandBinder : ICreatesCommandBinding
         }
 
         BehaviorSignal<object?> parameter = new(null);
-        var clicks = Signal.FromEventPattern(handler => button.Clicked += handler, handler => button.Clicked -= handler);
+        IObservable<Primitives.Core.EventPattern<EventArgs>> clicks = Signal.FromEventPattern(handler => button.Clicked += handler, handler => button.Clicked -= handler);
 
         return new(
             commandParameter.Subscribe(parameter.OnNext),

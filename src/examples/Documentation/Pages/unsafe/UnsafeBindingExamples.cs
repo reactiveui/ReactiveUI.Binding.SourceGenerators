@@ -34,7 +34,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayBetweenPathsChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
         Expression<Func<TodoView, string>> target = v => v.FilterTextBox.Text;
@@ -54,7 +54,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayWithConversionChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, int>> source = x => x.RemainingCount;
         Expression<Func<TodoView, string>> target = v => v.RemainingLabel.Text;
@@ -72,7 +72,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindTwoWayBetweenPathsChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
         Expression<Func<TodoView, string>> target = v => v.FilterTextBox.Text;
@@ -116,7 +116,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
         Expression<Func<TodoView, string>> target = v => v.FilterTextBox.Text;
@@ -136,7 +136,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindWithSelectorChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, int>> source = x => x.RemainingCount;
         Expression<Func<TodoView, string>> target = v => v.RemainingLabel.Text;
@@ -154,7 +154,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindThroughIndexer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, string>> source = x => x.Items[0].Title;
         Expression<Func<TodoView, string>> target = v => v.SelectedTitleTextBox.Text;
@@ -177,7 +177,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
         Expression<Func<TodoView, string>> target = v => v.FilterTextBox.Text;
@@ -221,7 +221,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindToTargetChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
         Expression<Func<TodoView, string?>> target = v => v.SelectedTitleTextBox.Text;
@@ -241,7 +241,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindToWithConverterOverride()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
         Expression<Func<TodoView, string?>> target = v => v.SelectedTitleTextBox.Text;
@@ -261,7 +261,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindToWithHintAndConverterOverride()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
         Expression<Func<TodoView, string?>> target = v => v.SelectedTitleTextBox.Text;
@@ -281,7 +281,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindToWithConversionHint()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
         Expression<Func<TodoView, string?>> target = v => v.SelectedTitleTextBox.Text;
@@ -301,7 +301,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task InvokeCommandChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
         Expression<Func<TodoListViewModel, ICommand?>> command = x => x.CompleteCommand;
         TaskCompletionSource completed = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -330,7 +330,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task BindCommandToButtonChosenAtRunTime()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, Command?>> command = x => x.AddCommand;
         Expression<Func<TodoView, Button>> button = v => v.AddButton;
@@ -361,7 +361,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task BindCommandWithParameterStream()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, Command?>> command = x => x.AddCommand;
         Expression<Func<TodoView, Button>> button = v => v.AddButton;
@@ -392,7 +392,7 @@ public static class UnsafeBindingExamples
     /// <returns>A task that completes when the command has run.</returns>
     public static async Task BindCommandWithParameterProperty()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         Expression<Func<TodoListViewModel, Command?>> command = x => x.AddCommand;
         Expression<Func<TodoView, Button>> button = v => v.AddButton;
@@ -437,7 +437,7 @@ public static class UnsafeBindingExamples
                 return Task.CompletedTask;
             }))
         {
-            var confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
+            bool confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
 
             Console.WriteLine(confirmed);
         }
@@ -463,7 +463,7 @@ public static class UnsafeBindingExamples
                 return Signal.Return(true);
             }))
         {
-            var confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
+            bool confirmed = await viewModel.ConfirmTransfer.Handle(viewModel.Draft);
 
             Console.WriteLine(confirmed);
         }

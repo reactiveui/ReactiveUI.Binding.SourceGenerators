@@ -19,9 +19,9 @@ public static class GradeCalculator
         decimal earned = 0;
         decimal weighed = 0;
 
-        foreach (var assignment in assignments)
+        foreach (Assignment assignment in assignments)
         {
-            foreach (var grade in grades)
+            foreach (Grade grade in grades)
             {
                 if (grade.AssignmentId != assignment.Id)
                 {

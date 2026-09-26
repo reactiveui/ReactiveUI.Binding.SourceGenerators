@@ -107,7 +107,7 @@ public sealed class TodoListViewModel : ObservableObject
     {
         try
         {
-            var rows = await _store.QueryAsync();
+            IReadOnlyList<TodoItem> rows = await _store.QueryAsync();
             ErrorMessage = string.Empty;
             ReplaceAll(rows);
         }
@@ -123,7 +123,7 @@ public sealed class TodoListViewModel : ObservableObject
     {
         try
         {
-            var added = await _store.AddAsync(new TodoItem { Title = NewTitle.Trim() });
+            TodoItem added = await _store.AddAsync(new TodoItem { Title = NewTitle.Trim() });
             ErrorMessage = string.Empty;
             NewTitle = string.Empty;
             ReplaceAll(_all.Append(added));
@@ -146,9 +146,9 @@ public sealed class TodoListViewModel : ObservableObject
 
         try
         {
-            var update = item.Clone();
+            TodoItem update = item.Clone();
             update.IsDone = true;
-            var saved = await _store.UpdateAsync(update);
+            TodoItem saved = await _store.UpdateAsync(update);
             ErrorMessage = string.Empty;
             item.IsDone = saved.IsDone;
             CompleteCommand.ChangeCanExecute();
@@ -163,14 +163,14 @@ public sealed class TodoListViewModel : ObservableObject
     /// <param name="rows">The new set of items.</param>
     private void ReplaceAll(IEnumerable<TodoItem> rows)
     {
-        foreach (var old in _all)
+        foreach (TodoItem old in _all)
         {
             old.PropertyChanged -= OnItemChanged;
         }
 
         _all = [.. rows];
 
-        foreach (var item in _all)
+        foreach (TodoItem item in _all)
         {
             item.PropertyChanged += OnItemChanged;
         }
@@ -181,7 +181,7 @@ public sealed class TodoListViewModel : ObservableObject
     /// <summary>Rebuilds <see cref="Items"/> from the loaded items and the filter, keeping the selection when it survives.</summary>
     private void ApplyFilter()
     {
-        var selectedId = SelectedItem?.Id;
+        int? selectedId = SelectedItem?.Id;
 
         Items = _all.Where(item => item.Matches(FilterText)).ToList();
         SelectedItem = selectedId is { } id ? Find(id) : null;

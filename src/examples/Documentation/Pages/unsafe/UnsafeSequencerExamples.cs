@@ -33,7 +33,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
@@ -59,7 +59,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayWithConversionOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, int>> source = x => x.RemainingCount;
@@ -83,7 +83,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindOneWayWithConverterOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;
@@ -105,7 +105,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task BindTwoWayOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new();
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, string>> source = x => x.FilterText;
@@ -241,7 +241,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindWithSelectorOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, int>> source = x => x.RemainingCount;
@@ -265,7 +265,7 @@ public static class UnsafeSequencerExamples
     /// <returns>A task that completes when the view model has loaded.</returns>
     public static async Task OneWayBindWithConverterOnSequencer()
     {
-        var viewModel = await LoadTodoAsync();
+        TodoListViewModel viewModel = await LoadTodoAsync();
         TodoView view = new() { ViewModel = viewModel };
         VirtualClock sequencer = new();
         Expression<Func<TodoListViewModel, TodoItem?>> source = x => x.SelectedItem;

@@ -17,8 +17,8 @@ public sealed class LoggingBindingHook(string name) : IPropertyBindingHook
         Func<IObservedChange<object, object>[]> getCurrentViewProperties,
         BindingDirection direction)
     {
-        var sourceType = getCurrentViewModelProperties()[0].Sender.GetType().Name;
-        var targetType = getCurrentViewProperties()[0].Sender.GetType().Name;
+        string sourceType = getCurrentViewModelProperties()[0].Sender.GetType().Name;
+        string targetType = getCurrentViewProperties()[0].Sender.GetType().Name;
 
         Console.WriteLine($"{name}: {direction}: {sourceType} -> {targetType}");
         return true;

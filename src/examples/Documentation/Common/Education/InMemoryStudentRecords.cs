@@ -106,7 +106,7 @@ public sealed class InMemoryStudentRecords : IStudentRecords
         await EnterAsync().ConfigureAwait(false);
 
         List<Student> students = [];
-        foreach (var student in _students)
+        foreach (Student student in _students)
         {
             students.Add(Snapshot(student));
         }
@@ -121,7 +121,7 @@ public sealed class InMemoryStudentRecords : IStudentRecords
 
         _ = FindCourse(courseCode);
         List<Student> roster = [];
-        foreach (var student in _students)
+        foreach (Student student in _students)
         {
             if (IndexOfEnrolment(student.Id, courseCode) >= 0)
             {
@@ -139,7 +139,7 @@ public sealed class InMemoryStudentRecords : IStudentRecords
 
         _ = FindCourse(courseCode);
         List<Assignment> assignments = [];
-        foreach (var assignment in _assignments)
+        foreach (Assignment assignment in _assignments)
         {
             if (assignment.CourseCode == courseCode)
             {
@@ -163,8 +163,8 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var student = FindStudent(studentId);
-        var course = FindCourse(courseCode);
+        Student student = FindStudent(studentId);
+        Course course = FindCourse(courseCode);
 
         if (IndexOfEnrolment(student.Id, course.Code) >= 0)
         {
@@ -176,9 +176,9 @@ public sealed class InMemoryStudentRecords : IStudentRecords
             throw new StudentRecordsException(RecordsFailure.CourseFull, $"{course.Code} has no places left.");
         }
 
-        foreach (var existing in EnrolmentsOf(student.Id))
+        foreach (Enrolment existing in EnrolmentsOf(student.Id))
         {
-            var other = FindCourse(existing.CourseCode);
+            Course other = FindCourse(existing.CourseCode);
             if (course.ClashesWith(other))
             {
                 throw new StudentRecordsException(RecordsFailure.TimetableClash, $"{course.Code} meets at the same time as {other.Code}.");
@@ -195,9 +195,9 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var student = FindStudent(studentId);
-        var course = FindCourse(courseCode);
-        var index = IndexOfEnrolment(student.Id, course.Code);
+        Student student = FindStudent(studentId);
+        Course course = FindCourse(courseCode);
+        int index = IndexOfEnrolment(student.Id, course.Code);
         if (index < 0)
         {
             throw new StudentRecordsException(RecordsFailure.NotEnrolled, $"{student.Name} is not enrolled in {course.Code}.");
@@ -211,9 +211,9 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var assignment = FindAssignment(assignmentId);
-        var index = RequireEnrolment(studentId, assignment.CourseCode);
-        var enrolment = _enrolments[index];
+        Assignment assignment = FindAssignment(assignmentId);
+        int index = RequireEnrolment(studentId, assignment.CourseCode);
+        Enrolment enrolment = _enrolments[index];
 
         Submission submission = new(studentId, assignmentId, Now, Today() > assignment.DueDate);
         List<Submission> submissions = [.. enrolment.Submissions];
@@ -228,14 +228,14 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     {
         await EnterAsync().ConfigureAwait(false);
 
-        var assignment = FindAssignment(assignmentId);
-        var index = RequireEnrolment(studentId, assignment.CourseCode);
+        Assignment assignment = FindAssignment(assignmentId);
+        int index = RequireEnrolment(studentId, assignment.CourseCode);
         if (score < 0 || score > assignment.MaxScore)
         {
             throw new StudentRecordsException(RecordsFailure.ScoreOutOfRange, $"A score for '{assignment.Title}' must be between 0 and {assignment.MaxScore}.");
         }
 
-        var enrolment = _enrolments[index];
+        Enrolment enrolment = _enrolments[index];
         Grade grade = new(studentId, assignmentId, score, Now);
         List<Grade> grades = [.. enrolment.Grades];
         _ = grades.RemoveAll(existing => existing.AssignmentId == assignmentId);
@@ -273,7 +273,7 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     /// <returns>An independent copy.</returns>
     private Student Snapshot(Student student)
     {
-        var copy = student.Clone();
+        Student copy = student.Clone();
         copy.Enrolments = EnrolmentsOf(student.Id);
         return copy;
     }
@@ -284,7 +284,7 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     private List<Enrolment> EnrolmentsOf(int studentId)
     {
         List<Enrolment> enrolments = [];
-        foreach (var enrolment in _enrolments)
+        foreach (Enrolment enrolment in _enrolments)
         {
             if (enrolment.StudentId == studentId)
             {
@@ -309,8 +309,8 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     /// <exception cref="StudentRecordsException">The student does not exist or is not enrolled.</exception>
     private int RequireEnrolment(int studentId, string courseCode)
     {
-        var student = FindStudent(studentId);
-        var index = IndexOfEnrolment(student.Id, courseCode);
+        Student student = FindStudent(studentId);
+        int index = IndexOfEnrolment(student.Id, courseCode);
         return index >= 0
             ? index
             : throw new StudentRecordsException(RecordsFailure.NotEnrolled, $"{student.Name} is not enrolled in {courseCode}.");
@@ -321,8 +321,8 @@ public sealed class InMemoryStudentRecords : IStudentRecords
     /// <returns>The number of enrolments.</returns>
     private int CountEnrolled(string courseCode)
     {
-        var count = 0;
-        foreach (var enrolment in _enrolments)
+        int count = 0;
+        foreach (Enrolment enrolment in _enrolments)
         {
             if (enrolment.CourseCode == courseCode)
             {

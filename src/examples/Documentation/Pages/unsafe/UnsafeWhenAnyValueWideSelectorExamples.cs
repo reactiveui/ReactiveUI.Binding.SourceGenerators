@@ -22,7 +22,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes three properties and combines them with a selector.</summary>
     public static void ObserveThreeColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(x => x.Title, x => x.Id, x => x.IsDone, static (c1, c2, c3) => string.Join(Separator, c1, c2, c3)).Subscribe(Console.WriteLine))
         {
@@ -37,7 +37,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes four properties and combines them with a selector.</summary>
     public static void ObserveFourColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -58,7 +58,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes five properties and combines them with a selector.</summary>
     public static void ObserveFiveColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -80,7 +80,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes six properties and combines them with a selector.</summary>
     public static void ObserveSixColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -103,7 +103,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes seven properties and combines them with a selector.</summary>
     public static void ObserveSevenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -127,7 +127,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes eight properties and combines them with a selector.</summary>
     public static void ObserveEightColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -152,7 +152,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes nine properties and combines them with a selector.</summary>
     public static void ObserveNineColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -178,7 +178,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes ten properties and combines them with a selector.</summary>
     public static void ObserveTenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -205,7 +205,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes eleven properties and combines them with a selector.</summary>
     public static void ObserveElevenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -233,7 +233,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes twelve properties and combines them with a selector.</summary>
     public static void ObserveTwelveColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -262,7 +262,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes thirteen properties and combines them with a selector.</summary>
     public static void ObserveThirteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -292,7 +292,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes fourteen properties and combines them with a selector.</summary>
     public static void ObserveFourteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -323,7 +323,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes fifteen properties and combines them with a selector.</summary>
     public static void ObserveFifteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,
@@ -355,7 +355,7 @@ public static class UnsafeWhenAnyValueWideSelectorExamples
     /// <summary>Observes sixteen properties and combines them with a selector.</summary>
     public static void ObserveSixteenColumnsWithSelector()
     {
-        var item = CreateItem();
+        TodoItem item = CreateItem();
 
         using (item.WhenAnyValueUnsafe(
             x => x.Title,

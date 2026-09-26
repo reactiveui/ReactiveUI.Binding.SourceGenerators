@@ -2,6 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Tests.TestExecutors;
 using TUnit.Core.Executors;
 
@@ -225,6 +226,29 @@ public class DefaultViewLocatorObjectResolveTests
         await Assert.That(() => locator.ResolveView(viewModel)).Throws<ArgumentNullException>();
     }
 
+    /// <summary>
+    /// ResolveView warns when it finds no generated or mapped view, naming ResolveViewUnsafe for a view registered only in
+    /// the service locator. ResolveViewUnsafe, which asks the service locator itself, gives no such warning.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveView_NoGeneratedOrMappedView_LogsAWarning()
+    {
+        var logger = new CapturingLogger();
+        AppLocator.CurrentMutable.RegisterConstant<ILogManager>(new CapturingLogManager(logger));
+        object viewModel = new TestViewModel();
+        var locator = new DefaultViewLocator();
+
+        _ = locator.ResolveViewUnsafe(viewModel, null);
+        var afterUnsafe = logger.Warnings.Count;
+        _ = locator.ResolveView(viewModel);
+
+        await Assert.That(afterUnsafe).IsEqualTo(0);
+        await Assert.That(logger.Warnings).HasSingleItem();
+        await Assert.That(logger.Warnings[0]).Contains("TestViewModel");
+        await Assert.That(logger.Warnings[0]).Contains("ResolveViewUnsafe");
+    }
+
     /// <summary>A view model the tests resolve views for.</summary>
     private sealed class TestViewModel
     {
@@ -244,6 +268,52 @@ public class DefaultViewLocatorObjectResolveTests
             get => ViewModel;
             set => ViewModel = value as TestViewModel;
         }
+    }
+
+    /// <summary>Records the warnings written to it.</summary>
+    private sealed class CapturingLogger : ILogger
+    {
+        /// <summary>Gets the warning messages, in the order they were written.</summary>
+        public List<string> Warnings { get; } = [];
+
+        /// <inheritdoc/>
+        public LogLevel Level => LogLevel.Debug;
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write(string message, LogLevel logLevel) => Record(message, logLevel);
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write(Exception exception, string message, LogLevel logLevel) => Record(message, logLevel);
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write(string message, Type type, LogLevel logLevel) => Record(message, logLevel);
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write(Exception exception, string message, Type type, LogLevel logLevel) => Record(message, logLevel);
+
+        /// <summary>Keeps a message written at warning level.</summary>
+        /// <param name="message">The message.</param>
+        /// <param name="logLevel">The level it was written at.</param>
+        private void Record(string message, LogLevel logLevel)
+        {
+            if (logLevel == LogLevel.Warn)
+            {
+                Warnings.Add(message);
+            }
+        }
+    }
+
+    /// <summary>Hands every type the same capturing logger.</summary>
+    /// <param name="logger">The logger.</param>
+    private sealed class CapturingLogManager(CapturingLogger logger) : ILogManager
+    {
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IFullLogger GetLogger(Type type) => new WrappingFullLogger(logger);
     }
 
     /// <summary>A second view for <see cref="TestViewModel"/>, so a test can tell which step supplied the view.</summary>

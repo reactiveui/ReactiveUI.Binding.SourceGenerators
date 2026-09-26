@@ -161,7 +161,7 @@ public sealed class StorageBrowserViewModel : ObservableObject
 
         try
         {
-            var objects = await _storage.ListObjectsAsync(bucket.Name, CurrentPrefix).ConfigureAwait(false);
+            IReadOnlyList<StorageObject> objects = await _storage.ListObjectsAsync(bucket.Name, CurrentPrefix).ConfigureAwait(false);
             ErrorMessage = string.Empty;
             Objects = objects;
             SelectedObject = null;
@@ -188,7 +188,7 @@ public sealed class StorageBrowserViewModel : ObservableObject
 
         try
         {
-            await foreach (var report in _storage.UploadAsync(bucket.Name, CurrentPrefix + request.FileName, request.SizeBytes, request.ContentType).ConfigureAwait(false))
+            await foreach (UploadProgress report in _storage.UploadAsync(bucket.Name, CurrentPrefix + request.FileName, request.SizeBytes, request.ContentType).ConfigureAwait(false))
             {
                 UploadPercent = report.Fraction * FullPercent;
             }

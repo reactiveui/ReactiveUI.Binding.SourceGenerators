@@ -45,11 +45,11 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are printed.</returns>
     public static async Task PrintTwoTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form.WhenChanged(x => x.Amount, x => x.Reference).FirstAsync();
+        PropertyValues<decimal, string> values = await form.WhenChanged(x => x.Amount, x => x.Reference).FirstAsync();
 
-        var text = values.ToString();
+        string text = values.ToString();
 
         Console.WriteLine($"Emission: {text}.");
 
@@ -61,16 +61,16 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareThreeTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
                 x => x.SourceId)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string> copy = values with { };
+        PropertyValues<decimal, string, string> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -90,17 +90,17 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareFourTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
                 x => x.SourceId,
                 x => x.SourceName)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string> copy = values with { };
+        PropertyValues<decimal, string, string, string> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -120,9 +120,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareFiveTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -130,8 +130,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.SourceName,
                 x => x.SourceKind)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -151,9 +151,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareSixTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -162,8 +162,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.SourceKind,
                 x => x.Currency)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -183,9 +183,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareSevenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -195,8 +195,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.Currency,
                 x => x.Balance)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -216,9 +216,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareEightTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -229,8 +229,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.Balance,
                 x => x.OverdraftLimit)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -250,9 +250,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareNineTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -264,8 +264,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.OverdraftLimit,
                 x => x.AvailableBalance)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -285,9 +285,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareTenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -300,8 +300,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.AvailableBalance,
                 x => x.ScheduledFor)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -321,9 +321,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareElevenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -337,8 +337,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.ScheduledFor,
                 x => x.IsRecurring)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -358,9 +358,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareTwelveTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -375,8 +375,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.IsRecurring,
                 x => x.NotifyPayee)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -396,9 +396,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareThirteenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -414,8 +414,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.NotifyPayee,
                 x => x.Memo)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -435,9 +435,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareFourteenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -454,8 +454,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.Memo,
                 x => x.Purpose)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -475,9 +475,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareFifteenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -495,8 +495,8 @@ public static class PropertyValuesComparisonExamples
                 x => x.Purpose,
                 x => x.Fee)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal> edited = values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);
@@ -516,9 +516,9 @@ public static class PropertyValuesComparisonExamples
     /// <returns>A task that completes when the values are compared.</returns>
     public static async Task CompareSixteenTransferValues()
     {
-        var form = CreateTransferForm();
+        TransferForm form = CreateTransferForm();
 
-        var values = await form
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal, Payee> values = await form
             .WhenChanged(
                 x => x.Amount,
                 x => x.Reference,
@@ -537,8 +537,9 @@ public static class PropertyValuesComparisonExamples
                 x => x.Fee,
                 x => x.Payee!)
             .FirstAsync();
-        var copy = values with { };
-        var edited = values with { Property1 = default };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal, Payee> copy = values with { };
+        PropertyValues<decimal, string, string, string, AccountKind, string, decimal, decimal, decimal, DateOnly, bool, bool, string, string, decimal, Payee> edited =
+            values with { Property1 = default };
 
         Console.WriteLine(values == copy);
         Console.WriteLine(values != edited);

@@ -298,6 +298,7 @@ src/
 │   │   ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
 │   │   ├── DispatchReachAnalyzer.cs              # RXUIBIND009
 │   │   ├── ObservableAsPropertyAnalyzer.cs       # RXUIBIND018, 019
+│   │   ├── ServiceLocatorViewAnalyzer.cs         # RXUIBIND020
 │   │   ├── ToPropertyAnalyzer.cs                 # RXUIBIND012, 013
 │   │   ├── ToPropertyInitialValueAnalyzer.cs     # RXUIBIND014
 │   │   ├── UnreachableTypeAnalyzer.cs            # RXUIBIND015, 016
@@ -387,8 +388,10 @@ registration order. `ResolveView` asks them from the most recently registered to
 view returned. A view model that two assemblies both have a view for resolves to the assembly that registered
 last. Registering the same lookup twice has no effect.
 
-`DefaultViewLocator.ResolveView` tries the generated lookups first. It then tries mappings added with `Map`, and
-then the service locator.
+`DefaultViewLocator.ResolveView` tries the generated lookups first. It then tries mappings added with `Map`. The
+generic `ResolveView<T>` and `ResolveViewUnsafe` then ask the service locator; `ResolveView(object)` does not, because
+that needs `MakeGenericType`, and it logs a warning when it finds nothing. RXUIBIND020 reports a service locator
+registration of `IViewFor<T>` that the project neither generates a view for nor maps.
 
 ### API Pattern
 
@@ -905,6 +908,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND017 | Warning | Binding writes to a UI object without its platform package |
 | RXUIBIND018 | Warning | ObservableAsProperty needs a partial get-only property |
 | RXUIBIND019 | Warning | ObservableAsProperty method takes parameters |
+| RXUIBIND020 | Info | View is registered only in the service locator |
 
 ## Code Style & Quality Requirements
 
