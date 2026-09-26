@@ -188,6 +188,41 @@ public class DefaultViewLocatorTypedResolveTests
         await Assert.That(() => locator.ResolveView<TestViewModel>()).Throws<InvalidOperationException>();
     }
 
+    /// <summary>
+    /// A service-locator mapping with a service contract picks the view registered under that contract, when the
+    /// default view and the contracted view are both registered as <see cref="IViewFor{T}"/>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MapFromServiceLocator_WithAServiceContract_ResolvesTheContractedRegistration()
+    {
+        var locator = new DefaultViewLocator();
+        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(static () => new TestView());
+        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(static () => new OtherTestView(), Contract);
+        var viewModel = new TestViewModel();
+
+        _ = locator.CreateMappingBuilder()
+            .MapFromServiceLocator<TestViewModel, IViewFor<TestViewModel>>()
+            .MapFromServiceLocator<TestViewModel, IViewFor<TestViewModel>>(Contract, Contract);
+
+        await Assert.That(locator.ResolveView(viewModel)).IsTypeOf<TestView>();
+        await Assert.That(locator.ResolveView(viewModel, Contract)).IsTypeOf<OtherTestView>();
+    }
+
+    /// <summary>A service-locator mapping whose service contract nobody registered names that contract when it resolves.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MapFromServiceLocator_UnregisteredServiceContract_ThrowsNamingTheContract()
+    {
+        var locator = new DefaultViewLocator();
+        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(static () => new TestView());
+        _ = locator.CreateMappingBuilder().MapFromServiceLocator<TestViewModel, IViewFor<TestViewModel>>(Contract, Contract);
+
+        await Assert.That(() => locator.ResolveView<TestViewModel>(Contract))
+            .Throws<InvalidOperationException>()
+            .WithMessageContaining($"'{Contract}'");
+    }
+
     /// <summary>Resolves a view through the <see cref="IViewLocator"/> extension, as a caller holding the interface would.</summary>
     /// <param name="locator">The locator.</param>
     /// <param name="contract">The contract to resolve under.</param>
