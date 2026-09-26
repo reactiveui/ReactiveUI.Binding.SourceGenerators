@@ -640,6 +640,16 @@ namespace ReactiveUI.Binding
         public TSender Sender { get; }
         public TValue Value { get; }
     }
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+    public static class ObservedProperty
+    {
+        public static System.IObservable<TValue> Create<TSource, TValue>(TSource source, System.Linq.Expressions.Expression<System.Func<TSource, TValue>> property, System.Func<TSource, TValue> getter) where TSource : class { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static System.IObservable<ReactiveUI.Binding.PropertyValues<T1, T2>> Create<TSource, T1, T2>(TSource source, System.Linq.Expressions.Expression<System.Func<TSource, T1>> property1, System.Func<TSource, T1> getter1, System.Linq.Expressions.Expression<System.Func<TSource, T2>> property2, System.Func<TSource, T2> getter2) where TSource : class { }
+        public static System.IObservable<TResult> Create<TSource, T1, T2, TResult>(TSource source, System.Linq.Expressions.Expression<System.Func<TSource, T1>> property1, System.Func<TSource, T1> getter1, System.Linq.Expressions.Expression<System.Func<TSource, T2>> property2, System.Func<TSource, T2> getter2, System.Func<T1, T2, TResult> selector) where TSource : class { }
+        public static System.IObservable<TValue> Switch<TValue>(this System.IObservable<System.IObservable<TValue>?> source) { }
+        public static System.IObservable<TValue> Then<TParent, TValue>(this System.IObservable<TParent?> parent, System.Linq.Expressions.Expression<System.Func<TParent, TValue>> property, System.Func<TParent, TValue> getter) where TParent : class { }
+    }
     [System.Diagnostics.DebuggerDisplay("PropertyValues: {Property1}, {Property2}")]
     public readonly record struct PropertyValues<T1, T2> : System.IEquatable<ReactiveUI.Binding.PropertyValues<T1, T2>>
     {

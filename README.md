@@ -370,6 +370,24 @@ view.BindCommand(profile, x => x.SaveCommand, v => v.Save); // generated
 A member any other source generator adds is not seen. RXUIBIND021 reports each call that binds one, because the call
 throws when it runs. Declare the member yourself as a partial property, or call the `Unsafe` overload.
 
+### Observing from code a generator writes
+
+The reverse holds too: code another source generator writes cannot call `WhenAnyValue`, because this generator never
+sees that call. `ObservedProperty` gives such code the same observation without a generated binding. Hand-written code
+calls `WhenAnyValue`.
+
+| Generated code wants | It calls |
+|----------------------|----------|
+| `WhenAnyValue(x => x.Name)` | `ObservedProperty.Create(source, static x => x.Name, static x => x.Name)` |
+| `WhenAnyValue(x => x.Name, x => x.Age)` | `ObservedProperty.Create(source, ...Name..., ...Age...)`, with an optional selector |
+| `WhenAnyValue(x => x.Home.City)` | `ObservedProperty.Create(source, ...Home...).Then(static h => h.City, static h => h.City)` |
+| `WhenAnyObservable(x => x.Messages)` | `ObservedProperty.Create(source, ...Messages...).Switch()` |
+
+Each property is passed twice: as a lambda that names it, and as a delegate that reads it. The compiler builds the
+lambda from metadata, so nothing uses reflection, and trimming and ahead-of-time publishing are safe. The types it
+composes are the ones a generated binding uses, so the values match. `ObservedProperty` observes one or two properties;
+`Then` and `Switch` extend either to longer paths.
+
 ## Installing
 
 ```

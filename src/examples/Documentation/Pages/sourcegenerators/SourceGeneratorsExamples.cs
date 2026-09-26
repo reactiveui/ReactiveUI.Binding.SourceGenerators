@@ -59,6 +59,25 @@ public static class SourceGeneratorsExamples
         // Linus
     }
 
+    /// <summary>
+    /// Observes a property the way code another source generator writes does: with <see cref="ObservedProperty"/>,
+    /// which needs no generated binding. Hand-written code calls <c>WhenAnyValue</c> instead.
+    /// </summary>
+    public static void ObserveFromGeneratedCode()
+    {
+        ProfileViewModel profile = new ProfileViewModel();
+
+        using IDisposable subscription = ObservedProperty
+            .Create(profile, static x => x.DisplayName, static x => x.DisplayName)
+            .Subscribe(Console.WriteLine);
+
+        profile.DisplayName = "Grace";
+
+        // Output:
+        // Ada
+        // Grace
+    }
+
     /// <summary>Binds a button to the command <c>[ReactiveCommand]</c> writes from a method.</summary>
     public static void BindAButtonToAGeneratedCommand()
     {
