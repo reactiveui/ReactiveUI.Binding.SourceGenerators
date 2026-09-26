@@ -129,6 +129,16 @@ internal static class DiagnosticWarnings
         true,
         ObservableAsPropertyNeedsPartialPropertyDescription);
 
+    /// <summary>RXUIBIND021: a binding call has no generated binding, so the runtime stub it resolves to throws.</summary>
+    internal static readonly DiagnosticDescriptor NoGeneratedBinding = new(
+        "RXUIBIND021",
+        "Binding call has no generated binding",
+        "'{0}' has no generated binding, so it throws at run time; name each member directly in the lambdas, declare a member another source generator adds as a partial property, or call {0}Unsafe",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        NoGeneratedBindingDescription);
+
     /// <summary>
     /// RXUIBIND020: a view is registered only in the service locator, which <c>ResolveView(object)</c> does not ask.
     /// Reported when the compilation ends, once every registration, view and mapping is known.
@@ -302,6 +312,14 @@ internal static class DiagnosticWarnings
         + "the build can see the property. A field, a method or an observable property marked with the attribute, as "
         + "ReactiveUI's older source generator allowed, gets nothing. The code fix rewrites those as partial properties, "
         + "which needs C# 13.";
+
+    /// <summary>The string description of the missing generated binding warning.</summary>
+    private const string NoGeneratedBindingDescription =
+        "The generator writes a binding for each call it can read, and the call runs that binding instead of the runtime "
+        + "method it names. A call it cannot read still runs the runtime method, which throws. A generator reads your code "
+        + "without any generator's output, so a member another source generator adds cannot be read. The members "
+        + "ReactiveUI.SourceGenerators adds are the exception: their rules are known, so they are read. Declare other "
+        + "generated members as partial properties, or call the Unsafe overload, which finds them by reflection.";
 
     /// <summary>The string description of the service-locator-only view information.</summary>
     private const string ServiceLocatorOnlyViewDescription =

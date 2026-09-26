@@ -4,7 +4,7 @@
 
 using ReactiveUI.Binding.Documentation.UnsafeOverloads;
 
-UnsafeSetupExamples.PlainCallWithStoredPathThrows();
+UnsafeSetupExamples.PlainCallNeedsAPathWrittenInTheCall();
 
 UnsafeSetupExamples.UnsafeCallBeforeBuildFails();
 

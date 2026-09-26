@@ -20,7 +20,7 @@ internal static class InteractionExtractor
     /// <returns>A BindInteractionInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
     internal static BindInteractionInvocationInfo? ExtractBindInteractionInvocation(
-        GeneratorSyntaxContext context,
+        CallSiteContext context,
         CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;

@@ -33,7 +33,7 @@ internal static class CommandExtractor
     /// </returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
     internal static BindCommandInvocationInfo? ExtractBindCommandInvocation(
-        GeneratorSyntaxContext context,
+        CallSiteContext context,
         CancellationToken ct)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;

@@ -18,6 +18,8 @@
     <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net472"/>
     <PackageReference Include="ReactiveUI"/>
+    <PackageReference Include="ReactiveUI.SourceGenerators" GeneratePathProperty="true" ExcludeAssets="analyzers"/>
+    <Reference Include="$(PkgReactiveUI_SourceGenerators)/analyzers/dotnet/roslyn5.0/cs/ReactiveUI.SourceGenerators.Roslyn.dll"/>
   </ItemGroup>
 
   <ItemGroup>

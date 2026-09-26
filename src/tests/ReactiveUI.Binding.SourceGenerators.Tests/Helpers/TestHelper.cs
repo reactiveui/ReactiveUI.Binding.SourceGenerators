@@ -347,6 +347,30 @@ public static class TestHelper
         return new(driver, outputCompilation, diagnostics);
     }
 
+    /// <summary>Runs this generator in the same pass as other generators, as a build that references both does.</summary>
+    /// <param name="compilation">The compilation to generate against.</param>
+    /// <param name="parseOptions">The options generated code is parsed with, and that the generators read.</param>
+    /// <param name="siblings">The other generators, which see the same input as this one and none of its output.</param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGeneratorBeside(
+        Compilation compilation,
+        CSharpParseOptions parseOptions,
+        ImmutableArray<ISourceGenerator> siblings)
+    {
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [.. siblings, new BindingGenerator().AsSourceGenerator()],
+            null,
+            parseOptions,
+            new BuildPropertyOptionsProvider(null, true),
+            new(
+                default,
+                true));
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+
+        return new(driver, outputCompilation, diagnostics);
+    }
+
     /// <summary>Emits the output compilation to memory and loads it into a collectible assembly load context.</summary>
     /// <param name="result">The generator test result to emit.</param>
     /// <returns>The loaded assembly and the load context (dispose context to unload).</returns>

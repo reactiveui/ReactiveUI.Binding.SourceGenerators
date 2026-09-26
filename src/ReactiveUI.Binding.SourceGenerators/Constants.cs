@@ -178,6 +178,21 @@ internal static class Constants
     /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[IViewFor("...")]</c> attribute.</summary>
     internal const string SourceGeneratorsIViewForAttributeMetadataName = "ReactiveUI.SourceGenerators.IViewForAttribute";
 
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[Reactive]</c> attribute.</summary>
+    internal const string SourceGeneratorsReactiveAttributeMetadataName = "ReactiveUI.SourceGenerators.ReactiveAttribute";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[ReactiveCollection]</c> attribute.</summary>
+    internal const string SourceGeneratorsReactiveCollectionAttributeMetadataName = "ReactiveUI.SourceGenerators.ReactiveCollectionAttribute";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[BindableDerivedList]</c> attribute.</summary>
+    internal const string SourceGeneratorsBindableDerivedListAttributeMetadataName = "ReactiveUI.SourceGenerators.BindableDerivedListAttribute";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[ReactiveCommand]</c> attribute.</summary>
+    internal const string SourceGeneratorsReactiveCommandAttributeMetadataName = "ReactiveUI.SourceGenerators.ReactiveCommandAttribute";
+
+    /// <summary>Metadata name of ReactiveUI.SourceGenerators' <c>[IReactiveObject]</c> attribute.</summary>
+    internal const string SourceGeneratorsIReactiveObjectAttributeMetadataName = "ReactiveUI.SourceGenerators.IReactiveObjectAttribute";
+
     /// <summary>Metadata name for the <c>ExcludeFromViewRegistrationAttribute</c> used to skip view auto-registration.</summary>
     internal const string ExcludeFromViewRegistrationAttributeMetadataName =
         "ReactiveUI.Binding.ExcludeFromViewRegistrationAttribute";

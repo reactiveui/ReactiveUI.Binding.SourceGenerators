@@ -46,23 +46,26 @@ public class BindingGenerator : IIncrementalGenerator
         // place; each generator is handed the invocations it asked for and only turns them into source.
         // The four property-binding APIs differ only in which call sites they match, so one extraction
         // delegate serves all of them rather than a conversion per scan.
-        Func<GeneratorSyntaxContext, CancellationToken, BindingInvocationInfo?> extractBinding =
+        Func<CallSiteContext, CancellationToken, BindingInvocationInfo?> extractBinding =
             BindingExtractor.ExtractBindInvocation;
 
-        var whenChanged = Detect(in context, RoslynHelpers.IsWhenChangedInvocation, ObservationExtractor.ExtractWhenChangedInvocation);
-        var whenChanging = Detect(in context, RoslynHelpers.IsWhenChangingInvocation, ObservationExtractor.ExtractWhenChangingInvocation);
-        var whenAnyValue = Detect(in context, RoslynHelpers.IsWhenAnyValueInvocation, ObservationExtractor.ExtractWhenAnyValueInvocation);
-        var whenAny = Detect(in context, RoslynHelpers.IsWhenAnyInvocation, ObservationExtractor.ExtractWhenAnyInvocation);
-        var whenAnyObservable = Detect(in context, RoslynHelpers.IsWhenAnyObservableInvocation, WhenAnyObservableExtractor.ExtractWhenAnyObservableInvocation);
-        var bindOneWay = Detect(in context, RoslynHelpers.IsBindOneWaySpecificInvocation, extractBinding);
-        var bindTwoWay = Detect(in context, RoslynHelpers.IsBindTwoWaySpecificInvocation, extractBinding);
-        var oneWayBind = Detect(in context, RoslynHelpers.IsOneWayBindSpecificInvocation, extractBinding);
-        var bind = Detect(in context, RoslynHelpers.IsBindSpecificInvocation, extractBinding);
-        var bindCommand = Detect(in context, RoslynHelpers.IsBindCommandInvocation, CommandExtractor.ExtractBindCommandInvocation);
-        var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation);
-        var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
-        var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation);
-        var toProperty = Detect(in context, RoslynHelpers.IsToPropertyInvocation, ToPropertyExtractor.ExtractToPropertyInvocation);
+        // Call sites that bind a member ReactiveUI.SourceGenerators writes are read from a compilation declaring it.
+        var sg = SourceGeneratorsCompilation.Register(in context);
+
+        var whenChanged = Detect(in context, RoslynHelpers.IsWhenChangedInvocation, ObservationExtractor.ExtractWhenChangedInvocation, sg);
+        var whenChanging = Detect(in context, RoslynHelpers.IsWhenChangingInvocation, ObservationExtractor.ExtractWhenChangingInvocation, sg);
+        var whenAnyValue = Detect(in context, RoslynHelpers.IsWhenAnyValueInvocation, ObservationExtractor.ExtractWhenAnyValueInvocation, sg);
+        var whenAny = Detect(in context, RoslynHelpers.IsWhenAnyInvocation, ObservationExtractor.ExtractWhenAnyInvocation, sg);
+        var whenAnyObservable = Detect(in context, RoslynHelpers.IsWhenAnyObservableInvocation, WhenAnyObservableExtractor.ExtractWhenAnyObservableInvocation, sg);
+        var bindOneWay = Detect(in context, RoslynHelpers.IsBindOneWaySpecificInvocation, extractBinding, sg);
+        var bindTwoWay = Detect(in context, RoslynHelpers.IsBindTwoWaySpecificInvocation, extractBinding, sg);
+        var oneWayBind = Detect(in context, RoslynHelpers.IsOneWayBindSpecificInvocation, extractBinding, sg);
+        var bind = Detect(in context, RoslynHelpers.IsBindSpecificInvocation, extractBinding, sg);
+        var bindCommand = Detect(in context, RoslynHelpers.IsBindCommandInvocation, CommandExtractor.ExtractBindCommandInvocation, sg);
+        var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation, sg);
+        var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation, sg);
+        var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation, sg);
+        var toProperty = Detect(in context, RoslynHelpers.IsToPropertyInvocation, ToPropertyExtractor.ExtractToPropertyInvocation, sg);
 
         // Each invocation generator receives the language-feature snapshot to control dispatch/output
         WhenChangedInvocationGenerator.Register(context, whenChanged, languageFeatures);
@@ -300,15 +303,23 @@ public class BindingGenerator : IIncrementalGenerator
     /// <param name="context">The generator initialization context.</param>
     /// <param name="predicate">The syntactic filter for this API.</param>
     /// <param name="transform">The semantic extraction for this API.</param>
+    /// <param name="sourceGenerators">The compilation that declares ReactiveUI.SourceGenerators' members, or null.</param>
     /// <returns>The extracted call sites, with the unanalyzable ones dropped.</returns>
+    /// <remarks>
+    /// Each call site is read from the compilation that declares ReactiveUI.SourceGenerators' members when the consumer
+    /// uses that generator, so a call site binding one of its properties is read like any other.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IncrementalValuesProvider<T> Detect<T>(
         in IncrementalGeneratorInitializationContext context,
         Func<SyntaxNode, CancellationToken, bool> predicate,
-        Func<GeneratorSyntaxContext, CancellationToken, T?> transform)
+        Func<CallSiteContext, CancellationToken, T?> transform,
+        IncrementalValueProvider<Compilation?> sourceGenerators)
         where T : class =>
         context.SyntaxProvider
-            .CreateSyntaxProvider(predicate, transform)
+            .CreateSyntaxProvider(predicate, static (syntaxContext, _) => syntaxContext)
+            .Combine(sourceGenerators)
+            .Select((data, ct) => transform(CallSiteContext.From(data.Left, data.Right), ct))
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 
