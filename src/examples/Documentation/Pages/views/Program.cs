@@ -84,6 +84,8 @@ ViewMappingExamples.ResolveViewByType();
 
 ViewMappingExamples.MapViewFromServiceLocator();
 
+ViewMappingExamples.MapContractedViewFromServiceLocator();
+
 ViewMappingExamples.ResolveInOrder();
 
 ViewMappingExamples.ConfigureViewLocatorInBuilder();

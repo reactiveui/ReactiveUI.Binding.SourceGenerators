@@ -85,18 +85,42 @@ public sealed class ViewMappingBuilder
     /// <param name="contract">The contract the mapping is registered under; null registers the default mapping.</param>
     /// <returns>This builder for chaining.</returns>
     /// <remarks>
-    /// The view is asked for each time the mapping resolves, so the service locator's lifetime for it applies. A view
-    /// that is not registered throws <see cref="InvalidOperationException"/> when the mapping resolves, rather than
-    /// resolving to nothing.
+    /// The service locator is asked for <typeparamref name="TView"/> with no contract. To tell apart views registered
+    /// under one type, such as <c>IViewFor&lt;TViewModel&gt;</c>, pass the service locator contract to
+    /// <see cref="MapFromServiceLocator{TViewModel, TView}(string?, string?)"/>. The view is asked for each time the
+    /// mapping resolves, so the service locator's lifetime for it applies. A view that is not registered throws
+    /// <see cref="InvalidOperationException"/> when the mapping resolves, rather than resolving to nothing.
     /// </remarks>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract)
+        where TViewModel : class
+        where TView : class, IViewFor => MapFromServiceLocator<TViewModel, TView>(contract, null);
+
+    /// <summary>
+    /// Maps a view model type and contract to a view the service locator creates under its own contract, replacing an
+    /// existing mapping for the same pair.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type, as registered in the service locator.</typeparam>
+    /// <param name="contract">The contract the mapping is registered under; null registers the default mapping.</param>
+    /// <param name="serviceContract">The contract the view is registered under in the service locator; null asks for the registration with no contract.</param>
+    /// <returns>This builder for chaining.</returns>
+    /// <remarks>
+    /// The view is asked for each time the mapping resolves, so the service locator's lifetime for it applies. A view
+    /// that is not registered under <paramref name="serviceContract"/> throws <see cref="InvalidOperationException"/>
+    /// when the mapping resolves, rather than resolving to nothing or to a view registered under another contract.
+    /// </remarks>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    public ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract, string? serviceContract)
         where TViewModel : class
         where TView : class, IViewFor
     {
         _locator.Map<TViewModel>(
-            static () => AppLocator.Current.GetService<TView>()
-                ?? throw new InvalidOperationException($"View {typeof(TView).Name} is not registered in the service locator."),
+            () => AppLocator.Current.GetService<TView>(serviceContract)
+                ?? throw new InvalidOperationException(serviceContract is null
+                    ? $"View {typeof(TView).Name} is not registered in the service locator."
+                    : $"View {typeof(TView).Name} is not registered in the service locator under contract '{serviceContract}'."),
             contract);
         return this;
     }

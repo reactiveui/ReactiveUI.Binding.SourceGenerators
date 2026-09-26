@@ -212,6 +212,40 @@ public static class ViewMappingExamples
         // True
     }
 
+    /// <summary>
+    /// Maps a contract to a screen the service locator registers under the same contract. Both screens are registered as
+    /// <c>IViewFor&lt;TodoItem&gt;</c>, so the service contract is what tells them apart.
+    /// </summary>
+    public static void MapContractedViewFromServiceLocator()
+    {
+        TodoItem item = CreateItem();
+        DefaultViewLocator locator = new();
+        AppLocator.CurrentMutable.Register<IViewFor<TodoItem>>(static () => new TodoItemDetailView());
+        AppLocator.CurrentMutable.Register<IViewFor<TodoItem>>(static () => new TodoItemPreviewView(), PreviewContract);
+
+        try
+        {
+            _ = locator.CreateMappingBuilder()
+                .MapFromServiceLocator<TodoItem, IViewFor<TodoItem>>()
+                .MapFromServiceLocator<TodoItem, IViewFor<TodoItem>>(PreviewContract, serviceContract: PreviewContract);
+
+            IViewFor? detail = locator.ResolveView(item);
+            IViewFor? preview = locator.ResolveView(item, PreviewContract);
+
+            Console.WriteLine(detail?.GetType().Name);
+            Console.WriteLine(preview?.GetType().Name);
+        }
+        finally
+        {
+            AppLocator.CurrentMutable.UnregisterAll<IViewFor<TodoItem>>();
+            AppLocator.CurrentMutable.UnregisterAll<IViewFor<TodoItem>>(PreviewContract);
+        }
+
+        // Output:
+        // TodoItemDetailView
+        // TodoItemPreviewView
+    }
+
     /// <summary>Registers the mappings while the application starts, before the locator is first used.</summary>
     public static void ConfigureViewLocatorInBuilder()
     {

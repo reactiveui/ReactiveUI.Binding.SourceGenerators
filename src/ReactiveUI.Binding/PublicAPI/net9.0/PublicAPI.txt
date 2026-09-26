@@ -1946,7 +1946,9 @@ namespace ReactiveUI.Binding
         public ReactiveUI.Binding.ViewMappingBuilder Map<TViewModel, TView>(string? contract) where TViewModel : class where TView : ReactiveUI.Binding.IViewFor, new() { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public ReactiveUI.Binding.ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>() where TViewModel : class where TView : class, ReactiveUI.Binding.IViewFor { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public ReactiveUI.Binding.ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract) where TViewModel : class where TView : class, ReactiveUI.Binding.IViewFor { }
+        public ReactiveUI.Binding.ViewMappingBuilder MapFromServiceLocator<TViewModel, TView>(string? contract, string? serviceContract) where TViewModel : class where TView : class, ReactiveUI.Binding.IViewFor { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static class ViewThreadInvokers
