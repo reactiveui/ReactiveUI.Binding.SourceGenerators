@@ -388,6 +388,26 @@ lambda from metadata, so nothing uses reflection, and trimming and ahead-of-time
 composes are the ones a generated binding uses, so the values match. `ObservedProperty` observes one or two properties;
 `Then` and `Switch` extend either to longer paths.
 
+### Controls named in XAML
+
+MAUI and Avalonia declare a field for each control a page names in XAML, and they do it with a source generator. The
+generator reads those pages itself, so `Bind`, `OneWayBind` and `BindCommand` reach the named controls:
+
+```csharp
+// LoginPage.xaml: <Entry x:Name="UserName" x:FieldModifier="internal" />
+this.Bind(ViewModel, vm => vm.UserName, v => v.UserName.Text); // generated
+```
+
+- **MAUI:** each `x:Name` is a field, `private` unless `x:FieldModifier` says otherwise. Generated code cannot reach a
+  private field, so give a bound control `x:FieldModifier="internal"`.
+- **Avalonia:** each `x:Name` or `Name` is a field, with the accessibility `AvaloniaNameGeneratorDefaultFieldModifier`
+  gives it, `internal` by default.
+- **WPF and WinUI:** their build writes the fields before the compiler runs, so the generator sees them without reading
+  the XAML.
+
+The pages reach the generator through the platform's own build, so there is nothing to set up. A control inside a
+template gets no field, and a generic control named with `x:TypeArguments` is not read.
+
 ## Installing
 
 ```
