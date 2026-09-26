@@ -17,6 +17,11 @@ namespace ReactiveUI.Binding;
 /// using a three-tier resolution strategy: source-generated AOT-safe dispatch, explicit runtime
 /// mappings, and service locator fallback.
 /// </summary>
+/// <remarks>
+/// For a view model held as an <see cref="object"/>, <see cref="ResolveView(object?, string?)"/> runs the first two
+/// tiers, which are ahead-of-time safe. <see cref="ResolveViewUnsafe(object?, string?)"/> adds the service locator
+/// tier, which closes <c>IViewFor&lt;&gt;</c> over the runtime type.
+/// </remarks>
 [DebuggerDisplay("DefaultViewLocator: Mappings = {_mappings.Count}")]
 public sealed class DefaultViewLocator : IViewLocator
 {
@@ -231,8 +236,24 @@ public sealed class DefaultViewLocator : IViewLocator
         return null;
     }
 
-    /// <inheritdoc/>
-    [RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
+    /// <summary>Resolves a view for the view model using its runtime type, without building any type at run time.</summary>
+    /// <param name="viewModel">The view model instance to resolve a view for.</param>
+    /// <param name="contract">The contract to resolve under, or null for the default view.</param>
+    /// <returns>The resolved view with its <c>ViewModel</c> set, or <see langword="null"/> if no view is found.</returns>
+    /// <remarks>
+    /// This asks the source-generated lookups, then the mappings added with <c>Map</c> for the view model's runtime
+    /// type. Both are safe in a trimmed or native AOT application. It never asks the service locator: a view
+    /// registered there only as <see cref="IViewFor{T}"/> needs <see cref="ResolveViewUnsafe(object?, string?)"/>.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var locator = new DefaultViewLocator();
+    /// locator.Map&lt;TodoViewModel, TodoView&gt;();
+    ///
+    /// object viewModel = new TodoViewModel();
+    /// var view = locator.ResolveView(viewModel, contract: null); // a TodoView
+    /// </code>
+    /// </example>
     public IViewFor? ResolveView(object? viewModel, string? contract)
     {
         if (viewModel is null)
@@ -252,15 +273,37 @@ public sealed class DefaultViewLocator : IViewLocator
 
         // 2. Explicit runtime mappings (AOT-safe)
         var view = TryResolveFromMappings(viewModel.GetType(), normalizedContract);
-        if (view is not null)
+        if (view is null)
         {
-            SetViewModelOnView(view, viewModel);
-            return view;
+            return null;
         }
 
-        // 3. Closing IViewFor<> over the runtime type, which needs an instantiation the compiler never saw
-        return TryResolveViaReflection(viewModel, normalizedContract);
+        SetViewModelOnView(view, viewModel);
+        return view;
     }
+
+    /// <summary>Resolves a view for the view model using its runtime type, and falls back to the service locator through a type built at run time.</summary>
+    /// <param name="viewModel">The view model instance to resolve a view for.</param>
+    /// <param name="contract">The contract to resolve under, or null for the default view.</param>
+    /// <returns>The resolved view with its <c>ViewModel</c> set, or <see langword="null"/> if no view is found.</returns>
+    /// <remarks>
+    /// This runs <see cref="ResolveView(object?, string?)"/> first. When it finds nothing, this closes
+    /// <c>IViewFor&lt;&gt;</c> over the view model's runtime type and asks the service locator for it. A native AOT
+    /// application cannot build that type, so prefer a generated view or a <c>Map</c> registration.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// AppLocator.CurrentMutable.Register&lt;IViewFor&lt;TodoViewModel&gt;&gt;(static () =&gt; new TodoView());
+    ///
+    /// object viewModel = new TodoViewModel();
+    /// var view = new DefaultViewLocator().ResolveViewUnsafe(viewModel, contract: null); // a TodoView
+    /// </code>
+    /// </example>
+    [RequiresDynamicCode(ViewLocatorMixins.ResolveViewUnsafeMessage)]
+    public IViewFor? ResolveViewUnsafe(object? viewModel, string? contract) =>
+        viewModel is null
+            ? null
+            : ResolveView(viewModel, contract) ?? TryResolveViaReflection(viewModel, contract ?? string.Empty);
 
     /// <summary>Creates a new <see cref="ViewMappingBuilder"/> for fluent registration of view-to-view-model mappings.</summary>
     /// <returns>A new <see cref="ViewMappingBuilder"/> targeting this locator instance.</returns>
@@ -295,7 +338,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <param name="viewModel">The view model instance.</param>
     private static void SetViewModelOnView(IViewFor view, object viewModel) => view.ViewModel = viewModel;
 
-    /// <summary>Fallback resolution using MakeGenericType. Not AOT-safe but provides backward compatibility.</summary>
+    /// <summary>The service locator tier of <see cref="ResolveViewUnsafe(object?, string?)"/>, which closes <c>IViewFor&lt;&gt;</c> with MakeGenericType.</summary>
     /// <param name="viewModel">The view model instance.</param>
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
