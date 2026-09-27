@@ -23,10 +23,9 @@ namespace ReactiveUI.Binding;
 /// they require to ask a question. The handler then provides the interaction with an output as the answer.
 /// </para>
 /// <para>
-/// This contract covers handler registration only, which is all a binding needs. Asking the question is the
-/// caller's own concern, so the method that does it belongs to the implementation:
-/// <see cref="Interaction{TInput, TOutput}.Handle(TInput)"/> returns a task, while a host framework that
-/// prefers observables can return one from its own type without conflicting with this interface.
+/// Through this interface, <see cref="Handle(TInput)"/> asks the question as an observable. On
+/// <see cref="Interaction{TInput, TOutput}"/> itself, <see cref="Interaction{TInput, TOutput}.Handle(TInput)"/>
+/// returns a task and <see cref="Interaction{TInput, TOutput}.WhenHandled(TInput)"/> returns the same observable.
 /// </para>
 /// </remarks>
 public interface IInteraction<TInput, TOutput>
@@ -46,4 +45,12 @@ public interface IInteraction<TInput, TOutput>
     /// <param name="handler">The handler.</param>
     /// <returns>A disposable which, when disposed, will unregister the handler.</returns>
     IDisposable RegisterHandler<TDontCare>(Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler);
+
+    /// <summary>Asks the question: runs the handlers, latest registered first, until one sets an output.</summary>
+    /// <param name="input">The input for the interaction.</param>
+    /// <returns>
+    /// A cold observable that runs the handlers each time it is subscribed, then emits the output and completes.
+    /// It fails with <see cref="UnhandledInteractionException{TInput, TOutput}"/> when no handler sets an output.
+    /// </returns>
+    IObservable<TOutput> Handle(TInput input);
 }

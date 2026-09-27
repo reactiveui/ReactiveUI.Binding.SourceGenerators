@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
+using ReactiveUI.Binding.Tests.TestModels;
+using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Tests.Interactions;
 
@@ -26,6 +28,9 @@ public class InteractionTests
 
     /// <summary>The input handed to an interaction whose handlers ignore it.</summary>
     private const string HandleInput = "input";
+
+    /// <summary>The message of the exception a failing handler raises.</summary>
+    private const string HandlerErrorMessage = "test error";
 
     /// <summary>The number of handlers the handler-list test registers.</summary>
     private const int RegisteredHandlerCount = 2;
@@ -186,12 +191,12 @@ public class InteractionTests
         using var registration = interaction.RegisterHandler(static ctx =>
         {
             ctx.SetOutput(true);
-            return new ErrorObservable<int>(new InvalidOperationException("test error"));
+            return new ErrorObservable<int>(new InvalidOperationException(HandlerErrorMessage));
         });
 
         await Assert.That(() => interaction.Handle("test"))
             .ThrowsExactly<InvalidOperationException>()
-            .WithMessage("test error", StringComparison.Ordinal);
+            .WithMessage(HandlerErrorMessage, StringComparison.Ordinal);
     }
 
     /// <summary>Verifies that the Action overload of RegisterHandler sets the output correctly.</summary>
@@ -204,6 +209,155 @@ public class InteractionTests
 
         var result = await interaction.Handle("test");
         await Assert.That(result).IsEqualTo(ActionOutput);
+    }
+
+    /// <summary>Verifies that WhenHandled runs the handlers on each subscription and not before.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task WhenHandled_RunsHandlersOnEachSubscription()
+    {
+        var interaction = new Interaction<string, int>();
+        var calls = 0;
+        using var registration = interaction.RegisterHandler(ctx =>
+        {
+            calls++;
+            ctx.SetOutput(ctx.Input.Length);
+        });
+
+        var question = interaction.WhenHandled("hello");
+        await Assert.That(calls).IsEqualTo(0);
+
+        var first = new CompletionObserver<int>();
+        using (question.Subscribe(first))
+        {
+            await Assert.That(await first.Completion).IsEqualTo(HelloLength);
+        }
+
+        var second = new CompletionObserver<int>();
+        using (question.Subscribe(second))
+        {
+            await Assert.That(await second.Completion).IsEqualTo(HelloLength);
+        }
+
+        await Assert.That(calls).IsEqualTo(RegisteredHandlerCount);
+    }
+
+    /// <summary>Verifies that WhenHandled fails with UnhandledInteractionException when no handler sets an output.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task WhenHandled_NoHandlers_FailsWithUnhandledInteractionException()
+    {
+        var interaction = new Interaction<string, int>();
+        var observer = new CompletionObserver<int>();
+
+        using var subscription = interaction.WhenHandled(HandleInput).Subscribe(observer);
+
+        await Assert.That(() => observer.Completion).ThrowsExactly<UnhandledInteractionException<string, int>>();
+    }
+
+    /// <summary>Verifies that Handle through the interface returns an observable of the output.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task InterfaceHandle_EmitsTheOutput()
+    {
+        IInteraction<string, int> interaction = new Interaction<string, int>();
+        using var registration = interaction.RegisterHandler(static ctx => ctx.SetOutput(SampleOutput));
+        var observer = new CompletionObserver<int>();
+
+        using var subscription = interaction.Handle(HandleInput).Subscribe(observer);
+
+        await Assert.That(await observer.Completion).IsEqualTo(SampleOutput);
+    }
+
+    /// <summary>Verifies that an interaction built with a scheduler invokes its handler only when the scheduler runs.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Handle_WithScheduler_InvokesHandlerOnTheScheduler()
+    {
+        var scheduler = new ManualSequencer();
+        var interaction = new Interaction<string, int>(scheduler);
+        var invoked = false;
+        using var registration = interaction.RegisterHandler(ctx =>
+        {
+            invoked = true;
+            ctx.SetOutput(SampleOutput);
+        });
+
+        var pending = interaction.Handle(HandleInput);
+        await Assert.That(invoked).IsFalse();
+
+        await Assert.That(scheduler.RunPending()).IsEqualTo(1);
+        await Assert.That(await pending).IsEqualTo(SampleOutput);
+        await Assert.That(invoked).IsTrue();
+    }
+
+    /// <summary>Verifies that a scheduled handler walks on to the next handler when it leaves the question unanswered.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Handle_WithScheduler_FallsToNextHandler()
+    {
+        var interaction = new Interaction<string, string>(ImmediateSequencer.Instance);
+        using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
+        using var second = interaction.RegisterHandler(static ctx =>
+        {
+            // Intentionally don't call SetOutput — skip
+        });
+
+        await Assert.That(await interaction.Handle(HandleInput)).IsEqualTo(FirstHandlerResult);
+    }
+
+    /// <summary>Verifies that a scheduled handler that throws faults Handle with its exception.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Handle_WithScheduler_HandlerThrows_FaultsHandle()
+    {
+        var interaction = new Interaction<string, bool>(ImmediateSequencer.Instance);
+        using var registration = interaction.RegisterHandler(
+            static Task (_) => throw new InvalidOperationException(HandlerErrorMessage));
+
+        await Assert.That(() => interaction.Handle(HandleInput))
+            .ThrowsExactly<InvalidOperationException>()
+            .WithMessage(HandlerErrorMessage, StringComparison.Ordinal);
+    }
+
+    /// <summary>Verifies that a null scheduler invokes handlers on the calling thread.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Handle_WithNullScheduler_InvokesHandlerInline()
+    {
+        var interaction = new Interaction<string, int>(null);
+        using var registration = interaction.RegisterHandler(static ctx => ctx.SetOutput(SampleOutput));
+
+        var pending = interaction.Handle(HandleInput);
+
+        await Assert.That(pending.IsCompleted).IsTrue();
+        await Assert.That(await pending).IsEqualTo(SampleOutput);
+    }
+
+    /// <summary>Completes a task with the last value an observable emits, or with its error.</summary>
+    /// <typeparam name="T">The element type.</typeparam>
+    private sealed class CompletionObserver<T> : IObserver<T>
+    {
+        /// <summary>Completes when the observable completes or fails.</summary>
+        private readonly TaskCompletionSource<T> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        /// <summary>The last value received.</summary>
+        private T _last = default!;
+
+        /// <summary>Gets a task that completes with the last value when the observable completes.</summary>
+        public Task<T> Completion => _completion.Task;
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnNext(T value) => _last = value;
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnError(Exception error) => _completion.TrySetException(error);
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnCompleted() => _completion.TrySetResult(_last);
     }
 
     /// <summary>An observable that immediately errors on subscribe. Used to test OnError path.</summary>

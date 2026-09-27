@@ -189,6 +189,12 @@ BindInteractionExamples.ConstructUnhandledInteractionException();
 
 await BindInteractionExamples.HandleThroughInterface();
 
+await BindInteractionExamples.AskAsAnObservable();
+
+await BindInteractionExamples.AskThroughInterfaceAsAnObservable();
+
+await BindInteractionExamples.AnswerOnTheHandlerScheduler();
+
 await ListSelectionBindingExamples.BindBusyIndicator();
 
 await ListSelectionBindingExamples.BindFilterTextBoxesTwoWay();
