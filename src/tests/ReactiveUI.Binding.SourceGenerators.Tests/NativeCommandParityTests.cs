@@ -30,11 +30,10 @@ public class NativeCommandParityTests
         }
         namespace ObjCRuntime
         {
-            public class Selector : IDisposable
+            public class Selector
             {
                 public string Name { get; }
                 public Selector(string name) { Name = name; }
-                public void Dispose() {}
             }
         }
         namespace Android.Views

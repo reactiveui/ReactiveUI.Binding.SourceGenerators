@@ -33,8 +33,7 @@ internal static class AppKitCommandEmitter
             .Append("var __target = new ").Append(GeneratedTypeNames.AppKitCommandTarget).Append("(cmd, () => ").Append(parameter).Line(");");
         if (native.HasAction)
         {
-            _ = sb.Line("var __selector = new global::ObjCRuntime.Selector(\"theAction:\");")
-                .Append(controlAccess).Line(".Action = __selector;");
+            _ = sb.Append(controlAccess).Line(".Action = new global::ObjCRuntime.Selector(\"theAction:\");");
         }
 
         _ = sb.Append(controlAccess).Line(".Target = __target;");
@@ -64,7 +63,7 @@ internal static class AppKitCommandEmitter
             .Line("cmd.CanExecuteChanged += __enabled;");
     }
 
-    /// <summary>Clears native target/action references and releases the bridge and selector.</summary>
+    /// <summary>Clears native target/action references and releases the bridge.</summary>
     /// <param name="sb">The writer, inside the command subscription's callback.</param>
     /// <param name="native">The verified native capabilities.</param>
     /// <param name="control">The concrete control expression.</param>
@@ -74,8 +73,7 @@ internal static class AppKitCommandEmitter
             .Append(control).Line(".Target = null;");
         if (native.HasAction)
         {
-            _ = sb.Append(control).Line(".Action = null;")
-                .Line("__selector.Dispose();");
+            _ = sb.Append(control).Line(".Action = null;");
         }
 
         if (native.HasEnabled)
