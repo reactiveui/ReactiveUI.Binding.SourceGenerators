@@ -312,6 +312,7 @@ namespace ReactiveUI.Binding
     }
     public interface IInteraction<TInput, TOutput>
     {
+        System.IObservable<TOutput> Handle(TInput input) { }
         System.IDisposable RegisterHandler(System.Action<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>> handler) { }
         System.IDisposable RegisterHandler(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.Threading.Tasks.Task> handler) { }
         System.IDisposable RegisterHandler<TDontCare>(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.IObservable<TDontCare>> handler) { }
@@ -391,12 +392,17 @@ namespace ReactiveUI.Binding
     public class Interaction<TInput, TOutput> : ReactiveUI.Binding.IInteraction<TInput, TOutput>
     {
         public Interaction() { }
+        public Interaction(ReactiveUI.Primitives.Concurrency.ISequencer? handlerScheduler) { }
         protected virtual ReactiveUI.Binding.IOutputContext<TInput, TOutput> GenerateContext(TInput input) { }
         protected System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.Threading.Tasks.Task>[] GetHandlers() { }
         public virtual System.Threading.Tasks.Task<TOutput> Handle(TInput input) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        System.IObservable<TOutput> ReactiveUI.Binding.IInteraction<TInput,TOutput>.Handle(TInput input) { }
         public System.IDisposable RegisterHandler(System.Action<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>> handler) { }
         public System.IDisposable RegisterHandler(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.Threading.Tasks.Task> handler) { }
         public System.IDisposable RegisterHandler<TDontCare>(System.Func<ReactiveUI.Binding.IInteractionContext<TInput, TOutput>, System.IObservable<TDontCare>> handler) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public System.IObservable<TOutput> WhenHandled(TInput input) { }
     }
     [System.Diagnostics.DebuggerDisplay("InteractionContext: Input = {Input}, Handled = {_outputSet == 1}, Output = {_output}")]
     public sealed class InteractionContext<TInput, TOutput> : ReactiveUI.Binding.IOutputContext<TInput, TOutput>

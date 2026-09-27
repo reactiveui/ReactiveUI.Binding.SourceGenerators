@@ -5,6 +5,7 @@
 using ReactiveUI.Binding.Documentation.Banking;
 using ReactiveUI.Binding.Documentation.Education;
 using ReactiveUI.Binding.Documentation.GitHub;
+using ReactiveUI.Primitives.Concurrency;
 using ReactiveUI.Primitives.Signals;
 
 namespace ReactiveUI.Binding.Documentation.Bindings;
@@ -441,6 +442,68 @@ public static class BindInteractionExamples
         // Output:
         // True
         // False
+    }
+
+    /// <summary>Asks the question as an observable with <c>WhenHandled</c>: nothing is asked until it is subscribed, and each subscription asks again.</summary>
+    /// <returns>A task that completes when both answers have been read.</returns>
+    public static async Task AskAsAnObservable()
+    {
+        Interaction<Issue, bool> confirmClose = new();
+        Issue issue = new() { Number = CheckoutIssueNumber };
+        int asked = 0;
+        using IDisposable registration = confirmClose.RegisterHandler(context =>
+        {
+            asked++;
+            context.SetOutput(true);
+        });
+
+        IObservable<bool> question = confirmClose.WhenHandled(issue);
+
+        Console.WriteLine(asked);
+        Console.WriteLine(await Signal.ToTask(question));
+        Console.WriteLine(await Signal.ToTask(question));
+        Console.WriteLine(asked);
+
+        // Output:
+        // 0
+        // True
+        // True
+        // 2
+    }
+
+    /// <summary>Asks the question through <see cref="IInteraction{TInput, TOutput}"/>, whose <c>Handle</c> returns an observable.</summary>
+    /// <returns>A task that completes when the answer has been read.</returns>
+    public static async Task AskThroughInterfaceAsAnObservable()
+    {
+        IInteraction<Issue, bool> confirmClose = new Interaction<Issue, bool>();
+        Issue issue = new() { Number = CheckoutIssueNumber };
+        using IDisposable registration = confirmClose.RegisterHandler(static context => context.SetOutput(context.Input.Number == CheckoutIssueNumber));
+
+        IObservable<bool> question = confirmClose.Handle(issue);
+
+        Console.WriteLine(await Signal.ToTask(question));
+
+        // Output:
+        // True
+    }
+
+    /// <summary>Runs every handler on the scheduler the interaction was created with; an app passes its main thread's scheduler so a dialog opens on the UI thread.</summary>
+    /// <returns>A task that completes when the answer has been read.</returns>
+    public static async Task AnswerOnTheHandlerScheduler()
+    {
+        Interaction<Issue, bool> confirmClose = new(TaskPoolSequencer.Default);
+        Issue issue = new() { Number = CheckoutIssueNumber };
+        using IDisposable registration = confirmClose.RegisterHandler(static context =>
+        {
+            Console.WriteLine(Thread.CurrentThread.IsThreadPoolThread);
+            context.SetOutput(true);
+        });
+
+        Console.WriteLine(await confirmClose.Handle(issue));
+
+        // Output:
+        // True
+        // True
     }
 
     /// <summary>Runs an action and reports whether it threw <see cref="InvalidOperationException"/>.</summary>
