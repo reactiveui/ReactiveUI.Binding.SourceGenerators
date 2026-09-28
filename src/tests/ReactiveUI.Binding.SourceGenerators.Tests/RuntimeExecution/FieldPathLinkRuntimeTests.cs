@@ -137,7 +137,7 @@ public class FieldPathLinkRuntimeTests
                 public static string BindCommandToFieldControl()
                 {
                     var person = new Person();
-                    var view = new PersonView();
+                    var view = new PersonView { ViewModel = person };
                     using (view.BindCommand(person, x => x.Save, v => v.SaveButton))
                     {
                         view.SaveButton.PerformClick();
