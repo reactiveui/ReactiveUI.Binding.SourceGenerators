@@ -337,6 +337,43 @@ public partial class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported for an Uno control, which implements <c>DependencyObject</c> as an interface
+    /// on every head but Windows.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_UnoInterfaceDependencyObject_NoDiagnostic()
+    {
+        const string Source = Preamble + """
+
+                                         namespace Microsoft.UI.Xaml
+                                         {
+                                             public interface DependencyObject { }
+                                         }
+
+                                         namespace TestApp
+                                         {
+                                             public class UnoControl : Microsoft.UI.Xaml.DependencyObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
+
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new UnoControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
     /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from Apple NSObject (KVO).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

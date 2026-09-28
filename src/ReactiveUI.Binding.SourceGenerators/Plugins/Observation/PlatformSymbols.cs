@@ -48,6 +48,30 @@ internal static class PlatformSymbols
         return false;
     }
 
+    /// <summary>Checks a framework base identity, or an interface of that name the type implements.</summary>
+    /// <param name="type">The consumer type.</param>
+    /// <param name="metadataName">The framework type name.</param>
+    /// <returns>True when the type derives from or implements the named framework type.</returns>
+    /// <remarks>Uno declares <c>DependencyObject</c> as an interface on its non-Windows heads.</remarks>
+    internal static bool DerivesFromOrImplements(INamedTypeSymbol type, string metadataName)
+    {
+        if (DerivesFrom(type, metadataName))
+        {
+            return true;
+        }
+
+        var interfaces = type.AllInterfaces;
+        for (var i = 0; i < interfaces.Length; i++)
+        {
+            if (NativeTypeIdentity.Matches(interfaces[i], metadataName))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>Finds a member through the base chain, honoring member hiding.</summary>
     /// <param name="owner">The type exposing the member.</param>
     /// <param name="name">The member name.</param>

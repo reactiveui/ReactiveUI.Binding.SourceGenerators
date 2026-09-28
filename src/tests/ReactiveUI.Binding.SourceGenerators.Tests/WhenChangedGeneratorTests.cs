@@ -485,6 +485,55 @@ public class WhenChangedGeneratorTests
     }
 
     /// <summary>
+    /// Verifies that WhenChanged observes a dependency property on an Uno control, whose <c>DependencyObject</c> is an
+    /// interface on every head but Windows.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task UnoInterfaceDependencyObject_Property()
+    {
+        const string source = """
+                              using System;
+
+                              using ReactiveUI.Binding;
+
+                              namespace Microsoft.UI.Xaml
+                              {
+                                  public class DependencyProperty {}
+                                  public interface DependencyObject
+                                  {
+                                      long RegisterPropertyChangedCallback(DependencyProperty dp, DependencyPropertyChangedCallback callback);
+                                      void UnregisterPropertyChangedCallback(DependencyProperty dp, long token);
+                                  }
+                                  public delegate void DependencyPropertyChangedCallback(DependencyObject sender, DependencyProperty dp);
+                              }
+
+                              namespace TestApp
+                              {
+                                  public class MyUnoControl : Microsoft.UI.Xaml.DependencyObject
+                                  {
+                                      public static readonly Microsoft.UI.Xaml.DependencyProperty TextProperty = new Microsoft.UI.Xaml.DependencyProperty();
+                                      public string Text { get; set; } = string.Empty;
+                                      public long RegisterPropertyChangedCallback(Microsoft.UI.Xaml.DependencyProperty dp, Microsoft.UI.Xaml.DependencyPropertyChangedCallback callback) => 0;
+                                      public void UnregisterPropertyChangedCallback(Microsoft.UI.Xaml.DependencyProperty dp, long token) {}
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyUnoControl control)
+                                          => control.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
+
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+        await Assert.That(result.GeneratedSources["WhenChangedDispatch.g.cs"]).Contains("RegisterPropertyChangedCallback");
+    }
+
+    /// <summary>
     /// Verifies that WhenChanged generates CallerFilePath dispatch when targeting pre-C# 10.
     /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
     /// with the runtime extension method in this test harness (both assemblies are referenced).

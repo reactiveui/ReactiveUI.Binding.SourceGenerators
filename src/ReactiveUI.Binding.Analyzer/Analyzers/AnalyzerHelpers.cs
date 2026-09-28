@@ -335,7 +335,7 @@ internal static class AnalyzerHelpers
 
         for (var i = 0; i < baseTypes.Length; i++)
         {
-            if (baseTypes[i] is { } observable && InheritsFrom(typeSymbol, observable))
+            if (baseTypes[i] is { } observable && InheritsFromOrImplements(typeSymbol, observable))
             {
                 return true;
             }
@@ -417,7 +417,8 @@ internal static class AnalyzerHelpers
     /// <param name="compilation">The current compilation for type resolution.</param>
     /// <param name="metadataName">The metadata name of the well-known type to resolve.</param>
     /// <param name="byInterface">
-    /// <c>true</c> to test interface implementation; <c>false</c> to test base-type inheritance.
+    /// <c>true</c> to test interface implementation; <c>false</c> to test base-type inheritance, or implementation when
+    /// the resolved type is an interface.
     /// </param>
     /// <returns><c>true</c> if the resolved type exists and matches; otherwise, <c>false</c>.</returns>
     private static bool Matches(
@@ -434,6 +435,16 @@ internal static class AnalyzerHelpers
 
         return byInterface
             ? ImplementsInterface(typeSymbol, target)
-            : InheritsFrom(typeSymbol, target);
+            : InheritsFromOrImplements(typeSymbol, target);
     }
+
+    /// <summary>Tests base-type inheritance, or implementation when the platform type is an interface.</summary>
+    /// <param name="typeSymbol">The type to test.</param>
+    /// <param name="platformType">The platform type.</param>
+    /// <returns><c>true</c> if the type derives from or implements the platform type; otherwise, <c>false</c>.</returns>
+    /// <remarks>Uno declares <c>DependencyObject</c> as an interface on its non-Windows heads.</remarks>
+    private static bool InheritsFromOrImplements(INamedTypeSymbol typeSymbol, INamedTypeSymbol platformType) =>
+        platformType.TypeKind == TypeKind.Interface
+            ? ImplementsInterface(typeSymbol, platformType)
+            : InheritsFrom(typeSymbol, platformType);
 }

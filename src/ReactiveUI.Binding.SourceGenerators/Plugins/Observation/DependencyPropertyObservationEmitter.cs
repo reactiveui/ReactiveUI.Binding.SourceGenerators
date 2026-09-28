@@ -32,7 +32,7 @@ internal static class DependencyPropertyObservationEmitter
     internal static PlatformObservationInfo? Inspect(INamedTypeSymbol owner, IPropertySymbol property, string kind, string frameworkNamespace)
     {
         var dependencyObject = $"{frameworkNamespace}.DependencyObject";
-        return PlatformSymbols.DerivesFrom(owner, dependencyObject)
+        return PlatformSymbols.DerivesFromOrImplements(owner, dependencyObject)
             && PlatformSymbols.HasDependencyProperty(owner, property.Name, $"{frameworkNamespace}.DependencyProperty")
             ? new(kind, BindingAffinity.WinUiDependencyObject, default, null, $"global::{dependencyObject}", null)
             : null;

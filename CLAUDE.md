@@ -693,10 +693,14 @@ never sees a write to an unclaimed object.
 
 - `ViewThreadPluginRegistry` checks the target's type during extraction. It matches
   `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control`,
-  `Microsoft.Maui.Controls.BindableObject`, `Avalonia.AvaloniaObject` and `Microsoft.UI.Xaml.DependencyObject`.
+  `Microsoft.Maui.Controls.BindableObject`, `Avalonia.AvaloniaObject` and `Microsoft.UI.Xaml.DependencyObject`,
+  through a base class first and then through an interface.
 - Uno and WinUI share `Microsoft.UI.Xaml.DependencyObject`. Its plugin names the Uno invoker only when the
   compilation references `ReactiveUI.Binding.Uno`, and its `PackageName` is null, so RXUIBIND017 never reports a
   WinUI binding: the Uno package does not serve plain WinUI apps.
+- Uno declares `DependencyObject` as an interface on every head but Windows, so an Uno control implements it rather
+  than deriving from it. Every check for that type accepts either: the view thread registry, the dependency-property
+  observation (`PlatformSymbols.DerivesFromOrImplements`), type detection, and the analyzers.
 - The invocation model stores the matching runtime invoker's full name. `BindTo`, `BindOneWay`, `OneWayBind` and
   `Bind` store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view, and
   for the control when the view has none.

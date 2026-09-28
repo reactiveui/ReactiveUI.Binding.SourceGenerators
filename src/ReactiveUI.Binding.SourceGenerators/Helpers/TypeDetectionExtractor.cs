@@ -297,7 +297,33 @@ internal static class TypeDetectionExtractor
             baseType = baseType.BaseType;
         }
 
+        // Uno declares DependencyObject as an interface on its non-Windows heads, so its controls implement it.
+        winui = winui || ImplementsInterface(typeSymbol, wellKnown.WinUIDependencyObject);
+
         return new(wpf, winui, ns, winforms, android);
+    }
+
+    /// <summary>Determines whether a type implements a (possibly null) interface.</summary>
+    /// <param name="typeSymbol">The type to inspect.</param>
+    /// <param name="candidate">The interface; null, or a type that is not an interface, is no match.</param>
+    /// <returns><c>true</c> if the candidate is an interface the type implements; otherwise, <c>false</c>.</returns>
+    private static bool ImplementsInterface(INamedTypeSymbol typeSymbol, INamedTypeSymbol? candidate)
+    {
+        if (candidate is not { TypeKind: TypeKind.Interface })
+        {
+            return false;
+        }
+
+        var allInterfaces = typeSymbol.AllInterfaces;
+        for (var i = 0; i < allInterfaces.Length; i++)
+        {
+            if (SymbolEqualityComparer.Default.Equals(allInterfaces[i], candidate))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Determines whether <paramref name="symbol"/> equals the (possibly null) candidate symbol.</summary>

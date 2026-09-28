@@ -119,6 +119,33 @@ public class ViewThreadPluginRegistryTests
                                                         }
                                                         """;
 
+    /// <summary>
+    /// A compilation shaped like an Uno head other than Windows, where <c>DependencyObject</c> is an interface that
+    /// each control implements.
+    /// </summary>
+    private const string UnoInterfaceSource = """
+                                              namespace Microsoft.UI.Xaml
+                                              {
+                                                  public interface DependencyObject { }
+                                              }
+
+                                              namespace ReactiveUI.Binding.Uno
+                                              {
+                                                  public sealed class UnoViewThreadInvoker { }
+                                              }
+
+                                              namespace TestApp
+                                              {
+                                                  public interface IUnrelated { }
+
+                                                  public class UnoControl : Microsoft.UI.Xaml.DependencyObject { }
+
+                                                  public class DerivedUnoControl : UnoControl { }
+
+                                                  public class UnrelatedViewModel : IUnrelated { }
+                                              }
+                                              """;
+
     /// <summary>A compilation that references no platform.</summary>
     private const string PlainSource = """
                                        namespace TestApp
@@ -221,6 +248,25 @@ public class ViewThreadPluginRegistryTests
 
         await Assert.That(ViewThreadPluginRegistry.InvokerFor(winUIView, compilation)).IsNull();
         await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(winUIView, compilation)).IsNull();
+    }
+
+    /// <summary>
+    /// On an Uno head other than Windows, a control implements <c>DependencyObject</c> rather than deriving from it, and
+    /// still names the Uno invoker; a type that implements some other interface names none.
+    /// </summary>
+    /// <param name="metadataName">The type to look up.</param>
+    /// <param name="expected">The runtime invoker it should route through, or null for none.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("TestApp.UnoControl", "global::ReactiveUI.Binding.Uno.UnoViewThreadInvoker")]
+    [Arguments("TestApp.DerivedUnoControl", "global::ReactiveUI.Binding.Uno.UnoViewThreadInvoker")]
+    [Arguments("TestApp.UnrelatedViewModel", null)]
+    public async Task InvokerFor_WithAnUnoInterfaceDependencyObject_NamesTheUnoInvoker(string metadataName, string? expected)
+    {
+        var compilation = TestHelper.CreateCompilation(UnoInterfaceSource);
+
+        await Assert.That(ViewThreadPluginRegistry.InvokerFor(compilation.GetTypeByMetadataName(metadataName), compilation))
+            .IsEqualTo(expected);
     }
 
     /// <summary>A platform type whose runtime invoker is out of reach carries no invoker.</summary>
