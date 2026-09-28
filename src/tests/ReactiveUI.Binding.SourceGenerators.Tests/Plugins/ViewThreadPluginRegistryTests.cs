@@ -54,6 +54,16 @@ public class ViewThreadPluginRegistryTests
                                               public sealed class DispatcherViewThreadInvoker { }
                                           }
 
+                                          namespace Avalonia
+                                          {
+                                              public class AvaloniaObject { }
+                                          }
+
+                                          namespace ReactiveUI.Binding.Avalonia
+                                          {
+                                              public sealed class AvaloniaViewThreadInvoker { }
+                                          }
+
                                           namespace TestApp
                                           {
                                               public class WpfView : System.Windows.Threading.DispatcherObject { }
@@ -63,6 +73,8 @@ public class ViewThreadPluginRegistryTests
                                               public class WinFormsView : System.Windows.Forms.Control { }
 
                                               public class MauiView : Microsoft.Maui.Controls.BindableObject { }
+
+                                              public class AvaloniaView : Avalonia.AvaloniaObject { }
 
                                               public class PlainViewModel { }
                                           }
@@ -75,9 +87,16 @@ public class ViewThreadPluginRegistryTests
                                                             public class DispatcherObject { }
                                                         }
 
+                                                        namespace Avalonia
+                                                        {
+                                                            public class AvaloniaObject { }
+                                                        }
+
                                                         namespace TestApp
                                                         {
                                                             public class WpfView : System.Windows.Threading.DispatcherObject { }
+
+                                                            public class AvaloniaView : Avalonia.AvaloniaObject { }
                                                         }
                                                         """;
 
@@ -101,6 +120,7 @@ public class ViewThreadPluginRegistryTests
     [Arguments("TestApp.DerivedWpfView", WpfInvoker)]
     [Arguments("TestApp.WinFormsView", "global::ReactiveUI.Binding.Reactive.WinForms.ControlViewThreadInvoker")]
     [Arguments("TestApp.MauiView", "global::ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker")]
+    [Arguments("TestApp.AvaloniaView", "global::ReactiveUI.Binding.Avalonia.AvaloniaViewThreadInvoker")]
     public async Task InvokerFor_WithATypeFromAPlatform_NamesItsInvoker(string metadataName, string expected)
     {
         var compilation = TestHelper.CreateCompilation(PlatformSource);
@@ -142,14 +162,18 @@ public class ViewThreadPluginRegistryTests
     }
 
     /// <summary>A platform type whose runtime invoker is out of reach names the package that ships it.</summary>
+    /// <param name="metadataName">The type to look up.</param>
+    /// <param name="expected">The package that ships the type's invoker.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task MissingPackageFor_WhenTheRuntimeInvokerIsMissing_NamesThePackage()
+    [Arguments(WpfView, "ReactiveUI.Binding.Wpf")]
+    [Arguments("TestApp.AvaloniaView", "ReactiveUI.Binding.Avalonia")]
+    public async Task MissingPackageFor_WhenTheRuntimeInvokerIsMissing_NamesThePackage(string metadataName, string expected)
     {
         var compilation = TestHelper.CreateCompilation(PlatformWithoutRuntimeSource);
 
-        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation))
-            .IsEqualTo("ReactiveUI.Binding.Wpf");
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(metadataName), compilation))
+            .IsEqualTo(expected);
     }
 
     /// <summary>Nothing is missing for a platform whose invoker resolves, for a type from no platform, or for no type.</summary>

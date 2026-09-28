@@ -28,6 +28,8 @@
     <Project Path="ReactiveUI.Binding.Wpf.Reactive/ReactiveUI.Binding.Wpf.Reactive.csproj" />
     <Project Path="ReactiveUI.Binding.WinForms.Reactive/ReactiveUI.Binding.WinForms.Reactive.csproj" />
     <Project Path="ReactiveUI.Binding.Maui.Reactive/ReactiveUI.Binding.Maui.Reactive.csproj" />
+    <Project Path="ReactiveUI.Binding.Avalonia/ReactiveUI.Binding.Avalonia.csproj" />
+    <Project Path="ReactiveUI.Binding.Avalonia.Reactive/ReactiveUI.Binding.Avalonia.Reactive.csproj" />
     <Folder Name="/examples/">
         <Project Path="examples/Documentation/Pages/index/index.csproj" />
         <Project Path="examples/Documentation/Pages/observing/observing.csproj" />
@@ -72,5 +74,7 @@
         <Project Path="tests/ReactiveUI.Binding.WinForms.Tests.Reactive/ReactiveUI.Binding.WinForms.Tests.Reactive.csproj" />
         <Project Path="tests/ReactiveUI.Binding.Maui.Tests/ReactiveUI.Binding.Maui.Tests.csproj" />
         <Project Path="tests/ReactiveUI.Binding.Maui.Tests.Reactive/ReactiveUI.Binding.Maui.Tests.Reactive.csproj" />
+        <Project Path="tests/ReactiveUI.Binding.Avalonia.Tests/ReactiveUI.Binding.Avalonia.Tests.csproj" />
+        <Project Path="tests/ReactiveUI.Binding.Avalonia.Tests.Reactive/ReactiveUI.Binding.Avalonia.Tests.Reactive.csproj" />
     </Folder>
 </Solution>

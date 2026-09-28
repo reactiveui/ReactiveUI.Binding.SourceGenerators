@@ -1,3 +1,4 @@
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Avalonia")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.GeneratedCode.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Maui")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Tests")]
@@ -1657,6 +1658,16 @@ namespace ReactiveUI.Binding
         [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.IObservable<TReturn> WhenChangingUnsafe<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn>(this TObj objectToMonitor, System.Linq.Expressions.Expression<System.Func<TObj, T1>> property1, System.Linq.Expressions.Expression<System.Func<TObj, T2>> property2, System.Linq.Expressions.Expression<System.Func<TObj, T3>> property3, System.Linq.Expressions.Expression<System.Func<TObj, T4>> property4, System.Linq.Expressions.Expression<System.Func<TObj, T5>> property5, System.Linq.Expressions.Expression<System.Func<TObj, T6>> property6, System.Linq.Expressions.Expression<System.Func<TObj, T7>> property7, System.Linq.Expressions.Expression<System.Func<TObj, T8>> property8, System.Linq.Expressions.Expression<System.Func<TObj, T9>> property9, System.Linq.Expressions.Expression<System.Func<TObj, T10>> property10, System.Linq.Expressions.Expression<System.Func<TObj, T11>> property11, System.Linq.Expressions.Expression<System.Func<TObj, T12>> property12, System.Linq.Expressions.Expression<System.Func<TObj, T13>> property13, System.Linq.Expressions.Expression<System.Func<TObj, T14>> property14, System.Linq.Expressions.Expression<System.Func<TObj, T15>> property15, System.Linq.Expressions.Expression<System.Func<TObj, T16>> property16, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn> conversionFunc) where TObj : class { }
+    }
+    public abstract class SequencerViewThreadInvoker<TTarget, TSequencer> : ReactiveUI.Binding.IViewThreadInvoker where TTarget : class where TSequencer : class, ReactiveUI.Primitives.Concurrency.ISequencer, ReactiveUI.Primitives.Concurrency.IThreadAffineSequencer
+    {
+        protected SequencerViewThreadInvoker() { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public bool CheckAccess(object target) { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public bool Claims(object target) { }
+        public void Post(object target, System.Action<object?> callback, object? state) { }
+        protected abstract TSequencer? SequencerFor(TTarget target) { }
     }
     [System.Diagnostics.DebuggerDisplay("SetMethodBindingConverterRegistry: {_snapshot.Converters.Count} set-method converters registered")]
     public sealed class SetMethodBindingConverterRegistry

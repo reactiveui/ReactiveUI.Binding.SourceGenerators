@@ -7,7 +7,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>Snapshot tests for the invoker a generated binding carries for a WPF, WinForms or MAUI target.</summary>
+/// <summary>Snapshot tests for the invoker a generated binding carries for a WPF, WinForms, MAUI or Avalonia target.</summary>
 public class ViewThreadInvokerGeneratorTests
 {
     /// <summary>A view model with one notifying property.</summary>
@@ -99,6 +99,31 @@ public class ViewThreadInvokerGeneratorTests
                                      }
 
                                      """ + RuntimeInvokerStandIns.Maui;
+
+    /// <summary>The Avalonia types the generated invoker calls.</summary>
+    private const string AvaloniaStubs = """
+
+                                         namespace Avalonia.Threading
+                                         {
+                                             public class Dispatcher
+                                             {
+                                                 public void Post(Action<object?> callback, object? state)
+                                                 {
+                                                 }
+                                             }
+                                         }
+
+                                         namespace Avalonia
+                                         {
+                                             public class AvaloniaObject
+                                             {
+                                                 public Avalonia.Threading.Dispatcher Dispatcher { get; } = new Avalonia.Threading.Dispatcher();
+
+                                                 public bool CheckAccess() => true;
+                                             }
+                                         }
+
+                                         """ + RuntimeInvokerStandIns.Avalonia;
 
     /// <summary>The imports every test source starts with.</summary>
     private const string Imports = """
@@ -203,6 +228,36 @@ public class ViewThreadInvokerGeneratorTests
 
         var result = await TestHelper.TestPassWithResult(
             Imports + usage + ViewModelSource + MauiStubs,
+            typeof(ViewThreadInvokerGeneratorTests),
+            LanguageVersion.CSharp10);
+
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>A one-way binding onto an Avalonia target carries the Avalonia invoker.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindOneWay_ToAnAvaloniaTarget_CarriesTheAvaloniaInvoker()
+    {
+        const string usage = """
+                             namespace TestApp
+                             {
+                                 public class MyTextBox : Avalonia.AvaloniaObject
+                                 {
+                                     public string Text { get; set; } = "";
+                                 }
+
+                                 public static class Usage
+                                 {
+                                     public static object Bind(MyViewModel viewModel, MyTextBox textBox) =>
+                                         viewModel.BindOneWay(textBox, x => x.Name, x => x.Text);
+                                 }
+                             }
+                             """;
+
+        var result = await TestHelper.TestPassWithResult(
+            Imports + usage + ViewModelSource + AvaloniaStubs,
             typeof(ViewThreadInvokerGeneratorTests),
             LanguageVersion.CSharp10);
 
@@ -320,6 +375,11 @@ public class ViewThreadInvokerGeneratorTests
                                      public string Text { get; set; } = "";
                                  }
 
+                                 public class MyTextBox : Avalonia.AvaloniaObject
+                                 {
+                                     public string Text { get; set; } = "";
+                                 }
+
                                  public static class Usage
                                  {
                                      public static object BindView(MyViewModel viewModel, MyView view) =>
@@ -330,11 +390,14 @@ public class ViewThreadInvokerGeneratorTests
 
                                      public static object BindEntry(MyViewModel viewModel, MyEntry entry) =>
                                          viewModel.BindOneWay(entry, x => x.Name, x => x.Text);
+
+                                     public static object BindTextBox(MyViewModel viewModel, MyTextBox textBox) =>
+                                         viewModel.BindOneWay(textBox, x => x.Name, x => x.Text);
                                  }
                              }
                              """;
 
-        var source = (Imports + usage + ViewModelSource + WpfStubs + WinFormsStubs + MauiStubs)
+        var source = (Imports + usage + ViewModelSource + WpfStubs + WinFormsStubs + MauiStubs + AvaloniaStubs)
             .Replace("using ReactiveUI.Binding;", "using ReactiveUI.Binding.Reactive;", StringComparison.Ordinal)
             .Replace("namespace ReactiveUI.Binding.", "namespace ReactiveUI.Binding.Reactive.", StringComparison.Ordinal)
             .Replace("global::ReactiveUI.Binding.IViewThreadInvoker", "global::ReactiveUI.Binding.Reactive.IViewThreadInvoker", StringComparison.Ordinal);

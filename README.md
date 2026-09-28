@@ -443,12 +443,14 @@ The WPF and WinForms packages target the .NET Framework versions and the Windows
 The MAUI packages start at .NET 10. They add Android, iOS, macOS, Mac Catalyst and tvOS targets. The Apple
 targets build only on Windows and macOS.
 
+The Avalonia packages target .NET 8 to 11. They are trim and NativeAOT safe.
+
 NativeAOT works on .NET 8 and later. Only the generated code runs there. The `Unsafe` overloads compile
 expressions at run time, and NativeAOT cannot do that.
 
 ## Packages
 
-Ten packages ship. Each runtime package carries the generator and the analyzer. The platform packages get them
+Twelve packages ship. Each runtime package carries the generator and the analyzer. The platform packages get them
 through the runtime package.
 
 | Package | What it is |
@@ -461,6 +463,8 @@ through the runtime package.
 | `ReactiveUI.Binding.WinForms.Reactive` | The same, for a System.Reactive app. |
 | `ReactiveUI.Binding.Maui` | MAUI bindable-property observation. |
 | `ReactiveUI.Binding.Maui.Reactive` | The same, for a System.Reactive app. |
+| `ReactiveUI.Binding.Avalonia` | Avalonia property observation and command binding. |
+| `ReactiveUI.Binding.Avalonia.Reactive` | The same, for a System.Reactive app. |
 | `ReactiveUI.Binding.SourceGenerators` | MSBuild props and targets only. A compatibility package. |
 | `ReactiveUI.Binding.Analyzer` | The analyzer project. Its files ship inside the runtime packages. |
 
@@ -816,16 +820,19 @@ override takes precedence over conversion voting.
 A UI framework lets only one thread touch a view. That thread is the view's owning thread. A view model can raise
 a change on any thread. So a binding moves each write to the owning thread.
 
-The binding asks the object it writes to. Each platform has its own check and its own way to queue work.
+The binding asks the object it writes to for its **sequencer**: the ReactiveUI.Primitives scheduler that runs work
+on the object's owning thread. The sequencer says whether the calling thread owns it, and queues the write when it
+does not.
 
-| Target | Check | Queue |
-|--------|-------|-------|
-| WPF `DispatcherObject` | `CheckAccess()` | `Dispatcher.BeginInvoke` |
-| WinForms `Control` | `InvokeRequired` | `Control.BeginInvoke` |
-| MAUI `BindableObject` | `Dispatcher.IsDispatchRequired` | `Dispatcher.Dispatch` |
+| Target | Sequencer |
+|--------|-----------|
+| WPF `DispatcherObject` | `DispatcherSequencer` for the object's dispatcher, at normal priority |
+| WinForms `Control` | `ControlSequencer` for the control |
+| MAUI `BindableObject` | `MauiDispatcherSequencer` for the object's dispatcher |
+| Avalonia `AvaloniaObject` | `AvaloniaScheduler` for the object's dispatcher, at background priority |
 
-WPF can run several UI threads. Each window belongs to one of them. Asking the object sends each write to the
-right one.
+WPF and Avalonia can run several UI threads. Each window belongs to one of them. Asking the object sends each write
+to the right one.
 
 The binding asks on every write.
 
@@ -840,7 +847,7 @@ Some objects have no owning thread. The binding writes to them straight away.
 - A frozen WPF `Freezable`.
 - A WinForms control with no window handle yet. Once the handle exists, writes go to the thread that created it.
 - A MAUI object with no dispatcher, such as a view in a unit test.
-- Any object that is not a WPF, WinForms or MAUI object, such as a plain view model.
+- Any object that is not a WPF, WinForms, MAUI or Avalonia object, such as a plain view model.
 
 Every binding API does this: `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, and `BindCommand` when
 it binds a new command to the control. Each `Unsafe` twin does the same through the registered invokers.
@@ -848,11 +855,15 @@ it binds a new command to the control. Each `Unsafe` twin does the same through 
 ### Invokers
 
 An `IViewThreadInvoker` does the check and the queueing for one platform. Each platform package has a module
-that registers one: `WpfBindingModule`, `WinFormsBindingModule` or `MauiBindingModule`. You can register your own.
-An invoker you register is asked first.
+that registers one: `WpfBindingModule`, `WinFormsBindingModule`, `MauiBindingModule` or `AvaloniaBindingModule`.
+You can register your own. An invoker you register is asked first.
 
-A generated binding knows its target's type when it compiles. For a WPF, WinForms or MAUI target, it carries that
-platform's invoker. So it routes writes even when the platform module is not registered.
+To support another platform, derive from `SequencerViewThreadInvoker<TTarget, TSequencer>` and return the
+sequencer that owns an object from `SequencerFor`. The sequencer has to implement `IThreadAffineSequencer`, as every
+ReactiveUI.Primitives UI sequencer does. Return null for an object that has no owning thread.
+
+A generated binding knows its target's type when it compiles. For a WPF, WinForms, MAUI or Avalonia target, it
+carries that platform's invoker. So it routes writes even when the platform module is not registered.
 
 An `Unsafe` binding only finds its target's type while the app runs. It uses the registered invokers alone. Register
 the platform module when you use `Unsafe` bindings.
@@ -911,7 +922,7 @@ The analyzer ships inside the runtime packages. It reports these diagnostics.
 | RXUIBIND014 | Error | Below C# 13, a `string` initial value passed by position makes a `ToProperty` call ambiguous. Write it as `initialValue: ...`. |
 | RXUIBIND015 | Warning | The call names a private or protected nested type, which generated code cannot reach, so nothing is generated and the call throws. Make the type `internal` or `public`, or call the `Unsafe` overload. |
 | RXUIBIND016 | Warning | The call is made through a type parameter of the calling code, so generated code cannot name its types and the call throws. Call the `Unsafe` overload. |
-| RXUIBIND017 | Warning | The binding writes to a WPF, WinForms or MAUI object, but the matching `ReactiveUI.Binding.Wpf`, `.WinForms` or `.Maui` package is not referenced, so writes from another thread are not marshalled onto the object's thread. Reference the platform package. |
+| RXUIBIND017 | Warning | The binding writes to a WPF, WinForms, MAUI or Avalonia object, but the matching `ReactiveUI.Binding.Wpf`, `.WinForms`, `.Maui` or `.Avalonia` package is not referenced, so writes from another thread are not marshalled onto the object's thread. Reference the platform package. |
 | RXUIBIND018 | Warning | `[ObservableAsProperty]` marks something other than a partial get-only instance property, so nothing is generated. For a field, a method or an observable property, a code fix rewrites it as a partial property (C# 13). |
 | RXUIBIND019 | Warning | A method marked `[ObservableAsProperty]` takes parameters, so it cannot supply a property's values. |
 | RXUIBIND020 | Info | A view is registered as `IViewFor<T>` in the service locator, and this project has no generated view and no `Map` for `T`. `ResolveView` with a view model held as an `object` does not find it. Add it with `Map`, or call `ResolveViewUnsafe`. |

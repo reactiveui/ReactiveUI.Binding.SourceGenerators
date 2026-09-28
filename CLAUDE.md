@@ -227,7 +227,7 @@ src/
 ├── ReactiveUI.Binding.Wpf.Shared/               # Each platform's source, compiled by both its leaves
 ├── ReactiveUI.Binding.Wpf/                      # Lean platform leaf
 ├── ReactiveUI.Binding.Wpf.Reactive/             # System.Reactive platform leaf
-│                                                # ...and the same triple for WinForms and Maui
+│                                                # ...and the same triple for WinForms, Maui and Avalonia
 │
 ├── ReactiveUI.Binding.SourceGenerators/         # Source generator (netstandard2.0)
 │   ├── BindingGenerator.cs                      # [Generator] IIncrementalGenerator entry point
@@ -260,7 +260,7 @@ src/
 │   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
 │   │   └── ViewThread/                          # The invoker a generated binding carries for its target
 │   │       ├── ViewThreadPluginRegistry.cs      # Matches a target's type to its platform's invoker
-│   │       └── Wpf/WinForms/MauiViewThreadPlugin.cs # One plugin per platform
+│   │       └── Wpf/WinForms/Maui/AvaloniaViewThreadPlugin.cs # One plugin per platform
 │   │   └── PropertyRaise/                       # How ToProperty raises the source type's notifications
 │   │       ├── PropertyRaisePluginRegistry.cs   # First plugin that can raise, strongest first
 │   │       ├── ReactiveObjectRaisePlugin.cs     # ReactiveUI's public RaisePropertyChanged extension (ExactType, 10)
@@ -631,16 +631,26 @@ APIs (`WhenChanged`, `WhenAny`, `WhenAnyValue` and the rest) do not. The caller 
 - `CheckAccess(target)` says whether the calling thread may write to the object now.
 - `Post(target, callback, state)` queues the callback on the owning thread.
 
-Each platform module registers one invoker. Each invoker uses its platform's own API.
+Each platform module registers one invoker. Every invoker derives from `SequencerViewThreadInvoker<TTarget, TSequencer>`.
+The base class claims a `TTarget`. It asks the platform for the sequencer that owns the object, with `SequencerFor`.
+That sequencer answers `CheckAccess` through `IThreadAffineSequencer` and runs `Post` through `Schedule`. An object
+no sequencer owns may be written from any thread, so `CheckAccess` passes and `Post` runs inline. The sequencers
+come from the Primitives platform packages, and `For(owner)` returns one sequencer per dispatcher or control.
 
-| Invoker | `CheckAccess` | `Post` |
-|---------|---------------|--------|
-| WPF `DispatcherViewThreadInvoker` | `DispatcherObject.CheckAccess()` | `Dispatcher.BeginInvoke`; inline with no dispatcher, as for a frozen `Freezable` |
-| WinForms `ControlViewThreadInvoker` | `!Control.InvokeRequired` | `Control.BeginInvoke`; inline while the control has no handle |
-| MAUI `DispatcherViewThreadInvoker` | `!IDispatcher.IsDispatchRequired` | `IDispatcher.Dispatch`; inline with no dispatcher |
+| Invoker | `SequencerFor` | No sequencer when |
+|---------|----------------|-------------------|
+| WPF `DispatcherViewThreadInvoker` | `DispatcherSequencer.For(Dispatcher)`, at normal priority | the object has no dispatcher, as for a frozen `Freezable` |
+| WinForms `ControlViewThreadInvoker` | `ControlSequencer.For(Control)` | `InvokeRequired` is false, which includes a control with no handle |
+| MAUI `DispatcherViewThreadInvoker` | `MauiDispatcherSequencer.For(IDispatcher)` | the object has no dispatcher |
+| Avalonia `AvaloniaViewThreadInvoker` | `AvaloniaScheduler.For(Dispatcher)`, at background priority | never; every `AvaloniaObject` has a dispatcher |
 
 MAUI's `BindableObject.Dispatcher` throws `InvalidOperationException` when it finds no dispatcher. That is normal in
 a view's unit test. The MAUI invoker catches it. It treats the object as having no owning thread.
+
+`ReactiveUI.Binding.Avalonia` also registers `AvaloniaObjectObservableForProperty`, which observes a registered
+`AvaloniaProperty` at the WPF dependency-property affinity, and `AvaloniaCreatesCommandBinding`, which binds a command
+through an `ICommandSource`'s `Command` property or through a routed event. Neither uses reflection over members, so
+the package is trim and AOT safe.
 
 **`ViewThreadObservable` decides every route.** Invokers only answer its questions.
 
@@ -671,8 +681,8 @@ never sees a write to an unclaimed object.
 **Generated bindings carry their fallback.** They route writes without the platform module.
 
 - `ViewThreadPluginRegistry` checks the target's type during extraction. It matches
-  `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control` and
-  `Microsoft.Maui.Controls.BindableObject`.
+  `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control`,
+  `Microsoft.Maui.Controls.BindableObject` and `Avalonia.AvaloniaObject`.
 - The invocation model stores the matching runtime invoker's full name. `BindTo`, `BindOneWay`, `OneWayBind` and
   `Bind` store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view, and
   for the control when the view has none.

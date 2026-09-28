@@ -42,6 +42,9 @@
          them through its own unshifted import; this leaf has to name them as well. The two Advanced
          namespaces declare disjoint types, which is what lets the lean leaf merge them already. -->
     <Using Include="ReactiveUI.Primitives.Advanced"/>
+    <!-- Core's concurrency namespace shares type names with System.Reactive.Concurrency, so only the one
+         interface the shared source names is imported. -->
+    <Using Include="ReactiveUI.Primitives.Concurrency.IThreadAffineSequencer" Alias="IThreadAffineSequencer"/>
     <Using Include="ReactiveUI.Primitives.Signals"/>
     <Using Include="ReactiveUI.Primitives.Reactive.Signals"/>
     <Using Include="ReactiveUI.Primitives.Disposables"/>
@@ -113,6 +116,7 @@
     <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf.Reactive"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms.Reactive"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Maui.Reactive"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Avalonia.Reactive"/>
   </ItemGroup>
 
   <!-- Every line here is a line of ReactiveUI.Binding.Shared that ReactiveUI.Binding already covers;

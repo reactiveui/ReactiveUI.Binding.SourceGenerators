@@ -31,13 +31,11 @@ namespace ReactiveUI.Binding.Maui
         [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Uses reflection to find DependencyProperty.")]
         public System.IObservable<ReactiveUI.Binding.IObservedChange<object, object?>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged, bool suppressWarnings) { }
     }
-    public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.IViewThreadInvoker
+    public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.SequencerViewThreadInvoker<Microsoft.Maui.Controls.BindableObject, ReactiveUI.Primitives.Concurrency.MauiDispatcherSequencer>
     {
         public DispatcherViewThreadInvoker() { }
         public static ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker Instance { get; }
-        public bool CheckAccess(object target) { }
-        public bool Claims(object target) { }
-        public void Post(object target, System.Action<object?> callback, object? state) { }
+        protected override ReactiveUI.Primitives.Concurrency.MauiDispatcherSequencer? SequencerFor(Microsoft.Maui.Controls.BindableObject target) { }
     }
     public sealed class MauiBindingModule : Splat.Builder.IModule
     {

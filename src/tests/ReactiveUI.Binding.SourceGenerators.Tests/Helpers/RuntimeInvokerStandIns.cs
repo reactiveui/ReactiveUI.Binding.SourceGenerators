@@ -135,4 +135,34 @@ internal static class RuntimeInvokerStandIns
                                  }
                                  #nullable restore
                                  """;
+
+    /// <summary>The Avalonia package's invoker, over a declared <c>Avalonia.AvaloniaObject</c>.</summary>
+    /// <remarks>The package routes through the dispatcher's sequencer; the stand-in asks the object directly, which answers the same.</remarks>
+    internal const string Avalonia = """
+
+                                     #nullable disable
+                                     namespace ReactiveUI.Binding.Avalonia
+                                     {
+                                         public sealed class AvaloniaViewThreadInvoker : global::ReactiveUI.Binding.IViewThreadInvoker
+                                         {
+                                             public static AvaloniaViewThreadInvoker Instance { get; } = new AvaloniaViewThreadInvoker();
+
+                                             public bool Claims(object target)
+                                             {
+                                                 return target is global::Avalonia.AvaloniaObject;
+                                             }
+
+                                             public bool CheckAccess(object target)
+                                             {
+                                                 return ((global::Avalonia.AvaloniaObject)target).CheckAccess();
+                                             }
+
+                                             public void Post(object target, global::System.Action<object> callback, object state)
+                                             {
+                                                 ((global::Avalonia.AvaloniaObject)target).Dispatcher.Post(callback, state);
+                                             }
+                                         }
+                                     }
+                                     #nullable restore
+                                     """;
 }
