@@ -220,6 +220,44 @@ public partial class BindingInvocationAnalyzerTests
     }
 
     /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on an Uno control, which implements
+    /// <c>DependencyObject</c> as an interface on every head but Windows.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_UnoInterfaceDependencyObject_ReportsDiagnostic()
+    {
+        const string Source = Preamble + """
+
+                                         namespace Microsoft.UI.Xaml
+                                         {
+                                             public interface DependencyObject { }
+                                         }
+
+                                         namespace TestApp
+                                         {
+                                             public class UnoControl : Microsoft.UI.Xaml.DependencyObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
+
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new UnoControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
     /// Verifies RXUIBIND004 is reported when WhenChanging is called on a WinForms Component type
     /// (WinForms does not support before-change notifications).
     /// </summary>

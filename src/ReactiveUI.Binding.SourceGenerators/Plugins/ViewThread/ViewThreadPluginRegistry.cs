@@ -45,10 +45,11 @@ internal static class ViewThreadPluginRegistry
             ? Plugins[index].PackageName
             : null;
 
-    /// <summary>Finds which platform a type belongs to, directly or through a base class.</summary>
+    /// <summary>Finds which platform a type belongs to, directly, through a base class or through an interface.</summary>
     /// <param name="type">The type, or null.</param>
     /// <param name="compilation">The compilation the type belongs to.</param>
     /// <returns>The plugin index, or null when the type belongs to no supported platform.</returns>
+    /// <remarks>Uno declares <c>DependencyObject</c> as an interface on its non-Windows heads.</remarks>
     private static int? FindPlatform(ITypeSymbol? type, Compilation compilation)
     {
         var owners = GetOwners(compilation);
@@ -59,12 +60,35 @@ internal static class ViewThreadPluginRegistry
 
         for (var current = type; current is not null; current = current.BaseType)
         {
-            for (var i = 0; i < Plugins.Length; i++)
+            if (IndexOf(current, owners) is { } index)
             {
-                if (SymbolEqualityComparer.Default.Equals(current, owners.Types[i]))
-                {
-                    return i;
-                }
+                return index;
+            }
+        }
+
+        var interfaces = type.AllInterfaces;
+        for (var i = 0; i < interfaces.Length; i++)
+        {
+            if (IndexOf(interfaces[i], owners) is { } index)
+            {
+                return index;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Finds the plugin whose platform type is the given type.</summary>
+    /// <param name="type">The type to look up.</param>
+    /// <param name="owners">The platform types the compilation resolves.</param>
+    /// <returns>The plugin index, or null when the type is no platform's type.</returns>
+    private static int? IndexOf(ITypeSymbol type, OwnerTypes owners)
+    {
+        for (var i = 0; i < Plugins.Length; i++)
+        {
+            if (SymbolEqualityComparer.Default.Equals(type, owners.Types[i]))
+            {
+                return i;
             }
         }
 

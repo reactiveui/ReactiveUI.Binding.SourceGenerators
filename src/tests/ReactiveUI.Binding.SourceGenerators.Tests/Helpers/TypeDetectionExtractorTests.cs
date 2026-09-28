@@ -15,6 +15,9 @@ public class TypeDetectionExtractorTests
     /// <summary>The <c>MyViewModel</c> name these tests generate against.</summary>
     private const string MyViewModelName = "MyViewModel";
 
+    /// <summary>The <c>Title</c> property these tests inspect.</summary>
+    private const string TitlePropertyName = "Title";
+
     /// <summary>Verifies ExtractProperties extracts public properties from a type symbol.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -99,7 +102,7 @@ public class TypeDetectionExtractorTests
 
         // Only Title should be extracted; Name (write-only) should be skipped
         await Assert.That(properties.Length).IsEqualTo(1);
-        await Assert.That(properties[0].PropertyName).IsEqualTo("Title");
+        await Assert.That(properties[0].PropertyName).IsEqualTo(TitlePropertyName);
     }
 
     /// <summary>Verifies ExtractProperties includes indexer properties with IsIndexer flag.</summary>
@@ -157,8 +160,75 @@ public class TypeDetectionExtractorTests
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
-        var titleProp = properties.First(static p => p.PropertyName == "Title");
+        var titleProp = properties.First(static p => p.PropertyName == TitlePropertyName);
         await Assert.That(titleProp.IsDependencyProperty).IsTrue();
+    }
+
+    /// <summary>Verifies ExtractProperties records a companion change event.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtractProperties_ChangeEvent_Detected()
+    {
+        const string source = """
+                              using System;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel
+                                  {
+                                      public event EventHandler? TitleChanged;
+                                      public string Title { get; set; } = "";
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
+
+        var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
+
+        await Assert.That(properties.First(static p => p.PropertyName == TitlePropertyName).HasChangeEvent).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies an Uno control, which implements <c>DependencyObject</c> as an interface on every head but Windows, is
+    /// detected as a WinUI dependency object, and a type that does not implement it is not.
+    /// </summary>
+    /// <param name="typeName">The type to detect.</param>
+    /// <param name="expected">Whether it is a WinUI dependency object.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments("UnoControl", true)]
+    [Arguments(MyViewModelName, false)]
+    public async Task ExtractFromSymbol_UnoInterfaceDependencyObject_DetectsImplementers(string typeName, bool expected)
+    {
+        const string source = """
+                              namespace Microsoft.UI.Xaml
+                              {
+                                  public interface DependencyObject { }
+                              }
+
+                              namespace TestApp
+                              {
+                                  public class UnoControl : Microsoft.UI.Xaml.DependencyObject
+                                  {
+                                      public string Title { get; set; } = "";
+                                  }
+
+                                  public class MyViewModel : System.IDisposable
+                                  {
+                                      public string Title { get; set; } = "";
+                                      public void Dispose() { }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var typeSymbol = GetNamedTypeSymbol(compilation, typeName);
+
+        var info = TypeDetectionExtractor.ExtractFromSymbol(typeSymbol, compilation, default);
+
+        await Assert.That(info.InheritsWinUIDependencyObject).IsEqualTo(expected);
     }
 
     /// <summary>Gets a named type symbol from a compilation.</summary>
