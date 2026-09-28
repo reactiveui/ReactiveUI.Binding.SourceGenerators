@@ -48,7 +48,7 @@
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\EquatableArray.cs" Link="Models\EquatableArray.cs"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Bindings\BindingAffinity.cs" Link="Bindings\BindingAffinity.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\CodeGeneration\PooledStringBuilder.cs" Link="CodeGeneration\PooledStringBuilder.cs"/>
-    <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\*.cs" LinkBase="Polyfills"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
   </ItemGroup>
 
