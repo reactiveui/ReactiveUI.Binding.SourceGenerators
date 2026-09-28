@@ -31,6 +31,7 @@
     <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Maui"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Avalonia"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Uno"/>
   </ItemGroup>
 
   <ItemGroup>

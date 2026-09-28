@@ -64,6 +64,16 @@ public class ViewThreadPluginRegistryTests
                                               public sealed class AvaloniaViewThreadInvoker { }
                                           }
 
+                                          namespace Microsoft.UI.Xaml
+                                          {
+                                              public class DependencyObject { }
+                                          }
+
+                                          namespace ReactiveUI.Binding.Uno
+                                          {
+                                              public sealed class UnoViewThreadInvoker { }
+                                          }
+
                                           namespace TestApp
                                           {
                                               public class WpfView : System.Windows.Threading.DispatcherObject { }
@@ -75,6 +85,8 @@ public class ViewThreadPluginRegistryTests
                                               public class MauiView : Microsoft.Maui.Controls.BindableObject { }
 
                                               public class AvaloniaView : Avalonia.AvaloniaObject { }
+
+                                              public class UnoView : Microsoft.UI.Xaml.DependencyObject { }
 
                                               public class PlainViewModel { }
                                           }
@@ -92,11 +104,18 @@ public class ViewThreadPluginRegistryTests
                                                             public class AvaloniaObject { }
                                                         }
 
+                                                        namespace Microsoft.UI.Xaml
+                                                        {
+                                                            public class DependencyObject { }
+                                                        }
+
                                                         namespace TestApp
                                                         {
                                                             public class WpfView : System.Windows.Threading.DispatcherObject { }
 
                                                             public class AvaloniaView : Avalonia.AvaloniaObject { }
+
+                                                            public class WinUIView : Microsoft.UI.Xaml.DependencyObject { }
                                                         }
                                                         """;
 
@@ -121,6 +140,7 @@ public class ViewThreadPluginRegistryTests
     [Arguments("TestApp.WinFormsView", "global::ReactiveUI.Binding.Reactive.WinForms.ControlViewThreadInvoker")]
     [Arguments("TestApp.MauiView", "global::ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker")]
     [Arguments("TestApp.AvaloniaView", "global::ReactiveUI.Binding.Avalonia.AvaloniaViewThreadInvoker")]
+    [Arguments("TestApp.UnoView", "global::ReactiveUI.Binding.Uno.UnoViewThreadInvoker")]
     public async Task InvokerFor_WithATypeFromAPlatform_NamesItsInvoker(string metadataName, string expected)
     {
         var compilation = TestHelper.CreateCompilation(PlatformSource);
@@ -186,6 +206,21 @@ public class ViewThreadPluginRegistryTests
         await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(WpfView), compilation)).IsNull();
         await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(compilation.GetTypeByMetadataName(PlainViewModel), compilation)).IsNull();
         await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(null, compilation)).IsNull();
+    }
+
+    /// <summary>
+    /// A WinUI object without ReactiveUI.Binding.Uno carries no invoker and names no missing package: that package is
+    /// for Uno, and WinUI shares its dependency object type.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WinUIObject_WithoutTheUnoPackage_CarriesNoInvokerAndReportsNothing()
+    {
+        var compilation = TestHelper.CreateCompilation(PlatformWithoutRuntimeSource);
+        var winUIView = compilation.GetTypeByMetadataName("TestApp.WinUIView");
+
+        await Assert.That(ViewThreadPluginRegistry.InvokerFor(winUIView, compilation)).IsNull();
+        await Assert.That(ViewThreadPluginRegistry.MissingPackageFor(winUIView, compilation)).IsNull();
     }
 
     /// <summary>A platform type whose runtime invoker is out of reach carries no invoker.</summary>

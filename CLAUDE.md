@@ -79,10 +79,19 @@ dotnet --info
 
 # Restore NuGet packages
 cd src
-dotnet restore ReactiveUI.Binding.SourceGenerators.slnx
+dotnet restore ReactiveUI.Binding.SourceGenerators.slnf
 ```
 
 **Note:** This project uses the modern `.slnx` (XML-based solution file) format instead of the legacy `.sln` format.
+
+**Build through the solution filters.** The `.slnx` holds every project, for the IDE. Two filters split it:
+
+- `ReactiveUI.Binding.SourceGenerators.slnf` holds every project except the Uno ones. `dotnet` builds it on any OS.
+- `ReactiveUI.Binding.SourceGenerators.Uno.slnf` holds the Uno.Sdk projects and their tests. Their Windows head needs
+  MSBuild, so CI builds this filter in its own Windows job (`msbuildSolutionFile` in reactiveui/actions-common). On
+  Linux and macOS, `dotnet build` builds the other Uno heads.
+
+A new project goes in the `.slnx` and in one of the two filters.
 
 ### Build Commands
 
@@ -90,13 +99,13 @@ dotnet restore ReactiveUI.Binding.SourceGenerators.slnx
 
 ```powershell
 # Build the solution
-dotnet build ReactiveUI.Binding.SourceGenerators.slnx -c Release
+dotnet build ReactiveUI.Binding.SourceGenerators.slnf -c Release
 
 # Build with warnings as errors (includes StyleSharp violations)
-dotnet build ReactiveUI.Binding.SourceGenerators.slnx -c Release -warnaserror
+dotnet build ReactiveUI.Binding.SourceGenerators.slnf -c Release -warnaserror
 
 # Clean the solution
-dotnet clean ReactiveUI.Binding.SourceGenerators.slnx
+dotnet clean ReactiveUI.Binding.SourceGenerators.slnf
 ```
 
 ### Test Commands (Microsoft Testing Platform)
@@ -111,7 +120,7 @@ The working folder must be `./src` folder.
 
 ```powershell
 # Run all tests in the solution
-dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnx -c Release
+dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnf -c Release
 
 # Run all tests in a specific project
 dotnet test --project tests/ReactiveUI.Binding.Analyzer.Tests/ReactiveUI.Binding.Analyzer.Tests.csproj -c Release
@@ -125,7 +134,7 @@ dotnet test --project tests/ReactiveUI.Binding.SourceGenerators.Tests/ReactiveUI
 dotnet test --project tests/ReactiveUI.Binding.SourceGenerators.Tests/ReactiveUI.Binding.SourceGenerators.Tests.csproj -- --treenode-filter "/*/*/WhenChangedGeneratorTests/*"
 
 # Run tests with code coverage
-dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnx -- --coverage --coverage-output-format cobertura
+dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnf -- --coverage --coverage-output-format cobertura
 ```
 
 ### TUnit Treenode-Filter Syntax
@@ -172,7 +181,7 @@ Code coverage uses **Microsoft.Testing.Extensions.CodeCoverage** configured in `
 
 ```powershell
 # Run tests with code coverage (from src/ folder)
-dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnx -c Release -- --coverage --coverage-output-format cobertura
+dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnf -c Release -- --coverage --coverage-output-format cobertura
 
 # Generate HTML report using ReportGenerator (install if needed: dotnet tool install -g dotnet-reportgenerator-globaltool)
 # Find all cobertura files and generate report to /tmp/<folder>
@@ -227,7 +236,8 @@ src/
 ├── ReactiveUI.Binding.Wpf.Shared/               # Each platform's source, compiled by both its leaves
 ├── ReactiveUI.Binding.Wpf/                      # Lean platform leaf
 ├── ReactiveUI.Binding.Wpf.Reactive/             # System.Reactive platform leaf
-│                                                # ...and the same triple for WinForms, Maui and Avalonia
+│                                                # ...and the same triple for WinForms, Maui, Avalonia and Uno
+│                                                # (Uno's leaves use Uno.Sdk and build from the Uno filter)
 │
 ├── ReactiveUI.Binding.SourceGenerators/         # Source generator (netstandard2.0)
 │   ├── BindingGenerator.cs                      # [Generator] IIncrementalGenerator entry point
@@ -260,7 +270,7 @@ src/
 │   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
 │   │   └── ViewThread/                          # The invoker a generated binding carries for its target
 │   │       ├── ViewThreadPluginRegistry.cs      # Matches a target's type to its platform's invoker
-│   │       └── Wpf/WinForms/Maui/AvaloniaViewThreadPlugin.cs # One plugin per platform
+│   │       └── Wpf/WinForms/Maui/Avalonia/UnoViewThreadPlugin.cs # One plugin per platform
 │   │   └── PropertyRaise/                       # How ToProperty raises the source type's notifications
 │   │       ├── PropertyRaisePluginRegistry.cs   # First plugin that can raise, strongest first
 │   │       ├── ReactiveObjectRaisePlugin.cs     # ReactiveUI's public RaisePropertyChanged extension (ExactType, 10)
@@ -643,6 +653,7 @@ come from the Primitives platform packages, and `For(owner)` returns one sequenc
 | WinForms `ControlViewThreadInvoker` | `ControlSequencer.For(Control)` | `InvokeRequired` is false, which includes a control with no handle |
 | MAUI `DispatcherViewThreadInvoker` | `MauiDispatcherSequencer.For(IDispatcher)` | the object has no dispatcher |
 | Avalonia `AvaloniaViewThreadInvoker` | `AvaloniaScheduler.For(Dispatcher)`, at background priority | never; every `AvaloniaObject` has a dispatcher |
+| Uno `UnoViewThreadInvoker` | `DispatcherQueueSequencer.For(DispatcherQueue)` | never; every `DependencyObject` has a dispatcher queue |
 
 MAUI's `BindableObject.Dispatcher` throws `InvalidOperationException` when it finds no dispatcher. That is normal in
 a view's unit test. The MAUI invoker catches it. It treats the object as having no owning thread.
@@ -682,7 +693,10 @@ never sees a write to an unclaimed object.
 
 - `ViewThreadPluginRegistry` checks the target's type during extraction. It matches
   `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control`,
-  `Microsoft.Maui.Controls.BindableObject` and `Avalonia.AvaloniaObject`.
+  `Microsoft.Maui.Controls.BindableObject`, `Avalonia.AvaloniaObject` and `Microsoft.UI.Xaml.DependencyObject`.
+- Uno and WinUI share `Microsoft.UI.Xaml.DependencyObject`. Its plugin names the Uno invoker only when the
+  compilation references `ReactiveUI.Binding.Uno`, and its `PackageName` is null, so RXUIBIND017 never reports a
+  WinUI binding: the Uno package does not serve plain WinUI apps.
 - The invocation model stores the matching runtime invoker's full name. `BindTo`, `BindOneWay`, `OneWayBind` and
   `Bind` store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view, and
   for the control when the view has none.
@@ -695,8 +709,8 @@ The generator never declares an invoker itself: the invokers are public types in
 
 An `Unsafe` binding only has the registered invokers. It routes writes only when the platform module is registered.
 
-There is no WinUI invoker. No runtime package registers one. A generated one would route writes that the `Unsafe`
-twin does not.
+There is no plain WinUI invoker package. An Uno app gets `ReactiveUI.Binding.Uno`, whose Windows head compiles
+against the Windows App SDK, so its invoker also covers the Uno app's Windows head.
 
 ### Operators Come From Primitives
 

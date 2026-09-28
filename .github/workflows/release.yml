@@ -27,7 +27,8 @@ jobs:
   release:
     uses: reactiveui/actions-common/.github/workflows/workflow-common-release.yml@main
     with:
-      solutionFile: ReactiveUI.Binding.SourceGenerators.slnx
+      solutionFile: ReactiveUI.Binding.SourceGenerators.slnf
+      msbuildSolutionFile: ReactiveUI.Binding.SourceGenerators.Uno.slnf
       installWorkloads: true
       minverMinimumMajorMinor: '3.3'
       bump: ${{ inputs.bump }}

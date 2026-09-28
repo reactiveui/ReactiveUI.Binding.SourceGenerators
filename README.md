@@ -445,12 +445,14 @@ targets build only on Windows and macOS.
 
 The Avalonia packages target .NET 8 to 11. They are trim and NativeAOT safe.
 
+The Uno packages target the Uno Platform heads of .NET 10 and 11: desktop, WebAssembly, Android, iOS and Windows.
+
 NativeAOT works on .NET 8 and later. Only the generated code runs there. The `Unsafe` overloads compile
 expressions at run time, and NativeAOT cannot do that.
 
 ## Packages
 
-Twelve packages ship. Each runtime package carries the generator and the analyzer. The platform packages get them
+Fourteen packages ship. Each runtime package carries the generator and the analyzer. The platform packages get them
 through the runtime package.
 
 | Package | What it is |
@@ -465,6 +467,8 @@ through the runtime package.
 | `ReactiveUI.Binding.Maui.Reactive` | The same, for a System.Reactive app. |
 | `ReactiveUI.Binding.Avalonia` | Avalonia property observation and command binding. |
 | `ReactiveUI.Binding.Avalonia.Reactive` | The same, for a System.Reactive app. |
+| `ReactiveUI.Binding.Uno` | Uno Platform view thread routing. |
+| `ReactiveUI.Binding.Uno.Reactive` | The same, for a System.Reactive app. |
 | `ReactiveUI.Binding.SourceGenerators` | MSBuild props and targets only. A compatibility package. |
 | `ReactiveUI.Binding.Analyzer` | The analyzer project. Its files ship inside the runtime packages. |
 
@@ -830,6 +834,7 @@ does not.
 | WinForms `Control` | `ControlSequencer` for the control |
 | MAUI `BindableObject` | `MauiDispatcherSequencer` for the object's dispatcher |
 | Avalonia `AvaloniaObject` | `AvaloniaScheduler` for the object's dispatcher, at background priority |
+| Uno `DependencyObject` | `DispatcherQueueSequencer` for the object's dispatcher queue |
 
 WPF and Avalonia can run several UI threads. Each window belongs to one of them. Asking the object sends each write
 to the right one.
@@ -847,7 +852,7 @@ Some objects have no owning thread. The binding writes to them straight away.
 - A frozen WPF `Freezable`.
 - A WinForms control with no window handle yet. Once the handle exists, writes go to the thread that created it.
 - A MAUI object with no dispatcher, such as a view in a unit test.
-- Any object that is not a WPF, WinForms, MAUI or Avalonia object, such as a plain view model.
+- Any object that is not a WPF, WinForms, MAUI, Avalonia or Uno object, such as a plain view model.
 
 Every binding API does this: `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, and `BindCommand` when
 it binds a new command to the control. Each `Unsafe` twin does the same through the registered invokers.
@@ -855,14 +860,15 @@ it binds a new command to the control. Each `Unsafe` twin does the same through 
 ### Invokers
 
 An `IViewThreadInvoker` does the check and the queueing for one platform. Each platform package has a module
-that registers one: `WpfBindingModule`, `WinFormsBindingModule`, `MauiBindingModule` or `AvaloniaBindingModule`.
+that registers one: `WpfBindingModule`, `WinFormsBindingModule`, `MauiBindingModule`, `AvaloniaBindingModule` or
+`UnoBindingModule`.
 You can register your own. An invoker you register is asked first.
 
 To support another platform, derive from `SequencerViewThreadInvoker<TTarget, TSequencer>` and return the
 sequencer that owns an object from `SequencerFor`. The sequencer has to implement `IThreadAffineSequencer`, as every
 ReactiveUI.Primitives UI sequencer does. Return null for an object that has no owning thread.
 
-A generated binding knows its target's type when it compiles. For a WPF, WinForms, MAUI or Avalonia target, it
+A generated binding knows its target's type when it compiles. For a WPF, WinForms, MAUI, Avalonia or Uno target, it
 carries that platform's invoker. So it routes writes even when the platform module is not registered.
 
 An `Unsafe` binding only finds its target's type while the app runs. It uses the registered invokers alone. Register

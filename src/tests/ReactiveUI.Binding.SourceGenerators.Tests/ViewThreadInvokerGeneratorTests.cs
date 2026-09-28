@@ -125,6 +125,29 @@ public class ViewThreadInvokerGeneratorTests
 
                                          """ + RuntimeInvokerStandIns.Avalonia;
 
+    /// <summary>The Uno types the generated invoker calls.</summary>
+    private const string UnoStubs = """
+
+                                    namespace Microsoft.UI.Dispatching
+                                    {
+                                        public class DispatcherQueue
+                                        {
+                                            public bool HasThreadAccess => true;
+
+                                            public bool TryEnqueue(Action callback) => true;
+                                        }
+                                    }
+
+                                    namespace Microsoft.UI.Xaml
+                                    {
+                                        public class DependencyObject
+                                        {
+                                            public Microsoft.UI.Dispatching.DispatcherQueue DispatcherQueue { get; } = new Microsoft.UI.Dispatching.DispatcherQueue();
+                                        }
+                                    }
+
+                                    """ + RuntimeInvokerStandIns.Uno;
+
     /// <summary>The imports every test source starts with.</summary>
     private const string Imports = """
                                    using System;
@@ -258,6 +281,36 @@ public class ViewThreadInvokerGeneratorTests
 
         var result = await TestHelper.TestPassWithResult(
             Imports + usage + ViewModelSource + AvaloniaStubs,
+            typeof(ViewThreadInvokerGeneratorTests),
+            LanguageVersion.CSharp10);
+
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>A one-way binding onto an Uno target carries the Uno invoker.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindOneWay_ToAnUnoTarget_CarriesTheUnoInvoker()
+    {
+        const string usage = """
+                             namespace TestApp
+                             {
+                                 public class MyTextBlock : Microsoft.UI.Xaml.DependencyObject
+                                 {
+                                     public string Text { get; set; } = "";
+                                 }
+
+                                 public static class Usage
+                                 {
+                                     public static object Bind(MyViewModel viewModel, MyTextBlock textBlock) =>
+                                         viewModel.BindOneWay(textBlock, x => x.Name, x => x.Text);
+                                 }
+                             }
+                             """;
+
+        var result = await TestHelper.TestPassWithResult(
+            Imports + usage + ViewModelSource + UnoStubs,
             typeof(ViewThreadInvokerGeneratorTests),
             LanguageVersion.CSharp10);
 
