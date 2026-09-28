@@ -16,6 +16,9 @@
     <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net472"/>
     <PackageReference Include="ReactiveUI"/>
+    <!-- The System.Reactive runtime compiles against ReactiveUI.Reactive, as its consumers do: lean ReactiveUI brings
+         the lean runtime with it. -->
+    <PackageReference Include="ReactiveUI.Reactive"/>
     <!-- ReactiveUI.SourceGenerators runs beside this generator in the contract tests: its attributes are referenced,
          and its generators are loaded from the package rather than run over this project. This project pins the first
          release the contract follows; the Roslyn 4.13 project runs the same tests against the current release. -->

@@ -19,6 +19,9 @@ public class SourceGeneratorsContractTests
     /// <summary>The placeholder the scenario names the runtime namespace with.</summary>
     internal const string RuntimeNamespace = "RUNTIME_NAMESPACE";
 
+    /// <summary>The placeholder the scenario names ReactiveUI's <c>ReactiveObject</c> with; each flavour has its own.</summary>
+    internal const string RuntimeReactiveObject = "RUNTIME_REACTIVE_OBJECT";
+
     /// <summary>A view model built from every ReactiveUI.SourceGenerators attribute, and call sites binding each member.</summary>
     internal const string Scenario = """
         using System;
@@ -28,7 +31,7 @@ public class SourceGeneratorsContractTests
         using System.Threading.Tasks;
         using ReactiveUI.SourceGenerators;
         using RUNTIME_NAMESPACE;
-        using RxObject = ReactiveUI.ReactiveObject;
+        using RxObject = RUNTIME_REACTIVE_OBJECT;
 
         namespace Contract
         {
@@ -215,7 +218,9 @@ public class SourceGeneratorsContractTests
             ? TestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp13)
             : TestHelper.ParseOptionsFor(LanguageVersion.CSharp13);
         var compilation = TestHelper.CreateCompilation(
-            source.Replace(RuntimeNamespace, useReactiveRuntime ? "ReactiveUI.Binding.Reactive" : "ReactiveUI.Binding", StringComparison.Ordinal),
+            source
+                .Replace(RuntimeNamespace, useReactiveRuntime ? "ReactiveUI.Binding.Reactive" : "ReactiveUI.Binding", StringComparison.Ordinal)
+                .Replace(RuntimeReactiveObject, useReactiveRuntime ? "ReactiveUI.Reactive.ReactiveObject" : "ReactiveUI.ReactiveObject", StringComparison.Ordinal),
             parseOptions,
             useReactiveRuntime,
             "TestAssembly",

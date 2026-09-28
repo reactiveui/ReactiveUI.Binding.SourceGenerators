@@ -489,18 +489,23 @@ public static class TestHelper
             // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
             // different assemblies, and the walk only follows references outward, so seeding from the
             // interface would leave the assembly that declares ReactiveObject out of the compilation.
+            // Each flavour takes the ReactiveUI package its consumers use, since each brings its own runtime.
             var runtimeSeeds = flavour
-                ? new[] { typeof(ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions).Assembly }
+                ? new[]
+                {
+                    typeof(ReactiveUI.Reactive.ReactiveObject).Assembly,
+                    typeof(ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions).Assembly,
+                }
                 : new[]
                 {
+                    typeof(ReactiveObject).Assembly,
                     typeof(ReactiveUIBindingExtensions).Assembly,
                     typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly,
                 };
 
             var seedAssemblies = new[]
             {
-                typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
-                typeof(System.Reactive.Linq.Observable).Assembly,
+                typeof(IReactiveObject).Assembly, typeof(System.Reactive.Linq.Observable).Assembly,
             }.Concat(runtimeSeeds).ToArray();
 
             return [.. GetTransitiveReferences(seedAssemblies)];

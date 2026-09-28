@@ -40,6 +40,18 @@ public class ReactiveRuntimeFlavourTests
     /// <summary>The same namespace on the System.Reactive package.</summary>
     private const string ReactiveQualifiedObservables = "ReactiveUI.Binding.Reactive.Observables.";
 
+    /// <summary>The import a scenario carries for ReactiveUI's <c>ReactiveObject</c> and its raise extensions.</summary>
+    private const string LeanReactiveUIImport = "using ReactiveUI;";
+
+    /// <summary>The same import plus the namespace ReactiveUI.Reactive declares them in.</summary>
+    private const string ReactiveReactiveUIImport = "using ReactiveUI;\nusing ReactiveUI.Reactive;";
+
+    /// <summary>ReactiveUI's <c>ReactiveObject</c> as a scenario body names it outright.</summary>
+    private const string LeanQualifiedReactiveObject = "ReactiveUI.ReactiveObject";
+
+    /// <summary>The same type on ReactiveUI.Reactive.</summary>
+    private const string ReactiveQualifiedReactiveObject = "ReactiveUI.Reactive.ReactiveObject";
+
     /// <summary>Lists the shared scenarios for the sweep.</summary>
     /// <returns>Every shared scenario path.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -94,7 +106,8 @@ public class ReactiveRuntimeFlavourTests
     /// Points a scenario at the other runtime package. The imports move - the scheduler one becomes an alias so
     /// the scenario bodies can keep naming <c>ISequencer</c>, which is exactly the seam the runtime library's own
     /// build uses to compile one source tree against both packages - and so does the one scenario that names a
-    /// runtime type outright rather than relying on its import.
+    /// runtime type outright rather than relying on its import. ReactiveUI's <c>ReactiveObject</c> moves to
+    /// ReactiveUI.Reactive, the package a System.Reactive consumer references.
     /// </summary>
     /// <param name="source">The scenario source, written against the lean package.</param>
     /// <returns>The same source, importing the System.Reactive package.</returns>
@@ -103,5 +116,7 @@ public class ReactiveRuntimeFlavourTests
         source
             .Replace(LeanSchedulerImport, ReactiveSchedulerImport, StringComparison.Ordinal)
             .Replace(LeanImport, ReactiveImport, StringComparison.Ordinal)
-            .Replace(LeanQualifiedObservables, ReactiveQualifiedObservables, StringComparison.Ordinal);
+            .Replace(LeanQualifiedObservables, ReactiveQualifiedObservables, StringComparison.Ordinal)
+            .Replace(LeanReactiveUIImport, ReactiveReactiveUIImport, StringComparison.Ordinal)
+            .Replace(LeanQualifiedReactiveObject, ReactiveQualifiedReactiveObject, StringComparison.Ordinal);
 }

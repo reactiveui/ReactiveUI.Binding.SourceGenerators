@@ -10,6 +10,9 @@ public class SingleToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>A value whose decimal separator differs between the invariant culture and fr-FR.</summary>
+    private const float FractionalValue = 7.25F;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -31,7 +34,7 @@ public class SingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
+        await Assert.That(output).IsEqualTo(float.MaxValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
     /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
@@ -45,7 +48,7 @@ public class SingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
+        await Assert.That(output).IsEqualTo(float.MinValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
     /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
@@ -59,7 +62,7 @@ public class SingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
     /// <summary>Verifies TryConvert SingleToString Succeeds.</summary>
@@ -73,7 +76,28 @@ public class SingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>Verifies TryConvert ignores a culture whose decimal separator is a comma, as generated bindings do.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_CommaDecimalCulture_UsesInvariantCulture()
+    {
+        var converter = new SingleToStringTypeConverter();
+        var previous = System.Globalization.CultureInfo.CurrentCulture;
+        string? output;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
+            _ = converter.TryConvert(FractionalValue, null, out output);
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = previous;
+        }
+
+        await Assert.That(output).IsEqualTo("7.25");
     }
 
     /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
