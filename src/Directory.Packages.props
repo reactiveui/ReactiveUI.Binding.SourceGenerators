@@ -57,7 +57,7 @@
     <PackageVersion Include="ReactiveUI.Primitives.Avalonia" Version="8.2.0"/>
 
     <!-- Test App Dependencies-->
-    <PackageVersion Include="ReactiveUI" Version="24.2.0"/>
+    <PackageVersion Include="ReactiveUI" Version="24.3.0"/>
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="4.2.0"/>
   </ItemGroup>
 </Project>
