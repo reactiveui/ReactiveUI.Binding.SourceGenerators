@@ -12,7 +12,10 @@ using ReactiveUI.Primitives;
 
 namespace ReactiveUI.Binding.Documentation.Threading;
 
-/// <summary>Shows how ReactiveUI.Binding binds real Avalonia controls, which raise <c>PropertyChanged</c>. <see cref="AvaloniaViewThreadInvoker"/> tells the engine which thread owns them.</summary>
+/// <summary>
+/// Shows how ReactiveUI.Binding binds real Avalonia controls, which raise <c>PropertyChanged</c>.
+/// <see cref="AvaloniaViewThreadInvoker"/>, from ReactiveUI.Binding.Avalonia, tells the engine which thread owns them.
+/// </summary>
 public static class AvaloniaExamples
 {
     /// <summary>What the transfer example prints for an empty validation message.</summary>
@@ -176,14 +179,17 @@ public static class AvaloniaExamples
         // 0.00
     }
 
-    /// <summary>Writes from a worker thread with no invoker registered: Avalonia refuses the write, and the failure reaches the code that changed the view model.</summary>
+    /// <summary>
+    /// Writes from a worker thread through an <c>Unsafe</c> binding with no invoker registered: Avalonia refuses the
+    /// write, and the failure reaches the code that changed the view model.
+    /// </summary>
     public static void WriteFromWorkerThreadWithoutInvoker()
     {
         AvaloniaTodoView view = new();
         TodoItem item = new() { Title = OriginalTitle };
         string? failure = string.Empty;
 
-        using (item.BindOneWay(view, x => x.Title, v => v.RemainingLabel.Text))
+        using (item.BindOneWayUnsafe(view, x => x.Title, v => v.RemainingLabel.Text))
         {
             Thread worker = new Thread(() =>
             {
@@ -203,7 +209,7 @@ public static class AvaloniaExamples
         Console.WriteLine(failure);
 
         // Output:
-        // InvalidOperationException
+        // TargetInvocationException
     }
 
     /// <summary>Follows an upload whose progress arrives on pool threads. The registered invoker claims the bar, so each report waits for the UI thread.</summary>

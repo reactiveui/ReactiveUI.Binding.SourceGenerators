@@ -30,6 +30,12 @@
     <BindingMauiTargets>$(BindingMauiTargets);net10.0;net11.0;$(BindingAndroidTargets)</BindingMauiTargets>
     <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
 
+    <!-- Uno.Sdk heads. The Windows head builds only on Windows, with MSBuild, and the iOS head on Windows or macOS;
+         the Uno projects sit in ReactiveUI.Binding.SourceGenerators.Uno.slnf so the dotnet build never loads them. -->
+    <BindingUnoTargets>net10.0;net10.0-desktop;net10.0-browserwasm;net11.0;net11.0-desktop;net11.0-browserwasm;net10.0-android;net11.0-android</BindingUnoTargets>
+    <BindingUnoTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingUnoTargets);net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0</BindingUnoTargets>
+    <BindingUnoTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingUnoTargets);net10.0-ios;net11.0-ios</BindingUnoTargets>
+
     <!-- The core runtime adds the Apple heads, which carry the key-value observing and AppKit command types that
          generated Apple bindings reference. Like the MAUI Apple heads, they build only on Windows and macOS.
          A consumer published for a runtime identifier passes it to this project's restore, and no Apple head

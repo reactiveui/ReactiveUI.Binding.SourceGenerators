@@ -24,6 +24,7 @@
     <Using Include="System.Diagnostics.CodeAnalysis"/>
     <Using Include="System.Runtime.CompilerServices"/>
     <Using Include="Splat"/>
+    <Using Include="ReactiveUI.Primitives.Concurrency.DispatcherSequencer" Alias="DispatcherSequencer"/>
   </ItemGroup>
 
   <!-- The shared source carries no per-file usings for the namespaces that shift between the two
@@ -37,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+    <PackageReference Include="ReactiveUI.Primitives.Wpf"/>
   </ItemGroup>
 
   <ItemGroup>

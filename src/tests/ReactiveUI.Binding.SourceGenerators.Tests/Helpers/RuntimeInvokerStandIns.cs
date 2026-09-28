@@ -135,4 +135,64 @@ internal static class RuntimeInvokerStandIns
                                  }
                                  #nullable restore
                                  """;
+
+    /// <summary>The Avalonia package's invoker, over a declared <c>Avalonia.AvaloniaObject</c>.</summary>
+    /// <remarks>The package routes through the dispatcher's sequencer; the stand-in asks the object directly, which answers the same.</remarks>
+    internal const string Avalonia = """
+
+                                     #nullable disable
+                                     namespace ReactiveUI.Binding.Avalonia
+                                     {
+                                         public sealed class AvaloniaViewThreadInvoker : global::ReactiveUI.Binding.IViewThreadInvoker
+                                         {
+                                             public static AvaloniaViewThreadInvoker Instance { get; } = new AvaloniaViewThreadInvoker();
+
+                                             public bool Claims(object target)
+                                             {
+                                                 return target is global::Avalonia.AvaloniaObject;
+                                             }
+
+                                             public bool CheckAccess(object target)
+                                             {
+                                                 return ((global::Avalonia.AvaloniaObject)target).CheckAccess();
+                                             }
+
+                                             public void Post(object target, global::System.Action<object> callback, object state)
+                                             {
+                                                 ((global::Avalonia.AvaloniaObject)target).Dispatcher.Post(callback, state);
+                                             }
+                                         }
+                                     }
+                                     #nullable restore
+                                     """;
+
+    /// <summary>The Uno package's invoker, over a declared <c>Microsoft.UI.Xaml.DependencyObject</c>.</summary>
+    /// <remarks>The package routes through the dispatcher queue's sequencer; the stand-in asks the queue directly.</remarks>
+    internal const string Uno = """
+
+                                #nullable disable
+                                namespace ReactiveUI.Binding.Uno
+                                {
+                                    public sealed class UnoViewThreadInvoker : global::ReactiveUI.Binding.IViewThreadInvoker
+                                    {
+                                        public static UnoViewThreadInvoker Instance { get; } = new UnoViewThreadInvoker();
+
+                                        public bool Claims(object target)
+                                        {
+                                            return target is global::Microsoft.UI.Xaml.DependencyObject;
+                                        }
+
+                                        public bool CheckAccess(object target)
+                                        {
+                                            return ((global::Microsoft.UI.Xaml.DependencyObject)target).DispatcherQueue.HasThreadAccess;
+                                        }
+
+                                        public void Post(object target, global::System.Action<object> callback, object state)
+                                        {
+                                            ((global::Microsoft.UI.Xaml.DependencyObject)target).DispatcherQueue.TryEnqueue(() => callback(state));
+                                        }
+                                    }
+                                }
+                                #nullable restore
+                                """;
 }

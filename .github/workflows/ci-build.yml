@@ -20,6 +20,9 @@ jobs:
     with:
       configuration: Release
       productNamespacePrefix: "ReactiveUI.Binding"
+      # The Uno.Sdk projects need MSBuild, so they build and test in their own Windows job.
+      solutionFile: ReactiveUI.Binding.SourceGenerators.slnf
+      msbuildSolutionFile: ReactiveUI.Binding.SourceGenerators.Uno.slnf
       installWorkloads: true
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

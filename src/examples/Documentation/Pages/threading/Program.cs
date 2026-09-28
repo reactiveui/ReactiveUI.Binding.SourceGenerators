@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Globalization;
+using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Documentation.Threading;
 #if WINDOWS
 using System.Windows.Threading;
@@ -147,6 +148,12 @@ static async Task RunWinFormsExamplesAsync()
     }
 }
 #else
+// The Unsafe examples read their property paths through the core observation services, so register them first.
+// This registers no view thread invoker, so the examples still start with none.
+IReactiveUIBindingBuilder coreServices = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+
+_ = coreServices.WithCoreServices().BuildApp();
+
 // The Avalonia examples run inside Avalonia's dispatcher on this thread, so an await returns to the UI thread.
 using CancellationTokenSource stop = new();
 
