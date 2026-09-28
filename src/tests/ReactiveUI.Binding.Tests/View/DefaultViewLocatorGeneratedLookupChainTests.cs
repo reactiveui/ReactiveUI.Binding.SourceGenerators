@@ -12,8 +12,14 @@ namespace ReactiveUI.Binding.Tests.View;
 [TestExecutor<BindingBuilderTestExecutor>]
 public class DefaultViewLocatorGeneratedLookupChainTests
 {
-    /// <summary>The number of lookups registered concurrently.</summary>
+    /// <summary>The number of lookups registered concurrently in each round.</summary>
     private const int ConcurrentLookupCount = 64;
+
+    /// <summary>The fewest threads a round races, so registrations collide even on a runner with few cores.</summary>
+    private const int MinimumRacingThreads = 8;
+
+    /// <summary>The number of racing rounds.</summary>
+    private const int RegistrationRounds = 8;
 
     /// <summary>Verifies each registered lookup resolves the view models it knows about.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -144,17 +150,48 @@ public class DefaultViewLocatorGeneratedLookupChainTests
         await Assert.That(calls).IsEqualTo(1);
     }
 
-    /// <summary>Verifies concurrent registrations all take effect.</summary>
+    /// <summary>Verifies concurrent registrations all take effect, including those that lose a race and retry.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
+    /// <remarks>
+    /// Each round starts its threads together at a barrier, so registrations collide and the losers retry against the
+    /// array the winner published. Several rounds keep that collision from depending on the runner's core count.
+    /// </remarks>
     [Test]
     public async Task ConcurrentRegistrations_AllTakeEffect()
     {
-        _ = Parallel.For(0, ConcurrentLookupCount, static i =>
-            DefaultViewLocator.SetGeneratedViewDispatch((vm, _) => vm is NumberedViewModel { Number: var n } && n == i ? new FirstView() : null));
+        var threads = Math.Max(Environment.ProcessorCount, MinimumRacingThreads);
+        var perThread = (ConcurrentLookupCount / threads) + 1;
+        var total = threads * perThread * RegistrationRounds;
+        for (var round = 0; round < RegistrationRounds; round++)
+        {
+            using var barrier = new Barrier(threads);
+            var offset = round * threads * perThread;
+            var workers = new Thread[threads];
+            for (var t = 0; t < threads; t++)
+            {
+                var first = offset + (t * perThread);
+                workers[t] = new(() =>
+                {
+                    barrier.SignalAndWait();
+                    for (var i = first; i < first + perThread; i++)
+                    {
+                        var number = i;
+                        DefaultViewLocator.SetGeneratedViewDispatch((vm, _) => vm is NumberedViewModel { Number: var n } && n == number ? new FirstView() : null);
+                    }
+                });
+                workers[t].Start();
+            }
+
+            foreach (var worker in workers)
+            {
+                worker.Join();
+            }
+        }
+
         var locator = new DefaultViewLocator();
 
         var unresolved = 0;
-        for (var i = 0; i < ConcurrentLookupCount; i++)
+        for (var i = 0; i < total; i++)
         {
             if (locator.ResolveView(new NumberedViewModel(i)) is null)
             {
