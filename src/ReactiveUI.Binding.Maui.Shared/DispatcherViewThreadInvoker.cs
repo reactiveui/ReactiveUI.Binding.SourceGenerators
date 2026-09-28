@@ -11,38 +11,16 @@ namespace ReactiveUI.Binding.Reactive.Maui;
 namespace ReactiveUI.Binding.Maui;
 #endif
 
-/// <summary>Routes writes to a MAUI <c>BindableObject</c> through the dispatcher it carries.</summary>
-public sealed class DispatcherViewThreadInvoker : IViewThreadInvoker
+/// <summary>Routes writes to a MAUI <c>BindableObject</c> onto the <c>MauiDispatcherSequencer</c> of the dispatcher it carries.</summary>
+/// <remarks>An object with no dispatcher, as in a view's unit test, is written inline.</remarks>
+public sealed class DispatcherViewThreadInvoker : SequencerViewThreadInvoker<BindableObject, MauiDispatcherSequencer>
 {
     /// <summary>Gets the shared instance, which generated bindings route their MAUI writes through.</summary>
     public static DispatcherViewThreadInvoker Instance { get; } = new();
 
     /// <inheritdoc/>
-    public bool Claims(object target) => target is BindableObject;
-
-    /// <summary>Returns whether the calling thread may write to the target; also true when the target has no dispatcher.</summary>
-    /// <param name="target">A <c>BindableObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
-    /// <returns><see langword="false"/> only when the target's dispatcher requires a dispatch from the calling thread.</returns>
-    public bool CheckAccess(object target) => FindDispatcher((BindableObject)target) is not { IsDispatchRequired: true };
-
-    /// <summary>Queues <paramref name="callback"/> on the target's dispatcher, or runs it inline when the target has no dispatcher.</summary>
-    /// <param name="target">A <c>BindableObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
-    /// <param name="callback">The callback to run.</param>
-    /// <param name="state">The value passed to <paramref name="callback"/>.</param>
-    /// <exception cref="ArgumentNullException"><paramref name="callback"/> is null.</exception>
-    public void Post(object target, Action<object?> callback, object? state)
-    {
-        ArgumentExceptionHelper.ThrowIfNull(callback);
-
-        var dispatcher = FindDispatcher((BindableObject)target);
-        if (dispatcher is null)
-        {
-            callback(state);
-            return;
-        }
-
-        _ = dispatcher.Dispatch(() => callback(state));
-    }
+    protected override MauiDispatcherSequencer? SequencerFor(BindableObject target) =>
+        FindDispatcher(target) is { } dispatcher ? MauiDispatcherSequencer.For(dispatcher) : null;
 
     /// <summary>Reads the dispatcher an object carries.</summary>
     /// <param name="owner">The object to read.</param>

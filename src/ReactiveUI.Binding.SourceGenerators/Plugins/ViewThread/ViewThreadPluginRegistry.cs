@@ -16,6 +16,8 @@ internal static class ViewThreadPluginRegistry
         new WpfViewThreadPlugin(),
         new WinFormsViewThreadPlugin(),
         new MauiViewThreadPlugin(),
+        new AvaloniaViewThreadPlugin(),
+        new UnoViewThreadPlugin(),
     ];
 
     /// <summary>The platform types each compilation resolves, in plugin order.</summary>

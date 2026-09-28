@@ -22,5 +22,9 @@ internal interface IViewThreadPlugin
     string ReactiveInvokerMetadataName { get; }
 
     /// <summary>Gets the name of the lean platform package that ships the invoker.</summary>
-    string PackageName { get; }
+    /// <remarks>
+    /// Null when a binding onto the platform's objects without the package is not reported, because the platform's
+    /// type is shared with a platform the package does not serve.
+    /// </remarks>
+    string? PackageName { get; }
 }
