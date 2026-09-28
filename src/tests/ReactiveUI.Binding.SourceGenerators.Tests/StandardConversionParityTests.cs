@@ -9,12 +9,12 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>Compares generated conversions with the corresponding ReactiveUI converters.</summary>
+/// <summary>Compares generated conversions with the runtime converters that ReactiveUI registers.</summary>
 public class StandardConversionParityTests
 {
     /// <summary>Formatting, parsing, nullable values and conversion hints agree with the runtime providers.</summary>
     /// <param name="type">The converted CLR type.</param>
-    /// <param name="name">The ReactiveUI converter's type-name stem.</param>
+    /// <param name="name">The runtime converter's type-name stem.</param>
     /// <param name="value">A representative typed input expression.</param>
     /// <returns>A task representing the asynchronous test.</returns>
     [Test]
@@ -81,7 +81,7 @@ public class StandardConversionParityTests
                         {
                             if (!Format({{value}}, hint) || !FormatNullable({{value}}, hint) || !FormatNullable(null, hint)) return false;
                         }
-                        var provider = new global::ReactiveUI.{{name}}ToStringTypeConverter();
+                        var provider = new global::ReactiveUI.Binding.{{name}}ToStringTypeConverter();
                         object formatted;
                         provider.TryConvertTyped({{value}}, null, out formatted);
                         foreach (var text in new[] { (string)formatted, "not a value", "", null })
@@ -97,7 +97,7 @@ public class StandardConversionParityTests
             {{Formatting(type, name, true)}}
             {{Parsing(type, name, false)}}
             {{Parsing(type, name, true)}}
-            private static bool Matches<TIn, TOut>(global::ReactiveUI.IBindingTypeConverter provider, TIn value, object hint, Target<TOut> target)
+            private static bool Matches<TIn, TOut>(global::ReactiveUI.Binding.IBindingTypeConverter provider, TIn value, object hint, Target<TOut> target)
             {
                 object expected;
                 var success = provider.TryConvertTyped(value, hint, out expected);
@@ -129,7 +129,7 @@ public class StandardConversionParityTests
                 var target = new Target<string>("unconverted");
                 IObservable<{{sourceType}}> source = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{{sourceType}}>(value);
                 using (source.BindTo(target, x => x.Value, conversionHint: hint))
-                    return Matches(new global::ReactiveUI.{{provider}}(), value, hint, target);
+                    return Matches(new global::ReactiveUI.Binding.{{provider}}(), value, hint, target);
             }
             """;
     }
@@ -150,7 +150,7 @@ public class StandardConversionParityTests
                 var target = new Target<{{targetType}}>(({{targetType}})default({{type}}));
                 IObservable<string> source = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<string>(value);
                 using (source.BindTo(target, x => x.Value))
-                    return Matches(new global::ReactiveUI.{{provider}}(), value, null, target);
+                    return Matches(new global::ReactiveUI.Binding.{{provider}}(), value, null, target);
             }
             """;
     }
