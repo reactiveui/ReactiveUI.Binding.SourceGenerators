@@ -166,7 +166,7 @@ internal static class SyntaxHelpers
 
         // A field raises no notification, so it resolves no mechanism and is read once, like any other link whose
         // owner cannot notify. It still carries its owner, which is how a call site whose first path starts at a
-        // field learns how the observed type notifies.
+        // field learns how the observed type notifies, and which view model property a view binding follows.
         return member is IPropertySymbol propertySymbol
             ? new(
                 propertySymbol.Name,
@@ -179,7 +179,7 @@ internal static class SyntaxHelpers
                 memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 memberType.IsReferenceType,
-                TypeDetectionExtractor.CreateTypeInfo(owner, semanticModel.Compilation, new([]), ct),
+                TypeDetectionExtractor.ExtractFieldOwner(owner, semanticModel.Compilation, ct),
                 IsField: true);
     }
 

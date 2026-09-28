@@ -13,6 +13,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// <summary>Extracts notification capabilities from property-owner symbols.</summary>
 internal static class TypeDetectionExtractor
 {
+    /// <summary>The name a view exposes its view model under.</summary>
+    private const string ViewModelPropertyName = "ViewModel";
+
     /// <summary>Reads a type's notification mechanisms and observable properties from its symbol.</summary>
     /// <param name="typeSymbol">The type to inspect, declared in this compilation or referenced from another.</param>
     /// <param name="compilation">The compilation the type is resolved against.</param>
@@ -39,12 +42,34 @@ internal static class TypeDetectionExtractor
         CancellationToken ct)
     {
         var propertyInfo = ExtractProperty(owner, property);
-        var properties = property.Name != "ViewModel"
-            && PlatformSymbols.FindMember(owner, "ViewModel") is IPropertySymbol { IsStatic: false, GetMethod.DeclaredAccessibility: Accessibility.Public } viewModel
+        var properties = property.Name != ViewModelPropertyName && FindViewModelProperty(owner) is { } viewModel
             ? new EquatableArray<ObservablePropertyInfo>([propertyInfo, ExtractProperty(owner, viewModel)])
             : new EquatableArray<ObservablePropertyInfo>([propertyInfo]);
         return CreateTypeInfo(owner, compilation, properties, ct);
     }
+
+    /// <summary>Captures the concrete owner of a field link: its notification interfaces and its view model property.</summary>
+    /// <param name="owner">The type through which the field is read.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The owner's capabilities, listing its view model property when it exposes one.</returns>
+    /// <remarks>
+    /// A view binding usually starts at a field, a control named in XAML or by a designer, as in
+    /// <c>v =&gt; v.NameBox.Text</c>. The view model property is recorded so the binding follows the view model the view
+    /// currently holds, as it does when the path starts at a property.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ClassBindingInfo ExtractFieldOwner(
+        INamedTypeSymbol owner,
+        Compilation compilation,
+        CancellationToken ct) =>
+        CreateTypeInfo(
+            owner,
+            compilation,
+            FindViewModelProperty(owner) is { } viewModel
+                ? new EquatableArray<ObservablePropertyInfo>([ExtractProperty(owner, viewModel)])
+                : new EquatableArray<ObservablePropertyInfo>([]),
+            ct);
 
     /// <summary>Reads one property's native candidates while its owner symbols are available.</summary>
     /// <param name="owner">The concrete property owner.</param>
@@ -149,6 +174,14 @@ internal static class TypeDetectionExtractor
 
         return new([.. properties]);
     }
+
+    /// <summary>Finds the public instance view model property a view exposes, through its base classes.</summary>
+    /// <param name="owner">The type to search.</param>
+    /// <returns>The view model property, or null when the type exposes none.</returns>
+    private static IPropertySymbol? FindViewModelProperty(INamedTypeSymbol owner) =>
+        PlatformSymbols.FindMember(owner, ViewModelPropertyName) is IPropertySymbol { IsStatic: false, GetMethod.DeclaredAccessibility: Accessibility.Public } viewModel
+            ? viewModel
+            : null;
 
     /// <summary>Finds the dependency-property field and change event a property notifies through.</summary>
     /// <param name="members">The members of the type and of the bases its own assembly declares.</param>

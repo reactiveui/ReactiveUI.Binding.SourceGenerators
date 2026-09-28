@@ -284,6 +284,37 @@ public class ViewModelReplacementRuntimeTests
                 "view.Bind(view.ViewModel, vm => vm.Name, v => v.Text)",
                 StringComparison.Ordinal));
 
+    /// <summary>A one-way binding created while the view has no view model follows the first assigned model.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task OneWayBind_WhenViewModelInitiallyNull_TracksTheAssignedViewModel() =>
+        AssertTracksReplacement(WithNullViewModel(ViewModelReplacementSource, "view.OneWayBind"));
+
+    /// <summary>A two-way binding created while the view has no view model follows the first assigned model.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task Bind_WhenViewModelInitiallyNull_TracksTheAssignedViewModel() =>
+        AssertTracksReplacement(WithNullViewModel(ToBind(ViewModelReplacementSource), "view.Bind"));
+
+    /// <summary>
+    /// A one-way binding onto a control the view holds in a field, as a control named in XAML is, follows the view's
+    /// view model when the view has none yet.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task OneWayBind_ToAFieldControl_WhenViewModelInitiallyNull_TracksTheAssignedViewModel() =>
+        AssertTracksReplacement(WithNullViewModel(ToFieldControl(ViewModelReplacementSource), "view.OneWayBind"));
+
+    /// <summary>A two-way binding onto a control the view holds in a field follows the view model it is given later.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task Bind_ToAFieldControl_WhenViewModelInitiallyNull_TracksTheAssignedViewModel() =>
+        AssertTracksReplacement(WithNullViewModel(ToFieldControl(ToBind(ViewModelReplacementSource)), "view.Bind"));
+
     /// <summary>
     /// A command binding follows the view's current view model, so clicking the control invokes the command the
     /// view model on display exposes rather than the one belonging to the view model it replaced.
@@ -323,6 +354,32 @@ public class ViewModelReplacementRuntimeTests
             "var binding = view.BindInteraction",
             "view.ViewModel = null; var binding = view.BindInteraction",
             StringComparison.Ordinal));
+
+    /// <summary>Makes the one-way replacement scenario bind two-way.</summary>
+    /// <param name="source">The one-way scenario.</param>
+    /// <returns>The same scenario, calling <c>Bind</c>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ToBind(string source) =>
+        source.Replace("view.OneWayBind(", "view.Bind(", StringComparison.Ordinal);
+
+    /// <summary>Clears the view's view model just before the scenario makes its binding.</summary>
+    /// <param name="source">The scenario.</param>
+    /// <param name="call">The binding call the scenario makes, such as <c>view.OneWayBind</c>.</param>
+    /// <returns>The same scenario, binding while the view holds no view model.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string WithNullViewModel(string source, string call) =>
+        source.Replace($"var binding = {call}", $"view.ViewModel = null; var binding = {call}", StringComparison.Ordinal);
+
+    /// <summary>Moves the bound view property onto a control the view holds in a field.</summary>
+    /// <param name="source">The scenario, binding <c>v =&gt; v.Text</c>.</param>
+    /// <returns>The same scenario, binding <c>v =&gt; v.NameBox.Text</c>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ToFieldControl(string source) =>
+        source
+            .Replace("public string Text { get; set; } = \"\";", "public TextBox NameBox = new TextBox();", StringComparison.Ordinal)
+            .Replace("public static class Usage", "public class TextBox { public string Text { get; set; } = \"\"; }\n\npublic static class Usage", StringComparison.Ordinal)
+            .Replace("v => v.Text)", "v => v.NameBox.Text)", StringComparison.Ordinal)
+            .Replace("return view.Text;", "return view.NameBox.Text;", StringComparison.Ordinal);
 
     /// <summary>Runs a replacement scenario and asserts the view ends up showing the replacement's value.</summary>
     /// <param name="source">The scenario source to generate, compile and run.</param>
