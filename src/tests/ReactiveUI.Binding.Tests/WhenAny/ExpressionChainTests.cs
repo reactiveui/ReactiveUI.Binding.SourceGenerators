@@ -136,6 +136,66 @@ public class ExpressionChainTests
         await Assert.That(values[1]).IsEqualTo("B");
     }
 
+    /// <summary>
+    /// A link with no change notification emits once on subscribe. The chain reads the same value straight after,
+    /// so it reports the initial value once, and the notifying leaf behind it still reports its changes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PocoLinkBeforeNotifyingLeaf_EmitsTheInitialValueOnce()
+    {
+        EnsureInitialized();
+
+        var root = new PocoChainRoot();
+        root.Leaf.IsNotNullString = StartValue;
+        Expression<Func<PocoChainRoot, string>> expr = x => x.Leaf.IsNotNullString;
+        var values = new List<string>();
+
+        using var sub = root.SubscribeToExpressionChain<PocoChainRoot, string>(
+                expr.Body,
+                false,
+                false,
+                false)
+            .Select(static x => x.Value)
+            .Subscribe(values.Add);
+        var initial = values.ToArray();
+
+        root.Leaf.IsNotNullString = ReplacementValue;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(initial).IsEquivalentTo([StartValue]);
+            await Assert.That(values).IsEquivalentTo([StartValue, ReplacementValue]);
+        }
+    }
+
+    /// <summary>A leaf with no change notification reports its value once, and skipping the initial value leaves nothing.</summary>
+    /// <param name="skipInitial">Whether the first value is dropped.</param>
+    /// <param name="expectedCount">The number of values the chain reports.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [Arguments(false, 1)]
+    [Arguments(true, 0)]
+    public async Task PocoLeaf_ReportsTheInitialValueAtMostOnce(bool skipInitial, int expectedCount)
+    {
+        EnsureInitialized();
+
+        var fixture = new PocoModel { Value = StartValue };
+        Expression<Func<PocoModel, string>> expr = x => x.Value;
+        var values = new List<string>();
+
+        using var sub = fixture.SubscribeToExpressionChain<PocoModel, string>(
+                expr.Body,
+                false,
+                skipInitial,
+                false,
+                true)
+            .Select(static x => x.Value)
+            .Subscribe(values.Add);
+
+        await Assert.That(values.Count).IsEqualTo(expectedCount);
+    }
+
     /// <summary>Verifies that null in a chain propagates correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
