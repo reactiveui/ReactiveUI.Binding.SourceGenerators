@@ -305,6 +305,13 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             /// <summary>This link's index/argument array (non-null only for indexer links), cached once.</summary>
             private readonly object?[]? _arguments;
 
+            /// <summary>Whether this level is subscribing to its link's notifications.</summary>
+            /// <remarks>
+            /// Only read under the gate, so only a notification the subscribing thread raises from inside
+            /// <c>Subscribe</c> sees it set.
+            /// </remarks>
+            private bool _attaching;
+
             /// <summary>Initializes a new instance of the <see cref="Level"/> class.</summary>
             /// <param name="sink">The owning chain sink.</param>
             /// <param name="index">This watcher's position in the chain.</param>
@@ -341,10 +348,14 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
                 // Subscribe before reading, so a change between the two is reported rather than lost. The
                 // caller holds the gate, so a notification that races this window queues behind it and
-                // re-reports the value the kicker is about to push; the sink drops that one repeat.
+                // re-reports the value the kicker is about to push; the sink drops that one repeat. A
+                // notification raised from inside Subscribe, such as the one a POCO link emits, is ignored:
+                // the kicker reads the same value straight after.
+                _attaching = true;
                 _subscription.Disposable = ReactiveNotifyPropertyChangedMixins
                     .NotifyForProperty(parent, link, _sink._beforeChange, _sink._suppressWarnings)
                     .Subscribe(new Observer(this));
+                _attaching = false;
 
                 Push(ReadValue(parent), fromKicker: true);
             }
@@ -359,7 +370,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             {
                 lock (_sink._gate)
                 {
-                    if (_sink._disposed)
+                    if (_sink._disposed || _attaching)
                     {
                         return;
                     }
