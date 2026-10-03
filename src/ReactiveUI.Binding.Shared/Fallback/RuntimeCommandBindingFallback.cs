@@ -61,7 +61,7 @@ public static class RuntimeCommandBindingFallback
             return EmptyDisposable.Instance;
         }
 
-        var binding = new MutableDisposable();
+        var binding = new SwapDisposable();
         var commands = RuntimeObservationFallback.WhenAnyValue(viewModel, commandProperty);
         var controls = RuntimeObservationFallback.WhenAnyValue(view, controlProperty);
 

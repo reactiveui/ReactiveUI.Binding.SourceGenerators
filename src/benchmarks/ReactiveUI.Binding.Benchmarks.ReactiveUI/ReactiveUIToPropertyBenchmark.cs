@@ -102,14 +102,14 @@ public class ReactiveUIToPropertyBenchmark : IDisposable
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs args) => _notifications++;
 
     /// <summary>A ReactiveObject whose derived property is backed by ReactiveUI's helper.</summary>
-    private sealed class CountViewModel : ReactiveObject, IDisposable
+    internal sealed class CountViewModel : ReactiveObject, IDisposable
     {
         /// <summary>Backs <see cref="Count"/>.</summary>
         private readonly ObservableAsPropertyHelper<int> _count;
 
         /// <summary>Initializes a new instance of the <see cref="CountViewModel"/> class.</summary>
         /// <param name="counts">The values <see cref="Count"/> takes.</param>
-        public CountViewModel(IObservable<int> counts) => _count = counts.ToProperty(this, x => x.Count);
+        public CountViewModel(IObservable<int> counts) => _count = counts.ToProperty(this, static x => x.Count);
 
         /// <summary>Gets the latest count.</summary>
         public int Count => _count.Value;

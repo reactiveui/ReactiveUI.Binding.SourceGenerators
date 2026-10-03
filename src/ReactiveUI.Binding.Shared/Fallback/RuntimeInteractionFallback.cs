@@ -50,7 +50,7 @@ public static class RuntimeInteractionFallback
             return EmptyDisposable.Instance;
         }
 
-        var registration = new MutableDisposable();
+        var registration = new SwapDisposable();
         var observation = BindingErrors.Subscribe(
             RuntimeObservationFallback.WhenAnyValue(viewModel, interactionProperty),
             interaction => registration.Disposable = interaction is null
