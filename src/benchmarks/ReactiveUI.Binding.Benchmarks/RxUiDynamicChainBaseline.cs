@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI;
 using ReactiveUI.Builder;
 using BenchmarkVm = ReactiveUI.Binding.Benchmarks.Mocks.BenchmarkViewModel;
 

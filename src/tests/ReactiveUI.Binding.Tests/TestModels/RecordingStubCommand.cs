@@ -21,11 +21,18 @@ public class RecordingStubCommand : ICommand
     /// <summary>Gets the parameter the most recent execution carried.</summary>
     public object? LastParameter { get; private set; }
 
+    /// <summary>Gets how many times the command has executed.</summary>
+    public int ExecuteCount { get; private set; }
+
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanExecute(object? parameter) => true;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Execute(object? parameter) => LastParameter = parameter;
+    public void Execute(object? parameter)
+    {
+        ExecuteCount++;
+        LastParameter = parameter;
+    }
 }
