@@ -115,6 +115,20 @@ The `GcVerbose` EventPipe profiler records allocations. Analysis uses the measur
 operation counts to report sampled bytes per generation and the allocation sites. NativeAOT timing runs remain
 separate where EventPipe capture is unavailable.
 
+## Views that name their controls in XAML
+
+`XamlViewGenerationBenchmarks` measures four views with controls named in XAML.
+The generation rows use 100 bindings per view. The rebuild rows use v2rayN.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Generation (.NET 10) | 11.95 s | 228 ms |
+| Generation (.NET 11) | 12.79 s | 204 ms |
+| Allocation (.NET 10) | 3,703 MB | 61 MB |
+| Allocation (.NET 11) | 3,702 MB | 61 MB |
+| v2rayN generator | 10.97 s | 441 ms |
+| v2rayN rebuild | 17.45 s | 5.81 s |
+
 ## What the analyzer benchmark covers
 
 `AnalyzerBenchmarks` runs each analyzer over a corpus through `CompilationWithAnalyzers`. It has two cases,
