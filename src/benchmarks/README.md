@@ -115,6 +115,22 @@ The `GcVerbose` EventPipe profiler records allocations. Analysis uses the measur
 operation counts to report sampled bytes per generation and the allocation sites. NativeAOT timing runs remain
 separate where EventPipe capture is unavailable.
 
+## Views that name their controls in XAML
+
+`XamlViewGenerationBenchmarks` builds four Avalonia-style views. Each view names its controls in an `.axaml`
+page and binds every control in one `WhenActivated` lambda. Each view model has a `[Reactive]` field. Either
+one makes the generator read call sites from its private copy of the compilation.
+
+| Parameter | Values | Meaning |
+|-----------|--------|---------|
+| `Bindings` | 10, 50, 100 | How many controls each view names and binds. |
+| `Xaml` | false, true | Whether the controls come from the pages, or the views declare them as fields. |
+
+`Generate` runs a cold pass. `Edit` runs the pass after a one-line edit to one view, with a driver primed on
+the unedited views. Setup fails when the output does not compile with the members the other generators add.
+
+See [the issue 166 measurements](issue-166-results.md) for the comparison against the baseline.
+
 ## What the analyzer benchmark covers
 
 `AnalyzerBenchmarks` runs each analyzer over a corpus through `CompilationWithAnalyzers`. It has two cases,
