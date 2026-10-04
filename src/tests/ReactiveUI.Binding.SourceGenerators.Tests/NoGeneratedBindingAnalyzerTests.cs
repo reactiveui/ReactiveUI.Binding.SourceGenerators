@@ -60,7 +60,10 @@ public class NoGeneratedBindingAnalyzerTests
     public async Task GeneratedCall_IsNotReported(bool intercept) =>
         await Assert.That(await AnalyzeAsync(Calls("person.WhenAnyValue(x => x.Name);"), [], intercept)).IsEmpty();
 
-    /// <summary>A call through a member another source generator adds has no generated binding, so it is reported.</summary>
+    /// <summary>
+    /// A call through a member another source generator adds has no generated binding, so it is reported. The caller
+    /// cannot make another generator's output visible, so it stays a warning.
+    /// </summary>
     /// <param name="intercept">Whether the build opts into interceptors.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -72,6 +75,7 @@ public class NoGeneratedBindingAnalyzerTests
 
         await Assert.That(diagnostics.Select(static d => d.Id)).IsEquivalentTo([NoGeneratedBinding]);
         await Assert.That(diagnostics[0].GetMessage()).Contains("'WhenAnyValue' has no generated binding");
+        await Assert.That(diagnostics[0].Severity).IsEqualTo(DiagnosticSeverity.Warning);
     }
 
     /// <summary>Every member ReactiveUI.SourceGenerators adds gets a generated binding, so none of its calls is reported.</summary>

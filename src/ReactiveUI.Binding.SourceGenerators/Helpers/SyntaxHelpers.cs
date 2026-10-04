@@ -34,15 +34,30 @@ internal static class SyntaxHelpers
         return invocation.SyntaxTree.GetLineSpan(anchor, ct).StartLinePosition.Line + 1;
     }
 
+    /// <summary>Extracts the property path from a lambda expression, for code declared in a class of its own.</summary>
+    /// <param name="expression">The expression syntax.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>An array of property path segments, or null if the expression is not a valid lambda.</returns>
+    /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static PropertyPathSegment[]? ExtractPropertyPathFromLambda(
+        ExpressionSyntax expression,
+        SemanticModel semanticModel,
+        CancellationToken ct) =>
+        ExtractPropertyPathFromLambda(expression, semanticModel, ReachScope.Assembly(semanticModel.Compilation), ct);
+
     /// <summary>Extracts the property path from a lambda expression.</summary>
     /// <param name="expression">The expression syntax.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code that reads the path is declared.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An array of property path segments, or null if the expression is not a valid lambda.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
     internal static PropertyPathSegment[]? ExtractPropertyPathFromLambda(
         ExpressionSyntax expression,
         SemanticModel semanticModel,
+        ReachScope scope,
         CancellationToken ct)
     {
         // Must be an inline lambda
@@ -70,7 +85,7 @@ internal static class SyntaxHelpers
         {
             ct.ThrowIfCancellationRequested();
 
-            if (ReadPathSegment(memberAccess, semanticModel, segments.Count == 0, ct) is not { } segment)
+            if (ReadPathSegment(memberAccess, semanticModel, scope, segments.Count == 0, ct) is not { } segment)
             {
                 return null;
             }
@@ -131,12 +146,14 @@ internal static class SyntaxHelpers
     /// <summary>Reads one link of an observed property path.</summary>
     /// <param name="memberAccess">The member access naming the link.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code that reads the link is declared.</param>
     /// <param name="isLeaf">Whether the link is the last of the path.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The segment, or null when the link is not a property or field generated code can read.</returns>
     private static PropertyPathSegment? ReadPathSegment(
         MemberAccessExpressionSyntax memberAccess,
         SemanticModel semanticModel,
+        ReachScope scope,
         bool isLeaf,
         CancellationToken ct)
     {
@@ -148,18 +165,23 @@ internal static class SyntaxHelpers
             _ => null,
         };
 
-        // Private and protected members are out of reach of generated code.
-        if (memberType is null || member!.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+        if (memberType is null)
         {
             return null;
         }
 
-        var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? member.ContainingType;
+        var link = member!;
+        var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? link.ContainingType;
+
+        // A private or protected member is only in reach of code in the caller's own partial class.
+        if (!scope.CanRead(link, owner))
+        {
+            return null;
+        }
 
         // Generated code names every link's owner and value type, so a link through a type it cannot reach
         // leaves the whole path to the runtime stub.
-        if (!ExtractorValidation.IsReachableFromGeneratedCode(owner, semanticModel.Compilation)
-            || !ExtractorValidation.IsReachableFromGeneratedCode(memberType, semanticModel.Compilation))
+        if (!scope.CanName(owner) || !scope.CanName(memberType))
         {
             return null;
         }
@@ -167,7 +189,7 @@ internal static class SyntaxHelpers
         // A field raises no notification, so it resolves no mechanism and is read once, like any other link whose
         // owner cannot notify. It still carries its owner, which is how a call site whose first path starts at a
         // field learns how the observed type notifies, and which view model property a view binding follows.
-        return member is IPropertySymbol propertySymbol
+        return link is IPropertySymbol propertySymbol
             ? new(
                 propertySymbol.Name,
                 memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
@@ -175,7 +197,7 @@ internal static class SyntaxHelpers
                 memberType.IsReferenceType,
                 TypeDetectionExtractor.ExtractPropertyOwner(owner, propertySymbol, semanticModel.Compilation, ct))
             : new(
-                member.Name,
+                link.Name,
                 memberType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 memberType.IsReferenceType,

@@ -23,6 +23,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Reports that it describes nothing on a compiler that cannot describe one, and for a call the compiler
 /// refuses to let anything intercept.
 /// </param>
+/// <param name="GenericResult">
+/// Where the selector's result sits when generated code cannot name it, so the observation and its interceptor are
+/// generic over it. Not generic when every type is named.
+/// </param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record InvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -33,4 +41,6 @@ internal sealed record InvocationInfo(
     bool HasSelector,
     string MethodName,
     EquatableArray<string> ExpressionTexts,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    GenericResult GenericResult = default,
+    HostedCall? Host = null) : IClaimableCallSite;

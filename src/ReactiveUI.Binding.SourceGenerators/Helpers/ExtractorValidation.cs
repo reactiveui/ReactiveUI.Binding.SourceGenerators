@@ -85,12 +85,65 @@ internal static class ExtractorValidation
     /// <remarks>
     /// Generated overloads and interceptors are declared in a class of their own, so a private or protected
     /// nested type - or a generic closed over one - is out of their reach, and so is a type parameter of the
-    /// calling code, alone or as a type argument of another type. Naming one anyway fails the consumer's whole
-    /// build over generated code they cannot edit.
+    /// calling code, alone or as a type argument of another type. An anonymous type has no name at all, and a
+    /// file-local type has none outside its own file. The compiler counts both as accessible, so they are tested for
+    /// separately. Naming one anyway fails the consumer's whole build over generated code they cannot edit.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsReachableFromGeneratedCode(ITypeSymbol? type, Compilation compilation) =>
-        type is not null && !ContainsTypeParameter(type) && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+        type is not null
+        && !ContainsTypeParameter(type)
+        && !ContainsNamelessType(type)
+        && compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+
+    /// <summary>Determines whether a type is, or is built from, a type generated code has no name for.</summary>
+    /// <param name="type">The type.</param>
+    /// <returns><see langword="true"/> when an anonymous or file-local type appears anywhere in the type.</returns>
+    /// <remarks>Generated code sits in files of its own, so a file-local type is as nameless to it as an anonymous one.</remarks>
+    internal static bool ContainsNamelessType(ITypeSymbol type) =>
+        type switch
+        {
+            { IsAnonymousType: true } => true,
+            IArrayTypeSymbol array => ContainsNamelessType(array.ElementType),
+            INamedTypeSymbol named => named.IsFileLocal
+                || AnyContainsNamelessType(named.TypeArguments)
+                || (named.ContainingType is { } containing && ContainsNamelessType(containing)),
+            _ => false,
+        };
+
+    /// <summary>Finds the one type argument a generic interceptor has to take in place of naming it.</summary>
+    /// <param name="method">The resolved binding method.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="resultOrdinal">The position of the selector's result among the method's type arguments.</param>
+    /// <returns>
+    /// <see langword="true"/> when every type argument generated code cannot name is the selector's result, which an
+    /// interceptor can take as a type parameter. <see langword="false"/> when another type argument is out of reach,
+    /// or the method has no selector whose result is one of its own type parameters.
+    /// </returns>
+    /// <remarks>
+    /// Generated code only passes the result along: the user's selector builds it and the observation hands it on.
+    /// So an anonymous type, a private nested type, the caller's type parameter, or a type built from any of them can
+    /// stay a type parameter there. The compiler closes the interceptor over whatever the call closed the result over.
+    /// </remarks>
+    internal static bool TryFindUnnameableResult(IMethodSymbol method, Compilation compilation, out int resultOrdinal)
+    {
+        resultOrdinal = FindSelectorResultOrdinal(method.OriginalDefinition);
+        if (resultOrdinal < 0 || method.ContainingType.IsGenericType)
+        {
+            return false;
+        }
+
+        var typeArguments = method.TypeArguments;
+        for (var i = 0; i < typeArguments.Length; i++)
+        {
+            if (i != resultOrdinal && !IsReachableFromGeneratedCode(typeArguments[i], compilation))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <summary>Determines whether a type is, or is built from, a type parameter.</summary>
     /// <param name="type">The type.</param>
@@ -139,10 +192,10 @@ internal static class ExtractorValidation
     /// <returns>The fully qualified type name, or <see langword="null"/> when no overload could name it.</returns>
     /// <remarks>
     /// <para>
-    /// A call made through a type parameter binds to whatever closes it, which the call site does not name.
-    /// Writing the parameter's own name into an overload puts an identifier no consumer declared into their
-    /// build, so the whole compilation fails over generated code they cannot edit - including every unrelated
-    /// call site in the project. Declining the call site leaves it on the runtime stub instead.
+    /// A call made through a type parameter binds to whatever closes it, which the call site does not name. Writing the
+    /// parameter's own name into code that is not generic over it puts an identifier no consumer declared into their
+    /// build, so the whole compilation fails over generated code they cannot edit. <c>ReachScope.NameOf</c>
+    /// names one only where the generated code is generic over it.
     /// </para>
     /// <para>
     /// A static type fails the same way and reaches here by a different route: a call written through the
@@ -216,6 +269,40 @@ internal static class ExtractorValidation
     /// </remarks>
     private static bool IsExtensionGroupingType(INamedTypeSymbol type) =>
         type.Name.Length == 0 || type.Name[0] == '<';
+
+    /// <summary>Finds which of a method's own type parameters its selector returns.</summary>
+    /// <param name="definition">The method as declared, with its type parameters unsubstituted.</param>
+    /// <returns>The type parameter's ordinal, or -1 when the method has no selector returning one.</returns>
+    private static int FindSelectorResultOrdinal(IMethodSymbol definition)
+    {
+        var parameters = definition.Parameters;
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i] is { Name: "selector" or "conversionFunc", Type: INamedTypeSymbol { TypeArguments.Length: > 0 } func }
+                && func.TypeArguments[func.TypeArguments.Length - 1] is ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Method } result)
+            {
+                return result.Ordinal;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>Determines whether any of a list of types is, or is built from, a type generated code has no name for.</summary>
+    /// <param name="types">The types.</param>
+    /// <returns><see langword="true"/> when an anonymous or file-local type appears in any of them.</returns>
+    private static bool AnyContainsNamelessType(ImmutableArray<ITypeSymbol> types)
+    {
+        for (var i = 0; i < types.Length; i++)
+        {
+            if (ContainsNamelessType(types[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>Determines whether any of a list of types is, or is built from, a type parameter.</summary>
     /// <param name="types">The types.</param>

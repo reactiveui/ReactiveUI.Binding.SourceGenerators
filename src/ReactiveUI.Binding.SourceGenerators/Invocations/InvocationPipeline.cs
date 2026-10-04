@@ -30,6 +30,7 @@ internal static class InvocationPipeline
         IncrementalValueProvider<LanguageFeatures> languageFeatures,
         string hintName,
         Func<ImmutableArray<TInvocation>, ImmutableArray<ClassBindingInfo>, LanguageFeatures, string?> emit)
+        where TInvocation : IClaimableCallSite
     {
         var combined = invocations.Collect().Combine(languageFeatures);
 
@@ -37,7 +38,10 @@ internal static class InvocationPipeline
             combined,
             (ctx, data) =>
             {
-                var source = emit(data.Left, ImmutableArray<ClassBindingInfo>.Empty, data.Right);
+                var source = HostedCallSiteEmitter.Compose(
+                    data.Left,
+                    data.Right,
+                    (calls, features) => emit(calls, ImmutableArray<ClassBindingInfo>.Empty, features));
                 if (source is null)
                 {
                     return;
@@ -64,6 +68,7 @@ internal static class InvocationPipeline
         IncrementalValueProvider<LanguageFeatures> languageFeatures,
         string hintName,
         Func<ImmutableArray<TInvocation>, LanguageFeatures, string?> emit)
+        where TInvocation : IClaimableCallSite
     {
         var combined = invocations.Collect().Combine(languageFeatures);
 
@@ -71,7 +76,7 @@ internal static class InvocationPipeline
             combined,
             (ctx, data) =>
             {
-                var source = emit(data.Left, data.Right);
+                var source = HostedCallSiteEmitter.Compose(data.Left, data.Right, emit);
                 if (source is null)
                 {
                     return;

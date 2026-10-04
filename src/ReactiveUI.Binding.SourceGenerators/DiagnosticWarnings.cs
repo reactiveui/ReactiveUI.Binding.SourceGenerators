@@ -25,7 +25,7 @@ internal static class DiagnosticWarnings
         "Expression argument must be an inline lambda expression for compile-time optimization. A variable or "
         + "method reference is not generated, so the call throws unless it names the Unsafe overload.",
         UsageCategory,
-        DiagnosticSeverity.Info,
+        DiagnosticSeverity.Error,
         true,
         NoneInlineLambdaDescription);
 
@@ -65,7 +65,7 @@ internal static class DiagnosticWarnings
         "ToProperty source raises no notification generated code can reach",
         "Generated code cannot raise change notifications for '{0}', so this ToProperty call generates nothing and throws when it runs",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         UnraisableToPropertySourceDescription);
 
@@ -75,7 +75,7 @@ internal static class DiagnosticWarnings
         "ToProperty property must be named directly",
         "Name the property as 'x => x.Property' or as a constant such as nameof(Property); this call generates nothing and throws when it runs",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         UnreadableToPropertyNameDescription);
 
@@ -93,9 +93,9 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor UnreachableType = new(
         "RXUIBIND015",
         "Binding call names a type generated code cannot reach",
-        "'{0}' is private or protected, so generated code cannot name it; this call generates nothing and throws when it runs",
+        "'{0}' is anonymous, file-local, private or protected, so no generated code claims this call; use an internal or public type, make the calling class partial, or call the Unsafe overload",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         UnreachableTypeDescription);
 
@@ -103,9 +103,9 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor TypeParameterCall = new(
         "RXUIBIND016",
         "Binding call is made through a type parameter",
-        "'{0}' is built from a type parameter, so generated code cannot name it; this call generates nothing and throws when it runs",
+        "'{0}' is built from a type parameter that no generated code can stand in for, so no generated code claims this call; call the Unsafe overload",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         TypeParameterCallDescription);
 
@@ -135,7 +135,7 @@ internal static class DiagnosticWarnings
         "Binding call has no generated binding",
         "'{0}' has no generated binding, so it throws at run time; name each member directly in the lambdas, declare a member another source generator adds as a partial property, or call {0}Unsafe",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         NoGeneratedBindingDescription);
 
@@ -169,7 +169,7 @@ internal static class DiagnosticWarnings
         "Expression contains private or protected member",
         "Expression accesses private or protected member '{0}' which cannot be observed by a generated extension method",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         PrivateMemberDescription);
 
@@ -202,7 +202,7 @@ internal static class DiagnosticWarnings
         + "this file's namespace '{1}' is not under it. Move the file under the root namespace, raise the language "
         + "version to 10 or later, or name the Unsafe overload to resolve the expression at run time.",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         DispatchOutOfReachDescription);
 
@@ -213,7 +213,7 @@ internal static class DiagnosticWarnings
         "Expression contains '{0}' which is not a property or instance field access. Indexers, static fields, a read-only field at the end of "
         + "the path, and method calls are not generated, so the call throws unless it names the Unsafe overload.",
         UsageCategory,
-        DiagnosticSeverity.Warning,
+        DiagnosticSeverity.Error,
         true,
         UnsupportedPathSegmentDescription);
 
@@ -319,7 +319,10 @@ internal static class DiagnosticWarnings
         + "method it names. A call it cannot read still runs the runtime method, which throws. A generator reads your code "
         + "without any generator's output, so a member another source generator adds cannot be read. The members "
         + "ReactiveUI.SourceGenerators adds are the exception: their rules are known, so they are read. Declare other "
-        + "generated members as partial properties, or call the Unsafe overload, which finds them by reflection.";
+        + "generated members as partial properties, or call the Unsafe overload, which finds them by reflection. A call "
+        + "through such a member is reported as a warning, because only the other generator could change it. Every "
+        + "other cause is one you can fix, such as a selector that computes a value or a call written through the "
+        + "class that declares the method, and fails the build.";
 
     /// <summary>The string description of the service-locator-only view information.</summary>
     private const string ServiceLocatorOnlyViewDescription =
@@ -352,15 +355,22 @@ internal static class DiagnosticWarnings
 
     /// <summary>The string description of the type parameter call warning.</summary>
     private const string TypeParameterCallDescription =
-        "Generated overloads and interceptors name the closed types a call is made with. A call inside a generic "
-        + "method or type whose types come from its type parameters names none that generated code can write, so "
-        + "the call stays on the runtime stub. Call the Unsafe overload, which resolves the path at run time.";
+        "Generated code names the closed types a call is made with. With Roslyn 4.13 or newer and interceptors on, a "
+        + "call built from the calling code's type parameters is still generated, as code generic over them, when each "
+        + "type parameter the call uses, and each one its constraints name, is itself one of the called method's type "
+        + "arguments. Any other such call would throw when it runs, so the build fails at the call instead. Call the "
+        + "Unsafe overload, which resolves the path at run time.";
 
     /// <summary>The string description of the unreachable type warning.</summary>
     private const string UnreachableTypeDescription =
-        "Generated overloads and interceptors live in a class of their own, so they can only name types that are "
-        + "accessible from outside the types that declare them. A private or protected nested type, or a generic "
-        + "closed over one, is out of reach. Make the type internal or public, or call the Unsafe overload.";
+        "Generated code lives in a class of its own, so it can only name types that are accessible from outside the "
+        + "types that declare them. An anonymous type, a file-local type, a private or protected nested type, or a "
+        + "type built from one is out of reach. With Roslyn 4.13 or newer and interceptors on, two kinds of call are "
+        + "still generated. A "
+        + "call whose only such type is its selector's result gets a generic interceptor. A call made inside a "
+        + "partial, non-generic class that can name every type gets its code added to that class. Any other call "
+        + "would throw when it runs, so the build fails at the call instead. Use an internal or public type, declare "
+        + "the calling class and the classes around it partial, or call the Unsafe overload.";
 
     /// <summary>The string description of the silent path link warning.</summary>
     private const string SilentPathLinkDescription =

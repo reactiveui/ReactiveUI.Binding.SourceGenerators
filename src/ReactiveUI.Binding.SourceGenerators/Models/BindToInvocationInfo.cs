@@ -17,6 +17,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="TargetExpressionText">The original expression text of the target lambda argument.</param>
 /// <param name="Interceptor">The call site's location, for a build that intercepts call sites.</param>
 /// <param name="TargetViewThreadInvoker">The invoker class a write to the target carries, or null for none.</param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record BindToInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -29,7 +33,8 @@ internal sealed record BindToInvocationInfo(
     bool HasConverterOverride,
     string TargetExpressionText,
     InterceptorLocation Interceptor = default,
-    string? TargetViewThreadInvoker = null)
+    string? TargetViewThreadInvoker = null,
+    HostedCall? Host = null) : IClaimableCallSite
 {
     /// <summary>Gets the typed mechanism converting stream values to the target.</summary>
     public ConversionInfo? Conversion { get; init; }

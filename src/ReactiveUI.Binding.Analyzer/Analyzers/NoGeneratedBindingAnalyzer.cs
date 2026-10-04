@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using ReactiveUI.Binding.Helpers;
@@ -21,6 +22,11 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 /// to a generated overload or is claimed by a generated interceptor. A call that still resolves to the runtime stub, and
 /// that no interceptor claims, got nothing. That covers every cause at once, including a member another source generator
 /// adds, which the generator cannot see.
+/// </para>
+/// <para>
+/// The call would throw, so it is an error. The one exception is a member that only generated code declares: no generator
+/// sees another's output, and only that generator could change it, so that call stays a warning. A call another error
+/// already reports, because it names a type generated code cannot name, is not reported twice.
 /// </para>
 /// <para>
 /// Interceptors exist only on Roslyn 4.13 and newer, so the analyzer built against an older Roslyn has no interceptor to
@@ -55,7 +61,8 @@ public class NoGeneratedBindingAnalyzer : DiagnosticAnalyzer
         if (!AnalyzerHelpers.GeneratedApiNames.Contains(method.Name)
             || !IsRuntimeStub(method.ContainingType)
             || !Throws(method)
-            || IsIntercepted(invocation, context.CancellationToken))
+            || AnalyzerHelpers.IsIntercepted(invocation, context.CancellationToken)
+            || IsReportedAsUnreachable(invocation, in context))
         {
             return;
         }
@@ -63,7 +70,64 @@ public class NoGeneratedBindingAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(
             DiagnosticWarnings.NoGeneratedBinding,
             invocation.Syntax.GetLocation(),
+            NamesAnotherGeneratorsMember(invocation, context.CancellationToken) ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error,
+            null,
+            null,
             method.Name));
+    }
+
+    /// <summary>Determines whether a call's lambdas name a member that only generated code declares.</summary>
+    /// <param name="invocation">The call.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns><see langword="true"/> when some member the call names is declared only in generated files.</returns>
+    /// <remarks>
+    /// No generator sees another generator's output, so such a member is invisible to this one. The caller cannot change
+    /// that, so this one cause stays a warning. Every other cause is something the caller can fix, and fails the build.
+    /// </remarks>
+    internal static bool NamesAnotherGeneratorsMember(IInvocationOperation invocation, CancellationToken cancellationToken)
+    {
+        var model = invocation.SemanticModel!;
+        foreach (var argument in invocation.Arguments)
+        {
+            if (argument.Value.Syntax is not LambdaExpressionSyntax { Body: ExpressionSyntax body })
+            {
+                continue;
+            }
+
+            for (var current = AnalyzerHelpers.SkipNullForgivingAndParentheses(body);
+                 current is MemberAccessExpressionSyntax access;
+                 current = AnalyzerHelpers.SkipNullForgivingAndParentheses(access.Expression))
+            {
+                if (model.GetSymbolInfo(access, cancellationToken).Symbol is { } member && IsDeclaredOnlyInGeneratedCode(member))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Determines whether every declaration of a member sits in a generated file.</summary>
+    /// <param name="member">The member.</param>
+    /// <returns><see langword="true"/> when the member has declarations and all of them are generated.</returns>
+    internal static bool IsDeclaredOnlyInGeneratedCode(ISymbol member)
+    {
+        var references = member.DeclaringSyntaxReferences;
+        if (references.IsEmpty)
+        {
+            return false;
+        }
+
+        foreach (var reference in references)
+        {
+            if (!IsGeneratedFile(reference.SyntaxTree))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>Determines whether a method is declared by a runtime stub class, whose binding methods throw.</summary>
@@ -108,25 +172,19 @@ public class NoGeneratedBindingAnalyzer : DiagnosticAnalyzer
     private static bool IsStubName(string name) =>
         name is Constants.StubExtensionClassName or Constants.SchedulerExtensionClassName;
 
-    /// <summary>Determines whether a generated interceptor claims the call.</summary>
+    /// <summary>Determines whether RXUIBIND015 or RXUIBIND016 already reports the call, which names a type generated code cannot name.</summary>
     /// <param name="invocation">The call.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns><see langword="true"/> when an interceptor replaces the call.</returns>
-    private static bool IsIntercepted(IInvocationOperation invocation, CancellationToken cancellationToken)
-    {
-#if ROSLYN_4_13
-        // A binding method is only ever called through an invocation expression, and an operation handed to an
-        // analyzer always carries the model it was bound with.
-        return Microsoft.CodeAnalysis.CSharp.CSharpExtensions.GetInterceptorMethod(
-            invocation.SemanticModel!,
-            (Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax)invocation.Syntax,
-            cancellationToken) is not null;
-#else
+    /// <param name="context">The operation analysis context.</param>
+    /// <returns><see langword="true"/> when the call names an anonymous, private, protected or type-parameter type.</returns>
+    /// <remarks>That error already fails the build at the call, so a second report of the same call adds nothing.</remarks>
+    private static bool IsReportedAsUnreachable(IInvocationOperation invocation, in OperationAnalysisContext context) =>
+        UnreachableTypeAnalyzer.FindUnreachable(invocation, in context) is not null;
 
-        // The baseline compiler has no interceptors, so every call that resolves to the stub runs it.
-        _ = invocation;
-        _ = cancellationToken;
-        return false;
-#endif
-    }
+    /// <summary>Determines whether a file is generated, by its name or its auto-generated marker.</summary>
+    /// <param name="tree">The file.</param>
+    /// <returns><see langword="true"/> for a generated file.</returns>
+    private static bool IsGeneratedFile(SyntaxTree tree) =>
+        tree.FilePath.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase)
+        || tree.FilePath.EndsWith(".generated.cs", StringComparison.OrdinalIgnoreCase)
+        || tree.GetRoot().GetLeadingTrivia().ToString().IndexOf("<auto-generated", StringComparison.Ordinal) >= 0;
 }

@@ -35,6 +35,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Where this call site is, for a build that claims call sites outright rather than competing for them.
 /// </param>
 /// <param name="ViewThreadInvoker">The invoker class a write to the view carries, or null for none.</param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record BindCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -59,7 +63,8 @@ internal sealed record BindCommandInvocationInfo(
     bool HasCommandParameterProperty,
     bool HasEnabledProperty,
     InterceptorLocation Interceptor = default,
-    string? ViewThreadInvoker = null)
+    string? ViewThreadInvoker = null,
+    HostedCall? Host = null) : IClaimableCallSite
 {
     /// <summary>Gets a value indicating whether the caller explicitly selected an event.</summary>
     public bool HasExplicitEvent { get; init; }

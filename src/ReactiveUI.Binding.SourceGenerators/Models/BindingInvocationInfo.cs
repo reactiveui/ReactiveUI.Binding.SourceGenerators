@@ -29,6 +29,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// </param>
 /// <param name="SourceViewThreadInvoker">The invoker class a write to the source carries, or null for none.</param>
 /// <param name="TargetViewThreadInvoker">The invoker class a write to the target carries, or null for none.</param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record BindingInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -47,7 +51,8 @@ internal sealed record BindingInvocationInfo(
     bool HasConverterOverride,
     InterceptorLocation Interceptor = default,
     string? SourceViewThreadInvoker = null,
-    string? TargetViewThreadInvoker = null)
+    string? TargetViewThreadInvoker = null,
+    HostedCall? Host = null) : IClaimableCallSite
 {
     /// <summary>Gets the typed mechanism converting source values to the target.</summary>
     public ConversionInfo? ForwardConversion { get; init; }

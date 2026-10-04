@@ -88,7 +88,7 @@ internal static class ObservationCodeGenerator
         in LanguageFeatures features,
         string methodPrefix) =>
         CodeGeneratorHelpers.GenerateDispatchFile(
-            invocations,
+            InterceptorEmitter.ClaimableBy(invocations, static x => x.GenericResult, features),
             features,
             GroupByTypeSignature,
             (sb, group, snapshot) => GenerateGroup(
@@ -114,7 +114,9 @@ internal static class ObservationCodeGenerator
         string prefix)
     {
         _ = sb.Append($"private static {IObservable}<").Append(inv.ReturnTypeFullName).Append("> __").Append(prefix).Append('_')
-            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj");
+            .Append(suffix);
+        InterceptorEmitter.AppendResultTypeParameter(sb, inv.GenericResult);
+        _ = sb.Append('(').Append(inv.SourceTypeFullName).Append(" obj");
         if (inv.HasSelector)
         {
             _ = sb.Append(", ").Append(GetSelectorType(inv)).Append(" selector");

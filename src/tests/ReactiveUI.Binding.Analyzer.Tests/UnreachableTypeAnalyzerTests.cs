@@ -31,6 +31,12 @@ public class UnreachableTypeAnalyzerTests
                                                 where TObj : class
                                                 => throw new InvalidOperationException();
 
+                                            public static IObservable<TRet> WhenAnyValue<TSender, T1, TRet>(
+                                                this TSender sender,
+                                                Expression<Func<TSender, T1>> property1,
+                                                Func<T1, TRet> selector)
+                                                => throw new InvalidOperationException();
+
                                             public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
                                                 this TSender sender,
                                                 Expression property,
@@ -71,6 +77,109 @@ public class UnreachableTypeAnalyzerTests
         var diagnostics = await GetDiagnosticsAsync(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         await Assert.That(diagnostics[0].GetMessage()).Contains("Outer.Vm");
+    }
+
+    /// <summary>A call that no interceptor claims fails the build, so the diagnostic is an error.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PrivateNestedReceiver_ReportedAsError()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public static class Outer
+                                             {
+                                                 public static void Run() => new Vm().WhenChanged(x => x.Name);
+
+                                                 private sealed class Vm : INotifyPropertyChanged
+                                                 {
+                                                     public event PropertyChangedEventHandler PropertyChanged;
+                                                     public string Name { get; set; }
+                                                 }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await GetDiagnosticsAsync(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Severity).IsEqualTo(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+    }
+
+    /// <summary>An anonymous selector result has no name generated code could write, so the call is reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AnonymousSelectorResult_Reported()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public sealed class Vm : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler PropertyChanged;
+                                                 public int A { get; set; }
+                                             }
+
+                                             public static class Outer
+                                             {
+                                                 public static void Run() => new Vm().WhenAnyValue(x => x.A, a => new { a });
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await GetDiagnosticsAsync(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].GetMessage()).Contains("anonymous");
+    }
+
+    /// <summary>A file-local type has no name outside its own file, where generated code never sits, so the call is reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FileLocalReceiver_Reported()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public static class Outer
+                                             {
+                                                 public static void Run() => new Vm().WhenChanged(x => x.Name);
+                                             }
+
+                                             file sealed class Vm : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler PropertyChanged;
+                                                 public string Name { get; set; }
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await GetDiagnosticsAsync(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].GetMessage()).Contains("file-local");
+    }
+
+    /// <summary>An array of an anonymous type has no name generated code could write, so the call is reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ArrayOfAnonymousType_Reported()
+    {
+        const string Source = Preamble + """
+                                         namespace TestApp
+                                         {
+                                             public sealed class Vm : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler PropertyChanged;
+                                                 public int A { get; set; }
+                                             }
+
+                                             public static class Outer
+                                             {
+                                                 public static void Run() => new Vm().WhenAnyValue(x => x.A, a => new[] { new { a } });
+                                             }
+                                         }
+                                         """;
+
+        var diagnostics = await GetDiagnosticsAsync(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
     }
 
     /// <summary>A protected nested value type reached through the path is reported.</summary>

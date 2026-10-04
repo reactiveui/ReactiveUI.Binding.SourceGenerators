@@ -40,7 +40,7 @@ internal static class WhenAnyObservableCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features) =>
         CodeGeneratorHelpers.GenerateDispatchFile(
-            invocations,
+            InterceptorEmitter.ClaimableBy(invocations, static x => x.GenericResult, features),
             features,
             GroupByTypeSignature,
             (sb, group, snapshot) => EmitGroup(sb, group, allClasses, snapshot));
@@ -90,7 +90,9 @@ internal static class WhenAnyObservableCodeGenerator
         string suffix)
     {
         _ = sb.Append($"private static {IObservable}<").Append(inv.ReturnTypeFullName).Append("> __WhenAnyObservable_")
-            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj");
+            .Append(suffix);
+        InterceptorEmitter.AppendResultTypeParameter(sb, inv.GenericResult);
+        _ = sb.Append('(').Append(inv.SourceTypeFullName).Append(" obj");
         if (inv.HasSelector)
         {
             _ = sb.Append(", ").Append(GetSelectorType(inv)).Append(" selector");
@@ -343,7 +345,9 @@ internal static class WhenAnyObservableCodeGenerator
             }
 
             _ = sb.Append($"internal static {IObservable}<").Append(first.ReturnTypeFullName)
-                .Append("> __Intercept_WhenAnyObservable_").Append(entry.Key).OpenParameterList();
+                .Append("> __Intercept_WhenAnyObservable_").Append(entry.Key);
+            InterceptorEmitter.AppendTypeParameterList(sb, first.GenericResult);
+            _ = sb.OpenParameterList();
 
             AppendParameterList(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 

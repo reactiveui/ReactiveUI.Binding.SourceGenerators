@@ -2,6 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -134,7 +135,9 @@ internal static class InterceptorEmitter
             }
 
             _ = builder.Append($"internal static {GeneratedTypeNames.IObservable}<").Append(first.ReturnTypeFullName)
-                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).OpenParameterList();
+                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key);
+            AppendTypeParameterList(builder, first.GenericResult);
+            _ = builder.OpenParameterList();
 
             appendParameterList(builder, first, in features);
 
@@ -144,6 +147,81 @@ internal static class InterceptorEmitter
                 .Outdent()
                 .BlankLine();
         }
+    }
+
+    /// <summary>Writes the type parameters of an interceptor that is generic over its call's selector result.</summary>
+    /// <param name="builder">The writer, just after the interceptor's name.</param>
+    /// <param name="genericResult">Where the result sits among the called method's type arguments.</param>
+    /// <remarks>
+    /// The compiler substitutes the call's type arguments into a generic interceptor before it compares the two
+    /// signatures, so the interceptor takes as many type parameters as the called method. Only the result's is used:
+    /// every other parameter is written with the type the call was closed over, which is the same after substitution.
+    /// </remarks>
+    internal static void AppendTypeParameterList(SourceWriter builder, in GenericResult genericResult)
+    {
+        if (!genericResult.IsGeneric)
+        {
+            return;
+        }
+
+        _ = builder.Append('<');
+        for (var i = 0; i < genericResult.Arity; i++)
+        {
+            if (i > 0)
+            {
+                _ = builder.Append(", ");
+            }
+
+            _ = i == genericResult.Ordinal
+                ? builder.Append(GenericResult.TypeParameterName)
+                : builder.Append("__T").Append(i);
+        }
+
+        _ = builder.Append('>');
+    }
+
+    /// <summary>Writes the type parameter of an observation method that is generic over its selector result.</summary>
+    /// <param name="builder">The writer, just after the method's name.</param>
+    /// <param name="genericResult">Where the result sits, or a default value when every type is named.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendResultTypeParameter(SourceWriter builder, in GenericResult genericResult)
+    {
+        if (genericResult.IsGeneric)
+        {
+            _ = builder.Append('<').Append(GenericResult.TypeParameterName).Append('>');
+        }
+    }
+
+    /// <summary>Drops the call sites only an interceptor can claim, when the build writes dispatch overloads instead.</summary>
+    /// <typeparam name="T">The per-call-site model this API extracts.</typeparam>
+    /// <param name="invocations">The call sites of one API.</param>
+    /// <param name="genericResultOf">Reads where a call site's result sits when generated code cannot name it.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <returns>The call sites the build can claim.</returns>
+    /// <remarks>
+    /// A dispatch overload has to name its result type, so a call whose result generated code cannot name gets no
+    /// overload. It reaches the runtime stub instead, and RXUIBIND015 fails the build at the call.
+    /// </remarks>
+    internal static ImmutableArray<T> ClaimableBy<T>(
+        ImmutableArray<T> invocations,
+        Func<T, GenericResult> genericResultOf,
+        in LanguageFeatures features)
+    {
+        if (features.SupportsInterceptors || invocations.IsDefaultOrEmpty)
+        {
+            return invocations;
+        }
+
+        var builder = ImmutableArray.CreateBuilder<T>(invocations.Length);
+        for (var i = 0; i < invocations.Length; i++)
+        {
+            if (!genericResultOf(invocations[i]).IsGeneric)
+            {
+                builder.Add(invocations[i]);
+            }
+        }
+
+        return builder.Count == invocations.Length ? invocations : builder.ToImmutable();
     }
 
     /// <summary>Gathers call sites under the generated method each of them reaches.</summary>

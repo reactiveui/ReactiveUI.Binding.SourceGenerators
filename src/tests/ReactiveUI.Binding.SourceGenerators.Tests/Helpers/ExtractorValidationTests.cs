@@ -11,7 +11,7 @@ using ReactiveUI.Binding.Tests.Shared;
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 /// <summary>Unit tests for <see cref="ExtractorValidation"/> helper methods. Tests the guard-clause branches extracted from extractor classes.</summary>
-public class ExtractorValidationTests
+public partial class ExtractorValidationTests
 {
     /// <summary>The <c>selector</c> name these tests generate against.</summary>
     private const string SelectorName = "selector";

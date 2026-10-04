@@ -14,14 +14,20 @@ using ReactiveUI.Binding.SourceGenerators;
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
 /// <summary>
-/// Reports binding calls that name a type generated code cannot reach (RXUIBIND015): a private or protected nested
-/// type, or a generic closed over one, in the call's signature or along an observed path.
+/// Reports binding calls that name a type generated code cannot reach (RXUIBIND015): an anonymous type, a private or
+/// protected nested type, or a type built from one, in the call's signature or along an observed path.
 /// </summary>
 /// <remarks>
-/// Generated overloads and interceptors are declared in a class of their own, so the generator declines such a call
-/// and it stays on the runtime stub, which throws when it runs. The checks mirror the generator's: the closed
-/// type arguments of the resolved method, then the owner of each link of every selector lambda. A link's value type
-/// is the next link's owner, or at the leaf one of the type arguments, so it needs no check of its own.
+/// <para>
+/// Generated overloads and interceptors are declared in a class of their own. The checks mirror the generator's: the
+/// closed type arguments of the resolved method, then the owner of each link of every selector lambda. A link's value
+/// type is the next link's owner, or at the leaf one of the type arguments, so it needs no check of its own.
+/// </para>
+/// <para>
+/// On Roslyn 4.13 and newer the generator claims some of these calls with a generic interceptor. A claimed call is
+/// not reported. Any other such call would reach the runtime stub and throw, so RXUIBIND015 is an error that fails
+/// the build at the call.
+/// </para>
 /// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
@@ -49,14 +55,15 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
         var invocation = (IInvocationOperation)context.Operation;
         var method = invocation.TargetMethod;
 
-        if (!AnalyzerHelpers.IsBindingExtensionMethod(method) || AnalyzerHelpers.IsUnsafeBindingMethod(method) || !IsGeneratedMethodName(method.Name))
+        if (!SourceGenerators.Helpers.ExtractorValidation.IsRecognizedExtensionClass(method.ContainingType)
+            || AnalyzerHelpers.IsUnsafeBindingMethod(method)
+            || !IsGeneratedMethodName(method.Name))
         {
             return;
         }
 
-        var unreachable = FindUnreachableInSignature(method, context.Compilation)
-            ?? FindUnreachableInPaths(invocation.Arguments, context);
-        if (unreachable is null)
+        var unreachable = FindUnreachable(invocation, in context);
+        if (unreachable is null || AnalyzerHelpers.IsIntercepted(invocation, context.CancellationToken))
         {
             return;
         }
@@ -69,23 +76,25 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
             unreachable.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)));
     }
 
+    /// <summary>Finds the first type a binding call names that generated code cannot name.</summary>
+    /// <param name="invocation">The binding call.</param>
+    /// <param name="context">The operation analysis context.</param>
+    /// <returns>The unreachable type, or null when every type is reachable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ITypeSymbol? FindUnreachable(IInvocationOperation invocation, in OperationAnalysisContext context) =>
+        FindUnreachableInSignature(invocation.TargetMethod, context.Compilation)
+            ?? FindUnreachableInPaths(invocation.Arguments, context);
+
     /// <summary>Finds the first type argument of a resolved method that generated code cannot name.</summary>
     /// <param name="method">The resolved binding method.</param>
     /// <param name="compilation">The consumer compilation.</param>
     /// <returns>The unreachable type, or null when every type is reachable.</returns>
-    internal static ITypeSymbol? FindUnreachableInSignature(IMethodSymbol method, Compilation compilation)
-    {
-        var typeArguments = method.TypeArguments;
-        for (var i = 0; i < typeArguments.Length; i++)
-        {
-            if (!IsReachable(typeArguments[i], compilation))
-            {
-                return typeArguments[i];
-            }
-        }
-
-        return null;
-    }
+    /// <remarks>
+    /// A member of an extension block takes the block's type parameters through its grouping type, so those type
+    /// arguments are read as well.
+    /// </remarks>
+    internal static ITypeSymbol? FindUnreachableInSignature(IMethodSymbol method, Compilation compilation) =>
+        FindUnreachable(method.TypeArguments, compilation) ?? FindUnreachable(method.ContainingType.TypeArguments, compilation);
 
     /// <summary>Finds the first link of a selector lambda whose owner generated code cannot name.</summary>
     /// <param name="arguments">The invocation arguments.</param>
@@ -111,6 +120,23 @@ public class UnreachableTypeAnalyzer : DiagnosticAnalyzer
                 }
 
                 current = AnalyzerHelpers.SkipNullForgivingAndParentheses(memberAccess.Expression);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Finds the first of a list of types that generated code cannot name.</summary>
+    /// <param name="types">The types.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns>The unreachable type, or null when every type is reachable.</returns>
+    private static ITypeSymbol? FindUnreachable(ImmutableArray<ITypeSymbol> types, Compilation compilation)
+    {
+        for (var i = 0; i < types.Length; i++)
+        {
+            if (!IsReachable(types[i], compilation))
+            {
+                return types[i];
             }
         }
 

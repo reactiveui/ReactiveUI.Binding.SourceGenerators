@@ -30,7 +30,7 @@ internal static class BindToExtractor
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
         if (methodSymbol is null
             || !ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !CallSiteHosting.TryResolve(context, methodSymbol, ct, out var scope))
         {
             return null;
         }
@@ -51,9 +51,9 @@ internal static class BindToExtractor
         }
 
         var targetPropertyArg = args[1].Expression;
-        var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
+        var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, scope, ct);
         var targetType = semanticModel.GetTypeInfo(args[0].Expression, ct).Type;
-        var targetTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(targetType);
+        var targetTypeName = scope.NameOf(targetType);
 
         // A target the model cannot name leaves nothing to declare a member against, generated or otherwise.
         if (targetTypeName is null)
@@ -88,7 +88,8 @@ internal static class BindToExtractor
             hasConverterOverride,
             targetExpressionText,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            ViewThreadPluginRegistry.InvokerFor(targetType, semanticModel.Compilation))
+            ViewThreadPluginRegistry.InvokerFor(targetType, semanticModel.Compilation),
+            scope.Call)
         {
             Conversion = ConversionPluginRegistry.Select(sourceValueType, targetValueType, semanticModel.Compilation),
             SetMethod = SetMethodPluginRegistry.Select(sourceValueType, targetValueType),

@@ -53,6 +53,18 @@ public class ToPropertyAnalyzerTests
 
                                     """;
 
+    /// <summary>A parenthesized selector that reads one member off its parameter names the property directly.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsDirectMemberSelector_ParenthesizedLambda_ReturnsTrue() =>
+        await Assert.That(ToPropertyAnalyzer.IsDirectMemberSelector(Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseExpression("(x) => x.Name"))).IsTrue();
+
+    /// <summary>A selector held in a variable names no property the generator can read.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsDirectMemberSelector_NotALambda_ReturnsFalse() =>
+        await Assert.That(ToPropertyAnalyzer.IsDirectMemberSelector(Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseExpression("selector"))).IsFalse();
+
     /// <summary>A type with only a protected raise method and no partial declaration cannot be raised from generated code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

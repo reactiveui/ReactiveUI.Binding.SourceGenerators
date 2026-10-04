@@ -64,7 +64,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         var methodSymbol = invocationOp.TargetMethod;
 
         // ToProperty only reads a name from its selector, so the path checks do not apply; ToPropertyAnalyzer covers it.
-        if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol)
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
             || methodSymbol.Name.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal)
             || methodSymbol.Name == Constants.ToPropertyMethodName)
         {
@@ -74,14 +74,14 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         var methodName = methodSymbol.Name;
         var arguments = invocationOp.Arguments;
 
-        // Check RXUIBIND001: Non-inline lambda
-        CheckNonInlineLambda(context, arguments);
-
-        // Check RXUIBIND003: Private/protected member access
-        CheckPrivateMember(context, arguments);
-
-        // Check RXUIBIND006: Unsupported path segments (indexer, field, method call)
-        CheckUnsupportedPathSegment(context, arguments);
+        // RXUIBIND001, 003 and 006 name a path the generator cannot read, so the call throws. A call an interceptor
+        // claims was read after all, from the caller's own partial class, and has nothing to report.
+        if (!AnalyzerHelpers.IsIntercepted(invocationOp, context.CancellationToken))
+        {
+            CheckNonInlineLambda(context, arguments);
+            CheckPrivateMember(context, arguments);
+            CheckUnsupportedPathSegment(context, arguments);
+        }
 
         // Check RXUIBIND010: A link in the middle of the path that raises no notification
         CheckSilentPathLink(context, arguments);

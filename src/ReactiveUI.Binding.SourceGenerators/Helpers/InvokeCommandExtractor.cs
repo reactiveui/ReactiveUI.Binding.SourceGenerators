@@ -33,7 +33,7 @@ internal static class InvokeCommandExtractor
         }
 
         if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !CallSiteHosting.TryResolve(context, methodSymbol, ct, out var scope))
         {
             return null;
         }
@@ -54,9 +54,9 @@ internal static class InvokeCommandExtractor
         }
 
         var commandArg = args[1].Expression;
-        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandArg, semanticModel, ct);
+        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandArg, semanticModel, scope, ct);
         var targetTypeName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+            scope.NameOf(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
         // A target the model cannot name leaves nothing to declare a member against, generated or otherwise.
         if (targetTypeName is null)
@@ -75,6 +75,7 @@ internal static class InvokeCommandExtractor
                 targetTypeName,
                 new(commandPropertyPath),
                 commandArg.ToString(),
-                InterceptableLocationReader.Read(semanticModel, invocation, ct));
+                InterceptableLocationReader.Read(semanticModel, invocation, ct),
+                scope.Call);
     }
 }
