@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <RoslynCommonAnalyzersVersion>5.1.2</RoslynCommonAnalyzersVersion>
-    <ReactiveUIPrimitivesVersion>8.4.0</ReactiveUIPrimitivesVersion>
+    <ReactiveUIPrimitivesVersion>9.0.0</ReactiveUIPrimitivesVersion>
   </PropertyGroup>
 
   <ItemGroup>

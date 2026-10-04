@@ -1,4 +1,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[assembly: System.Runtime.Versioning.SupportedOSPlatform("iOS15.0")]
 namespace ReactiveUI.Binding.Reactive.Uno
 {
     public sealed class UnoBindingModule : Splat.Builder.IModule

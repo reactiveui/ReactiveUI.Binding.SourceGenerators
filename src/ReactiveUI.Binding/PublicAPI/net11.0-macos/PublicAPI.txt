@@ -2,6 +2,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.GeneratedCode.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Maui")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Uno")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.WinForms")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ReactiveUI.Binding.Wpf")]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
