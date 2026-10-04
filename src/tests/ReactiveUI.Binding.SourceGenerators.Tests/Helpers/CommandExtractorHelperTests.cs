@@ -404,6 +404,7 @@ public class CommandExtractorHelperTests
             memberAccess,
             invocation.ArgumentList.Arguments,
             model,
+            ReachScope.Assembly(model.Compilation),
             CancellationToken.None);
 
         await Assert.That(sides!.Value.ViewTypeFullName).IsEqualTo("global::TestApp.View");
@@ -683,6 +684,7 @@ public class CommandExtractorHelperTests
             memberAccess,
             invocation.ArgumentList.Arguments,
             model,
+            ReachScope.Assembly(model.Compilation),
             CancellationToken.None);
     }
 

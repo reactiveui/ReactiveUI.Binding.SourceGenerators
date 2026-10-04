@@ -12,6 +12,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="CommandPropertyPath">The property path chain reaching the command.</param>
 /// <param name="CommandExpressionText">The original expression text of the command lambda argument.</param>
 /// <param name="Interceptor">The call site's location, for a build that intercepts call sites.</param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record InvokeCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -19,4 +23,5 @@ internal sealed record InvokeCommandInvocationInfo(
     string TargetTypeFullName,
     EquatableArray<PropertyPathSegment> CommandPropertyPath,
     string CommandExpressionText,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    HostedCall? Host = null) : IClaimableCallSite;

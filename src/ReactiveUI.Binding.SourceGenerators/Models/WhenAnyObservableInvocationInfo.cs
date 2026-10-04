@@ -20,6 +20,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Interceptor">
 /// Where this call site is, for a build that claims call sites outright rather than competing for them.
 /// </param>
+/// <param name="GenericResult">
+/// Where the selector's result sits when generated code cannot name it, so the observation and its interceptor are
+/// generic over it. Not generic when every type is named.
+/// </param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record WhenAnyObservableInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -29,4 +37,6 @@ internal sealed record WhenAnyObservableInvocationInfo(
     string ReturnTypeFullName,
     bool HasSelector,
     EquatableArray<string> ExpressionTexts,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    GenericResult GenericResult = default,
+    HostedCall? Host = null) : IClaimableCallSite;

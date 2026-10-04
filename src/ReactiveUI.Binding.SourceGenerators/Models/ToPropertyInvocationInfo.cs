@@ -15,6 +15,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Shape">The stub overload the call site resolved to.</param>
 /// <param name="Raise">How generated code raises the source type's change notifications.</param>
 /// <param name="Interceptor">The call site's location, for a build that intercepts call sites.</param>
+/// <param name="Host">
+/// The class the call's generated code is declared in, when only that class can name the call's types. Null when
+/// generated code can name them from its own class.
+/// </param>
 internal sealed record ToPropertyInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -25,4 +29,5 @@ internal sealed record ToPropertyInvocationInfo(
     string PropertyExpressionText,
     ToPropertyOverloadShape Shape,
     PropertyRaiseInfo Raise,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    HostedCall? Host = null) : IClaimableCallSite;

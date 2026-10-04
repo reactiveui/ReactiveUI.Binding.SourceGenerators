@@ -29,7 +29,7 @@ internal static class WhenAnyCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features) =>
         CodeGeneratorHelpers.GenerateDispatchFile(
-            invocations,
+            InterceptorEmitter.ClaimableBy(invocations, static x => x.GenericResult, features),
             features,
             ObservationCodeGenerator.GroupByTypeSignature,
             (sb, group, snapshot) => EmitGroup(sb, group, allClasses, snapshot));
@@ -115,8 +115,9 @@ internal static class WhenAnyCodeGenerator
         ClassBindingInfo? classInfo,
         string suffix)
     {
-        _ = sb.Append($"private static {GeneratedTypeNames.IObservable}<").Append(inv.ReturnTypeFullName).Append("> __WhenAny_").Append(suffix)
-            .Append('(').Append(inv.SourceTypeFullName).Append(" obj, ").Append(GetWhenAnySelectorType(inv)).Line(" selector)")
+        _ = sb.Append($"private static {GeneratedTypeNames.IObservable}<").Append(inv.ReturnTypeFullName).Append("> __WhenAny_").Append(suffix);
+        InterceptorEmitter.AppendResultTypeParameter(sb, inv.GenericResult);
+        _ = sb.Append('(').Append(inv.SourceTypeFullName).Append(" obj, ").Append(GetWhenAnySelectorType(inv)).Line(" selector)")
             .OpenBlock();
 
         if (inv.PropertyPaths.Length == 1)

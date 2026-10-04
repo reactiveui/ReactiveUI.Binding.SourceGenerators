@@ -36,13 +36,13 @@ internal static class WhenAnyObservableExtractor
 
         // Verify this is our stub or generated method
         if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !ObservationExtractor.TryResolveScope(context, methodSymbol, ct, out var scope, out var genericResult))
         {
             return null;
         }
 
         var (propertyPaths, expressionTexts, innerObservableTypes, hasSelector) =
-            CollectObservableArguments(methodSymbol, invocation.ArgumentList.Arguments, semanticModel, ct);
+            CollectObservableArguments(methodSymbol, invocation.ArgumentList.Arguments, semanticModel, scope, ct);
 
         if (propertyPaths.Count == 0)
         {
@@ -51,20 +51,21 @@ internal static class WhenAnyObservableExtractor
 
         // Get the source type from the receiver
         var sourceTypeFullName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+            scope.NameOf(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
         if (sourceTypeFullName is null)
         {
             return null;
         }
 
         // Compute return type
-        var returnTypeFullName = hasSelector
+        var namedReturnTypeFullName = hasSelector
             ? ExtractorValidation.FindSelectorReturnType(
                 methodSymbol.Parameters,
                 "selector")!
             : InvalidOperationExceptionHelper.EnsureNotNull(
                 innerObservableTypes[0],
                 "inner observable types");
+        var returnTypeFullName = genericResult.IsGeneric ? GenericResult.TypeParameterName : namedReturnTypeFullName;
 
         var filePath = invocation.SyntaxTree.FilePath;
         var lineNumber = SyntaxHelpers.CallerLineNumber(invocation, ct);
@@ -78,7 +79,9 @@ internal static class WhenAnyObservableExtractor
             returnTypeFullName,
             hasSelector,
             new([.. expressionTexts]),
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            genericResult,
+            scope.Call);
     }
 
     /// <summary>
@@ -88,12 +91,14 @@ internal static class WhenAnyObservableExtractor
     /// <param name="methodSymbol">The resolved method.</param>
     /// <param name="args">The invocation arguments.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code that reads the paths is declared.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The observed paths, their expression texts, their inner types, and whether a selector was supplied.</returns>
     private static ObservableArguments CollectObservableArguments(
             IMethodSymbol methodSymbol,
             SeparatedSyntaxList<ArgumentSyntax> args,
             SemanticModel semanticModel,
+            ReachScope scope,
             CancellationToken ct)
     {
         var propertyPaths = new List<EquatableArray<PropertyPathSegment>>(args.Count);
@@ -118,7 +123,7 @@ internal static class WhenAnyObservableExtractor
 
             // One path generated code cannot read leaves the whole call to the runtime stub. Keeping the others
             // would generate a method with fewer parameters than the call, which an interceptor cannot claim.
-            var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+            var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, scope, ct);
             if (path is null)
             {
                 propertyPaths.Clear();

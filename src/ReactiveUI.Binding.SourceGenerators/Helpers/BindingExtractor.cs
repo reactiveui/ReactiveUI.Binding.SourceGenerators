@@ -39,7 +39,7 @@ internal static class BindingExtractor
 
         // Verify this is our stub or generated method
         if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !CallSiteHosting.TryResolve(context, methodSymbol, ct, out var scope))
         {
             return null;
         }
@@ -55,15 +55,15 @@ internal static class BindingExtractor
         var sourcePropertyArg = args[1].Expression;
         var targetPropertyArg = args[2].Expression;
 
-        var sourcePropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(sourcePropertyArg, semanticModel, ct);
-        var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
+        var sourcePropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(sourcePropertyArg, semanticModel, scope, ct);
+        var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, scope, ct);
 
         if (sourcePropertyPath is null || targetPropertyPath is null)
         {
             return null;
         }
 
-        if (ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct) is not { } sides)
+        if (ResolveBindingSides(memberAccess, args, methodName, semanticModel, scope, ct) is not { } sides)
         {
             return null;
         }
@@ -91,7 +91,8 @@ internal static class BindingExtractor
             hasConverterOverride,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
             sides.SourceViewThreadInvoker,
-            sides.TargetViewThreadInvoker)
+            sides.TargetViewThreadInvoker,
+            scope.Call)
         {
             ForwardConversion = ConversionPluginRegistry.Select(sourceValueType, targetValueType, semanticModel.Compilation),
             ReverseConversion = isTwoWay ? ConversionPluginRegistry.Select(targetValueType, sourceValueType, semanticModel.Compilation) : null,
@@ -122,6 +123,7 @@ internal static class BindingExtractor
     /// <param name="args">The invocation arguments.</param>
     /// <param name="methodName">The invoked method name.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code is declared, which decides the types it can name.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
     /// The fully qualified source and target type names, or <see langword="null"/> when either side names a
@@ -132,12 +134,13 @@ internal static class BindingExtractor
         SeparatedSyntaxList<ArgumentSyntax> args,
         string methodName,
         SemanticModel semanticModel,
+        ReachScope scope,
         CancellationToken ct)
     {
         var receiverType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
         var firstArgType = semanticModel.GetTypeInfo(args[0].Expression, ct).Type;
-        var receiverTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(receiverType);
-        var firstArgTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(firstArgType);
+        var receiverTypeName = scope.NameOf(receiverType);
+        var firstArgTypeName = scope.NameOf(firstArgType);
 
         if (receiverTypeName is null || firstArgTypeName is null)
         {

@@ -55,7 +55,9 @@ public class ToPropertyAnalyzer : DiagnosticAnalyzer
         var method = invocation.TargetMethod;
 
         // The name test comes first: it is one string comparison, and it turns away every other invocation.
-        if (method.Name != Constants.ToPropertyMethodName || !AnalyzerHelpers.IsBindingExtensionMethod(method))
+        if (method.Name != Constants.ToPropertyMethodName
+            || !AnalyzerHelpers.IsBindingExtensionMethod(method)
+            || AnalyzerHelpers.IsIntercepted(invocation, context.CancellationToken))
         {
             return;
         }
@@ -63,13 +65,13 @@ public class ToPropertyAnalyzer : DiagnosticAnalyzer
         var property = FindArgument(invocation.Arguments, PropertyParameterName);
         var source = FindArgument(invocation.Arguments, SourceParameterName);
 
-        if (property is not null && !NamesPropertyReadably(property))
+        if (!NamesPropertyReadably(property))
         {
             context.ReportDiagnostic(Diagnostic.Create(DiagnosticWarnings.UnreadableToPropertyName, property.Value.Syntax.GetLocation()));
         }
 
         // A source typed by a type parameter is not generated for either, and names no type the warning could fix.
-        if (source?.Parameter?.Type is not INamedTypeSymbol sourceType
+        if (source.Parameter!.Type is not INamedTypeSymbol sourceType
             || PropertyRaisePluginRegistry.Select(sourceType, context.Compilation) is not null)
         {
             return;
@@ -85,7 +87,7 @@ public class ToPropertyAnalyzer : DiagnosticAnalyzer
     /// <param name="property">The property argument.</param>
     /// <returns><see langword="true"/> for <c>x =&gt; x.Property</c> or a constant, non-blank string.</returns>
     internal static bool NamesPropertyReadably(IArgumentOperation property) =>
-        property.Parameter?.Type.SpecialType == SpecialType.System_String
+        property.Parameter!.Type.SpecialType == SpecialType.System_String
             ? property.Value.ConstantValue is { HasValue: true, Value: string name } && !string.IsNullOrWhiteSpace(name)
             : IsDirectMemberSelector(property.Value.Syntax);
 
@@ -114,17 +116,16 @@ public class ToPropertyAnalyzer : DiagnosticAnalyzer
     /// <summary>Finds the argument passed for a parameter, whatever position or name it was passed by.</summary>
     /// <param name="arguments">The invocation's arguments.</param>
     /// <param name="parameterName">The parameter name.</param>
-    /// <returns>The argument, or null when the overload has no such parameter.</returns>
-    private static IArgumentOperation? FindArgument(ImmutableArray<IArgumentOperation> arguments, string parameterName)
+    /// <returns>The argument.</returns>
+    /// <remarks>Every <c>ToProperty</c> overload takes both the source and the property, so the argument is always there.</remarks>
+    private static IArgumentOperation FindArgument(ImmutableArray<IArgumentOperation> arguments, string parameterName)
     {
-        for (var i = 0; i < arguments.Length; i++)
+        var i = 0;
+        while (arguments[i].Parameter!.Name != parameterName)
         {
-            if (arguments[i].Parameter?.Name == parameterName)
-            {
-                return arguments[i];
-            }
+            i++;
         }
 
-        return null;
+        return arguments[i];
     }
 }

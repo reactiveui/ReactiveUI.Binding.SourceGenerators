@@ -60,7 +60,7 @@ internal static class ToPropertyExtractor
         var method = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
         if (method is not { TypeArguments.Length: StubTypeArgumentCount }
             || !ExtractorValidation.IsRecognizedExtensionClass(method.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(method, semanticModel.Compilation))
+            || !CallSiteHosting.TryResolve(context, method, ct, out var scope))
         {
             return null;
         }
@@ -83,7 +83,8 @@ internal static class ToPropertyExtractor
                 propertyArgument.ToString(),
                 shape,
                 resolved.Raise,
-                InterceptableLocationReader.Read(semanticModel, invocation, ct));
+                InterceptableLocationReader.Read(semanticModel, invocation, ct),
+                scope.Call);
     }
 
     /// <summary>Names the stub's type arguments and chooses how the source type's notifications are raised.</summary>

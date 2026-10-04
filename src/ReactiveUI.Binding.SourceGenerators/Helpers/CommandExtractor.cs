@@ -41,14 +41,11 @@ internal static class CommandExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol is null)
-        {
-            return null;
-        }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+        if (methodSymbol is null
+            || !ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
+            || !CallSiteHosting.TryResolve(context, methodSymbol, ct, out var scope))
         {
             return null;
         }
@@ -59,20 +56,21 @@ internal static class CommandExtractor
         // The command path comes from the 2nd argument, the control path from the 3rd.
         var commandPropertyArg = args[1].Expression;
         var controlPropertyArg = args[2].Expression;
-        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandPropertyArg, semanticModel, ct);
-        var controlPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(controlPropertyArg, semanticModel, ct);
+        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandPropertyArg, semanticModel, scope, ct);
+        var controlPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(controlPropertyArg, semanticModel, scope, ct);
         if (commandPropertyPath is null || controlPropertyPath is null)
         {
             return null;
         }
 
-        if (ResolveBindCommandSides(memberAccess, args, semanticModel, ct) is not { } sides)
+        // Determine parameter overload (Expression vs IObservable withParameter). A parameter path the generator cannot
+        // read would be dropped, so the call is left to fail the build instead.
+        var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, scope, ct);
+        if (parameterOverload is { HasExpressionParameter: true, ParameterPropertyPath: null }
+            || ResolveBindCommandSides(memberAccess, args, semanticModel, scope, ct) is not { } sides)
         {
             return null;
         }
-
-        // Determine parameter overload (Expression vs IObservable withParameter)
-        var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, ct);
 
         var controlBinding = ResolveControlBinding(methodSymbol, args, controlPropertyArg, semanticModel, ct);
 
@@ -100,7 +98,8 @@ internal static class CommandExtractor
             controlBinding.Capabilities.HasCommandParameter,
             controlBinding.Capabilities.HasEnabled,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            sides.ViewThreadInvoker)
+            sides.ViewThreadInvoker,
+            scope.Call)
         { HasExplicitEvent = controlBinding.HasExplicitEvent, NativeCommand = controlBinding.NativeCommand, ControlViewThreadInvoker = controlBinding.ViewThreadInvoker };
     }
 
@@ -112,14 +111,31 @@ internal static class CommandExtractor
     /// The parameter property path, leaf type name, and normalized expression text when a supported
     /// lambda is found; otherwise, <see langword="null"/>.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ParameterLambda? FindParameterLambda(
             SeparatedSyntaxList<ArgumentSyntax> args,
             SemanticModel semanticModel,
+            CancellationToken ct) =>
+        FindParameterLambda(args, semanticModel, ReachScope.Assembly(semanticModel.Compilation), ct);
+
+    /// <summary>Searches invocation arguments for a valid <c>withParameter</c> lambda expression.</summary>
+    /// <param name="args">The argument list from the invocation.</param>
+    /// <param name="semanticModel">The semantic model used to resolve lambda property paths.</param>
+    /// <param name="scope">Where the generated code that reads the path is declared.</param>
+    /// <param name="ct">The token used to cancel semantic model operations.</param>
+    /// <returns>
+    /// The parameter property path, leaf type name, and normalized expression text when a supported
+    /// lambda is found; otherwise, <see langword="null"/>.
+    /// </returns>
+    internal static ParameterLambda? FindParameterLambda(
+            SeparatedSyntaxList<ArgumentSyntax> args,
+            SemanticModel semanticModel,
+            ReachScope scope,
             CancellationToken ct)
     {
         for (var argumentIndex = WithParameterSearchStartIndex; argumentIndex < args.Count; argumentIndex++)
         {
-            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[argumentIndex].Expression, semanticModel, ct);
+            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[argumentIndex].Expression, semanticModel, scope, ct);
             if (paramPath is not null)
             {
                 return new ParameterLambda(
@@ -192,6 +208,7 @@ internal static class CommandExtractor
     /// <param name="memberAccess">The member access the invocation hangs off.</param>
     /// <param name="args">The invocation arguments.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code is declared, which decides the types it can name.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
     /// The fully qualified view and view model type names, or <see langword="null"/> when either names a type
@@ -201,12 +218,12 @@ internal static class CommandExtractor
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
+        ReachScope scope,
         CancellationToken ct)
     {
         var viewType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
-        var viewTypeFullName = ExtractorValidation.GetDeclarableTypeDisplayName(viewType);
-        var viewModelTypeFullName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+        var viewTypeFullName = scope.NameOf(viewType);
+        var viewModelTypeFullName = scope.NameOf(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
         return viewTypeFullName is null || viewModelTypeFullName is null
             ? null
@@ -273,10 +290,26 @@ internal static class CommandExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The detected parameter overload information.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ParameterOverloadInfo DetectParameterOverload(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
+        CancellationToken ct) =>
+        DetectParameterOverload(methodSymbol, args, semanticModel, ReachScope.Assembly(semanticModel.Compilation), ct);
+
+    /// <summary>Detects whether the method has a <c>withParameter</c> overload, reading its path in the given scope.</summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="args">The invocation argument list.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code that reads the path is declared.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The detected parameter overload information.</returns>
+    internal static ParameterOverloadInfo DetectParameterOverload(
+        IMethodSymbol methodSymbol,
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        SemanticModel semanticModel,
+        ReachScope scope,
         CancellationToken ct)
     {
         var result = new ParameterOverloadInfo();
@@ -294,7 +327,7 @@ internal static class CommandExtractor
                 result.HasExpressionParameter = true;
 
                 // Find the withParameter argument
-                var paramResult = FindParameterLambda(args, semanticModel, ct);
+                var paramResult = FindParameterLambda(args, semanticModel, scope, ct);
                 if (paramResult is not null)
                 {
                     result.ParameterPropertyPath = new EquatableArray<PropertyPathSegment>(paramResult.Value.PropertyPath);

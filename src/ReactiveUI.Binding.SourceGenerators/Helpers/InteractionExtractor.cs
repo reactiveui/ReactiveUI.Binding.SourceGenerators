@@ -35,7 +35,7 @@ internal static class InteractionExtractor
 
         // Verify this is our stub or generated method
         if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !CallSiteHosting.TryResolve(context, methodSymbol, ct, out var scope))
         {
             return null;
         }
@@ -45,7 +45,7 @@ internal static class InteractionExtractor
 
         // Extract the interaction property path from the second argument (propertyName)
         var propertyNameArg = args[1].Expression;
-        var interactionPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(propertyNameArg, semanticModel, ct);
+        var interactionPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(propertyNameArg, semanticModel, scope, ct);
         if (interactionPropertyPath is null)
         {
             return null;
@@ -62,7 +62,7 @@ internal static class InteractionExtractor
         var isTaskHandler = DetermineHandlerVariant(methodSymbol, out var dontCareTypeFullName);
 
         // Get types
-        var viewTypeFullName = ResolveViewType(memberAccess, semanticModel, ct, out var viewClassInfo);
+        var viewTypeFullName = ResolveViewType(memberAccess, semanticModel, scope, ct, out var viewClassInfo);
         if (viewTypeFullName is null)
         {
             return null;
@@ -89,7 +89,8 @@ internal static class InteractionExtractor
             Constants.BindInteractionMethodName,
             expressionText,
             viewClassInfo,
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            scope.Call);
     }
 
     /// <summary>Resolves the interaction's two type arguments, refusing a call site that names neither.</summary>
@@ -116,6 +117,7 @@ internal static class InteractionExtractor
     /// <summary>Names the view type the call was made on, and reads how it notifies from the same symbol.</summary>
     /// <param name="memberAccess">The member access naming the view the call was made on.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code is declared, which decides the types it can name.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <param name="viewClassInfo">How the view notifies, or <see langword="null"/> when no type was named.</param>
     /// <returns>The fully qualified view type name, or <see langword="null"/> when the view names no type.</returns>
@@ -128,22 +130,33 @@ internal static class InteractionExtractor
     private static string? ResolveViewType(
         MemberAccessExpressionSyntax memberAccess,
         SemanticModel semanticModel,
+        ReachScope scope,
         CancellationToken ct,
         out ClassBindingInfo? viewClassInfo)
     {
         viewClassInfo = null;
+        var viewType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
 
-        // A type parameter names no type a generated overload could declare, so emitting one would put the
-        // parameter's own name in the consumer's build. The call site is left to the runtime stub instead.
-        if (semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type is not INamedTypeSymbol viewTypeSymbol)
+        // A view typed by the caller's type parameter only reaches here when the generated code is generic over it, and
+        // how it notifies is read from its constraint.
+        if (NotifyingType(viewType) is { } viewTypeSymbol)
         {
-            return null;
+            viewClassInfo = TypeDetectionExtractor.ExtractFromSymbol(viewTypeSymbol, semanticModel.Compilation, ct);
         }
 
-        viewClassInfo = TypeDetectionExtractor.ExtractFromSymbol(viewTypeSymbol, semanticModel.Compilation, ct);
-
-        return ExtractorValidation.GetTypeDisplayName(viewTypeSymbol);
+        return scope.NameOf(viewType);
     }
+
+    /// <summary>Reads the type whose notifications a view raises: the view's own, or its type parameter's first constraint.</summary>
+    /// <param name="viewType">The view's type.</param>
+    /// <returns>The type, or null when there is none to read.</returns>
+    private static INamedTypeSymbol? NotifyingType(ITypeSymbol? viewType) =>
+        viewType switch
+        {
+            INamedTypeSymbol named => named,
+            ITypeParameterSymbol { ConstraintTypes: [INamedTypeSymbol first, ..] } => first,
+            _ => null,
+        };
 
     /// <summary>
     /// Resolves the <c>TInput</c> and <c>TOutput</c> type arguments of the targeted

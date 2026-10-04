@@ -7,9 +7,9 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
 /// <summary>
-/// Call sites that name a private or protected nested type. Generated code lives in a class of its own and cannot
-/// name such a type, so the generator leaves the call on the runtime stub rather than emit code that fails the
-/// consumer's build.
+/// Call sites that name a private or protected nested type, in a build that writes dispatch overloads. Generated code
+/// lives in a class of its own and cannot name such a type, so the generator writes nothing for the call rather than
+/// code that fails the consumer's build. RXUIBIND015 then fails the build at the call.
 /// </summary>
 public class UnreachableTypeInvocationTests
 {

@@ -80,7 +80,7 @@ internal static class ObservationExtractor
 
         // Verify this is our stub or generated method
         if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType)
-            || !ExtractorValidation.NamesOnlyReachableTypes(methodSymbol, semanticModel.Compilation))
+            || !TryResolveScope(context, methodSymbol, ct, out var scope, out var genericResult))
         {
             return null;
         }
@@ -93,6 +93,7 @@ internal static class ObservationExtractor
             methodSymbol,
             args,
             semanticModel,
+            scope,
             propertyPaths,
             expressionTexts,
             ct);
@@ -104,13 +105,15 @@ internal static class ObservationExtractor
 
         // Get the source type from the receiver
         var sourceTypeFullName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+            scope.NameOf(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
         if (sourceTypeFullName is null)
         {
             return null;
         }
 
-        var returnTypeFullName = ComputeReturnTypeFullName(methodSymbol, propertyPaths, hasSelector);
+        var returnTypeFullName = genericResult.IsGeneric
+            ? GenericResult.TypeParameterName
+            : ComputeReturnTypeFullName(methodSymbol, propertyPaths, hasSelector);
 
         var filePath = invocation.SyntaxTree.FilePath;
         var lineNumber = SyntaxHelpers.CallerLineNumber(invocation, ct);
@@ -125,7 +128,69 @@ internal static class ObservationExtractor
             hasSelector,
             expectedMethodName,
             new([.. expressionTexts]),
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            genericResult,
+            scope.Call);
+    }
+
+    /// <summary>Decides where an observation call's generated code is declared, and whether its result is a type parameter.</summary>
+    /// <param name="context">The call site and its semantic model.</param>
+    /// <param name="method">The resolved binding method.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="scope">The scope the generated code can name types in, which may move while the call is read.</param>
+    /// <param name="genericResult">Where the result sits when generated code takes it as a type parameter.</param>
+    /// <returns><see langword="true"/> when the call can be generated; otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// A result generated code cannot name is taken as a type parameter first, because that needs nothing of the
+    /// caller, and the code then stays where it is. Any other call moves only when its types or paths need it.
+    /// </remarks>
+    internal static bool TryResolveScope(
+        in CallSiteContext context,
+        IMethodSymbol method,
+        CancellationToken ct,
+        out ReachScope scope,
+        out GenericResult genericResult)
+    {
+        scope = ReachScope.ForCall(context, method, ct);
+        if (!TryReadGenericResult(method, context.SemanticModel.Compilation, out genericResult))
+        {
+            return scope.CanNameAll(method.TypeArguments);
+        }
+
+        if (genericResult.IsGeneric)
+        {
+            scope.Pin();
+        }
+
+        return true;
+    }
+
+    /// <summary>Decides whether generated code can write a call's types, taking its selector's result as a type parameter if need be.</summary>
+    /// <param name="method">The resolved binding method.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="genericResult">Where the result sits when generated code takes it as a type parameter.</param>
+    /// <returns><see langword="true"/> when the call can be generated; otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// Only an interceptor can be generic over the result, because it takes the called method's own type
+    /// parameters. A build that cannot describe a call site has no interceptor to write, so such a call stays on
+    /// the diagnostic path there.
+    /// </remarks>
+    internal static bool TryReadGenericResult(IMethodSymbol method, Compilation compilation, out GenericResult genericResult)
+    {
+        genericResult = default;
+        if (ExtractorValidation.NamesOnlyReachableTypes(method, compilation))
+        {
+            return true;
+        }
+
+        if (!InterceptableLocationReader.IsSupported
+            || !ExtractorValidation.TryFindUnnameableResult(method, compilation, out var ordinal))
+        {
+            return false;
+        }
+
+        genericResult = new(method.TypeArguments.Length, ordinal);
+        return true;
     }
 
     /// <summary>
@@ -135,6 +200,7 @@ internal static class ObservationExtractor
     /// <param name="methodSymbol">The resolved method symbol.</param>
     /// <param name="args">The invocation argument list.</param>
     /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="scope">Where the generated code that reads the paths is declared.</param>
     /// <param name="propertyPaths">The list to append extracted property paths to.</param>
     /// <param name="expressionTexts">The list to append normalized expression texts to.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -146,6 +212,7 @@ internal static class ObservationExtractor
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
+        ReachScope scope,
         List<EquatableArray<PropertyPathSegment>> propertyPaths,
         List<string> expressionTexts,
         CancellationToken ct)
@@ -170,7 +237,7 @@ internal static class ObservationExtractor
             {
                 // One path generated code cannot read leaves the whole call to the runtime stub. Keeping the
                 // others would generate a method with fewer parameters than the call, which an interceptor cannot claim.
-                var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+                var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, scope, ct);
                 if (path is null)
                 {
                     propertyPaths.Clear();

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
@@ -380,6 +381,25 @@ internal static class AnalyzerHelpers
         }
 
         return false;
+    }
+
+    /// <summary>Determines whether a generated interceptor claims a binding call.</summary>
+    /// <param name="invocation">The call.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns><see langword="true"/> when an interceptor replaces the call.</returns>
+    internal static bool IsIntercepted(IInvocationOperation invocation, CancellationToken cancellationToken)
+    {
+#if ROSLYN_4_13
+        // A binding method is only ever called through an invocation expression, and an operation handed to an
+        // analyzer always carries the model it was bound with.
+        return invocation.SemanticModel!.GetInterceptorMethod((InvocationExpressionSyntax)invocation.Syntax, cancellationToken) is not null;
+#else
+
+        // The baseline compiler has no interceptors, so no call is ever claimed.
+        _ = invocation;
+        _ = cancellationToken;
+        return false;
+#endif
     }
 
     /// <summary>Checks if a method is an API or its <c>Unsafe</c> twin.</summary>
