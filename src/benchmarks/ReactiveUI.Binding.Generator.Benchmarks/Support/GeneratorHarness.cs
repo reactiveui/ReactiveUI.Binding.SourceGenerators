@@ -58,6 +58,15 @@ internal static class GeneratorHarness
             syntaxTrees[i] = CSharpSyntaxTree.ParseText(reader.ReadToEnd(), parseOptions, paths[i]);
         }
 
+        return BuildCompilation(CompilationAssemblyName, syntaxTrees);
+    }
+
+    /// <summary>Builds a compilation over the given source, referencing the framework and the runtime library.</summary>
+    /// <param name="assemblyName">The compilation's assembly name.</param>
+    /// <param name="syntaxTrees">The source.</param>
+    /// <returns>The compilation.</returns>
+    internal static CSharpCompilation BuildCompilation(string assemblyName, SyntaxTree[] syntaxTrees)
+    {
 #if NET11_0_OR_GREATER
         var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net110.References.All)
 #else
@@ -70,7 +79,7 @@ internal static class GeneratorHarness
         };
 
         return CSharpCompilation.Create(
-            CompilationAssemblyName,
+            assemblyName,
             syntaxTrees,
             references,
             new(OutputKind.DynamicallyLinkedLibrary));

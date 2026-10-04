@@ -486,6 +486,9 @@ and nothing is generated. A class marked `[IReactiveObject]` looks as if it rais
   The file is never emitted.
 - `BindingGenerator.Detect` reads every call site from that copy, through `CallSiteContext`. A compilation that uses
   none of the attributes gets no copy, and its call sites are read from the consumer's compilation as before.
+- Every call site in one file shares one semantic model of the copy (`CallSiteContext.ModelFor`). A model caches the
+  methods it binds, and binding one call site binds its whole method. A new model per call site binds a view's
+  `WhenActivated` lambda once per binding in it, which grows with the square of the bindings.
 
 The rules mirror ReactiveUI.SourceGenerators 4.0.0. Its session agreed to announce any change to a name, type or
 attribute argument. When one changes, update `SourceGeneratorsMemberExtractor` and `SourceGeneratorsDeclarationTests`.
