@@ -1,3 +1,13 @@
+> [!WARNING]
+> **This project has moved to [ReactiveUI/ReactiveUI.SourceGenerators](https://github.com/ReactiveUI/ReactiveUI.SourceGenerators).**
+>
+> The binding engine and ReactiveUI.SourceGenerators were heavily coupled: generated properties, commands and
+> notification support need to work together. Combining them in one repository lets us develop, test and release
+> those changes together, keeping the generators in sync.
+>
+> **ReactiveUI.Binding and its related packages will continue to be maintained from the combined repository.**
+> Please use that repository for ongoing development, issues and pull requests.
+
 [![NuGet Stats](https://img.shields.io/nuget/v/ReactiveUI.Binding.svg)](https://www.nuget.org/packages/ReactiveUI.Binding) [![Build](https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml/badge.svg)](https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml) [![Code Coverage](https://codecov.io/gh/reactiveui/ReactiveUI.Binding.SourceGenerators/branch/main/graph/badge.svg)](https://codecov.io/gh/reactiveui/ReactiveUI.Binding.SourceGenerators) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 <br>
 <a href="https://www.nuget.org/packages/ReactiveUI.Binding">
